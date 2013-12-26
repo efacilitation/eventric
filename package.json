@@ -4,5 +4,10 @@
   "url": "http://eventric.org",
   "keywords": ["cqrs", "cqs", "ddd", "domain-driven", "event-sourcing", "event-driven", "es", "ead", "shared", "client", "server"],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.1"
+  "version": "0.0.1",
+
+  "repository": {
+    "type": "git",
+    "url": "git://sixsteps.com/efa/eventric.git"
+  }
 }

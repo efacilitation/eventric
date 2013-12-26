@@ -1,0 +1,19 @@
+{
+  "name": "eventric",
+  "description": "Make your JS App truly an Event-Centric Architecture with Commands, Aggregates, Domain-Events and ReadMixes",
+  "url": "http://eventricjs.org",
+  "keywords": ["ddd", "es", "cqrs", "cqs", "ead", "event-driven", "domain-driven", "shared", "client", "server"],
+  "author": "eFa SixSteps Team <team@efa-gmbh.com>",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+
+  "dependencies": {
+
+  },
+
+  "devDependencies": {
+
+  }
+}

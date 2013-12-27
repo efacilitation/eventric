@@ -2,8 +2,8 @@ describe 'Entity', ->
 
   expect            = require 'expect'
   sinon             = require 'sinon'
-  Entity            = require '../../src/shared/entity'
-  EntityCollection  = require '../../src/shared/entity_collection'
+  Entity            = require('eventric').Entity
+  EntityCollection  = require('eventric').EntityCollection
 
   it 'should implement backbone events', ->
     entity = new Entity

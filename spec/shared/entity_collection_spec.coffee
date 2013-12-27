@@ -1,8 +1,8 @@
 describe 'EntityCollection', ->
 
   expect = require 'expect'
-  Entity  = require '../../src/shared/entity'
-  EntityCollection  = require '../../src/shared/entity_collection'
+  Entity = require('eventric').Entity
+  EntityCollection = require('eventric').EntityCollection
 
   entityCollection = undefined
   beforeEach ->

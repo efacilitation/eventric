@@ -37,8 +37,8 @@ describe 'AggregateRoot', ->
 
     it 'should return the accumulated domainEvents', ->
       class MyAggregate extends AggregateRoot
-          myAggregateFunction: ->
-            @_domainEvent 'myDomainEvent'
+        myAggregateFunction: ->
+          @_domainEvent 'myDomainEvent'
 
       myAggregate = new MyAggregate
       myAggregate.myAggregateFunction()

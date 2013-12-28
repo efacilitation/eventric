@@ -8,7 +8,7 @@ describe 'CommandService', ->
   DomainEventService = eventric 'DomainEventService'
   CommandService     = eventric 'CommandService'
 
-  Repository         = require('sixsteps-client')('SixStepsRepository')
+  Repository         = require('sixsteps-client')('Repository')
 
   sandbox = null
   beforeEach ->

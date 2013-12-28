@@ -1,7 +1,7 @@
 DomainEventService  = require('eventric')('DomainEventService')
 
 # TODO so we obviously need the repository injected / given by constructor
-Repository          = require('sixsteps-client')('SixStepsRepository')
+Repository          = require('sixsteps-client')('Repository')
 
 class CommandService
 

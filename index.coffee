@@ -6,6 +6,8 @@ moduleDefinition =
   ReadAggregateRoot: './src/read_aggregate_root'
   ReadAggregateEntity: './src/read_aggregate_entity'
 
+  DomainEventService: './src/domain_event_service'
+
 module.exports = (required) ->
   path = moduleDefinition[required] ? required
 

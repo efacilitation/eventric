@@ -2,8 +2,9 @@ describe 'DomainEventService', ->
 
   sinon      = require 'sinon'
   expect     = require 'expect'
+  eventric   = require 'eventric'
 
-  DomainEventService = require('eventric')('DomainEventService')
+  DomainEventService = eventric 'DomainEventService'
 
   describe '#handle', ->
 

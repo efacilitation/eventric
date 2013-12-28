@@ -1,5 +1,6 @@
 _ = require 'underscore'
-AggregateEntityCollection = require('eventric')('AggregateEntityCollection')
+eventric = require 'eventric'
+AggregateEntityCollection = eventric 'AggregateEntityCollection'
 
 class AggregateEntity
 

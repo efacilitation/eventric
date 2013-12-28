@@ -1,7 +1,8 @@
 describe 'ReadAggregateRoot', ->
 
   expect = require 'expect'
-  ReadAggregateRoot = require('eventric')('ReadAggregateRoot')
+  eventric = require 'eventric'
+  ReadAggregateRoot = eventric 'ReadAggregateRoot'
 
   readAggregateRoot = null
   beforeEach ->

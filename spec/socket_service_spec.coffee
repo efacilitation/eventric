@@ -1,13 +1,14 @@
 describe 'SocketService', ->
 
-  _      = require 'underscore'
-  expect = require 'expect'
-  sinon  = require 'sinon'
+  _        = require 'underscore'
+  expect   = require 'expect'
+  sinon    = require 'sinon'
+  eventric = require 'eventric'
 
   class StubDomainEventService
     process: sinon.stub().callsArg(1)
 
-  SocketService = require('eventric')('SocketService')
+  SocketService = eventric 'SocketService'
 
   sessionUser            = null
   socketService          = null

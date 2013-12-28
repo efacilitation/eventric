@@ -20,4 +20,9 @@ class AggregateRoot extends Entity
 
     @_domainEvents.push event
 
+
+  getDomainEvents: ->
+    @_domainEvents
+
+
 module.exports = AggregateRoot

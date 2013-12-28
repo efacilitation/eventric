@@ -69,15 +69,6 @@ class Entity
   _shouldTrackChangePropertiesFor: (propName, val) ->
     @_trackPropsChanged and @_props[propName] != val and val not instanceof EntityCollection
 
-  _domainEvent: (domainEventName, options) ->
-    # TODO: should be a domainEvent Class
-    @_domainEvents.push
-      name: domainEventName
-      options: options
-
-  getDomainEvents: ->
-    @_domainEvents
-
   # TODO: Refactor, push to a mixin (like Backbone Events). Use hooks to execute custom behaviour like "@onSet?()".
   # We need the props at the query entities too.
   @prop = (propName, desc) ->

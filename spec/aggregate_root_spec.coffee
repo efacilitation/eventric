@@ -31,3 +31,15 @@ describe 'AggregateRoot', ->
         expect(a._domainEvents[0].name).to.be eventName
         expect(a._domainEvents[0].changed).to.be undefined
         expect(a._propsChanged).to.not.eql {}
+
+  describe '#getDomainEvents', ->
+
+    it 'should return the accumulated domainEvents', ->
+      class MyAggregate extends AggregateRoot
+          myAggregateFunction: ->
+            @_domainEvent 'myDomainEvent'
+
+      myAggregate = new MyAggregate
+      myAggregate.myAggregateFunction()
+      domainEvents = myAggregate.getDomainEvents()
+      expect(domainEvents.length).to.be 1

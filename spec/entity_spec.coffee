@@ -229,25 +229,3 @@ describe 'Entity', ->
       mytopentity._applyChanges changedPropsAndCollections
 
       expect(mytopentity.topcollection.get(1).name).to.eql 'ChangedWayne'
-
-  describe '#_domainEvent', ->
-
-    it 'should save the domainEvents', ->
-      aggregate = new Entity
-      aggregate._domainEvent 'MyDomainEvent'
-      expect(aggregate._domainEvents.length).to.be 1
-
-  describe '#getDomainEvents', ->
-
-    it 'should return the accumulated domainEvents', ->
-      class MyAggregate extends Entity
-          myAggregateFunction: ->
-            @_domainEvent 'myDomainEvent'
-
-      myAggregate = new MyAggregate
-      myAggregate.myAggregateFunction()
-      domainEvents = myAggregate.getDomainEvents()
-      expect(domainEvents).to.be.eql [
-        name: 'myDomainEvent',
-        options: undefined
-      ]

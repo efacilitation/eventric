@@ -6,9 +6,6 @@ describe 'AggregateEntity', ->
   Entity            = eventric 'AggregateEntity'
   EntityCollection  = eventric 'AggregateEntityCollection'
 
-  it 'should implement backbone events', ->
-    entity = new Entity
-    expect(entity._events).not.to.be 'undefined'
 
   describe '#prop', ->
 

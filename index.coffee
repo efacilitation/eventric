@@ -6,6 +6,7 @@ moduleDefinition =
   ReadAggregateRoot: './src/read_aggregate_root'
   ReadAggregateEntity: './src/read_aggregate_entity'
 
+  CommandService: './src/command_service'
   DomainEventService: './src/domain_event_service'
   SocketService: './src/socket_service'
 

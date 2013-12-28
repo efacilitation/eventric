@@ -1,4 +1,4 @@
-describe 'EntityCollection', ->
+describe 'AggregateEntityCollection', ->
 
   expect = require 'expect'
   Entity = require('eventric')('AggregateEntity')

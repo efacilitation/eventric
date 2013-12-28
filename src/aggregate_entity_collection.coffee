@@ -1,4 +1,12 @@
-require('sixsteps-shared-helpers')('FunctionExtensions')
+_ = require 'underscore'
+
+Function::prop = (propName, desc = {}) ->
+  Object.defineProperty @::, propName, _.defaults desc,
+    get: ->
+      @['_' + propName]
+    set: (val) ->
+      @['_' + propName] = val
+
 
 class AggregateEntityCollection
 

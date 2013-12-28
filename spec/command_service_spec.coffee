@@ -1,13 +1,14 @@
 describe 'CommandService', ->
 
-  sinon = require 'sinon'
-  expect = require 'expect'
+  sinon    = require 'sinon'
+  expect   = require 'expect'
+  eventric = require 'eventric'
 
-  AggregateRoot      = require('eventric')('AggregateRoot')
-  DomainEventService = require('eventric')('DomainEventService')
+  AggregateRoot      = eventric 'AggregateRoot'
+  DomainEventService = eventric 'DomainEventService'
+  CommandService     = eventric 'CommandService'
 
   Repository         = require('sixsteps-client')('SixStepsRepository')
-  CommandService     = require('eventric')('CommandService')
 
   sandbox = null
   beforeEach ->

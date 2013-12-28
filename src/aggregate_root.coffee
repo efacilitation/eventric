@@ -1,6 +1,6 @@
-Entity = require './entity'
+AggregateEntity = require('eventric')('AggregateEntity')
 
-class AggregateRoot extends Entity
+class AggregateRoot extends AggregateEntity
 
   constructor: ->
     @_domainEvents = []

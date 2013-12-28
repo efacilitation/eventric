@@ -1,8 +1,8 @@
 describe 'EntityCollection', ->
 
   expect = require 'expect'
-  Entity = require('eventric')('Entity')
-  EntityCollection = require('eventric')('EntityCollection')
+  Entity = require('eventric')('AggregateEntity')
+  EntityCollection = require('eventric')('AggregateEntityCollection')
 
   entityCollection = undefined
   beforeEach ->

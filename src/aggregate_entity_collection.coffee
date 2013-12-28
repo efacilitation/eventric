@@ -9,7 +9,7 @@ Function::prop = (propName, desc = {}) ->
 
 
 
-class EntityCollection
+class AggregateEntityCollection
 
   constructor: (options = {}) ->
     @_entities = []
@@ -44,4 +44,4 @@ class EntityCollection
     get: -> @_entities.length
 
 
-module.exports = EntityCollection
+module.exports = AggregateEntityCollection

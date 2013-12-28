@@ -1,7 +1,7 @@
 _ = require 'underscore'
-EntityCollection = require './entity_collection'
+AggregateEntityCollection = require('eventric')('AggregateEntityCollection')
 
-class Entity
+class AggregateEntity
 
   constructor: (@_props = {}) ->
     @_trackPropsChanged = true
@@ -25,7 +25,7 @@ class Entity
   _changesOnCollections: ->
     changes = {}
     for propkey, propvalue of @_props
-      if propvalue instanceof EntityCollection
+      if propvalue instanceof AggregateEntityCollection
         collectionChanges = @_changesOnCollection propkey, propvalue
         if Object.keys(collectionChanges).length > 0
           changes[propkey] = collectionChanges
@@ -43,7 +43,7 @@ class Entity
   _clearChanges: ->
     @_propsChanged = {}
 
-    for propKey, propVal of @_props when propVal instanceof EntityCollection
+    for propKey, propVal of @_props when propVal instanceof AggregateEntityCollection
       @_clearCollectionChanges propVal
 
   _clearCollectionChanges: (collection) ->
@@ -67,7 +67,7 @@ class Entity
       entity._applyChanges subChanges
 
   _shouldTrackChangePropertiesFor: (propName, val) ->
-    @_trackPropsChanged and @_props[propName] != val and val not instanceof EntityCollection
+    @_trackPropsChanged and @_props[propName] != val and val not instanceof AggregateEntityCollection
 
   # TODO: Refactor, push to a mixin (like Backbone Events). Use hooks to execute custom behaviour like "@onSet?()".
   # We need the props at the query entities too.
@@ -84,4 +84,4 @@ class Entity
 
   @props = (propNames...) ->  @prop(propName) for propName in propNames
 
-module.exports = Entity
+module.exports = AggregateEntity

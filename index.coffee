@@ -1,10 +1,10 @@
 moduleDefinition =
   AggregateRoot: './src/aggregate_root'
-  Entity: './src/entity'
-  EntityCollection: './src/entity_collection'
+  AggregateEntity: './src/aggregate_entity'
+  AggregateEntityCollection: './src/aggregate_entity_collection'
 
   ReadAggregateRoot: './src/read_aggregate_root'
-  ReadEntity: './src/read_entity'
+  ReadAggregateEntity: './src/read_aggregate_entity'
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

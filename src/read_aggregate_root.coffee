@@ -1,6 +1,6 @@
-ReadEntity = require('eventric')('ReadEntity')
+ReadAggregateEntity = require('eventric')('ReadAggregateEntity')
 
-class ReadAggregateRoot extends ReadEntity
+class ReadAggregateRoot extends ReadAggregateEntity
 
 
 module.exports = ReadAggregateRoot

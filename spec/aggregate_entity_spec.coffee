@@ -1,9 +1,9 @@
-describe 'Entity', ->
+describe 'AggregateEntity', ->
 
   expect            = require 'expect'
   sinon             = require 'sinon'
-  Entity            = require('eventric')('Entity')
-  EntityCollection  = require('eventric')('EntityCollection')
+  Entity            = require('eventric')('AggregateEntity')
+  EntityCollection  = require('eventric')('AggregateEntityCollection')
 
   it 'should implement backbone events', ->
     entity = new Entity

@@ -1,7 +1,7 @@
 describe 'AggregateRoot', ->
 
   expect = require 'expect'
-  AggregateRoot = require('eventric').AggregateRoot
+  AggregateRoot = require('eventric')('AggregateRoot')
 
   describe '#_domainEvent', ->
     eventName = null

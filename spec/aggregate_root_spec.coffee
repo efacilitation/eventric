@@ -1,7 +1,7 @@
 describe 'AggregateRoot', ->
 
-  expect = require 'expect'
-  eventric = require 'eventric'
+  expect        = require 'expect'
+  eventric      = require 'eventric'
   AggregateRoot = eventric 'AggregateRoot'
 
   describe '#_domainEvent', ->

@@ -1,4 +1,4 @@
-eventric = require 'eventric'
+eventric            = require 'eventric'
 ReadAggregateEntity = eventric 'ReadAggregateEntity'
 
 class ReadAggregateRoot extends ReadAggregateEntity

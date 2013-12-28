@@ -1,4 +1,4 @@
-eventric = require 'eventric'
+eventric        = require 'eventric'
 AggregateEntity = eventric 'AggregateEntity'
 
 class AggregateRoot extends AggregateEntity

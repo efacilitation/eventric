@@ -27,8 +27,8 @@ describe 'Aggregate Scenario', ->
       DomainEventServiceTriggerSpy = null
       createdCallback              = null
       beforeEach ->
-        # spy on the DomainEventService.trigger
-        DomainEventServiceTriggerSpy = sandbox.spy DomainEventService, 'trigger'
+        # stub the DomainEventService.trigger
+        DomainEventServiceTriggerSpy = sandbox.stub DomainEventService, 'trigger'
 
         # create a stub for the CommandService callback
         createdCallback = sandbox.stub()

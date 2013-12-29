@@ -1,10 +1,9 @@
 eventric = require 'eventric'
 
-ReadAggregateRoot  = eventric 'ReadAggregateRoot'
-DomainEventService = eventric 'DomainEventService'
-
-# TODO so we obviously need the repository injected / given by constructor
-Repository          = require('sixsteps-client')('Repository')
+ReadAggregateRoot       = eventric 'ReadAggregateRoot'
+ReadAggregateRepository = eventric 'ReadAggregateRepository'
+DomainEventService      = eventric 'DomainEventService'
+Repository              = eventric 'Repository'
 
 class CommandService
 
@@ -16,24 +15,21 @@ class CommandService
     aggregate = new Aggregate
     aggregate.create()
 
-    # "trigger" the DomainEvent
-    aggregate._domainEvent 'create'
-
     # store a reference to the Aggregate into a local cache
     @aggregateCache[aggregate._id] = aggregate
 
-    # get events and hand them over to DomainEventService
+    # "trigger" the DomainEvent
+    aggregate._domainEvent 'create'
+
+    # get the DomainEvent and hand it over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
 
     # build ReadAggregate
     readAggregate = new ReadAggregateRoot
 
-    # return the id of the newly generated Aggregate
+    # return ReadAggregate
     readAggregate
-
-  fetch: (modelId, name, params) ->
-    #TODO: implement!
 
   handle: (aggregateId, commandName, params) ->
     aggregate = Repository.fetchById aggregateId
@@ -41,7 +37,17 @@ class CommandService
     aggregate[commandName] params
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
-    @
+
+    # build ReadAggregate
+    readAggregate = new ReadAggregateRoot
+
+    # return ReadAggregate
+    readAggregate
+
+
+
+  fetch: (modelId, name, params) ->
+    #TODO: implement!
 
   remove: (modelId, name, params) ->
     #TODO: implement!

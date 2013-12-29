@@ -32,7 +32,7 @@ describe 'AggregateRoot', ->
 
     describe 'given param includeChanges is set to false', ->
 
-      it 'then it should NOT include and clear the changes', ->
+      it 'then it should NOT include and clear the  changes', ->
         enderAggregate._domainEvent eventName, {includeChanges: false}
 
         expect(enderAggregate._domainEvents[0].name).to.be eventName

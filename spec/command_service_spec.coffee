@@ -57,7 +57,6 @@ describe 'CommandService', ->
   it 'should have a fetch function', ->
     expect(CommandService.fetch).to.be.a Function
 
-  # TODO: test instead what the function does!
   describe '#handle', ->
 
     aggregateId = 1

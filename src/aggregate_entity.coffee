@@ -9,9 +9,9 @@ class AggregateEntity
     @_propsChanged = {}
     @_domainEvents = []
 
-  _data: ->
+  _metaData: ->
     id: @id
-    entity: @_entityName
+    name: @_entityName
 
   _changes: ->
     props: @_changesOnProperties()
@@ -37,7 +37,7 @@ class AggregateEntity
     for entity in collection.entities
       entityChanges = entity._changes()
       if Object.keys(entityChanges).length > 0
-        entityChanges.data = entity._data()
+        entityChanges.data = entity._metaData()
         changes.push entityChanges
     changes
 

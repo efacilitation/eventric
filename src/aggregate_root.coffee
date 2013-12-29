@@ -17,10 +17,10 @@ class AggregateRoot extends AggregateEntity
 
     event =
       name: eventName
-      data: @_data()
+      data: @_metaData()
 
     if params.includeChanges
-      event.changed = @_changes()
+      event._changed = @_changes()
       @_clearChanges()
 
     @_domainEvents.push event

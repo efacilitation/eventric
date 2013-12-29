@@ -27,7 +27,7 @@ describe 'AggregateRoot', ->
       enderAggregate._domainEvent eventName
 
       expect(enderAggregate._domainEvents[0].name).to.be eventName
-      expect(enderAggregate._domainEvents[0].changed.props.name).to.be enderAggregate.name
+      expect(enderAggregate._domainEvents[0]._changed.props.name).to.be enderAggregate.name
       expect(enderAggregate._propsChanged).to.eql {}
 
     describe 'given param includeChanges is set to false', ->
@@ -36,7 +36,7 @@ describe 'AggregateRoot', ->
         enderAggregate._domainEvent eventName, {includeChanges: false}
 
         expect(enderAggregate._domainEvents[0].name).to.be eventName
-        expect(enderAggregate._domainEvents[0].changed).to.be undefined
+        expect(enderAggregate._domainEvents[0]._changed).to.be undefined
         expect(enderAggregate._propsChanged).to.not.eql {}
 
   describe '#getDomainEvents', ->

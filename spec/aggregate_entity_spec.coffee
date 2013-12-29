@@ -6,116 +6,59 @@ describe 'AggregateEntity', ->
   Entity            = eventric 'AggregateEntity'
   EntityCollection  = eventric 'AggregateEntityCollection'
 
+  describe '#_metaData', ->
 
-  describe '#prop', ->
+    it 'should return an object including the Entity MetaData', ->
+      class MyEntity extends Entity
+        _entityName: 'MyEntity'
 
-    it 'should be defined', ->
-      class A extends Entity
-      expect(A.prop).to.be.a 'function'
+      myEntity = new MyEntity
+      myEntity.id = 1
 
-    it 'should provide a default setter and getter for a property', ->
-      class B extends Entity
-        @prop 'name'
-
-      b = new B()
-      b.name = 'Steve'
-      expect(b.name).to.be 'Steve'
-
-    it 'should override the setter', ->
-      class C extends Entity
-
-        @prop 'name'
-        @prop 'birthyear',
-          set: (val) ->
-            @_birthyear = val
-            @_props['age'] = 2013 - @_birthyear
-
-        @prop 'age',
-          set: (val) -> throw "Don't set age directly"
-
-      c = new C()
-      c.birthyear = 2000
-      expect(c.age).to.be 13
-
-    it 'should override the getter', ->
-      class D extends Entity
-        @prop 'name'
-        @prop 'welcomeMessage',
-          set: (val) -> throw "Don't set welcomeMessage directly"
-          get: ->
-            "Hello #{@name}!"
-
-      d = new D()
-      d.name = 'Hans'
-      expect(d.welcomeMessage).to.be 'Hello Hans!'
-
-    it 'should keep track of changes', ->
-      class E extends Entity
-        @prop 'name'
-
-      e = new E()
-      e.name = 'Wayne'
-      expect(e._propsChanged.name).to.be 'Wayne'
-
-    it 'should not keep track of property changes if _trackPropsChanged is set to false', ->
-      class E extends Entity
-        @prop 'name'
-
-      e = new E()
-      e._trackPropsChanged = false
-      e.name = 'Wayne'
-      expect(e._propsChanged.name).to.be undefined
-
-
-  describe '#_data', ->
-
-    it 'should return an object including some EntityData', ->
-      class A extends Entity
-        _entityName: 'A'
-
-      a = new A()
-      a.id = 1
-
-      expect(a._data()).to.eql
+      expect(myEntity._metaData()).to.eql
         id: 1
-        entity: 'A'
+        name: 'MyEntity'
 
   describe '#_changes', ->
 
     it 'should return changes to properties from the given entity', ->
-      class A extends Entity
-        _entityName: 'A'
+      class MyEntity extends Entity
+        _entityName: 'MyEntity'
         @prop 'name'
 
-      a1 = new A name: 'Willy'
-      a1.name = 'John'
+      myEntity = new MyEntity name: 'Willy'
+      myEntity.name = 'John'
 
-      expect(a1._changes()).to.eql
+      expect(myEntity._changes()).to.eql
         props:
           name: 'John'
         collections: {}
 
     it 'should return changes to properties from the given entity collection', ->
-      class A extends Entity
-        _entityName: 'A'
+      class MyEntity extends Entity
+        _entityName: 'MyEntity'
         @prop 'name'
         @prop 'things'
 
-      a1 = new A
-      a1.things = new EntityCollection
+      class MyThingsEntity extends Entity
+        _entityName: 'MyThingsEntity'
+        @prop 'name'
 
-      a2 = new A name: 'NotWayne'
-      a2.id = 2
-      a2.name = 'Wayne'
+      myEntity = new MyEntity
+      myEntity.things = new EntityCollection
 
-      a1.things.add a2
+      myThingsEntity = new MyThingsEntity name: 'NotWayne'
+      myThingsEntity.id = 2
+      myThingsEntity.name = 'Wayne'
 
-      expect(a1._changes()).to.eql
+      myEntity.things.add myThingsEntity
+
+      expect(myEntity._changes()).to.eql
         props: {}
         collections:
           things: [ {
             data:
-              entity: 'A'
+              name: 'MyThingsEntity'
               id: 2
             props:
               name: 'Wayne'
@@ -227,3 +170,67 @@ describe 'AggregateEntity', ->
       mytopentity._applyChanges changedPropsAndCollections
 
       expect(mytopentity.topcollection.get(1).name).to.eql 'ChangedWayne'
+
+
+
+
+
+  describe '#prop', ->
+
+    it 'should be defined', ->
+      class A extends Entity
+      expect(A.prop).to.be.a 'function'
+
+    it 'should provide a default setter and getter for a property', ->
+      class B extends Entity
+        @prop 'name'
+
+      b = new B()
+      b.name = 'Steve'
+      expect(b.name).to.be 'Steve'
+
+    it 'should override the setter', ->
+      class C extends Entity
+
+        @prop 'name'
+        @prop 'birthyear',
+          set: (val) ->
+            @_birthyear = val
+            @_props['age'] = 2013 - @_birthyear
+
+        @prop 'age',
+          set: (val) -> throw "Don't set age directly"
+
+      c = new C()
+      c.birthyear = 2000
+      expect(c.age).to.be 13
+
+    it 'should override the getter', ->
+      class D extends Entity
+        @prop 'name'
+        @prop 'welcomeMessage',
+          set: (val) -> throw "Don't set welcomeMessage directly"
+          get: ->
+            "Hello #{@name}!"
+
+      d = new D()
+      d.name = 'Hans'
+      expect(d.welcomeMessage).to.be 'Hello Hans!'
+
+    it 'should keep track of changes', ->
+      class E extends Entity
+        @prop 'name'
+
+      e = new E()
+      e.name = 'Wayne'
+      expect(e._propsChanged.name).to.be 'Wayne'
+
+    it 'should not keep track of property changes if _trackPropsChanged is set to false', ->
+      class E extends Entity
+        @prop 'name'
+
+      e = new E()
+      e._trackPropsChanged = false
+      e.name = 'Wayne'
+      expect(e._propsChanged.name).to.be undefined
+

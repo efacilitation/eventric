@@ -9,18 +9,21 @@ class CommandService
     @aggregateCache = {}
 
   create: (Aggregate) ->
-    # create aggregate
+    # create Aggregate
     aggregate = new Aggregate
     aggregate.create()
+
+    # "trigger" the DomainEvent
     aggregate._domainEvent 'create'
 
-    # store an reference to the aggregate into a local cache
+    # store a reference to the Aggregate into a local cache
     @aggregateCache[aggregate._id] = aggregate
 
-    # get events and hand them over to domaineventservice
+    # get events and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
 
+    # return the id of the newly generated Aggregate
     aggregate._id
 
   fetch: (modelId, name, params) ->

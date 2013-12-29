@@ -5,6 +5,7 @@ describe 'CommandService', ->
   eventric = require 'eventric'
 
   AggregateRoot      = eventric 'AggregateRoot'
+  ReadAggregateRoot  = eventric 'ReadAggregateRoot'
   DomainEventService = eventric 'DomainEventService'
   CommandService     = eventric 'CommandService'
 
@@ -19,7 +20,7 @@ describe 'CommandService', ->
 
   describe '#create', ->
 
-    aggregateId = null
+    readAggregate = null
     myAggregateStub = null
     beforeEach ->
       sandbox.stub DomainEventService, 'handle'
@@ -28,10 +29,10 @@ describe 'CommandService', ->
       myAggregateStub._id = 42
 
       AggregateStub = sandbox.stub().returns myAggregateStub
-      aggregateId = CommandService.create AggregateStub
+      readAggregate = CommandService.create AggregateStub
 
-    it 'should return the ID of the instantiated Aggregate', ->
-      expect(aggregateId).to.be 42
+    it.only 'should return the corresponding ReadAggregate', ->
+      expect(readAggregate).to.be.a ReadAggregateRoot
 
     it 'should store the aggregate into a local cache using its ID', ->
       expect(CommandService.aggregateCache[42]).to.be.a AggregateRoot

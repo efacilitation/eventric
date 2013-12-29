@@ -1,4 +1,7 @@
-DomainEventService  = require('eventric')('DomainEventService')
+eventric = require 'eventric'
+
+ReadAggregateRoot  = eventric 'ReadAggregateRoot'
+DomainEventService = eventric 'DomainEventService'
 
 # TODO so we obviously need the repository injected / given by constructor
 Repository          = require('sixsteps-client')('Repository')
@@ -23,8 +26,11 @@ class CommandService
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
 
+    # build ReadAggregate
+    readAggregate = new ReadAggregateRoot
+
     # return the id of the newly generated Aggregate
-    aggregate._id
+    readAggregate
 
   fetch: (modelId, name, params) ->
     #TODO: implement!

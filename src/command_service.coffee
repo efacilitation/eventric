@@ -5,8 +5,15 @@ Repository          = require('sixsteps-client')('Repository')
 
 class CommandService
 
-  create: (modelId, name, params) ->
-    #TODO: implement!
+  create: (Aggregate, callback) ->
+    aggregate = new Aggregate
+    domainEvent =
+      name: 'create'
+      data:
+        model: 'Foo'
+    domainEvents = [domainEvent]
+    DomainEventService.handle domainEvents
+    callback(null, aggregate)
 
   fetch: (modelId, name, params) ->
     #TODO: implement!

@@ -1,4 +1,9 @@
+_ = require 'underscore'
+Backbone = require 'backbone'
+
 class DomainEventService
+
+  _.extend @prototype, Backbone.Events
 
   constructor: ->
     @handlers = {}
@@ -9,9 +14,13 @@ class DomainEventService
     for domainEvent in domainEvents
 
       # loop all matching read models
-      readModels = @handlers[domainEvent.data.model][domainEvent.data.id]
-      for readModel in readModels
-        readModel._applyChanges domainEvent.changed
+      if @handlers[domainEvent.data.model]
+        readModels = @handlers[domainEvent.data.model][domainEvent.data.id]
+        for readModel in readModels
+          readModel._applyChanges domainEvent.changed
+
+      # now trigger the domainevent
+      @trigger 'DomainEvent', domainEvent
 
 # DomainEventService is a singelton!
 domainEventService = new DomainEventService

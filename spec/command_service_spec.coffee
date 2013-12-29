@@ -48,15 +48,6 @@ describe 'CommandService', ->
     it 'should call the handle function of the DomainEventService', ->
       expect(DomainEventService.handle.calledOnce).to.be.ok()
 
-
-  # TODO: test instead what the function does!
-  it 'should have a create function', ->
-    expect(CommandService.create).to.be.a Function
-
-  # TODO: test instead what the function does!
-  it 'should have a fetch function', ->
-    expect(CommandService.fetch).to.be.a Function
-
   describe '#handle', ->
 
     aggregateId = 1
@@ -87,10 +78,8 @@ describe 'CommandService', ->
       CommandService.handle 1, 'myAggregateFunction'
       expect(stub.withArgs(events).calledOnce).to.be.ok()
 
-  # TODO: test instead what the function does!
-  it 'should have a remove function', ->
-    expect(CommandService.remove).to.be.a Function
+  xit 'should have a fetch function'
 
-  # TODO: test instead what the function does!
-  it 'should have a destroy function', ->
-    expect(CommandService.destroy).to.be.a Function
+  xit 'should have a remove function'
+
+  xit 'should have a destroy function'

@@ -16,7 +16,7 @@ describe 'DomainEventService', ->
   it 'should have extended Backbone.Events', ->
     expect(DomainEventService.trigger).to.be.ok()
 
-  describe.only '#handle', ->
+  describe '#handle', ->
 
     domainEvent = null
     beforeEach ->

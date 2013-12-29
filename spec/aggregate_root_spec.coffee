@@ -4,43 +4,44 @@ describe 'AggregateRoot', ->
   eventric      = require 'eventric'
   AggregateRoot = eventric 'AggregateRoot'
 
+  enderAggregate = null
+  beforeEach ->
+    class EnderAggregate extends AggregateRoot
+      @prop 'name'
+
+    enderAggregate = new EnderAggregate
+
+  describe '#create', ->
+
+    it 'should generate an id', ->
+      enderAggregate.create()
+      expect(enderAggregate._id).to.be.ok()
+
   describe '#_domainEvent', ->
     eventName = null
-    a = null
-
     beforeEach ->
-      class A extends AggregateRoot
-        @prop 'name'
-
-      a = new A()
-      a.name = 'John'
-
+      enderAggregate.name = 'John'
       eventName = 'somethingHappend'
 
     it 'should create an event, add it to _domainEvents, include changes and clear the changes afterwards', ->
-      a._domainEvent eventName
+      enderAggregate._domainEvent eventName
 
-      expect(a._domainEvents[0].name).to.be eventName
-      expect(a._domainEvents[0].changed.props.name).to.be a.name
-      expect(a._propsChanged).to.eql {}
+      expect(enderAggregate._domainEvents[0].name).to.be eventName
+      expect(enderAggregate._domainEvents[0].changed.props.name).to.be enderAggregate.name
+      expect(enderAggregate._propsChanged).to.eql {}
 
     describe 'given param includeChanges is set to false', ->
 
       it 'then it should NOT include and clear the changes', ->
-        a._domainEvent eventName, {includeChanges: false}
+        enderAggregate._domainEvent eventName, {includeChanges: false}
 
-        expect(a._domainEvents[0].name).to.be eventName
-        expect(a._domainEvents[0].changed).to.be undefined
-        expect(a._propsChanged).to.not.eql {}
+        expect(enderAggregate._domainEvents[0].name).to.be eventName
+        expect(enderAggregate._domainEvents[0].changed).to.be undefined
+        expect(enderAggregate._propsChanged).to.not.eql {}
 
   describe '#getDomainEvents', ->
 
     it 'should return the accumulated domainEvents', ->
-      class MyAggregate extends AggregateRoot
-        myAggregateFunction: ->
-          @_domainEvent 'myDomainEvent'
-
-      myAggregate = new MyAggregate
-      myAggregate.myAggregateFunction()
-      domainEvents = myAggregate.getDomainEvents()
+      enderAggregate._domainEvents = ['someEvent']
+      domainEvents = enderAggregate.getDomainEvents()
       expect(domainEvents.length).to.be 1

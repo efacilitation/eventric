@@ -50,3 +50,5 @@ describe 'DomainEventService', ->
       triggerSpy = sandbox.spy DomainEventService, 'trigger'
       DomainEventService.handle [domainEvent]
       expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.ok()
+
+    it 'should store the DomainEvent into a local cache'

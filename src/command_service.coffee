@@ -5,15 +5,23 @@ Repository          = require('sixsteps-client')('Repository')
 
 class CommandService
 
-  create: (Aggregate, callback) ->
+  constructor: ->
+    @aggregateCache = {}
+
+  create: (Aggregate) ->
+    # create aggregate
     aggregate = new Aggregate
-    domainEvent =
-      name: 'create'
-      data:
-        model: 'Foo'
-    domainEvents = [domainEvent]
+    aggregate.create()
+    aggregate._domainEvent 'create'
+
+    # store an reference to the aggregate into a local cache
+    @aggregateCache[aggregate._id] = aggregate
+
+    # get events and hand them over to domaineventservice
+    domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
-    callback(null, aggregate)
+
+    aggregate._id
 
   fetch: (modelId, name, params) ->
     #TODO: implement!

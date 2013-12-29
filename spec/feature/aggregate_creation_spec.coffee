@@ -36,10 +36,5 @@ describe 'Aggregate Scenario', ->
         # now we tell the commandservice to create the aggregate for us
         CommandService.create EnderAggregate, createdCallback
 
-      it 'then the CommandService should have returned the instantiated Aggregate through the callback', ->
-        expect(createdCallback.calledWith null, sinon.match.instanceOf EnderAggregate).to.be.ok()
-
-      it 'and the DomainEventService should haved triggered a "create" DomainEvent', ->
+      it 'then the DomainEventService should haved triggered a "create" DomainEvent', ->
         expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()
-
-      it 'and the CommandService should have told the repository to store the "create" DomainEvent'

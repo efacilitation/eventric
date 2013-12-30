@@ -25,7 +25,7 @@ class CommandService
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
 
-    # build ReadAggregate
+    # get the ReadAggregate
     readAggregate = @_readAggregateRepository.findById aggregate._id
 
     # return ReadAggregate
@@ -38,8 +38,8 @@ class CommandService
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
 
-    # build ReadAggregate
-    readAggregate = new ReadAggregateRoot
+    # get the ReadAggregate
+    readAggregate = @_readAggregateRepository.findById aggregate._id
 
     # return ReadAggregate
     readAggregate

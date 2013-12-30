@@ -12,8 +12,13 @@ describe 'CommandService', ->
   Repository              = eventric 'Repository'
 
   sandbox = null
+  readAggregateRepositoryStub = null
   beforeEach ->
     sandbox = sinon.sandbox.create()
+
+    # create ReadAggregateRepository.findById stub which returns an ReadAggregateRoot
+    readAggregateRepositoryStub = sinon.createStubInstance ReadAggregateRepository
+    readAggregateRepositoryStub.findById.returns new ReadAggregateRoot
 
   afterEach ->
     sandbox.restore()
@@ -21,13 +26,9 @@ describe 'CommandService', ->
   describe '#create', ->
 
     readAggregate = null
-    readAggregateRepositoryStub = null
     myAggregateStub = null
     commandService = null
     beforeEach ->
-      # create ReadAggregateRepository.findById stub which returns an ReadAggregateRoot
-      readAggregateRepositoryStub = sinon.createStubInstance ReadAggregateRepository
-      readAggregateRepositoryStub.findById.withArgs(42).returns new ReadAggregateRoot
 
       # instantiate the CommandService with the ReadAggregateRepository stub
       commandService = new CommandService null, readAggregateRepositoryStub
@@ -87,7 +88,7 @@ describe 'CommandService', ->
       DomainEventServiceStub = sandbox.stub DomainEventService
 
       # instantiate the command service
-      commandService = new CommandService repository
+      commandService = new CommandService repository, readAggregateRepositoryStub
 
 
     it 'should call the command on the aggregate', ->

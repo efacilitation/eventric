@@ -26,14 +26,20 @@ describe 'Aggregate Scenario', ->
     describe 'when we tell the CommandService to create an Aggregate', ->
 
       DomainEventServiceTriggerSpy = null
+      readAggregateRepositoryStub  = null
       createdCallback              = null
       beforeEach ->
         # stub the DomainEventService.trigger
         DomainEventServiceTriggerSpy = sandbox.stub DomainEventService, 'trigger'
 
         # now we tell the commandservice to create the aggregate for us
-        commandService = new CommandService null, sinon.createStubInstance ReadAggregateRepository
+        readAggregateRepositoryStub = sinon.createStubInstance ReadAggregateRepository
+        commandService = new CommandService null, readAggregateRepositoryStub
         commandService.create EnderAggregate
 
       it 'then the DomainEventService should haved triggered a "create" DomainEvent', ->
         expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()
+
+      it 'and the ReadAggregateRepository should have been asked to find a ReadAggregate by its ID', ->
+        # TODO this should actually check if the adapter inside of the repository got called
+        expect(readAggregateRepositoryStub.findById.calledOnce).to.be.ok()

@@ -17,7 +17,7 @@ class Repository
   findOne: (query, callback) ->
     user =
       email: 'user@test.com'
-      passwordHash: 'hash'
+      passwordHash: '$2a$10$JfaXMYjS5VknafBfFEynj.FhJUAHrcAyMEFcgVUNSZKrFxpuZmrW2'
     callback null, user
 
 module.exports = Repository

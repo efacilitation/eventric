@@ -11,7 +11,13 @@ class Repository
 
   fetchById: ->
 
-# Repository is a singelton!
-repository = new Repository
+  save: (user, callback) ->
+    callback null, user
 
-module.exports = repository
+  findOne: (query, callback) ->
+    user =
+      email: 'user@test.com'
+      passwordHash: 'hash'
+    callback null, user
+
+module.exports = Repository

@@ -7,7 +7,7 @@ Repository              = eventric 'Repository'
 
 class CommandService
 
-  constructor: ->
+  constructor: (@_aggregateRepository, @_readAggregateRepository) ->
     @aggregateCache = {}
 
   create: (Aggregate) ->
@@ -26,13 +26,13 @@ class CommandService
     DomainEventService.handle domainEvents
 
     # build ReadAggregate
-    readAggregate = new ReadAggregateRoot
+    readAggregate = @_readAggregateRepository.findById aggregate._id
 
     # return ReadAggregate
     readAggregate
 
   handle: (aggregateId, commandName, params) ->
-    aggregate = Repository.fetchById aggregateId
+    aggregate = @_aggregateRepository.fetchById aggregateId
     # TODO: Error handling if the function is not available
     aggregate[commandName] params
     domainEvents = aggregate.getDomainEvents()
@@ -55,7 +55,4 @@ class CommandService
   destroy: (modelId, name, params) ->
     #TODO: implement!
 
-# CommandService is a singelton!
-commandService = new CommandService
-
-module.exports = commandService
+module.exports = CommandService

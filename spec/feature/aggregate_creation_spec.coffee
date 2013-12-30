@@ -4,9 +4,10 @@ describe 'Aggregate Scenario', ->
   expect   = require 'expect'
   eventric = require 'eventric'
 
-  CommandService     = eventric 'CommandService'
-  DomainEventService = eventric 'DomainEventService'
-  AggregateRoot      = eventric 'AggregateRoot'
+  CommandService          = eventric 'CommandService'
+  DomainEventService      = eventric 'DomainEventService'
+  AggregateRoot           = eventric 'AggregateRoot'
+  ReadAggregateRepository = eventric 'ReadAggregateRepository'
 
   sandbox = null
   beforeEach ->
@@ -30,11 +31,9 @@ describe 'Aggregate Scenario', ->
         # stub the DomainEventService.trigger
         DomainEventServiceTriggerSpy = sandbox.stub DomainEventService, 'trigger'
 
-        # create a stub for the CommandService callback
-        createdCallback = sandbox.stub()
-
         # now we tell the commandservice to create the aggregate for us
-        CommandService.create EnderAggregate, createdCallback
+        commandService = new CommandService null, sinon.createStubInstance ReadAggregateRepository
+        commandService.create EnderAggregate
 
       it 'then the DomainEventService should haved triggered a "create" DomainEvent', ->
         expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()

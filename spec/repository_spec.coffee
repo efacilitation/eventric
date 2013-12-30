@@ -15,7 +15,8 @@ describe 'Repository', ->
 
     it 'should yield its callback and return a entity given the domain event', (next) ->
       domainEvent = {}
-      Repository.findByDomainEvent domainEvent, (err, entity) ->
+      repository = new Repository
+      repository.findByDomainEvent domainEvent, (err, entity) ->
         expect(err).not.to.be.ok()
         expect(entity).to.be.a Entity
         next()

@@ -2,7 +2,7 @@ _ = require 'underscore'
 EntityCollection = require('eventric')('AggregateEntityCollection')
 
 
-class Repository
+class MongooseAdapter
   _mongooseModels: {}
 
   constructor: (@_mongoose = require 'mongoose') ->
@@ -134,4 +134,4 @@ class Repository
     ,@
     result
 
-module.exports = Repository
+module.exports = MongooseAdapter

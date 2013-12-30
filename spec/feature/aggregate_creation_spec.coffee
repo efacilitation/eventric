@@ -37,7 +37,7 @@ describe 'Aggregate Scenario', ->
         commandService = new CommandService null, readAggregateRepositoryStub
         commandService.create EnderAggregate
 
-      it 'then the DomainEventService should haved triggered a "create" DomainEvent', ->
+      it 'then the DomainEventService should have triggered a "create" DomainEvent', ->
         expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()
 
       it 'and the ReadAggregateRepository should have been asked to find a ReadAggregate by its ID', ->

@@ -9,14 +9,14 @@ class CommandService
   constructor: (@_aggregateRepository, @_readAggregateRepository) ->
     @aggregateCache = {}
 
-  create: (Aggregate) ->
+  createAggregate: (Aggregate) ->
     # create Aggregate
     aggregate = new Aggregate
     aggregate.create()
 
-    @_handle aggregate, 'create'
+    @_handle 'create', aggregate
 
-  handle: (aggregateId, commandName, params) ->
+  commandAggregate: (aggregateId, commandName, params) ->
     # get the aggregate from the AggregateRepository
     aggregate = @_aggregateRepository.fetchById aggregateId
 
@@ -24,10 +24,10 @@ class CommandService
     # TODO: Error handling if the function is not available
     aggregate[commandName] params
 
-    @_handle aggregate, commandName
+    @_handle commandName, aggregate
 
 
-  _handle: (aggregate, commandName) ->
+  _handle: (commandName, aggregate) ->
     # "trigger" the DomainEvent
     aggregate._domainEvent commandName
 

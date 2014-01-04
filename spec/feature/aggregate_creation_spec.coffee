@@ -35,7 +35,7 @@ describe 'Aggregate Scenario', ->
         # now we tell the commandservice to create the aggregate for us
         readAggregateRepositoryStub = sinon.createStubInstance ReadAggregateRepository
         commandService = new CommandService null, readAggregateRepositoryStub
-        commandService.create EnderAggregate
+        commandService.createAggregate EnderAggregate
 
       it 'then the DomainEventService should have triggered a "create" DomainEvent', ->
         expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()

@@ -33,7 +33,7 @@ describe 'CommandService', ->
   afterEach ->
     sandbox.restore()
 
-  describe '#create', ->
+  describe '#createAggregate', ->
 
     readAggregate = null
     commandService = null
@@ -45,7 +45,7 @@ describe 'CommandService', ->
       AggregateStub = sandbox.stub().returns myAggregateStub
 
       # call the create method on the CommandService with the Aggregate Class stub
-      readAggregate = commandService.create AggregateStub
+      readAggregate = commandService.createAggregate AggregateStub
 
     it 'should call the create method of the given aggregate', ->
       expect(myAggregateStub.create.calledOnce).to.be.ok()
@@ -53,7 +53,7 @@ describe 'CommandService', ->
     it 'should return the corresponding ReadAggregate', ->
       expect(readAggregate).to.be.a ReadAggregateRoot
 
-  describe '#handle', ->
+  describe '#commandAggregate', ->
 
     commandService = null
     beforeEach ->
@@ -65,30 +65,30 @@ describe 'CommandService', ->
       commandService = new CommandService repository, readAggregateRepositoryStub
 
     it 'should call the command on the aggregate', ->
-      commandService.handle 1, 'myAggregateFunction'
+      commandService.commandAggregate 1, 'myAggregateFunction'
       expect(myAggregateStub.myAggregateFunction.calledOnce).to.be.ok()
 
     it 'should store the aggregate into a local cache using its ID', ->
-      commandService.handle 1, 'myAggregateFunction'
+      commandService.commandAggregate 1, 'myAggregateFunction'
       expect(commandService.aggregateCache[1]).to.be.a AggregateRoot
 
     it 'should call the _domainEvent method of the given aggregate', ->
-      commandService.handle 1, 'myAggregateFunction'
+      commandService.commandAggregate 1, 'myAggregateFunction'
       expect(myAggregateStub._domainEvent.calledWith 'myAggregateFunction').to.be.ok()
 
     it 'should pass the accumulated domainEvents from the Aggregate to the DomainEventService', ->
       events = {}
       myAggregateStub.getDomainEvents.returns events
 
-      commandService.handle 1, 'myAggregateFunction'
+      commandService.commandAggregate 1, 'myAggregateFunction'
       expect(DomainEventService.handle.withArgs(events).calledOnce).to.be.ok()
 
     it 'should call the findById function of the ReadAggregateRepository', ->
-      commandService.handle 1, 'myAggregateFunction'
+      commandService.commandAggregate 1, 'myAggregateFunction'
       expect(readAggregateRepositoryStub.findById.calledOnce).to.be.ok()
 
     it 'should return the corresponding ReadAggregate', ->
-      readAggregate = commandService.handle 1, 'myAggregateFunction'
+      readAggregate = commandService.commandAggregate 1, 'myAggregateFunction'
       expect(readAggregate).to.be.a ReadAggregateRoot
 
 

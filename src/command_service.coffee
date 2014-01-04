@@ -9,9 +9,11 @@ class CommandService
   constructor: (@_aggregateRepository, @_readAggregateRepository) ->
     @aggregateCache = {}
 
-  createAggregate: (Aggregate) ->
+  # TODO support garbage-collector-callback which gets called in intervals to check if we can drop the cache-entry
+
+  createAggregate: (Aggregate, params) ->
     # create Aggregate
-    aggregate = new Aggregate
+    aggregate = new Aggregate params
     aggregate.create()
 
     @_handle 'create', aggregate

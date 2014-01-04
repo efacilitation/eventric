@@ -21,11 +21,11 @@ describe 'DomainEventService', ->
     domainEvent = null
     beforeEach ->
       domainEvent =
-        name: 'testEvent'
-        data:
+        name: 'testMethod'
+        metaData:
           id: 1
-          model: 'Example'
-        changed:
+          name: 'Example'
+        _changed:
           props:
             name: 'John'
 
@@ -50,6 +50,10 @@ describe 'DomainEventService', ->
       triggerSpy = sandbox.spy DomainEventService, 'trigger'
       DomainEventService.handle [domainEvent]
       expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.ok()
+      expect(triggerSpy.calledWith 'Example', domainEvent).to.be.ok()
+      expect(triggerSpy.calledWith 'Example/1', domainEvent).to.be.ok()
+      expect(triggerSpy.calledWith 'Example:testMethod', domainEvent).to.be.ok()
+      expect(triggerSpy.calledWith 'Example:testMethod/1', domainEvent).to.be.ok()
 
     it 'should store the DomainEvent into a local cache', ->
       storeInCacheSpy = sandbox.spy DomainEventService, '_storeInCache'

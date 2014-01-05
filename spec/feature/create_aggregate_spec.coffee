@@ -1,4 +1,4 @@
-describe 'Aggregate Scenario', ->
+describe 'Create new Aggregate Scenario', ->
 
   sinon    = require 'sinon'
   expect   = require 'expect'

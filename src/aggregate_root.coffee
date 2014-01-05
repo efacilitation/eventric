@@ -17,7 +17,7 @@ class AggregateRoot extends AggregateEntity
 
     event =
       name: eventName
-      data: @_metaData()
+      metaData: @_metaData()
 
     if params.includeChanges
       event._changed = @_changes()

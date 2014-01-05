@@ -9,7 +9,6 @@ describe 'Repository', ->
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
   Repository              = eventric 'Repository'
 
-  FooReadAggregate = null
   readAggregateRepository = null
   sandbox = null
   beforeEach ->
@@ -19,9 +18,9 @@ describe 'Repository', ->
       _findDomainEventsByAggregateId: ->
       _findAggregateIdsByDomainEventCriteria: ->
 
-    class FooReadAggregate extends ReadAggregateRoot
+    class ReadFoo extends ReadAggregateRoot
 
-    readAggregateRepository = new ReadAggregateRepository adapter, FooReadAggregate
+    readAggregateRepository = new ReadAggregateRepository adapter, ReadFoo
 
   afterEach ->
     sandbox.restore()

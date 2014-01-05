@@ -9,8 +9,6 @@ class CommandService
   constructor: (@_aggregateRepository, @_readAggregateRepository) ->
     @aggregateCache = {}
 
-  # TODO support garbage-collector-callback which gets called in intervals to check if we can drop the cache-entry
-
   createAggregate: (Aggregate, params) ->
     # create Aggregate
     aggregate = new Aggregate params
@@ -38,6 +36,7 @@ class CommandService
     DomainEventService.handle domainEvents
 
     # store a reference to the Aggregate into a local cache
+    # TODO support garbage-collector-callback which gets called in intervals to check if we can drop the cache-entry
     @aggregateCache[aggregate._id] = aggregate
 
     # get the ReadAggregate

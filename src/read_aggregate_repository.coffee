@@ -2,22 +2,41 @@ Repository = require('eventric')('Repository')
 
 class ReadAggregateRepository extends Repository
 
-  constructor: (@_adapter, @_ReadAggregateClass) ->
+  constructor: (_adapter, @_ReadAggregateClass) ->
+    super _adapter
 
   findById: (id) ->
-    # create and return a ReadAggregate instance with the data-row found
-    @_createReadAggregateInstance @_findDomainEventsByAggregateId id
+    # find domain events matching the aggregate id first
+    domainEvents = @_findDomainEventsByAggregateId id
+
+    # create the ReadAggregate instance
+    readAggregate = new @_ReadAggregateClass
+
+    # apply the domainevents on the ReadAggregate
+    readAggregate._applyChanges domainEvent._changed for domainEvent in domainEvents
+
+    # return the readAggregate
+    readAggregate
+
 
   findByIds: (ids) ->
     # call finyById for every given Id
     @findById id for id in ids
 
-  find: (query, projection) ->
-    # find aggregate data based on query and projection
-    results = @_findAggregateData query, projection
 
-    # create and return a ReadAggregate instance for every data-row found
-    @_createReadAggregateInstance data for data in results
+  find: (query, projection) ->
+    # find ReadAggregates based on query and projection
+
+    # get AggregateIds first
+    aggregateIds = @_findAggregateIdsByDomainEventCriteria query, projection
+
+    # now fetch all ReadAggregates matching the AggregateIds
+    readAggregates = []
+    readAggregates.push @findById aggregateId for aggregateId in aggregateIds
+
+    # return the readAggregates found
+    readAggregates
+
 
   findIds: (query) ->
     # only return aggregateIds
@@ -26,7 +45,7 @@ class ReadAggregateRepository extends Repository
       aggregateId: 1
 
     # ask the adapter to find the ids
-    results = @_findAggregateData query, projection
+    results = @_findDomainEventsByAggregateId query, projection
 
     # convert to array of ids and return
     object.id for object in results
@@ -41,8 +60,8 @@ class ReadAggregateRepository extends Repository
     @_adapter.find query, projection
 
 
-  _createReadAggregateInstance: (data) ->
+  _createReadAggregateInstance: ->
     # create and return a ReadAggregate instance with the given data
-    new @_ReadAggregateClass data
+    new @_ReadAggregateClass
 
 module.exports = ReadAggregateRepository

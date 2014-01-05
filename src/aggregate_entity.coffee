@@ -48,8 +48,7 @@ class AggregateEntity
       @_clearCollectionChanges propVal
 
   _clearCollectionChanges: (collection) ->
-    for entity in collection.entities
-      entity._clearChanges()
+    entity._clearChanges() for entity in collection.entities
 
   _applyChanges: (changes, params={}) ->
     oldTrackPropsChanged = @_trackPropsChanged

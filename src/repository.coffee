@@ -4,6 +4,8 @@ Entity = eventric 'AggregateEntity'
 
 class Repository
 
+  constructor: (@_adapter) ->
+
   _findDomainEventsByAggregateId: (aggregateId) ->
     @_adapter._findDomainEventsByAggregateId aggregateId
 

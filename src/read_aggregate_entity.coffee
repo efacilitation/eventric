@@ -1,5 +1,6 @@
-class ReadAggregateEntity
+eventric        = require 'eventric'
+AggregateEntity = eventric 'AggregateEntity'
 
-  constructor: (@_props = {}) ->
+class ReadAggregateEntity extends AggregateEntity
 
 module.exports = ReadAggregateEntity

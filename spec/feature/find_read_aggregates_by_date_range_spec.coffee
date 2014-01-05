@@ -1,4 +1,4 @@
-describe 'Find Read Aggregates By Date Range Scenario', ->
+describe 'Find ReadAggregates By Date Range Scenario', ->
 
   expect   = require 'expect'
   sinon    = require 'sinon'
@@ -11,7 +11,7 @@ describe 'Find Read Aggregates By Date Range Scenario', ->
 
     describe 'when we ask the ReadExampleRepository to find the matching ReadAggregates', ->
 
-      it 'then it should return the corresponding list of ReadAggregates', ->
+      it 'then it should return the corresponding list of ReadExampleAggregates', ->
         # Example Classes
         class ReadExample extends ReadAggregateRoot
 
@@ -44,7 +44,7 @@ describe 'Find Read Aggregates By Date Range Scenario', ->
           {'id': 1}
         ]
 
-        # stub ExampleAdapter.findById to return an example AggregateData
+        # stub ExampleAdapter._findDomainEventsByAggregateId to return example DomainEvents
         exampleAdapterStub._findDomainEventsByAggregateId.withArgs(1).returns
           id: 1
           name: 'example'

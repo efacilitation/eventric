@@ -118,13 +118,12 @@ describe 'AggregateEntity', ->
 
   describe '#_applyChanges', ->
 
-    it 'should apply given changes to properties', ->
+    it 'should apply given changes to properties and not track the changes', ->
       class MyEntity extends Entity
         _entityName: 'MyEntity'
         @props 'name'
 
       myEntity = new MyEntity
-      myEntity.name = 'John'
 
       changedPropsAndCollections =
         props:
@@ -133,6 +132,9 @@ describe 'AggregateEntity', ->
       myEntity._applyChanges changedPropsAndCollections
 
       expect(myEntity.name).to.eql 'ChangedJohn'
+      expect(myEntity._changes()).to.eql
+        props: {}
+        collections: {}
 
 
     it 'should apply given changes to properties and collections', ->

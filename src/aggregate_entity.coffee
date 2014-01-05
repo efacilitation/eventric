@@ -52,8 +52,11 @@ class AggregateEntity
       entity._clearChanges()
 
   _applyChanges: (changes, params={}) ->
+    oldTrackPropsChanged = @_trackPropsChanged
+    @_trackPropsChanged = false
     @_applyChangesToProps changes.props
     @_applyChangesToCollections changes.collections
+    @_trackPropsChanged = oldTrackPropsChanged
 
   _applyChangesToProps: (propChanges) ->
     @[propName] = propValue for propName, propValue of propChanges

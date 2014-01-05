@@ -33,21 +33,22 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
             readAggregates = @findByIds aggregateIds
 
         class ExampleAdapter
-          find: ->
+          _findAggregateIdsByDomainEventCriteria: ->
           _findDomainEventsByAggregateId: ->
 
         # create a stub instance of the ExampleAdapter
         exampleAdapterStub = sinon.createStubInstance ExampleAdapter
 
-        # stub ExampleAdapter.find to return an example id only
-        exampleAdapterStub.find.returns [
-          {'id': 1}
-        ]
+        # stub ExampleAdapter._findAggregateIdsByDomainEventCriteria to return an example id only
+        exampleAdapterStub._findAggregateIdsByDomainEventCriteria.returns [42]
 
-        # stub ExampleAdapter._findDomainEventsByAggregateId to return example DomainEvents
-        exampleAdapterStub._findDomainEventsByAggregateId.withArgs(1).returns
-          id: 1
-          name: 'example'
+        # stub ExampleAdapter._findDomainEventsByAggregateId to return an example DomainEvent
+        exampleAdapterStub._findDomainEventsByAggregateId.withArgs(42).returns [
+          name: 'testEvent'
+          _changed:
+            props:
+              name: 'example'
+        ]
 
         # instantiate the ReadExampleRepository with the stubbed Adapter and the ReadExample Class
         readExampleRepository = new ReadExampleRepository exampleAdapterStub, ReadExample

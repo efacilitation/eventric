@@ -25,24 +25,17 @@ class ReadAggregateRepository extends Repository
     @findById id for id in ids
 
 
-  find: (query, projection) ->
-    # find ReadAggregates based on query and projection
-
+  find: (query) ->
     # get AggregateIds first
-    aggregateIds = @_findAggregateIdsByDomainEventCriteria query, projection
+    aggregateIds = @findIds query
 
     # now fetch all ReadAggregates matching the AggregateIds and return as array
     @findById aggregateId for aggregateId in aggregateIds
 
 
   findIds: (query) ->
-    # only return aggregateIds
-    projection =
-      _id: 0
-      aggregateId: 1
-
     # ask the adapter to find the ids and return them
-    aggregateIds = @_findAggregateIdsByDomainEventCriteria query, projection
+    aggregateIds = @_findAggregateIdsByDomainEventCriteria query
 
 
 module.exports = ReadAggregateRepository

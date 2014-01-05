@@ -4,6 +4,12 @@ Entity = eventric 'AggregateEntity'
 
 class Repository
 
+  _findDomainEventsByAggregateId: (aggregateId) ->
+    @_adapter._findDomainEventsByAggregateId aggregateId
+
+  _findAggregateIdsByDomainEventCriteria: (criteria) ->
+    @_adapter._findAggregateIdsByDomainEventCriteria criteria
+
   findByDomainEvent: (domainEvent, next) ->
     # TODO this is only an example implementation
     entity = new Entity

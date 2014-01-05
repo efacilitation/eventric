@@ -18,7 +18,7 @@ describe 'Find Read Aggregates By Date Range Scenario', ->
         class ReadExampleRepository extends ReadAggregateRepository
 
           findByDateRange: (start, end) ->
-            # criteria not actually used here, just to show how it could work
+            # criteria not actually used here, just to show how it could look like
             exampleCriteria =
               aggregateName: 'ReadExample'
               eventName: 'create'
@@ -34,7 +34,7 @@ describe 'Find Read Aggregates By Date Range Scenario', ->
 
         class ExampleAdapter
           find: ->
-          findById: ->
+          _findDomainEventsByAggregateId: ->
 
         # create a stub instance of the ExampleAdapter
         exampleAdapterStub = sinon.createStubInstance ExampleAdapter
@@ -45,7 +45,7 @@ describe 'Find Read Aggregates By Date Range Scenario', ->
         ]
 
         # stub ExampleAdapter.findById to return an example AggregateData
-        exampleAdapterStub.findById.withArgs(1).returns
+        exampleAdapterStub._findDomainEventsByAggregateId.withArgs(1).returns
           id: 1
           name: 'example'
 

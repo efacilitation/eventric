@@ -1,9 +1,12 @@
-class ReadAggregateRepository
+Repository = require('eventric')('Repository')
+
+class ReadAggregateRepository extends Repository
+
   constructor: (@_adapter, @_ReadAggregateClass) ->
 
   findById: (id) ->
     # create and return a ReadAggregate instance with the data-row found
-    @_createReadAggregateInstance @_findAggregateDataById id
+    @_createReadAggregateInstance @_findDomainEventsByAggregateId id
 
   findByIds: (ids) ->
     # call finyById for every given Id

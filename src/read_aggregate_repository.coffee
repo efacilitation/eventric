@@ -7,7 +7,7 @@ class ReadAggregateRepository extends Repository
 
 
   findById: (id) ->
-    # find domain events matching the aggregate id first
+    # find domain events matching the aggregate id
     domainEvents = @_findDomainEventsByAggregateId id
 
     # create the ReadAggregate instance
@@ -26,10 +26,10 @@ class ReadAggregateRepository extends Repository
 
 
   find: (query) ->
-    # get AggregateIds first
+    # get AggregateIds matching the query
     aggregateIds = @findIds query
 
-    # now fetch all ReadAggregates matching the AggregateIds and return as array
+    # now find ReadAggregates matching the AggregateIds and return as array
     @findById aggregateId for aggregateId in aggregateIds
 
 

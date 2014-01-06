@@ -1,8 +1,6 @@
 eventric = require 'eventric'
 
-ReadAggregateRepository = eventric 'ReadAggregateRepository'
-DomainEventService      = eventric 'DomainEventService'
-Repository              = eventric 'Repository'
+DomainEventService = eventric 'DomainEventService'
 
 class CommandService
 
@@ -18,7 +16,7 @@ class CommandService
 
   commandAggregate: (aggregateId, commandName, params) ->
     # get the aggregate from the AggregateRepository
-    aggregate = @_aggregateRepository.fetchById aggregateId
+    aggregate = @_aggregateRepository.findById aggregateId
 
     # call the given commandName as method on the aggregate
     # TODO: Error handling if the function is not available
@@ -45,15 +43,5 @@ class CommandService
     # return ReadAggregate
     readAggregate
 
-
-
-  fetch: (modelId, name, params) ->
-    #TODO: implement!
-
-  remove: (modelId, name, params) ->
-    #TODO: implement!
-
-  destroy: (modelId, name, params) ->
-    #TODO: implement!
 
 module.exports = CommandService

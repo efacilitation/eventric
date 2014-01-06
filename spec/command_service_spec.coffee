@@ -5,11 +5,11 @@ describe 'CommandService', ->
   eventric = require 'eventric'
 
   AggregateRoot           = eventric 'AggregateRoot'
+  AggregateRepository     = eventric 'AggregateRepository'
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
   DomainEventService      = eventric 'DomainEventService'
   CommandService          = eventric 'CommandService'
-  Repository              = eventric 'Repository'
 
   sandbox = null
   aggregateId = 1
@@ -58,11 +58,11 @@ describe 'CommandService', ->
     commandService = null
     beforeEach ->
       # stub the repository
-      repository = sinon.createStubInstance Repository
-      repository.fetchById.withArgs(aggregateId).returns(myAggregateStub)
+      aggregateRepository = sinon.createStubInstance AggregateRepository
+      aggregateRepository.findById.withArgs(aggregateId).returns(myAggregateStub)
 
       # instantiate the command service
-      commandService = new CommandService repository, readAggregateRepositoryStub
+      commandService = new CommandService aggregateRepository, readAggregateRepositoryStub
 
     it 'should call the command on the aggregate', ->
       commandService.commandAggregate 1, 'myAggregateFunction'
@@ -90,12 +90,3 @@ describe 'CommandService', ->
     it 'should return the corresponding ReadAggregate', ->
       readAggregate = commandService.commandAggregate 1, 'myAggregateFunction'
       expect(readAggregate).to.be.a ReadAggregateRoot
-
-
-
-
-  xit 'should have a fetch function'
-
-  xit 'should have a remove function'
-
-  xit 'should have a destroy function'

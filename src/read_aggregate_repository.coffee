@@ -37,5 +37,7 @@ class ReadAggregateRepository extends Repository
     # ask the adapter to find the ids and return them
     aggregateIds = @_findAggregateIdsByDomainEventCriteria query
 
+  findOne: (query) ->
+
 
 module.exports = ReadAggregateRepository

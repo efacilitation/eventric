@@ -81,6 +81,11 @@ describe 'ReadAggregateRepositorySpec', ->
       expect(readAggregates.length).to.be 1
       expect(readAggregates[0]).to.be.a ReadFoo
 
+  describe '#findOne', ->
+
+    it 'should call find and return only one result'
+
+
   describe '#findIds', ->
 
     it 'should return all AggregateIds matching the given query-criteria', ->

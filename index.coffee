@@ -13,6 +13,7 @@ moduleDefinition =
   SocketService: './src/socket_service'
 
   Repository: './src/repository'
+  RepositoryInMemoryAdapter: './src/repository_adapters/inmemory_adapter'
   RepositorySocketIOAdapter: './src/repository_adapters/socketio_adapter'
 
 module.exports = (required) ->

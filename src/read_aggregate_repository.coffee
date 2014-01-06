@@ -1,8 +1,12 @@
-Repository = require('eventric')('Repository')
+eventric = require 'eventric'
+
+Repository        = eventric 'Repository'
+ReadAggregateRoot = eventric 'ReadAggregateRoot'
 
 class ReadAggregateRepository extends Repository
 
   constructor: (_adapter, @_ReadAggregateClass) ->
+    @_ReadAggregateClass ?= ReadAggregateRoot
     super _adapter
 
 
@@ -15,6 +19,7 @@ class ReadAggregateRepository extends Repository
 
     # apply the domainevents on the ReadAggregate
     readAggregate._applyChanges domainEvent._changed for domainEvent in domainEvents
+    readAggregate.id = id
 
     # return the readAggregate
     readAggregate
@@ -38,6 +43,8 @@ class ReadAggregateRepository extends Repository
     aggregateIds = @_findAggregateIdsByDomainEventCriteria query
 
   findOne: (query) ->
+    result = @find query
+    result[0]
 
 
 module.exports = ReadAggregateRepository

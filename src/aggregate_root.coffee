@@ -9,7 +9,7 @@ class AggregateRoot extends AggregateEntity
 
   create: ->
     # TODO this should be an unique id
-    @_id = 1
+    @id = 1
 
   _domainEvent: (eventName, params={}) ->
 

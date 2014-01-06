@@ -9,8 +9,11 @@ class CommandService
 
   createAggregate: (Aggregate, params) ->
     # create Aggregate
-    aggregate = new Aggregate params
+    aggregate = new Aggregate
     aggregate.create()
+
+    # apply given params
+    aggregate[key] = value for key, value of params
 
     @_handle 'create', aggregate
 
@@ -33,12 +36,15 @@ class CommandService
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
 
+    # TODO save DomainEvents, this needs some refactoring..
+    @_readAggregateRepository._saveDomainEvents? domainEvents
+
     # store a reference to the Aggregate into a local cache
     # TODO support garbage-collector-callback which gets called in intervals to check if we can drop the cache-entry
     @aggregateCache[aggregate._id] = aggregate
 
     # get the ReadAggregate
-    readAggregate = @_readAggregateRepository.findById aggregate._id
+    readAggregate = @_readAggregateRepository.findById aggregate.id
 
     # return ReadAggregate
     readAggregate

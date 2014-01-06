@@ -15,7 +15,7 @@ describe 'AggregateRoot', ->
 
     it 'should generate an id', ->
       enderAggregate.create()
-      expect(enderAggregate._id).to.be.ok()
+      expect(enderAggregate.id).to.be.ok()
 
   describe '#_domainEvent', ->
     eventName = null

@@ -37,7 +37,7 @@ class CommandService
     DomainEventService.handle domainEvents
 
     # TODO save DomainEvents, this needs some refactoring..
-    @_readAggregateRepository._saveDomainEvents? domainEvents
+    @_readAggregateRepository._saveDomainEvents domainEvents
 
     # store a reference to the Aggregate into a local cache
     # TODO support garbage-collector-callback which gets called in intervals to check if we can drop the cache-entry

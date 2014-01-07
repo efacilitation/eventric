@@ -18,7 +18,7 @@ class InMemoryAdapter
         ids.push domainEvent.metaData?.id unless domainEvent.metaData.id in ids
       else
         for key, value of query
-          if key of domainEvent._changed.props and domainEvent._changed.props[key] == value
+          if key of domainEvent._changed.props and domainEvent._changed.props[key] is value
             ids.push domainEvent.metaData?.id unless domainEvent.metaData.id in ids
             break
 

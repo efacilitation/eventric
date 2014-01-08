@@ -9,7 +9,6 @@ class ReadAggregateRepository extends Repository
     @_ReadAggregateClass ?= ReadAggregateRoot
     super _adapter
 
-
   findById: (id) ->
     # find domain events matching the aggregate id
     domainEvents = @_findDomainEventsByAggregateId id
@@ -24,11 +23,9 @@ class ReadAggregateRepository extends Repository
     # return the readAggregate
     readAggregate
 
-
   findByIds: (ids) ->
     # call finyById for every given Id
     @findById id for id in ids
-
 
   find: (query) ->
     # get AggregateIds matching the query

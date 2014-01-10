@@ -11,7 +11,7 @@ class AggregateRoot extends AggregateEntity
     # TODO this should be an unique id
     @id = 1
 
-  _domainEvent: (eventName, params={}) ->
+  generateDomainEvent: (eventName, params={}) ->
 
     params.includeChanges = true unless params.includeChanges is false
 

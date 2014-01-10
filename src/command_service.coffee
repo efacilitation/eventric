@@ -4,10 +4,11 @@ DomainEventService = eventric 'DomainEventService'
 
 class CommandService
 
-  constructor: (@_aggregateRepository, @_readAggregateRepository) ->
+  constructor: (@_aggregateRepository) ->
     @aggregateCache = {}
 
   createAggregate: (Aggregate, params) ->
+
     # create Aggregate
     aggregate = new Aggregate
     aggregate.create()
@@ -29,25 +30,22 @@ class CommandService
 
 
   _handle: (commandName, aggregate) ->
-    # "trigger" the DomainEvent
-    aggregate._domainEvent commandName
+    # generate the DomainEvent
+    aggregate.generateDomainEvent commandName
 
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
     DomainEventService.handle domainEvents
 
     # TODO save DomainEvents, this needs some refactoring..
-    @_readAggregateRepository._saveDomainEvents domainEvents
+    @_aggregateRepository._saveDomainEvents domainEvents
 
     # store a reference to the Aggregate into a local cache
     # TODO support garbage-collector-callback which gets called in intervals to check if we can drop the cache-entry
-    @aggregateCache[aggregate._id] = aggregate
+    @aggregateCache[aggregate.id] = aggregate
 
-    # get the ReadAggregate
-    readAggregate = @_readAggregateRepository.findById aggregate.id
-
-    # return ReadAggregate
-    readAggregate
+    # return the aggregateId
+    aggregate.id
 
 
 module.exports = CommandService

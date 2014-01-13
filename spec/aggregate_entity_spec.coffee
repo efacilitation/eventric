@@ -10,7 +10,6 @@ describe 'AggregateEntity', ->
 
     it 'should return an object including the Entity MetaData', ->
       class MyEntity extends Entity
-        _entityName: 'MyEntity'
 
       myEntity = new MyEntity
       myEntity.id = 1
@@ -23,7 +22,6 @@ describe 'AggregateEntity', ->
 
     it 'should return changes to properties from the given entity', ->
       class MyEntity extends Entity
-        _entityName: 'MyEntity'
         @prop 'name'
 
       myEntity = new MyEntity name: 'Willy'
@@ -32,16 +30,15 @@ describe 'AggregateEntity', ->
       expect(myEntity._changes()).to.eql
         props:
           name: 'John'
+        entities: {}
         collections: {}
 
     it 'should return changes to properties from the given entity collection', ->
       class MyEntity extends Entity
-        _entityName: 'MyEntity'
         @prop 'name'
         @prop 'things'
 
       class MyThingsEntity extends Entity
-        _entityName: 'MyThingsEntity'
         @prop 'name'
 
       myEntity = new MyEntity
@@ -55,19 +52,20 @@ describe 'AggregateEntity', ->
 
       expect(myEntity._changes()).to.eql
         props: {}
+        entities: {}
         collections:
           things: [ {
-            data:
-              name: 'MyThingsEntity'
-              id: 2
-            props:
-              name: 'Wayne'
-            collections: {}
+            id: 2
+            name: 'MyThingsEntity'
+            changed:
+              props:
+                name: 'Wayne'
+              entities: {}
+              collections: {}
           } ]
 
     it 'should track changes to collections that are contained in other collections', ->
       class A extends Entity
-        _entityName: 'A'
         @props 'name', 'things', 'formics'
 
       a1 = new A
@@ -97,7 +95,6 @@ describe 'AggregateEntity', ->
 
     it 'should clear all changes', ->
       class A extends Entity
-        _entityName: 'A'
         @props 'name', 'things'
 
       a1 = new A()
@@ -120,7 +117,6 @@ describe 'AggregateEntity', ->
 
     it 'should apply given changes to properties and not track the changes', ->
       class MyEntity extends Entity
-        _entityName: 'MyEntity'
         @props 'name'
 
       myEntity = new MyEntity
@@ -134,17 +130,16 @@ describe 'AggregateEntity', ->
       expect(myEntity.name).to.eql 'ChangedJohn'
       expect(myEntity._changes()).to.eql
         props: {}
+        entities: {}
         collections: {}
 
 
     it 'should apply given changes to properties and collections', ->
 
       class MyTopEntity extends Entity
-        _entityName: 'MyTopEntity'
         @props 'topcollection'
 
       class MySubEntity extends Entity
-        _entityName: 'MySubEntity'
         @props 'name'
 
       mytopentity = new MyTopEntity
@@ -158,14 +153,16 @@ describe 'AggregateEntity', ->
 
       changedPropsAndCollections =
         props: {}
+        entities: {}
         collections:
           topcollection: [ {
-            data:
-              entity: 'MySubEntity'
-              id: 1
-            props:
-              name: 'ChangedWayne'
-            collections: {}
+            id: 1
+            name: 'MySubEntity'
+            changed:
+              props:
+                name: 'ChangedWayne'
+              entities: {}
+              collections: {}
           } ]
 
 

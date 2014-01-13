@@ -6,6 +6,20 @@ describe 'AggregateRepository', ->
 
   AggregateRepository = eventric 'AggregateRepository'
   AggregateRoot       = eventric 'AggregateRoot'
+  EventStore          = eventric 'EventStoreInMemory'
+
+  before ->
+    EventStore.save
+      name: 'testEvent'
+      aggregate:
+        id: 42
+        name: 'Foo'
+        changed:
+          props:
+            name: 'John'
+
+  after ->
+    EventStore.clear()
 
   sandbox = null
   beforeEach ->
@@ -19,35 +33,22 @@ describe 'AggregateRepository', ->
     Foo = null
     aggregateRepository = null
     beforeEach ->
-      adapter =
-        _findDomainEventsByAggregateId: -> []
-        _findAggregateIdsByDomainEventCriteria: -> []
 
       class Foo extends AggregateRoot
 
-      aggregateRepository = new AggregateRepository adapter, Foo
+      aggregateRepository = new AggregateRepository EventStore
+      aggregateRepository.registerClass 'Foo', Foo
 
     it 'should return a instantiated Aggregate', ->
-      expect(aggregateRepository.findById(42)).to.be.a Foo
+      aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
+        expect(aggregate).to.be.a Foo
 
-    it 'should ask the adapter for the DomainEvents matching the AggregateId', ->
-      adapterSpy = sandbox.spy aggregateRepository._adapter, '_findDomainEventsByAggregateId'
-      aggregateRepository.findById 27
-      expect(adapterSpy.calledWith(27)).to.be.ok()
+    it 'should ask the EventStore for DomainEvents matching the AggregateId', ->
+      EventStoreSpy = sandbox.spy EventStore, 'findByAggregateId'
+      aggregateRepository.findById 'Foo', 42, ->
+      expect(EventStoreSpy.calledWith(42)).to.be.ok()
 
     it 'should return the Aggregate matching the given Id with all DomainEvents applied', ->
-      testEvent =
-        name: 'testEvent'
-        metaData:
-          id: 1
-          name: 'Foo'
-        _changed:
-          props:
-            name: 'John'
-
-      sandbox.stub aggregateRepository._adapter, '_findDomainEventsByAggregateId', ->
-        [ testEvent ]
-
-      aggregate = aggregateRepository.findById 42
-      expect(aggregate).to.be.a Foo
-      expect(aggregate.name).to.be 'John'
+      aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
+        expect(aggregate).to.be.a Foo
+        expect(aggregate.name).to.be 'John'

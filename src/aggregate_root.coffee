@@ -13,15 +13,17 @@ class AggregateRoot extends AggregateEntity
 
   generateDomainEvent: (eventName, params={}) ->
 
-    params.includeChanges = true unless params.includeChanges is false
+    params.includeAggregateChanges = true unless params.includeAggregateChanges is false
 
     event =
       name: eventName
-      metaData: @_metaData()
+      aggregate: @_metaData()
 
-    if params.includeChanges
-      event._changed = @_changes()
+    if params.includeAggregateChanges
+      event.aggregate.changed = @_changes()
       @_clearChanges()
+
+    # TODO return error if DomainEvent is empty (no changes, no payload)
 
     @_domainEvents.push event
 

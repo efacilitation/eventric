@@ -6,19 +6,31 @@ describe 'ReadAggregateRepositorySpec', ->
 
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
+  EventStore              = eventric 'EventStoreInMemory'
 
   class ReadFoo extends ReadAggregateRoot
+    @prop 'name'
+
+  before ->
+    EventStore.save
+      name: 'testEvent'
+      aggregate:
+        id: 23
+        name: 'Foo'
+        changed:
+          props:
+            name: 'John'
+
+  after ->
+    EventStore.clear()
 
   sandbox = null
   readAggregateRepository = null
   beforeEach ->
     sandbox = sinon.sandbox.create()
 
-    adapter =
-      _findDomainEventsByAggregateId: -> []
-      _findAggregateIdsByDomainEventCriteria: -> []
-
-    readAggregateRepository = new ReadAggregateRepository adapter, ReadFoo
+    readAggregateRepository = new ReadAggregateRepository EventStore
+    readAggregateRepository.registerClass 'ReadFoo', ReadFoo
 
   afterEach ->
     sandbox.restore()
@@ -26,38 +38,20 @@ describe 'ReadAggregateRepositorySpec', ->
   describe '#findById', ->
 
     it 'should return a instantiated ReadAggregate', ->
-      expect(readAggregateRepository.findById(1)).to.be.a ReadFoo
+      readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
+        expect(readAggregate).to.be.a ReadFoo
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', ->
-      adapterSpy = sandbox.spy readAggregateRepository._adapter, '_findDomainEventsByAggregateId'
-      readAggregateRepository.findById 27
-      expect(adapterSpy.calledWith(27)).to.be.ok()
+      EventStoreSpy = sandbox.spy EventStore, 'findByAggregateId'
+      readAggregateRepository.findById 'ReadFoo', 23, ->
+      expect(EventStoreSpy.calledWith(23)).to.be.ok()
 
     it 'should return a instantiated ReadAggregate containing the applied DomainEvents', ->
-      testEvent =
-        name: 'testEvent'
-        metaData:
-          id: 1
-          name: 'FooAggregate'
-        _changed:
-          props:
-            name: 'John'
-
-      sandbox.stub readAggregateRepository._adapter, '_findDomainEventsByAggregateId', ->
-        [ testEvent ]
-
-      readAggregate = readAggregateRepository.findById 1
-      expect(readAggregate.name).to.be 'John'
+      readAggregate = readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
+        expect(readAggregate.name).to.be 'John'
 
 
-  describe '#findByIds', ->
-
-    it 'should call findById for every given id', ->
-      findByIdStub = sandbox.stub readAggregateRepository, 'findById'
-      readAggregateRepository.findByIds [1, 2]
-      expect(findByIdStub.calledTwice).to.be.ok()
-
-  describe '#find', ->
+  describe.skip '#find', ->
 
     criteria = null
     findByIdStub = null
@@ -65,12 +59,12 @@ describe 'ReadAggregateRepositorySpec', ->
     beforeEach ->
       criteria = {}
       findByIdStub = sandbox.stub readAggregateRepository, 'findById', -> new ReadFoo
-      adapterStub = sandbox.stub readAggregateRepository._adapter, '_findAggregateIdsByDomainEventCriteria', -> [42]
+      EventStoreStub = sandbox.stub EventStore, 'findAggregateIds', -> [42]
 
-    it 'should ask the adapter for the AggregateIds matching the DomainEvent-Criteria', ->
+    it 'should ask the EventStore for the AggregateIds matching the DomainEvent-Criteria', ->
       # stub _findAggregateIdsByDomainEventCriteria to return an example AggregateId
       readAggregateRepository.find criteria
-      expect(adapterStub.calledWith criteria).to.be.ok()
+      expect(EventStoreStub.calledWith criteria).to.be.ok()
 
     it 'should call findById for every aggregateId found', ->
       readAggregateRepository.find criteria
@@ -81,12 +75,12 @@ describe 'ReadAggregateRepositorySpec', ->
       expect(readAggregates.length).to.be 1
       expect(readAggregates[0]).to.be.a ReadFoo
 
-  describe '#findOne', ->
+  describe.skip '#findOne', ->
 
     it 'should call find and return only one result'
 
 
-  describe '#findIds', ->
+  describe.skip '#findIds', ->
 
     it 'should return all AggregateIds matching the given query-criteria', ->
       criteria = {}

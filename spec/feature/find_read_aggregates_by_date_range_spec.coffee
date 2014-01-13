@@ -1,4 +1,4 @@
-describe 'Find ReadAggregates By Date Range Scenario', ->
+describe.skip 'Find ReadAggregates By Date Range Scenario', ->
 
   expect   = require 'expect'
   sinon    = require 'sinon'

@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "description": "Make your JS App truly an Event-Centric Architecture with Commands, Aggregates, DomainEvents and ReadMixes",
+  "description": "eventric emphasizes Domain-driven design, Event-driven architecture and Task-based UI",
   "url": "http://eventric.org",
   "keywords": ["cqrs", "cqs", "ddd", "domain-driven", "event-sourcing", "event-driven", "es", "ead", "shared", "client", "server"],
   "author": "eFa Team <team@efa-gmbh.com>",

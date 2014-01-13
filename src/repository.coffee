@@ -1,21 +1,13 @@
-eventric = require 'eventric'
-
-Entity = eventric 'AggregateEntity'
-
 class Repository
 
-  constructor: (@_adapter) ->
+  _classes: {}
 
-  # TODO this could actually just be a mixin of the adapter, right?
+  registerClass: (className, Class) ->
+    @_classes[className] = Class
 
-  _findDomainEventsByAggregateId: (aggregateId) ->
-    @_adapter._findDomainEventsByAggregateId aggregateId
-
-  _findAggregateIdsByDomainEventCriteria: (criteria) ->
-    @_adapter._findAggregateIdsByDomainEventCriteria criteria
-
-  _saveDomainEvents: (domainEvents) ->
-    @_adapter._saveDomainEvents domainEvents
+  getClass: (className) ->
+    return false unless className of @_classes
+    @_classes[className]
 
 
 module.exports = Repository

@@ -1,27 +1,33 @@
-eventric = require 'eventric'
-
-Repository    = eventric 'Repository'
-AggregateRoot = eventric 'AggregateRoot'
+Repository = require('eventric')('Repository')
 
 class AggregateRepository extends Repository
 
-  constructor: (_adapter, @_AggregateClass) ->
-    @_AggregateClass ?= AggregateRoot
-    super _adapter
+  constructor: (@_eventStore) ->
 
-  findById: (id) ->
+  findById: (aggregateName, id, callback) ->
     # find all domainEvents matching the given aggregateId
-    domainEvents = @_findDomainEventsByAggregateId id
+    @_eventStore.findByAggregateId id, (err, domainEvents) =>
 
-    # construct the Aggregate
-    aggregate = new @_AggregateClass
+      if domainEvents.length == 0
+        err = new Error "EventStore did not found any DomainEvent for aggregateId #{id}"
+        callback err, null
 
-    # apply the domainevents on the ReadAggregate
-    aggregate._applyChanges domainEvent._changed for domainEvent in domainEvents
-    aggregate.id = id
+      else
+        # construct the Aggregate
+        AggregateClass = @getClass aggregateName
+        if not AggregateClass
+          err = new Error "Tried to command not registered Aggregate '#{aggregateName}'"
+          callback err, null
 
-    # return the readAggregate
-    aggregate
+        else
+          aggregate = new AggregateClass
+
+          # apply the domainevents on the ReadAggregate
+          aggregate._applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
+          aggregate.id = id
+
+          # return the aggregate
+          callback null, aggregate
 
 
 module.exports = AggregateRepository

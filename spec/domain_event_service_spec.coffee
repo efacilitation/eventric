@@ -1,4 +1,4 @@
-describe 'DomainEventService', ->
+describe.skip 'DomainEventService', ->
 
   sinon      = require 'sinon'
   expect     = require 'expect'

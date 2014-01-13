@@ -1,4 +1,4 @@
-describe 'CommandService', ->
+describe.skip 'CommandService', ->
 
   sinon    = require 'sinon'
   expect   = require 'expect'

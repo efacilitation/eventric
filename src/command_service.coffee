@@ -45,6 +45,7 @@ class CommandService
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
     @_domainEventService.saveAndTrigger domainEvents
+    aggregate.clearChanges()
 
     # return the aggregateId
     callback null, aggregate.id

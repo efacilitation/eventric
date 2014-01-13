@@ -11,7 +11,7 @@ class AggregateRoot extends AggregateEntity
     # TODO this should be an unique id
     @id = 1
 
-  generateDomainEventAndClearChanges: (eventName, params={}) ->
+  generateDomainEvent: (eventName, params={}) ->
 
     params.includeAggregateChanges = true unless params.includeAggregateChanges is false
 
@@ -21,7 +21,6 @@ class AggregateRoot extends AggregateEntity
 
     if params.includeAggregateChanges
       event.aggregate.changed = @getChanges()
-      @_clearChanges()
 
     # TODO return error if DomainEvent is empty (no changes, no payload)
 

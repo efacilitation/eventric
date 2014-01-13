@@ -50,14 +50,14 @@ class AggregateEntity
         changes.push entity
     changes
 
-  _clearChanges: ->
+  clearChanges: ->
     @_propsChanged = {}
 
     for propKey, propVal of @_props when propVal instanceof AggregateEntityCollection
       @_clearCollectionChanges propVal
 
   _clearCollectionChanges: (collection) ->
-    entity._clearChanges() for entity in collection.entities
+    entity.clearChanges() for entity in collection.entities
 
   applyChanges: (changes, params={}) ->
     oldTrackPropsChanged = @_trackPropsChanged

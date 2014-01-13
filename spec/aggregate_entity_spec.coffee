@@ -91,7 +91,7 @@ describe 'AggregateEntity', ->
       expect(spy.calledOnce).to.be.ok()
 
 
-  describe '#_clearChanges', ->
+  describe '#clearChanges', ->
 
     it 'should clear all changes', ->
       class A extends Entity
@@ -108,10 +108,22 @@ describe 'AggregateEntity', ->
 
       a1.things.add a2
 
-      a1._clearChanges()
+      a1.clearChanges()
 
-      expect(a1._propsChanged).to.eql {}
-      expect(a1.things.entities[0]._propsChanged).to.eql {}
+      expect(a1.getChanges()).to.eql
+        props: {}
+        entities: {}
+        collections:
+          things: [
+            {
+              id: 2
+              name: 'A'
+              changed:
+                props: {}
+                entities: {}
+                collections: {}
+            }
+          ]
 
   describe '#applyChanges', ->
 

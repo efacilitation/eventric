@@ -25,7 +25,6 @@ describe.skip 'CommandService', ->
     # stub the repository
     aggregateRepositoryStub = sinon.createStubInstance AggregateRepository
     aggregateRepositoryStub.findById.withArgs(aggregateStubId).returns(myAggregateStub)
-    aggregateRepositoryStub._saveDomainEvents = sinon.stub()
 
     # stub the DomainEventService
     sandbox.stub DomainEventService
@@ -79,6 +78,10 @@ describe.skip 'CommandService', ->
 
       commandService.commandAggregate 1, 'myAggregateFunction'
       expect(DomainEventService.handle.withArgs(events).calledOnce).to.be.ok()
+
+    it 'should call the clearChanges method of the given aggregate', ->
+      commandService.commandAggregate 1, 'myAggregateFunction'
+      expect(myAggregateStub.clearChanges.calledOnce).to.be.ok()
 
     it 'should return the aggregateId', ->
       aggregateId = commandService.commandAggregate 1, 'myAggregateFunction'

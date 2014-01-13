@@ -17,10 +17,10 @@ class AggregateRoot extends AggregateEntity
 
     event =
       name: eventName
-      aggregate: @_metaData()
+      aggregate: @getMetaData()
 
     if params.includeAggregateChanges
-      event.aggregate.changed = @_changes()
+      event.aggregate.changed = @getChanges()
       @_clearChanges()
 
     # TODO return error if DomainEvent is empty (no changes, no payload)

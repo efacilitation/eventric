@@ -23,7 +23,7 @@ class AggregateRepository extends Repository
           aggregate = new AggregateClass
 
           # apply the domainevents on the ReadAggregate
-          aggregate._applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
+          aggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
           aggregate.id = id
 
           # return the aggregate

@@ -6,19 +6,19 @@ describe 'AggregateEntity', ->
   Entity            = eventric 'AggregateEntity'
   EntityCollection  = eventric 'AggregateEntityCollection'
 
-  describe '#_metaData', ->
+  describe '#getMetaData', ->
 
-    it 'should return an object including the Entity MetaData', ->
+    it 'should return an object including the MetaData of the Entity', ->
       class MyEntity extends Entity
 
       myEntity = new MyEntity
       myEntity.id = 1
 
-      expect(myEntity._metaData()).to.eql
+      expect(myEntity.getMetaData()).to.eql
         id: 1
         name: 'MyEntity'
 
-  describe '#_changes', ->
+  describe '#getChanges', ->
 
     it 'should return changes to properties from the given entity', ->
       class MyEntity extends Entity
@@ -27,7 +27,7 @@ describe 'AggregateEntity', ->
       myEntity = new MyEntity name: 'Willy'
       myEntity.name = 'John'
 
-      expect(myEntity._changes()).to.eql
+      expect(myEntity.getChanges()).to.eql
         props:
           name: 'John'
         entities: {}
@@ -50,7 +50,7 @@ describe 'AggregateEntity', ->
 
       myEntity.things.add myThingsEntity
 
-      expect(myEntity._changes()).to.eql
+      expect(myEntity.getChanges()).to.eql
         props: {}
         entities: {}
         collections:
@@ -84,9 +84,9 @@ describe 'AggregateEntity', ->
 
       a2.formics.add a3
 
-      spy = sinon.spy a3, '_changes'
+      spy = sinon.spy a3, 'getChanges'
 
-      a1._changes()
+      a1.getChanges()
 
       expect(spy.calledOnce).to.be.ok()
 
@@ -113,7 +113,7 @@ describe 'AggregateEntity', ->
       expect(a1._propsChanged).to.eql {}
       expect(a1.things.entities[0]._propsChanged).to.eql {}
 
-  describe '#_applyChanges', ->
+  describe '#applyChanges', ->
 
     it 'should apply given changes to properties and not track the changes', ->
       class MyEntity extends Entity
@@ -125,10 +125,10 @@ describe 'AggregateEntity', ->
         props:
           name: 'ChangedJohn'
 
-      myEntity._applyChanges changedPropsAndCollections
+      myEntity.applyChanges changedPropsAndCollections
 
       expect(myEntity.name).to.eql 'ChangedJohn'
-      expect(myEntity._changes()).to.eql
+      expect(myEntity.getChanges()).to.eql
         props: {}
         entities: {}
         collections: {}
@@ -166,7 +166,7 @@ describe 'AggregateEntity', ->
           } ]
 
 
-      mytopentity._applyChanges changedPropsAndCollections
+      mytopentity.applyChanges changedPropsAndCollections
 
       expect(mytopentity.topcollection.get(1).name).to.eql 'ChangedWayne'
 

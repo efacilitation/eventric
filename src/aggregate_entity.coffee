@@ -12,11 +12,11 @@ class AggregateEntity
     @_domainEvents = []
     @_entityClasses = {}
 
-  _metaData: ->
+  getMetaData: ->
     id: @id
     name: @constructor.name
 
-  _changes: ->
+  getChanges: ->
     props: @_changesOnProperties()
 
     # TODO one-to-one entity relation
@@ -43,9 +43,9 @@ class AggregateEntity
   _changesOnCollection: (collectionName, collection) ->
     changes = []
     for entity in collection.entities
-      entityChanges = entity._changes()
+      entityChanges = entity.getChanges()
       if Object.keys(entityChanges).length > 0
-        entity = entity._metaData()
+        entity = entity.getMetaData()
         entity.changed = entityChanges
         changes.push entity
     changes
@@ -59,7 +59,7 @@ class AggregateEntity
   _clearCollectionChanges: (collection) ->
     entity._clearChanges() for entity in collection.entities
 
-  _applyChanges: (changes, params={}) ->
+  applyChanges: (changes, params={}) ->
     oldTrackPropsChanged = @_trackPropsChanged
     @_trackPropsChanged = false
     @_applyChangesToProps changes.props
@@ -83,14 +83,14 @@ class AggregateEntity
         entityInstance = new AggregateEntity
 
       entityInstance.id = entity.id
-      entityInstance._applyChanges entity.changed
+      entityInstance.applyChanges entity.changed
       @[collectionName].add entityInstance
 
   _shouldTrackChangePropertiesFor: (propName, val) ->
     @_trackPropsChanged and @_props[propName] != val and val not instanceof AggregateEntityCollection
 
   toJSON: ->
-    json = @_metaData()
+    json = @getMetaData()
     json.props = @_toJSONonProps()
     json.entities = {} # TODO
     json.collections = @_toJSONonCollections()
@@ -105,9 +105,9 @@ class AggregateEntity
     json = {}
     for propKey, propValue of @_props
       if propValue instanceof AggregateEntityCollection
-        jsonCollection = json[propKey] = []
+        json[propKey] = []
         for entity in propValue.entities
-          jsonCollection.push entity.toJSON()
+          json[propKey].push entity.toJSON()
 
     json
 

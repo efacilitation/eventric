@@ -5,29 +5,30 @@ class ReadAggregateRepository extends Repository
   constructor: (@_eventStore) ->
 
   findById: (readAggregateName, id, callback) ->
-    # find domain events matching the aggregate id
+    # create the ReadAggregate instance
+    ReadAggregateClass = @getClass readAggregateName
+
+    if not ReadAggregateClass
+      err = new Error "Tried 'findById' on not registered ReadAggregate '#{readAggregateName}'"
+      callback err, null
+      return
+
     @_eventStore.findByAggregateId id, (err, domainEvents) =>
 
       if domainEvents.length == 0
-        err = new Error "EventStore did not found any DomainEvent for aggregateId #{id}"
+        err = new Error "EventStore couldnt find any DomainEvent for aggregateId #{id}"
         callback err, null
+        return
 
-      else
-        # create the ReadAggregate instance
-        ReadAggregateClass = @getClass readAggregateName
+      readAggregate = new ReadAggregateClass
 
-        if not ReadAggregateClass
-          err = new Error "Tried to findById on not registered ReadAggregate '#{readAggregateName}'"
-          callback err, null
+      # apply the domainevents on the ReadAggregate
+      readAggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
+      readAggregate.id = id
 
-        readAggregate = new ReadAggregateClass
+      # return the readAggregate
+      callback null, readAggregate
 
-        # apply the domainevents on the ReadAggregate
-        readAggregate._applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
-        readAggregate.id = id
-
-        # return the readAggregate
-        callback null, readAggregate
 
   find: (query, callback) ->
     # get AggregateIds matching the query
@@ -46,6 +47,7 @@ class ReadAggregateRepository extends Repository
     @_eventStore.findAggregateIds query, (err, aggregateIds) =>
 
       callback null, aggregateIds
+
 
   findOne: (query, callback) ->
     result = @find query

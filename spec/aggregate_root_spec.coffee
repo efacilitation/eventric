@@ -17,14 +17,14 @@ describe 'AggregateRoot', ->
       enderAggregate.create()
       expect(enderAggregate.id).to.be.ok()
 
-  describe '#generateDomainEvent', ->
+  describe '#generateDomainEventAndClearChanges', ->
     eventName = null
     beforeEach ->
       enderAggregate.name = 'John'
       eventName = 'somethingHappend'
 
     it 'should create an event, add it to _domainEvents, include changes and clear the changes afterwards', ->
-      enderAggregate.generateDomainEvent eventName
+      enderAggregate.generateDomainEventAndClearChanges eventName
 
       expect(enderAggregate.getDomainEvents()[0].name).to.be eventName
       expect(enderAggregate.getDomainEvents()[0].aggregate.changed.props.name).to.be enderAggregate.name
@@ -33,7 +33,7 @@ describe 'AggregateRoot', ->
     describe 'given param includeAggregateChanges is set to false', ->
 
       it 'then it should NOT include and clear the  changes', ->
-        enderAggregate.generateDomainEvent eventName, {includeAggregateChanges: false}
+        enderAggregate.generateDomainEventAndClearChanges eventName, {includeAggregateChanges: false}
 
         expect(enderAggregate.getDomainEvents()[0].name).to.be eventName
         expect(enderAggregate.getDomainEvents()[0].aggregate.changed).to.be undefined

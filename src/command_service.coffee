@@ -40,7 +40,7 @@ class CommandService
 
   _handle: (commandName, aggregate, callback) ->
     # generate the DomainEvent
-    aggregate.generateDomainEvent commandName
+    aggregate.generateDomainEventAndClearChanges commandName
 
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()

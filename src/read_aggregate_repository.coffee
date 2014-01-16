@@ -30,14 +30,14 @@ class ReadAggregateRepository extends Repository
       callback null, readAggregate
 
 
-  find: (query, callback) ->
+  find: (readAggregateName, query, callback) ->
     # get AggregateIds matching the query
     aggregateIds = @findIds query
 
     # now find ReadAggregates matching the AggregateIds and return as array
     # TODO implement cursor-behaviour like https://github.com/mongodb/node-mongodb-native
     results = []
-    results.push @findById aggregateId for aggregateId in aggregateIds
+    results.push @findById readAggregateName, aggregateId for aggregateId in aggregateIds
 
     callback null, results
 

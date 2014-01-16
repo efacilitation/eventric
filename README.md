@@ -2,6 +2,20 @@ Eventric
 
 --
 
+thoughts on data inside the aggregate:
+
+only use primitives (string, number, boolean)
+if you need objects or arrays, use entities or entitycollections!
+
+this has multiple reasons, but foremost its because its really difficult to automatically include changes into the domainevent
+maybe let _set check if you want to set object/array and then just tell you: sorry, not possible?
+
+
+see also:
+http://stackoverflow.com/questions/11661380/does-backbone-models-this-get-copy-an-entire-array-or-point-to-the-same-array
+
+--
+
 thoughts on repository:
 
 Es ist notwendig, dass man alle Aggregate und ReadAggregate beim Repository registriert,
@@ -76,3 +90,7 @@ aggregate:
           props:
             seat: 'XYZ'
       ]
+
+
+---
+

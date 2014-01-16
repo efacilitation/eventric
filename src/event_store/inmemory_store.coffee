@@ -6,15 +6,22 @@ class InMemoryStore
   save: (domainEvent, callback) ->
     @_domainEvents.push domainEvent
 
+    console.log 'SAVED DOMAINEVENT', domainEvent.name
+    if domainEvent.aggregate?.changed
+      console.log '-> AGGREGATED CHANGED', domainEvent.aggregate.changed
+
+    if domainEvent.aggregate.changed.collections.checkins?
+      console.log '--> CHECKINS', domainEvent.aggregate.changed.collections.checkins
+
+
+    console.log 'ALL DOMAINEVENTS', @_domainEvents
+
     callback? null
 
   clear: ->
     @_domainEvents = []
 
   findByAggregateId: (aggregateId, callback) ->
-    # cast aggregateId to Int
-    aggregateId = parseInt aggregateId
-
     results = []
     results.push domainEvent for domainEvent in @_domainEvents when domainEvent.aggregate?.id is aggregateId
 

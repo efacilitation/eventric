@@ -26,6 +26,9 @@ class AggregateRepository extends Repository
           aggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
           aggregate.id = id
 
+          if aggregate.checkins?
+            console.log 'REPO BUILT', aggregate.checkins
+
           # return the aggregate
           callback null, aggregate
 

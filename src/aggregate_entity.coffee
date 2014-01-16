@@ -12,6 +12,25 @@ class AggregateEntity
     @_domainEvents = []
     @_entityClasses = {}
 
+  create: ->
+    # TODO this should be an unique id
+    #@id = @_generateUid()
+    #@id = Math.floor((Math.random()*100)+1)
+    @id = 1
+
+  _generateUid: (separator) ->
+
+    #/ <summary>
+    #/    Creates a unique id for identification purposes.
+    #/ </summary>
+    #/ <param name="separator" type="String" optional="true">
+    #/ The optional separator for grouping the generated segmants: default "-".
+    #/ </param>
+    S4 = ->
+      (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
+    delim = separator or "-"
+    S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
+
   getMetaData: ->
     id: @id
     name: @constructor.name
@@ -36,7 +55,7 @@ class AggregateEntity
     for propkey, propvalue of @_props
       if propvalue instanceof AggregateEntityCollection
         collectionChanges = @_changesOnCollection propkey, propvalue
-        if Object.keys(collectionChanges).length > 0
+        if collectionChanges.length > 0
           changes[propkey] = collectionChanges
     changes
 
@@ -44,11 +63,18 @@ class AggregateEntity
     changes = []
     for entity in collection.entities
       entityChanges = entity.getChanges()
-      if Object.keys(entityChanges).length > 0
+      if @_changesAreNotEmpty entityChanges
         entity = entity.getMetaData()
         entity.changed = entityChanges
         changes.push entity
     changes
+
+  _changesAreNotEmpty: (changes) ->
+    for key, value of changes
+      if Object.keys(value).length > 0
+        return true
+
+    return false
 
   clearChanges: ->
     @_propsChanged = {}
@@ -71,23 +97,28 @@ class AggregateEntity
 
   _applyChangesToCollections: (collectionChanges) ->
     for collectionName, collection of collectionChanges
-      @[collectionName] = new AggregateEntityCollection
+      @[collectionName] ?= new AggregateEntityCollection
       @_applyChangesToCollection collectionName, collection
 
   _applyChangesToCollection: (collectionName, collection) ->
     for entity in collection
-      if EntityClass = @getEntityClass entity.name
-        entityInstance = new EntityClass
-      else
-        # TODO this should trigger a warning somehow..
-        entityInstance = new AggregateEntity
+      entityInstance = @[collectionName].get entity.id
+      if !entityInstance
+        if EntityClass = @getEntityClass entity.name
+          entityInstance = new EntityClass
+        else
+          # TODO this should trigger a warning somehow..
+          entityInstance = new AggregateEntity
 
-      entityInstance.id = entity.id
+        entityInstance.id = entity.id
+        # this will actually add a reference, so we can applyChanges afterwards safely
+        @[collectionName].add entityInstance
+
       entityInstance.applyChanges entity.changed
-      @[collectionName].add entityInstance
+
 
   _shouldTrackChangePropertiesFor: (propName, val) ->
-    @_trackPropsChanged and @_props[propName] != val and val not instanceof AggregateEntityCollection
+    @_trackPropsChanged and val not instanceof AggregateEntityCollection
 
   toJSON: ->
     json = @getMetaData()

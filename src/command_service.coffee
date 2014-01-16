@@ -20,12 +20,18 @@ class CommandService
       # apply given params
       aggregate[key] = value for key, value of params
 
-      @_handle 'create', aggregate, callback
+      @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
+        # if for some reason we try to create an already existing aggregateId, skip now
+        if aggregateCheck
+          err = new Error "Tried to create already existiting aggregateId #{aggregate.id}"
+          callback err, null
+          return
+
+        @_handle 'create', aggregate, callback
 
   commandAggregate: ([aggregateName, aggregateId, commandName, params]..., callback) ->
     # get the aggregate from the AggregateRepository
     @_aggregateRepository.findById aggregateName, aggregateId, (err, aggregate) =>
-
       if err
         callback err, null
 
@@ -40,7 +46,7 @@ class CommandService
 
   _handle: (commandName, aggregate, callback) ->
     # generate the DomainEvent
-    aggregate.generateDomainEventAndClearChanges commandName
+    aggregate.generateDomainEvent commandName
 
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()

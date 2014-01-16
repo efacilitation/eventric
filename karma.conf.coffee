@@ -74,7 +74,7 @@ module.exports = (config) ->
     logLevel: config.LOG_INFO
 
     # enable / disable watching file and executing tests whenever any file changes
-    autoWatch: yes
+    autoWatch: no
 
     # Start these browsers, currently available:
     # - Chrome
@@ -83,11 +83,11 @@ module.exports = (config) ->
     # - Opera
     # - Safari
     # - PhantomJS
-    browsers: ['Chrome']
+    browsers: ['PhantomJS']
 
     # Continuous Integration mode
     # if true, it capture browsers, run tests and exit
-    singleRun: no
+    singleRun: yes
 
     reporters: ['spec']
 

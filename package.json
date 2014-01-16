@@ -42,7 +42,8 @@
     "grunt": "~0.4.2",
     "grunt-contrib-watch": "~0.5.3",
     "karma-mocha": "~0.1.1",
-    "bower": "~1.2.8"
+    "bower": "~1.2.8",
+    "grunt-karma": "~0.6.2"
   },
   "dependencies": {
     "coffee-script": "~1.6.3",

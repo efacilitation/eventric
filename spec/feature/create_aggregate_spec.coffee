@@ -1,7 +1,7 @@
 describe.skip 'Create new Aggregate Scenario', ->
 
   sinon    = require 'sinon'
-  expect   = require 'expect'
+  expect   = require 'expect.js'
   eventric = require 'eventric'
 
   CommandService          = eventric 'CommandService'

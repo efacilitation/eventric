@@ -1,6 +1,6 @@
 describe 'AggregateEntityCollection', ->
 
-  expect           = require 'expect'
+  expect           = require 'expect.js'
   eventric         = require 'eventric'
   Entity           = eventric 'AggregateEntity'
   EntityCollection = eventric 'AggregateEntityCollection'

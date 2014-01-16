@@ -1,6 +1,6 @@
 describe 'InMemoryAdapter', ->
 
-  expect   = require 'expect'
+  expect   = require 'expect.js'
   eventric = require 'eventric'
 
   RepositoryInMemoryAdapter = eventric 'RepositoryInMemoryAdapter'

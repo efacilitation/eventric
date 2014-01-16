@@ -14,18 +14,10 @@ class AggregateEntity
 
   create: ->
     # TODO this should be an unique id
-    #@id = @_generateUid()
-    #@id = Math.floor((Math.random()*100)+1)
-    @id = 1
+    @id = @_generateUid()
 
   _generateUid: (separator) ->
-
-    #/ <summary>
-    #/    Creates a unique id for identification purposes.
-    #/ </summary>
-    #/ <param name="separator" type="String" optional="true">
-    #/ The optional separator for grouping the generated segmants: default "-".
-    #/ </param>
+    # http://stackoverflow.com/a/12223573
     S4 = ->
       (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
     delim = separator or "-"

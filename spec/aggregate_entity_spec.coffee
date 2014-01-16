@@ -1,6 +1,6 @@
 describe 'AggregateEntity', ->
 
-  expect            = require 'expect'
+  expect            = require 'expect.js'
   sinon             = require 'sinon'
   eventric          = require 'eventric'
   Entity            = eventric 'AggregateEntity'
@@ -113,17 +113,7 @@ describe 'AggregateEntity', ->
       expect(a1.getChanges()).to.eql
         props: {}
         entities: {}
-        collections:
-          things: [
-            {
-              id: 2
-              name: 'A'
-              changed:
-                props: {}
-                entities: {}
-                collections: {}
-            }
-          ]
+        collections: {}
 
   describe '#applyChanges', ->
 

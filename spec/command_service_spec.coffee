@@ -1,7 +1,7 @@
 describe.skip 'CommandService', ->
 
   sinon    = require 'sinon'
-  expect   = require 'expect'
+  expect   = require 'expect.js'
   eventric = require 'eventric'
 
   AggregateRoot           = eventric 'AggregateRoot'

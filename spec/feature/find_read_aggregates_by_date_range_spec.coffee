@@ -1,6 +1,6 @@
 describe.skip 'Find ReadAggregates By Date Range Scenario', ->
 
-  expect   = require 'expect'
+  expect   = require 'expect.js'
   sinon    = require 'sinon'
   eventric = require 'eventric'
 

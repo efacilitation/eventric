@@ -1,7 +1,7 @@
 describe 'AggregateRepository', ->
 
   sinon    = require 'sinon'
-  expect   = require 'expect'
+  expect   = require 'expect.js'
   eventric = require 'eventric'
 
   AggregateRepository = eventric 'AggregateRepository'

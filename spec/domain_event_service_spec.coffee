@@ -1,7 +1,7 @@
 describe.skip 'DomainEventService', ->
 
   sinon      = require 'sinon'
-  expect     = require 'expect'
+  expect     = require 'expect.js'
   eventric   = require 'eventric'
 
   DomainEventService = eventric 'DomainEventService'

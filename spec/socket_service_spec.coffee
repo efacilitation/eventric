@@ -1,7 +1,7 @@
 describe 'SocketService', ->
 
   _        = require 'underscore'
-  expect   = require 'expect'
+  expect   = require 'expect.js'
   sinon    = require 'sinon'
   eventric = require 'eventric'
 

@@ -1,0 +1,1 @@
+sinon.js is currently custom modified to support wrapping into commonjs

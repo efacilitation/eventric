@@ -1,0 +1,20 @@
+{
+  "name": "eventric",
+  "version": "0.0.1",
+  "authors": [
+    "eFa Team <team@efa-gmbh.com>"
+  ],
+  "description": "eventric emphasizes Domain-driven design, Event-driven architecture and Task-based UI",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "commonjs-require-definition": "~0.1.2"
+  }
+}

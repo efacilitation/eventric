@@ -1,0 +1,3 @@
+class RemoteRepository
+
+  constructor: () ->

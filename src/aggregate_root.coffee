@@ -18,7 +18,7 @@ class AggregateRoot extends AggregateEntity
     if params.includeAggregateChanges
       changes = @getChanges()
       if Object.keys(changes).length > 0
-        event.aggregate.changed = @getChanges()
+        event.aggregate.changed = changes
 
     # TODO return error if DomainEvent is empty (no changes, no payload)
 

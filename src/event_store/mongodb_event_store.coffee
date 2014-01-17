@@ -6,12 +6,13 @@ class MongoDBEventStore
   initialize: (callback) ->
 
     MongoClient.connect 'mongodb://127.0.0.1:27017/events', (err, db) =>
-      console.log 'MongoDB connected'
 
       if err
+        console.log 'MongoDB connection failed'
         callback? err, null
 
       else
+        console.log 'MongoDB connected'
         @db = db
         callback? null
 

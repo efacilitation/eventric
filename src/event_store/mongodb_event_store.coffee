@@ -10,56 +10,48 @@ class MongoDBEventStore
       if err
         console.log 'MongoDB connection failed'
         callback? err, null
+        return
 
-      else
-        console.log 'MongoDB connected'
-        @db = db
-        callback? null
+      console.log 'MongoDB connected'
+      @db = db
+      callback? null
 
 
 
   save: (domainEvent, callback) ->
 
     @db.collection domainEvent.aggregate.name, (err, collection) ->
-      collection.insert domainEvent, (err, doc) ->
-        if err
-          callback err
 
-        else
-          callback null
+      collection.insert domainEvent, (err, doc) ->
+        return callback err if err
+
+        callback null
 
 
 
   findByAggregateId: (aggregateName, aggregateId, callback) ->
 
+
     @db.collection aggregateName, (err, collection) =>
 
       collection.find { 'aggregate.id': aggregateId }, (err, cursor) =>
-        if err
-          callback err, null
-          return
+        return callback err, null if err
 
         cursor.toArray (err, items) =>
-          if err
-            callback err, null
-            return
+          return callback err, null if err
 
           callback null, items
 
 
-  findAggregateIds: ([aggregateName, query, projection]..., callback) ->
+  find: ([aggregateName, query, projection]..., callback) =>
 
     @db.collection aggregateName, (err, collection) =>
 
       collection.find query, projection, (err, cursor) =>
-        if err
-          callback err, null
-          return
+        return callback err, null if err
 
         cursor.toArray (err, items) =>
-          if err
-            callback err, null
-            return
+          return callback err, null if err
 
           callback null, items
 

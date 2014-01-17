@@ -51,7 +51,7 @@ class ReadAggregateRepository extends Repository
 
   findIds: (readAggregateName, query, callback) =>
     # ask the adapter to find the ids and return them
-    @_eventStore.findAggregateIds @_aggregateName, query, { 'aggregate.id': 1 }, (err, results) =>
+    @_eventStore.find @_aggregateName, query, { 'aggregate.id': 1 }, (err, results) =>
       if err
         callback err, null
         return

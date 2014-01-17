@@ -6,7 +6,7 @@ describe 'ReadAggregateRepositorySpec', ->
 
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
-  EventStore              = eventric 'EventStoreInMemory'
+  EventStore              = eventric 'InMemoryEventStore'
 
   class ReadFoo extends ReadAggregateRoot
     @prop 'name'

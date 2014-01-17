@@ -7,11 +7,6 @@ class AggregateRoot extends AggregateEntity
     @_domainEvents = []
     super
 
-  create: ->
-    # TODO this should be an unique id
-    #@id = @_generateUid()
-    @id = 1
-
   generateDomainEvent: (eventName, params={}) ->
 
     params.includeAggregateChanges = true unless params.includeAggregateChanges is false
@@ -21,7 +16,9 @@ class AggregateRoot extends AggregateEntity
       aggregate: @getMetaData()
 
     if params.includeAggregateChanges
-      event.aggregate.changed = @getChanges()
+      changes = @getChanges()
+      if Object.keys(changes).length > 0
+        event.aggregate.changed = @getChanges()
 
     # TODO return error if DomainEvent is empty (no changes, no payload)
 

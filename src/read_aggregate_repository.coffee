@@ -2,9 +2,9 @@ Repository = require('eventric')('Repository')
 
 class ReadAggregateRepository extends Repository
 
-  constructor: (@_eventStore) ->
+  constructor: (@_aggregateName, @_eventStore) ->
 
-  findById: (readAggregateName, id, callback) ->
+  findById: (readAggregateName, id, callback) =>
     # create the ReadAggregate instance
     ReadAggregateClass = @getClass readAggregateName
 
@@ -13,12 +13,9 @@ class ReadAggregateRepository extends Repository
       callback err, null
       return
 
-    @_eventStore.findByAggregateId id, (err, domainEvents) =>
-
-      if domainEvents.length == 0
-        err = new Error "EventStore couldnt find any DomainEvent for aggregateId #{id}"
-        callback err, null
-        return
+    @_eventStore.findByAggregateId @_aggregateName, id, (err, domainEvents) =>
+      return callback err, null if err
+      return callback null, [] if domainEvents.length == 0
 
       readAggregate = new ReadAggregateClass
 
@@ -31,28 +28,38 @@ class ReadAggregateRepository extends Repository
 
 
   find: (readAggregateName, query, callback) ->
-    # get AggregateIds matching the query
-    aggregateIds = @findIds query
+    # get ReadAggregates matching the query
+    aggregateIds = @findIds readAggregateName, query, (err, aggregateIds) =>
+      return callback err, null if err
 
-    # now find ReadAggregates matching the AggregateIds and return as array
-    # TODO implement cursor-behaviour like https://github.com/mongodb/node-mongodb-native
-    results = []
-    results.push @findById readAggregateName, aggregateId for aggregateId in aggregateIds
+      # TODO support multiple aggregateIds..
+      @findById readAggregateName, aggregateIds[0], (err, readAggregate) =>
+        return callback err, null if err
+        return callback null, [] if readAggregate.length == 0
 
-    callback null, results
+        results = [readAggregate]
+
+        callback null, results
 
 
-  findIds: (query, callback) ->
+  findOne: (readAggregateName, query, callback) ->
+    @find readAggregateName, query, (err, results) =>
+      return callback err, null if err
+      return callback null, false if results.length == 0
+      callback null, results[0]
+
+
+  findIds: (readAggregateName, query, callback) =>
     # ask the adapter to find the ids and return them
-    @_eventStore.findAggregateIds query, (err, aggregateIds) =>
+    @_eventStore.findAggregateIds @_aggregateName, query, { 'aggregate.id': 1 }, (err, results) =>
+      if err
+        callback err, null
+        return
+
+      aggregateIds = []
+      aggregateIds.push result.aggregate.id for result in results when result.aggregate.id not in aggregateIds
 
       callback null, aggregateIds
-
-
-  findOne: (query, callback) ->
-    result = @find query
-
-    callback null, result[0]
 
 
 module.exports = ReadAggregateRepository

@@ -4,13 +4,13 @@ class AggregateRepository extends Repository
 
   constructor: (@_eventStore) ->
 
-  findById: (aggregateName, id, callback) ->
+  findById: (aggregateName, aggregateId, callback) ->
     # find all domainEvents matching the given aggregateId
-    @_eventStore.findByAggregateId id, (err, domainEvents) =>
+    @_eventStore.findByAggregateId aggregateName, aggregateId, (err, domainEvents) =>
 
       if domainEvents.length == 0
-        err = new Error "EventStore did not found any DomainEvent for aggregateId #{id}"
-        callback err, null
+        # nothing found, return null
+        callback null, null
 
       else
         # construct the Aggregate
@@ -21,13 +21,12 @@ class AggregateRepository extends Repository
 
         else
           aggregate = new AggregateClass
+          aggregate.id = aggregateId
 
           # apply the domainevents on the ReadAggregate
-          aggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
-          aggregate.id = id
-
-          if aggregate.checkins?
-            console.log 'REPO BUILT', aggregate.checkins
+          for domainEvent in domainEvents
+            if domainEvent.aggregate.changed
+              aggregate.applyChanges domainEvent.aggregate.changed
 
           # return the aggregate
           callback null, aggregate

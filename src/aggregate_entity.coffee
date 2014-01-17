@@ -28,13 +28,21 @@ class AggregateEntity
     name: @constructor.name
 
   getChanges: ->
-    props: @_changesOnProperties()
+    changes =
+      props: @_changesOnProperties()
 
-    # TODO one-to-one entity relation
-    entities: {}
+      # TODO one-to-one entity relation
+      entities: {}
 
-    # one-to-many entity relation
-    collections: @_changesOnCollections()
+      # one-to-many entity relation
+      collections: @_changesOnCollections()
+
+    if @_changesAreNotEmpty changes
+      changes
+
+    else
+      # return empty object if nothing changed
+      {}
 
   _changesOnProperties: ->
     changes = {}
@@ -106,7 +114,8 @@ class AggregateEntity
         # this will actually add a reference, so we can applyChanges afterwards safely
         @[collectionName].add entityInstance
 
-      entityInstance.applyChanges entity.changed
+      if entity.changed
+        entityInstance.applyChanges entity.changed
 
 
   _shouldTrackChangePropertiesFor: (propName, val) ->

@@ -21,9 +21,14 @@ class CommandService
       aggregate[key] = value for key, value of params
 
       @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
+
+        if err
+          callback err, null
+          return
+
         # if for some reason we try to create an already existing aggregateId, skip now
         if aggregateCheck
-          err = new Error "Tried to create already existiting aggregateId #{aggregate.id}"
+          err = new Error "Tried to create already existing aggregateId #{aggregate.id}"
           callback err, null
           return
 
@@ -34,14 +39,20 @@ class CommandService
     @_aggregateRepository.findById aggregateName, aggregateId, (err, aggregate) =>
       if err
         callback err, null
+        return
 
-      else if commandName not of aggregate
-        err = new Error "Given commandName '#{commandName}' not found as method in the aggregate", aggregate
+      if not aggregate
+        err = new Error "No #{aggregateName} Aggregate with given aggregateId #{aggregateId} found"
         callback err, null
+        return
 
-      else
-        aggregate[commandName] params
-        @_handle commandName, aggregate, callback
+      if commandName not of aggregate
+        err = new Error "Given commandName '#{commandName}' not found as method in the #{aggregateName} Aggregate"
+        callback err, null
+        return
+
+      aggregate[commandName] params
+      @_handle commandName, aggregate, callback
 
 
   _handle: (commandName, aggregate, callback) ->
@@ -55,6 +66,12 @@ class CommandService
 
     # return the aggregateId
     callback null, aggregate.id
+
+
+  commandAggregateClosure: (aggregateName, aggregateId) ->
+    ([commandName, params]..., callback) =>
+      @commandAggregate aggregateName, aggregateId, commandName, params, callback
+
 
 
 module.exports = CommandService

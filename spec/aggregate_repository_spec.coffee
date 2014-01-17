@@ -6,7 +6,7 @@ describe 'AggregateRepository', ->
 
   AggregateRepository = eventric 'AggregateRepository'
   AggregateRoot       = eventric 'AggregateRoot'
-  EventStore          = eventric 'EventStoreInMemory'
+  EventStore          = eventric 'InMemoryEventStore'
 
   before ->
     EventStore.save

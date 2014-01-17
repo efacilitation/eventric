@@ -10,7 +10,9 @@ module.exports = (grunt) ->
       test:
         options:
           reporter: 'spec'
-        src: ['spec/**/*_spec.coffee']
+        src: [
+          'spec/**/*_spec.coffee'
+        ]
 
     karma:
       unit:

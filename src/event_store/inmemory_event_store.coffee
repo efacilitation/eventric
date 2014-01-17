@@ -11,7 +11,7 @@ class InMemoryStore
   clear: ->
     @_domainEvents = []
 
-  findByAggregateId: (aggregateId, callback) ->
+  findByAggregateId: (aggregateName, aggregateId, callback) ->
     results = []
     results.push domainEvent for domainEvent in @_domainEvents when domainEvent.aggregate?.id is aggregateId
 

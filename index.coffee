@@ -16,10 +16,9 @@ moduleDefinition =
   SocketService: './src/socket_service'
 
   Repository: './src/repository'
-  RepositoryInMemoryAdapter: './src/repository_adapters/inmemory_adapter'
-  RepositorySocketIOAdapter: './src/repository_adapters/socketio_adapter'
 
-  EventStoreInMemory: './src/event_store/inmemory_store'
+  InMemoryEventStore: './src/event_store/inmemory_event_store'
+  MongoDBEventStore: './src/event_store/mongodb_event_store'
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

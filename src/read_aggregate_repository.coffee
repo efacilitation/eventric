@@ -32,7 +32,7 @@ class ReadAggregateRepository extends Repository
     aggregateIds = @findIds readAggregateName, query, (err, aggregateIds) =>
       return callback err, null if err
 
-      # TODO support multiple aggregateIds..
+      # TODO return multiple ReadAggregates when multiple aggregateIds are found
       @findById readAggregateName, aggregateIds[0], (err, readAggregate) =>
         return callback err, null if err
         return callback null, [] if readAggregate.length == 0
@@ -52,9 +52,7 @@ class ReadAggregateRepository extends Repository
   findIds: (readAggregateName, query, callback) =>
     # ask the adapter to find the ids and return them
     @_eventStore.find @_aggregateName, query, { 'aggregate.id': 1 }, (err, results) =>
-      if err
-        callback err, null
-        return
+      return callback err, null if err
 
       aggregateIds = []
       aggregateIds.push result.aggregate.id for result in results when result.aggregate.id not in aggregateIds

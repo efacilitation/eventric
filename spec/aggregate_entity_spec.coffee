@@ -110,10 +110,7 @@ describe 'AggregateEntity', ->
 
       a1.clearChanges()
 
-      expect(a1.getChanges()).to.eql
-        props: {}
-        entities: {}
-        collections: {}
+      expect(a1.getChanges()).to.eql {}
 
   describe '#applyChanges', ->
 
@@ -130,10 +127,7 @@ describe 'AggregateEntity', ->
       myEntity.applyChanges changedPropsAndCollections
 
       expect(myEntity.name).to.eql 'ChangedJohn'
-      expect(myEntity.getChanges()).to.eql
-        props: {}
-        entities: {}
-        collections: {}
+      expect(myEntity.getChanges()).to.eql {}
 
 
     it 'should apply given changes to properties and collections', ->

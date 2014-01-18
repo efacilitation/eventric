@@ -6,30 +6,21 @@ describe 'ReadAggregateRepositorySpec', ->
 
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
-  EventStore              = eventric 'InMemoryEventStore'
+  EventStore              = eventric 'MongoDBEventStore'
 
   class ReadFoo extends ReadAggregateRoot
     @prop 'name'
 
-  before ->
-    EventStore.save
-      name: 'testEvent'
-      aggregate:
-        id: 23
-        name: 'Foo'
-        changed:
-          props:
-            name: 'John'
-
-  after ->
-    EventStore.clear()
 
   sandbox = null
   readAggregateRepository = null
+  EventStoreStub = null
   beforeEach ->
     sandbox = sinon.sandbox.create()
 
-    readAggregateRepository = new ReadAggregateRepository EventStore
+    EventStoreStub = sinon.createStubInstance EventStore
+
+    readAggregateRepository = new ReadAggregateRepository 'Foo', EventStoreStub
     readAggregateRepository.registerClass 'ReadFoo', ReadFoo
 
   afterEach ->
@@ -42,9 +33,8 @@ describe 'ReadAggregateRepositorySpec', ->
         expect(readAggregate).to.be.a ReadFoo
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', ->
-      EventStoreSpy = sandbox.spy EventStore, 'findByAggregateId'
       readAggregateRepository.findById 'ReadFoo', 23, ->
-      expect(EventStoreSpy.calledWith(23)).to.be.ok()
+      expect(EventStoreStub.findByAggregateId.calledWith('Foo', 23)).to.be.ok()
 
     it 'should return a instantiated ReadAggregate containing the applied DomainEvents', ->
       readAggregate = readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
@@ -59,7 +49,7 @@ describe 'ReadAggregateRepositorySpec', ->
     beforeEach ->
       criteria = {}
       findByIdStub = sandbox.stub readAggregateRepository, 'findById', -> new ReadFoo
-      EventStoreStub = sandbox.stub EventStore, 'findAggregateIds', -> [42]
+      EventStoreStub.findIds.retuns -> [42]
 
     it 'should ask the EventStore for the AggregateIds matching the DomainEvent-Criteria', ->
       # stub _findAggregateIdsByDomainEventCriteria to return an example AggregateId

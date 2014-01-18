@@ -1,4 +1,5 @@
 # this should go into its own module: eventric-mongodb-eventstore so we can test with mongodb
+# TODO actually this should not know anything about aggregates and events, we need a `DomainEventRepository` for that, dont we?
 MongoClient = require('mongodb').MongoClient
 
 class MongoDBEventStore

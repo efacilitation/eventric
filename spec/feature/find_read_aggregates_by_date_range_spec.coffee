@@ -45,7 +45,7 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
 
         # instantiate the ReadExampleRepository with the stubbed Adapter and the ReadExample Class
         readExampleRepository = new ReadExampleRepository 'Example', EventStoreStub
-        readExampleRepository.findIds = sinon.stub().yields null, 42
+        readExampleRepository.findIds = sinon.stub().yields null, [42]
 
         # example start, end dates
         start = new Date 2013, 10, 1

@@ -72,7 +72,7 @@ describe 'ReadAggregateRepositorySpec', ->
         expect(findIdsStub.calledWith 'ReadFoo', query).to.be.ok()
         done()
 
-    it.only 'should call findById for every aggregateId found', (done) ->
+    it 'should call findById for every aggregateId found', (done) ->
       readAggregateRepository.find 'ReadFoo', query, ->
         expect(findByIdStub.calledWith 'ReadFoo', 42).to.be.ok()
         expect(findByIdStub.calledWith 'ReadFoo', 23).to.be.ok()

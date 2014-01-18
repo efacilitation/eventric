@@ -41,29 +41,36 @@ describe 'ReadAggregateRepositorySpec', ->
         expect(readAggregate.name).to.be 'John'
 
 
-  describe.skip '#find', ->
+  describe '#find', ->
 
-    criteria = null
+    query        = null
+    findIdsStub  = null
     findByIdStub = null
-    adapterStub = null
+    adapterStub  = null
     beforeEach ->
-      criteria = {}
-      findByIdStub = sandbox.stub readAggregateRepository, 'findById', -> new ReadFoo
-      EventStoreStub.findIds.retuns -> [42]
+      query = {}
+      findIdsStub  = sandbox.stub readAggregateRepository, 'findIds'
+      findIdsStub.yields null, [42]
+      findByIdStub = sandbox.stub readAggregateRepository, 'findById'
+      findByIdStub.yields null, new ReadFoo
 
-    it 'should ask the EventStore for the AggregateIds matching the DomainEvent-Criteria', ->
+
+    it 'should call findIds to get all aggregateIds matching the query', (done) ->
       # stub _findAggregateIdsByDomainEventCriteria to return an example AggregateId
-      readAggregateRepository.find criteria
-      expect(EventStoreStub.calledWith criteria).to.be.ok()
+      readAggregateRepository.find 'ReadFoo', query, ->
+        expect(findIdsStub.calledWith 'ReadFoo', query).to.be.ok()
+        done()
 
-    it 'should call findById for every aggregateId found', ->
-      readAggregateRepository.find criteria
-      expect(findByIdStub.calledWith 42).to.be.ok()
+    it 'should call findById for every aggregateId found', (done) ->
+      readAggregateRepository.find 'ReadFoo', query, ->
+        expect(findByIdStub.calledWith 'ReadFoo', 42).to.be.ok()
+        done()
 
-    it 'should return ReadAggregate instances matching the given query-criteria', ->
-      readAggregates = readAggregateRepository.find criteria
-      expect(readAggregates.length).to.be 1
-      expect(readAggregates[0]).to.be.a ReadFoo
+    it 'should return ReadAggregate instances matching the given query', (done) ->
+      readAggregateRepository.find 'ReadFoo', query, (err, readAggregates) ->
+        expect(readAggregates.length).to.be 1
+        expect(readAggregates[0]).to.be.a ReadFoo
+        done()
 
   describe.skip '#findOne', ->
 

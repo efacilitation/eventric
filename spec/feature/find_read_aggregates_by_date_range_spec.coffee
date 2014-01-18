@@ -1,4 +1,4 @@
-describe.skip 'Find ReadAggregates By Date Range Scenario', ->
+describe 'Find ReadAggregates By Date Range Scenario', ->
 
   expect   = require 'expect.js'
   sinon    = require 'sinon'
@@ -6,61 +6,56 @@ describe.skip 'Find ReadAggregates By Date Range Scenario', ->
 
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
+  EventStore              = eventric 'MongoDBEventStore'
 
   describe 'given we want to get all ReadExampleAggregates between two dates', ->
 
     describe 'when we ask the ReadExampleRepository to find the matching ReadAggregates', ->
 
-      it 'then it should return the corresponding list of ReadExampleAggregates', ->
+      it 'then it should return the corresponding list of ReadExampleAggregates', (done) ->
         # Example Classes
         class ReadExample extends ReadAggregateRoot
 
         class ReadExampleRepository extends ReadAggregateRepository
 
-          findByDateRange: (start, end) ->
+          constructor: ->
+            super
+            @registerClass 'ReadExample', ReadExample
+
+          findByDateRange: (start, end, callback) ->
             # criteria not actually used here, just to show how it could look like
-            exampleCriteria =
-              aggregateName: 'ReadExample'
-              eventName: 'create'
-              eventTimestamp:
+            exampleQuery =
+              'name': 'create'
+              'timestamp':
                 $gte: start
                 $lt: end
 
-            # find the aggregateIds matching the criteria
-            aggregateIds = @findIds exampleCriteria
+            @find 'ReadExample', exampleQuery, (err, readAggregates) =>
+              callback null, readAggregates
 
-            # find the actual ReadAggregates by id
-            readAggregates = @findByIds aggregateIds
-
-        class ExampleAdapter
-          _findAggregateIdsByDomainEventCriteria: ->
-          _findDomainEventsByAggregateId: ->
-
-        # create a stub instance of the ExampleAdapter
-        exampleAdapterStub = sinon.createStubInstance ExampleAdapter
-
-        # stub ExampleAdapter._findAggregateIdsByDomainEventCriteria to return an example id only
-        exampleAdapterStub._findAggregateIdsByDomainEventCriteria.returns [42]
-
-        # stub ExampleAdapter._findDomainEventsByAggregateId to return an example DomainEvent
-        exampleAdapterStub._findDomainEventsByAggregateId.withArgs(42).returns [
+        # create EventStoreStub and yield fake event
+        EventStoreStub = sinon.createStubInstance EventStore
+        EventStoreStub.find.yields null, [
           name: 'testEvent'
-          _changed:
-            props:
-              name: 'example'
+          aggregate:
+            changed:
+              props:
+                name: 'example'
         ]
 
         # instantiate the ReadExampleRepository with the stubbed Adapter and the ReadExample Class
-        readExampleRepository = new ReadExampleRepository exampleAdapterStub, ReadExample
+        readExampleRepository = new ReadExampleRepository 'Example', EventStoreStub
+        readExampleRepository.findIds = sinon.stub().yields null, 42
 
         # example start, end dates
         start = new Date 2013, 10, 1
         end = new Date 2014, 2, 1
 
         # ask the ReadExampleRepository to find ReagAggregates by DateRange
-        readAggregates = readExampleRepository.findByDateRange start, end
+        readAggregates = readExampleRepository.findByDateRange start, end, (err, readAggregates) ->
+          # expectations
+          expect(readAggregates.length).to.be 1
+          expect(readAggregates[0]).to.be.a ReadExample
+          expect(readAggregates[0].name).to.be 'example'
 
-        # expectations
-        expect(readAggregates.length).to.be 1
-        expect(readAggregates[0]).to.be.a ReadExample
-        expect(readAggregates[0].name).to.be 'example'
+          done()

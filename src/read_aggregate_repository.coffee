@@ -29,7 +29,7 @@ class ReadAggregateRepository extends Repository
 
   find: (readAggregateName, query, callback) ->
     # get ReadAggregates matching the query
-    aggregateIds = @findIds readAggregateName, query, (err, aggregateIds) =>
+    @findIds readAggregateName, query, (err, aggregateIds) =>
       return callback err, null if err
 
       # TODO return multiple ReadAggregates when multiple aggregateIds are found

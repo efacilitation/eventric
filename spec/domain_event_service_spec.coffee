@@ -1,61 +1,52 @@
-describe.skip 'DomainEventService', ->
+describe 'DomainEventService', ->
 
   sinon      = require 'sinon'
   expect     = require 'expect.js'
   eventric   = require 'eventric'
 
   DomainEventService = eventric 'DomainEventService'
+  EventStore         = eventric 'MongoDBEventStore'
 
   sandbox = null
+  eventStore = null
+  domainEventService = null
   beforeEach ->
     sandbox = sinon.sandbox.create()
+    eventStore = sinon.createStubInstance EventStore
+    eventStore.save.yields null
+    domainEventService = new DomainEventService eventStore
 
   afterEach ->
     sandbox.restore()
 
   it 'should have extended Backbone.Events', ->
-    expect(DomainEventService.trigger).to.be.ok()
+    expect(domainEventService.trigger).to.be.ok()
 
-  describe '#handle', ->
+  describe '#saveAndTrigger', ->
 
     domainEvent = null
     beforeEach ->
       domainEvent =
         name: 'testMethod'
-        metaData:
+        aggregate:
           id: 1
           name: 'Example'
-        _changed:
-          props:
-            name: 'John'
+          changed:
+            props:
+              name: 'John'
 
 
-    it 'should call _applyChanges with given DomainEvents on active matching ReadModels', ->
-      class ExampleReadModel
-        _applyChanges: sinon.stub()
+    it 'should tell the EventStore to save the DomainEvent', (done) ->
+      domainEventService.saveAndTrigger [domainEvent], (err) ->
+        expect(eventStore.save.calledOnce).to.be.ok()
+        done()
 
-      exampleReadModel = new ExampleReadModel
-
-      DomainEventService._handlers =
-        'Example':
-          1: [
-            exampleReadModel
-          ]
-
-      DomainEventService.handle [domainEvent]
-
-      expect(exampleReadModel._applyChanges.calledWith domainEvent._changed).to.be.ok()
-
-    it 'should trigger the given DomainEvent', ->
-      triggerSpy = sandbox.spy DomainEventService, 'trigger'
-      DomainEventService.handle [domainEvent]
-      expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.ok()
-      expect(triggerSpy.calledWith 'Example', domainEvent).to.be.ok()
-      expect(triggerSpy.calledWith 'Example/1', domainEvent).to.be.ok()
-      expect(triggerSpy.calledWith 'Example:testMethod', domainEvent).to.be.ok()
-      expect(triggerSpy.calledWith 'Example:testMethod/1', domainEvent).to.be.ok()
-
-    it 'should store the DomainEvent into a local cache', ->
-      storeInCacheSpy = sandbox.spy DomainEventService, '_storeInCache'
-      DomainEventService.handle [domainEvent]
-      expect(storeInCacheSpy.calledWith domainEvent).to.be.ok()
+    it 'should trigger the given DomainEvent', (done) ->
+      triggerSpy = sandbox.spy domainEventService, 'trigger'
+      domainEventService.saveAndTrigger [domainEvent], (err) ->
+        expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.ok()
+        expect(triggerSpy.calledWith 'Example', domainEvent).to.be.ok()
+        expect(triggerSpy.calledWith 'Example/1', domainEvent).to.be.ok()
+        expect(triggerSpy.calledWith 'Example:testMethod', domainEvent).to.be.ok()
+        expect(triggerSpy.calledWith 'Example:testMethod/1', domainEvent).to.be.ok()
+        done()

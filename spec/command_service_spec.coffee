@@ -1,4 +1,4 @@
-describe.skip 'CommandService', ->
+describe 'CommandService', ->
 
   sinon    = require 'sinon'
   expect   = require 'expect.js'
@@ -12,77 +12,87 @@ describe.skip 'CommandService', ->
 
   sandbox = null
   aggregateStubId = 1
-  myAggregateStub = null
+  exampleAggregateStub = null
   aggregateRepositoryStub = null
+  domainEventService = null
   beforeEach ->
     sandbox = sinon.sandbox.create()
 
-    # build Aggregate Stub
-    myAggregateStub = sinon.createStubInstance AggregateRoot
-    myAggregateStub.myAggregateFunction = sandbox.stub()
-    myAggregateStub.id = aggregateStubId
+    # example aggregate
+    class ExampleAggregate extends AggregateRoot
+
+    # build ExampleAggregateStub
+    exampleAggregateStub = sinon.createStubInstance ExampleAggregate
+    exampleAggregateStub.doSomething = sandbox.stub()
+    exampleAggregateStub.id = aggregateStubId
 
     # stub the repository
     aggregateRepositoryStub = sinon.createStubInstance AggregateRepository
-    aggregateRepositoryStub.findById.withArgs(aggregateStubId).returns(myAggregateStub)
+
+    # getClass returns a Stub which returns the ExampleAggregateStub on instantiation
+    aggregateRepositoryStub.getClass.returns sandbox.stub().returns exampleAggregateStub
 
     # stub the DomainEventService
-    sandbox.stub DomainEventService
+    domainEventService = sinon.createStubInstance DomainEventService
+    domainEventService.saveAndTrigger.yields null
 
   afterEach ->
     sandbox.restore()
 
   describe '#createAggregate', ->
 
-    aggregateId = null
-    readAggregate = null
     commandService = null
     beforeEach ->
+      # findById should find nothing
+      aggregateRepositoryStub.findById.yields null, null
+
       # instantiate the CommandService with the ReadAggregateRepository stub
-      commandService = new CommandService aggregateRepositoryStub
+      commandService = new CommandService domainEventService, aggregateRepositoryStub
 
-      # create an Aggregate Class stub which returns the myAggregateStub on instantiation
-      AggregateStub = sandbox.stub().returns myAggregateStub
+    it 'should call the create method of the given aggregate', (done) ->
+      commandService.createAggregate 'ExampleAggregate', ->
+        expect(exampleAggregateStub.create.calledOnce).to.be.ok()
+        done()
 
-      # call the create method on the CommandService with the Aggregate Class stub
-      aggregateId = commandService.createAggregate AggregateStub
-
-    it 'should call the create method of the given aggregate', ->
-      expect(myAggregateStub.create.calledOnce).to.be.ok()
-
-    it 'should return the aggregateId', ->
-      expect(aggregateId).to.be aggregateStubId
+    it 'should return the aggregateId', (done) ->
+      commandService.createAggregate 'ExampleAggregate', (err, aggregateId) ->
+        expect(aggregateId).to.be aggregateStubId
+        done()
 
   describe '#commandAggregate', ->
 
     commandService = null
     beforeEach ->
+      # findById should find something
+      aggregateRepositoryStub.findById.yields null, exampleAggregateStub
+
       # instantiate the command service
-      commandService = new CommandService aggregateRepositoryStub
+      commandService = new CommandService domainEventService, aggregateRepositoryStub
 
-    it 'should call the command on the aggregate', ->
-      commandService.commandAggregate 1, 'myAggregateFunction'
-      expect(myAggregateStub.myAggregateFunction.calledOnce).to.be.ok()
+    it 'should call the command on the aggregate', (done) ->
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+        expect(exampleAggregateStub.doSomething.calledOnce).to.be.ok()
+        done()
 
-    it 'should store the aggregate into a local cache using its ID', ->
-      commandService.commandAggregate 1, 'myAggregateFunction'
-      expect(commandService.aggregateCache[1]).to.be.a AggregateRoot
+    it 'should call the generateDomainEvent method of the given aggregate', (done) ->
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+        expect(exampleAggregateStub.generateDomainEvent.calledWith 'doSomething').to.be.ok()
+        done()
 
-    it 'should call the generateDomainEvent method of the given aggregate', ->
-      commandService.commandAggregate 1, 'myAggregateFunction'
-      expect(myAggregateStub.generateDomainEvent.calledWith 'myAggregateFunction').to.be.ok()
-
-    it 'should pass the accumulated domainEvents from the Aggregate to the DomainEventService', ->
+    it 'should call saveAndTrigger on DomainEventService with the generated DomainEvents', (done) ->
       events = {}
-      myAggregateStub.getDomainEvents.returns events
+      exampleAggregateStub.getDomainEvents.returns events
 
-      commandService.commandAggregate 1, 'myAggregateFunction'
-      expect(DomainEventService.handle.withArgs(events).calledOnce).to.be.ok()
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+        expect(domainEventService.saveAndTrigger.withArgs(events).calledOnce).to.be.ok()
+        done()
 
-    it 'should call the clearChanges method of the given aggregate', ->
-      commandService.commandAggregate 1, 'myAggregateFunction'
-      expect(myAggregateStub.clearChanges.calledOnce).to.be.ok()
+    it 'should call the clearChanges method of the given aggregate', (done) ->
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+        expect(exampleAggregateStub.clearChanges.calledOnce).to.be.ok()
+        done()
 
-    it 'should return the aggregateId', ->
-      aggregateId = commandService.commandAggregate 1, 'myAggregateFunction'
-      expect(aggregateId).to.be 1
+    it 'should return the aggregateId', (done) ->
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+        expect(aggregateId).to.be 1
+        done()

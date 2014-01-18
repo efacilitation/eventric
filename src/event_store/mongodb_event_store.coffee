@@ -32,7 +32,7 @@ class MongoDBEventStore
   find: ([aggregateName, query, projection]..., callback) ->
     if not query
       err = new Error 'Missing query'
-      callback err, null unless query
+      callback err, null
       return
     projection = {} unless projection
 

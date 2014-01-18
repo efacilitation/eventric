@@ -20,7 +20,7 @@ class ReadAggregateRepository extends Repository
       readAggregate = new ReadAggregateClass
 
       # apply the domainevents on the ReadAggregate
-      readAggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
+      readAggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents when domainEvent.aggregate?.changed
       readAggregate.id = aggregateId
 
       # return the readAggregate

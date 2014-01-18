@@ -19,6 +19,13 @@ describe 'ReadAggregateRepositorySpec', ->
     sandbox = sinon.sandbox.create()
 
     EventStoreStub = sinon.createStubInstance EventStore
+    EventStoreStub.find.yields null, [
+      name: 'create'
+      aggregate:
+        changed:
+          props:
+            name: 'John'
+    ]
 
     readAggregateRepository = new ReadAggregateRepository 'Foo', EventStoreStub
     readAggregateRepository.registerClass 'ReadFoo', ReadFoo
@@ -28,17 +35,20 @@ describe 'ReadAggregateRepositorySpec', ->
 
   describe '#findById', ->
 
-    it 'should return a instantiated ReadAggregate', ->
+    it 'should return a instantiated ReadAggregate', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
         expect(readAggregate).to.be.a ReadFoo
+        done()
 
-    it 'should ask the adapter for the DomainEvents matching the AggregateId', ->
+    it 'should ask the adapter for the DomainEvents matching the AggregateId', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, ->
-      expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.ok()
+        expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.ok()
+        done()
 
-    it 'should return a instantiated ReadAggregate containing the applied DomainEvents', ->
+    it 'should return a instantiated ReadAggregate containing the applied DomainEvents', (done) ->
       readAggregate = readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
         expect(readAggregate.name).to.be 'John'
+        done()
 
 
   describe '#find', ->
@@ -56,7 +66,6 @@ describe 'ReadAggregateRepositorySpec', ->
 
 
     it 'should call findIds to get all aggregateIds matching the query', (done) ->
-      # stub _findAggregateIdsByDomainEventCriteria to return an example AggregateId
       readAggregateRepository.find 'ReadFoo', query, ->
         expect(findIdsStub.calledWith 'ReadFoo', query).to.be.ok()
         done()

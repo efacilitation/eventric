@@ -22,6 +22,8 @@ describe 'ReadAggregateRepositorySpec', ->
     EventStoreStub.find.yields null, [
       name: 'create'
       aggregate:
+        id: 23
+        name: 'Foo'
         changed:
           props:
             name: 'John'
@@ -46,7 +48,7 @@ describe 'ReadAggregateRepositorySpec', ->
         done()
 
     it 'should return a instantiated ReadAggregate containing the applied DomainEvents', (done) ->
-      readAggregate = readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
+      readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
         expect(readAggregate.name).to.be 'John'
         done()
 
@@ -81,16 +83,20 @@ describe 'ReadAggregateRepositorySpec', ->
         expect(readAggregates[0]).to.be.a ReadFoo
         done()
 
-  describe.skip '#findOne', ->
+  describe '#findOne', ->
 
-    it 'should call find and return only one result'
+    it 'should call find and return only one result', (done) ->
+      findStub = sandbox.stub readAggregateRepository, 'find'
+      findStub.yields null, [1, 2]
+      readAggregateRepository.findOne 'ReadFoo', {}, (err, result) ->
+        expect(result).to.be 1
+        done()
 
 
-  describe.skip '#findIds', ->
+  describe '#findIds', ->
 
-    it 'should return all AggregateIds matching the given query-criteria', ->
-      criteria = {}
-      sandbox.stub readAggregateRepository._adapter, '_findAggregateIdsByDomainEventCriteria', -> [42]
-      aggregateIds = readAggregateRepository.findIds criteria
-      expect(aggregateIds.length).to.be 1
-      expect(aggregateIds[0]).to.be 42
+    it 'should return all AggregateIds matching the given query', (done) ->
+      readAggregateRepository.findIds 'ReadFoo', {}, (err, aggregateIds) ->
+        expect(aggregateIds.length).to.be 1
+        expect(aggregateIds[0]).to.be 23
+        done()

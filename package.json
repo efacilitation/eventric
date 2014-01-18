@@ -21,6 +21,7 @@
     "type": "git",
     "url": "git://sixsteps.com/efa/eventric.git"
   },
+  "main": "src/index.coffee",
   "devDependencies": {
     "mocha": "~1.17.0",
     "expect.js": "~0.2.0",
@@ -43,7 +44,11 @@
     "grunt-contrib-watch": "~0.5.3",
     "karma-mocha": "~0.1.1",
     "bower": "~1.2.8",
-    "grunt-karma": "~0.6.2"
+    "grunt-karma": "~0.6.2",
+    "grunt-commonjs-coffee": "git://github.com/johannesbecker/grunt-commonjs-coffee.git",
+    "grunt-contrib-coffee": "~0.8.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-clean": "~0.5.0"
   },
   "dependencies": {
     "coffee-script": "~1.6.3",

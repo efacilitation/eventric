@@ -37,7 +37,7 @@ describe 'ReadAggregateRepositorySpec', ->
 
   describe '#findById', ->
 
-    it 'should return a instantiated ReadAggregate', (done) ->
+    it 'should return an instantiated ReadAggregate', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
         expect(readAggregate).to.be.a ReadFoo
         done()
@@ -47,7 +47,7 @@ describe 'ReadAggregateRepositorySpec', ->
         expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.ok()
         done()
 
-    it 'should return a instantiated ReadAggregate containing the applied DomainEvents', (done) ->
+    it 'should return an instantiated ReadAggregate containing the applied DomainEvents', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
         expect(readAggregate.name).to.be 'John'
         done()
@@ -62,7 +62,7 @@ describe 'ReadAggregateRepositorySpec', ->
     beforeEach ->
       query = {}
       findIdsStub  = sandbox.stub readAggregateRepository, 'findIds'
-      findIdsStub.yields null, [42]
+      findIdsStub.yields null, [42, 23]
       findByIdStub = sandbox.stub readAggregateRepository, 'findById'
       findByIdStub.yields null, new ReadFoo
 
@@ -72,15 +72,17 @@ describe 'ReadAggregateRepositorySpec', ->
         expect(findIdsStub.calledWith 'ReadFoo', query).to.be.ok()
         done()
 
-    it 'should call findById for every aggregateId found', (done) ->
+    it.only 'should call findById for every aggregateId found', (done) ->
       readAggregateRepository.find 'ReadFoo', query, ->
         expect(findByIdStub.calledWith 'ReadFoo', 42).to.be.ok()
+        expect(findByIdStub.calledWith 'ReadFoo', 23).to.be.ok()
         done()
 
     it 'should return ReadAggregate instances matching the given query', (done) ->
       readAggregateRepository.find 'ReadFoo', query, (err, readAggregates) ->
-        expect(readAggregates.length).to.be 1
+        expect(readAggregates.length).to.be 2
         expect(readAggregates[0]).to.be.a ReadFoo
+        expect(readAggregates[1]).to.be.a ReadFoo
         done()
 
   describe '#findOne', ->

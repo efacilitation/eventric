@@ -1,3 +1,5 @@
+async = require 'async'
+
 Repository = require('eventric')('Repository')
 
 class ReadAggregateRepository extends Repository
@@ -32,14 +34,23 @@ class ReadAggregateRepository extends Repository
     @findIds readAggregateName, query, (err, aggregateIds) =>
       return callback err, null if err
 
-      # TODO return multiple ReadAggregates when multiple aggregateIds are found
-      @findById readAggregateName, aggregateIds[0], (err, readAggregate) =>
-        return callback err, null if err
-        return callback null, [] if readAggregate.length == 0
+      readAggregates = []
+      # execute findById for every aggregateId found
+      async.whilst (=> aggregateIds.length > 0),
 
-        results = [readAggregate]
+        ((callbackAsync) =>
+          aggregateId = aggregateIds.shift()
+          @findById readAggregateName, aggregateId, (err, readAggregate) =>
+            return callbackAsync err if err
+            return callbackAsync null if readAggregate.length == 0
+            readAggregates.push readAggregate
+            callbackAsync null
+        ),
 
-        callback null, results
+        ((err) =>
+          return callback err, null if err
+          callback null, readAggregates
+        )
 
 
   findOne: (readAggregateName, query, callback) ->

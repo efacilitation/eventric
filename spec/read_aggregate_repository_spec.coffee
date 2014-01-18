@@ -34,7 +34,7 @@ describe 'ReadAggregateRepositorySpec', ->
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', ->
       readAggregateRepository.findById 'ReadFoo', 23, ->
-      expect(EventStoreStub.findByAggregateId.calledWith('Foo', 23)).to.be.ok()
+      expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.ok()
 
     it 'should return a instantiated ReadAggregate containing the applied DomainEvents', ->
       readAggregate = readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->

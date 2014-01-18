@@ -1,4 +1,4 @@
-describe.skip 'Create new Aggregate Scenario', ->
+describe 'Create new Aggregate Scenario', ->
 
   sinon    = require 'sinon'
   expect   = require 'expect.js'
@@ -8,6 +8,7 @@ describe.skip 'Create new Aggregate Scenario', ->
   DomainEventService      = eventric 'DomainEventService'
   AggregateRoot           = eventric 'AggregateRoot'
   AggregateRepository     = eventric 'AggregateRepository'
+  EventStore              = eventric 'MongoDBEventStore'
 
   sandbox = null
   beforeEach ->

@@ -29,22 +29,7 @@ class MongoDBEventStore
         callback null
 
 
-
-  findByAggregateId: (aggregateName, aggregateId, callback) ->
-
-
-    @db.collection aggregateName, (err, collection) =>
-
-      collection.find { 'aggregate.id': aggregateId }, (err, cursor) =>
-        return callback err, null if err
-
-        cursor.toArray (err, items) =>
-          return callback err, null if err
-
-          callback null, items
-
-
-  find: ([aggregateName, query, projection]..., callback) =>
+  find: ([aggregateName, query, projection]..., callback) ->
 
     @db.collection aggregateName, (err, collection) =>
 

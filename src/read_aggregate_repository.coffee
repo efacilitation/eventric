@@ -4,7 +4,7 @@ class ReadAggregateRepository extends Repository
 
   constructor: (@_aggregateName, @_eventStore) ->
 
-  findById: (readAggregateName, id, callback) =>
+  findById: (readAggregateName, aggregateId, callback) =>
     # create the ReadAggregate instance
     ReadAggregateClass = @getClass readAggregateName
 
@@ -13,7 +13,7 @@ class ReadAggregateRepository extends Repository
       callback err, null
       return
 
-    @_eventStore.findByAggregateId @_aggregateName, id, (err, domainEvents) =>
+    @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
 
@@ -21,7 +21,7 @@ class ReadAggregateRepository extends Repository
 
       # apply the domainevents on the ReadAggregate
       readAggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents
-      readAggregate.id = id
+      readAggregate.id = aggregateId
 
       # return the readAggregate
       callback null, readAggregate

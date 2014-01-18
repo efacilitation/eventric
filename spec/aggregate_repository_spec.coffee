@@ -29,7 +29,7 @@ describe 'AggregateRepository', ->
 
     it 'should ask the EventStore for DomainEvents matching the AggregateId', ->
       aggregateRepository.findById 'Foo', 42, ->
-      expect(EventStoreStub.findByAggregateId.calledWith('Foo', 42)).to.be.ok()
+      expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 42})).to.be.ok()
 
     it 'should return the Aggregate matching the given Id with all DomainEvents applied', ->
       aggregateRepository.findById 'Foo', 42, (err, aggregate) ->

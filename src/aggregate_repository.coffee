@@ -6,7 +6,7 @@ class AggregateRepository extends Repository
 
   findById: (aggregateName, aggregateId, callback) ->
     # find all domainEvents matching the given aggregateId
-    @_eventStore.findByAggregateId aggregateName, aggregateId, (err, domainEvents) =>
+    @_eventStore.find aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
 
       if domainEvents.length == 0
         # nothing found, return null

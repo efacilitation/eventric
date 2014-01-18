@@ -11,35 +11,35 @@ class CommandService
     if not AggregateClass
       err = new Error "Tried to create not registered Aggregate '#{aggregateName}'"
       callback err, null
+      return
 
-    else
-      # create Aggregate
-      aggregate = new AggregateClass
-      aggregate.create()
+    # create Aggregate
+    aggregate = new AggregateClass
+    aggregate.create()
 
-      # apply given params
-      aggregate[key] = value for key, value of params
+    # apply given params
+    aggregate[key] = value for key, value of params
 
-      @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
+    @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
+      return callback err, null if err
 
-        if err
-          callback err, null
-          return
+      # if for some reason we try to create an already existing aggregateId, skip now
+      if aggregateCheck
+        err = new Error "Tried to create already existing aggregateId #{aggregate.id}"
+        callback err, null
+        return
 
-        # if for some reason we try to create an already existing aggregateId, skip now
-        if aggregateCheck
-          err = new Error "Tried to create already existing aggregateId #{aggregate.id}"
-          callback err, null
-          return
+      @_generateSaveAndTriggerDomainEvent 'create', aggregate, callback
 
-        @_handle 'create', aggregate, callback
+
+  commandAggregateClosure: (aggregateName, aggregateId) ->
+    ([commandName, params]..., callback) =>
+      @commandAggregate aggregateName, aggregateId, commandName, params, callback
 
   commandAggregate: ([aggregateName, aggregateId, commandName, params]..., callback) ->
     # get the aggregate from the AggregateRepository
     @_aggregateRepository.findById aggregateName, aggregateId, (err, aggregate) =>
-      if err
-        callback err, null
-        return
+      return callback err, null if err
 
       if not aggregate
         err = new Error "No #{aggregateName} Aggregate with given aggregateId #{aggregateId} found"
@@ -52,26 +52,22 @@ class CommandService
         return
 
       aggregate[commandName] params
-      @_handle commandName, aggregate, callback
+      @_generateSaveAndTriggerDomainEvent commandName, aggregate, callback
 
 
-  _handle: (commandName, aggregate, callback) ->
+  _generateSaveAndTriggerDomainEvent: (commandName, aggregate, callback) ->
     # generate the DomainEvent
     aggregate.generateDomainEvent commandName
 
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
-    @_domainEventService.saveAndTrigger domainEvents
-    aggregate.clearChanges()
+    @_domainEventService.saveAndTrigger domainEvents, (err) ->
+      return callback err, null if err
 
-    # return the aggregateId
-    callback null, aggregate.id
+      aggregate.clearChanges()
 
-
-  commandAggregateClosure: (aggregateName, aggregateId) ->
-    ([commandName, params]..., callback) =>
-      @commandAggregate aggregateName, aggregateId, commandName, params, callback
-
+      # return the aggregateId
+      callback null, aggregate.id
 
 
 module.exports = CommandService

@@ -19,25 +19,40 @@ describe 'Create new Aggregate Scenario', ->
 
   describe 'given we want to instantiate a new Aggregate', ->
 
-    EnderAggregate = null
-    beforeEach ->
-      # so we have an aggregate defined
-      class EnderAggregate extends AggregateRoot
-
     describe 'when we tell the CommandService to create an Aggregate', ->
 
       DomainEventServiceTriggerSpy = null
-      aggregateRepositoryStub      = null
-      createdCallback              = null
+      commandService               = null
       beforeEach ->
-        # stub the DomainEventService.trigger
-        DomainEventServiceTriggerSpy = sandbox.stub DomainEventService, 'trigger'
+        # so we have an aggregate defined
+        class EnderAggregate extends AggregateRoot
 
+        # create the EventStoreStub
+        eventStore = sinon.createStubInstance EventStore
+        # simulate successful saving
+        eventStore.save.yields null
+        # create the DomainEventService
+        domainEventService = new DomainEventService eventStore
+
+        # stub DomainEventService.trigger
+        DomainEventServiceTriggerSpy = sandbox.spy domainEventService, 'trigger'
+
+        # create the AggregateRepositoryStub
+        aggregateRepository = sinon.createStubInstance AggregateRepository
+        # simulate "register Class 'EnderAggregate', EnderAggregate"
+        aggregateRepository.getClass.returns EnderAggregate
+        # simulate "nothing found"
+        aggregateRepository.findById.yields null, null
+
+        # register the aggregate class in the repository
+        aggregateRepository.registerClass 'EnderAggregate', EnderAggregate
+
+        # create the CommandService
+        commandService = new CommandService domainEventService, aggregateRepository
+
+      it 'then the DomainEventService should have triggered a "create" DomainEvent', (done) ->
         # now we tell the commandservice to create the aggregate for us
-        aggregateRepositoryStub = sinon.createStubInstance AggregateRepository
-        aggregateRepositoryStub._saveDomainEvents = sinon.stub()
-        commandService = new CommandService aggregateRepositoryStub
-        commandService.createAggregate EnderAggregate
+        commandService.createAggregate 'EnderAggregate', (err, aggrageId) ->
 
-      it 'then the DomainEventService should have triggered a "create" DomainEvent', ->
-        expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()
+          expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()
+          done()

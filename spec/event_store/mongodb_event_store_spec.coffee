@@ -1,1 +1,1 @@
-describe.only 'MongoDBEventStore', ->
+describe 'MongoDBEventStore', ->

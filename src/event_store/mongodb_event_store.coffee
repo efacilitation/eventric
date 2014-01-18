@@ -7,7 +7,6 @@ class MongoDBEventStore
   initialize: (callback) ->
 
     MongoClient.connect 'mongodb://127.0.0.1:27017/events', (err, db) =>
-
       if err
         console.log 'MongoDB connection failed'
         callback? err, null
@@ -22,6 +21,7 @@ class MongoDBEventStore
   save: (domainEvent, callback) ->
 
     @db.collection domainEvent.aggregate.name, (err, collection) ->
+      return callback err, null if err
 
       collection.insert domainEvent, (err, doc) ->
         return callback err if err
@@ -30,8 +30,14 @@ class MongoDBEventStore
 
 
   find: ([aggregateName, query, projection]..., callback) ->
+    if not query
+      err = new Error 'Missing query'
+      callback err, null unless query
+      return
+    projection = {} unless projection
 
     @db.collection aggregateName, (err, collection) =>
+      return callback err, null if err
 
       collection.find query, projection, (err, cursor) =>
         return callback err, null if err

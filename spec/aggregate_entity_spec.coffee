@@ -167,9 +167,6 @@ describe 'AggregateEntity', ->
       expect(mytopentity.topcollection.get(1).name).to.eql 'ChangedWayne'
 
 
-
-
-
   describe '#prop', ->
 
     it 'should be defined', ->

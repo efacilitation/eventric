@@ -13,7 +13,6 @@ class AggregateEntity
     @_entityClasses = {}
 
   create: ->
-    # TODO this should be an unique id
     @id = @_generateUid()
 
   _generateUid: (separator) ->
@@ -120,28 +119,6 @@ class AggregateEntity
 
   _shouldTrackChangePropertiesFor: (propName, val) ->
     @_trackPropsChanged and val not instanceof AggregateEntityCollection
-
-  toJSON: ->
-    json = @getMetaData()
-    json.props = @_toJSONonProps()
-    json.entities = {} # TODO
-    json.collections = @_toJSONonCollections()
-    json
-
-  _toJSONonProps: ->
-    json = {}
-    json[propKey] = propVal for propKey, propVal of @_props when propVal not instanceof AggregateEntityCollection and propVal not instanceof AggregateEntity
-    json
-
-  _toJSONonCollections: ->
-    json = {}
-    for propKey, propValue of @_props
-      if propValue instanceof AggregateEntityCollection
-        json[propKey] = []
-        for entity in propValue.entities
-          json[propKey].push entity.toJSON()
-
-    json
 
   getEntityClass: (className) ->
     EntityClass = @_entityClasses[className] ? false

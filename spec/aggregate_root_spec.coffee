@@ -43,3 +43,21 @@ describe 'AggregateRoot', ->
       enderAggregate._domainEvents = ['someEvent']
       domainEvents = enderAggregate.getDomainEvents()
       expect(domainEvents.length).to.be 1
+
+
+  describe '#getSnapshot', ->
+
+    it 'should return the current state as special "_snapshot"-DomainEvent', ->
+      enderAggregate.id = 42
+      enderAggregate.name = 'John'
+
+      expect(enderAggregate.getSnapshot()).to.eql
+        name: '_snapshot'
+        aggregate:
+          id: 42
+          name: 'EnderAggregate'
+          changed:
+            props:
+              name: 'John'
+            entities: {}
+            collections: {}

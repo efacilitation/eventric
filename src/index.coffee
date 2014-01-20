@@ -17,8 +17,9 @@ moduleDefinition =
 
   Repository: './repository'
 
-  InMemoryEventStore: './event_store/inmemory_event_store'
   MongoDBEventStore: './event_store/mongodb_event_store'
+
+  MixinSnapshot: './mixin_snapshot'
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

@@ -6,14 +6,15 @@ class ReadAggregateRepository extends Repository
 
   constructor: (@_aggregateName, @_eventStore) ->
 
-  findById: (readAggregateName, aggregateId, callback) =>
+  findById: ([readAggregateName]..., aggregateId, callback) =>
+    return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
+
     # create the ReadAggregate instance
     ReadAggregateClass = @getClass readAggregateName
 
     if not ReadAggregateClass
       err = new Error "Tried 'findById' on not registered ReadAggregate '#{readAggregateName}'"
-      callback err, null
-      return
+      return callback err, null
 
     @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
@@ -29,7 +30,9 @@ class ReadAggregateRepository extends Repository
       callback null, readAggregate
 
 
-  find: (readAggregateName, query, callback) ->
+  find: ([readAggregateName]..., query, callback) ->
+    return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
+
     # get ReadAggregates matching the query
     @findIds readAggregateName, query, (err, aggregateIds) =>
       return callback err, null if err
@@ -53,7 +56,9 @@ class ReadAggregateRepository extends Repository
         )
 
 
-  findOne: (readAggregateName, query, callback) ->
+  findOne: ([readAggregateName]..., query, callback) ->
+    return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
+
     @find readAggregateName, query, (err, results) =>
       return callback err, null if err
       return callback null, false if results.length == 0
@@ -69,6 +74,17 @@ class ReadAggregateRepository extends Repository
       aggregateIds.push result.aggregate.id for result in results when result.aggregate.id not in aggregateIds
 
       callback null, aggregateIds
+
+  _readAggregateNameNotSet: (readAggregateName, callback) ->
+    if not readAggregateName
+      if not @_readAggregateName
+        err = new Error 'No readAggregateName supplied'
+        callback err, null
+        return false
+      else
+        readAggregateName = @_readAggregateName
+
+    return readAggregateName
 
 
 module.exports = ReadAggregateRepository

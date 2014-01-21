@@ -51,7 +51,9 @@ class CommandService
         callback err, null
         return
 
+      # EXECUTING
       aggregate[commandName] params
+
       @_generateSaveAndTriggerDomainEvent commandName, aggregate, callback
 
 

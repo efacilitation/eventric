@@ -12,10 +12,12 @@ class ReadAggregateRepository extends Repository
     # create the ReadAggregate instance
     ReadAggregateClass = @getClass readAggregateName
 
+    # TODO return if @_checkReadAggregateClassNotSet ReadAggregateClass, callback
     if not ReadAggregateClass
       err = new Error "Tried 'findById' on not registered ReadAggregate '#{readAggregateName}'"
       return callback err, null
 
+    # TODO @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
     @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
@@ -23,6 +25,7 @@ class ReadAggregateRepository extends Repository
       readAggregate = new ReadAggregateClass
 
       # apply the domainevents on the ReadAggregate
+      # TODO readAggregate = @_applyDomainEventChangesOnReadAggregate readAggregate, domainEvent
       readAggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents when domainEvent.aggregate?.changed
       readAggregate.id = aggregateId
 

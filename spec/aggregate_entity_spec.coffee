@@ -119,7 +119,7 @@ describe 'AggregateEntity', ->
 
       myEntity.applyChanges changedPropsAndCollections
 
-      expect(myEntity.name).to.eql 'ChangedJohn'
+      expect(myEntity._get 'name').to.eql 'ChangedJohn'
       expect(myEntity.getChanges()).to.eql {}
 
 
@@ -130,13 +130,13 @@ describe 'AggregateEntity', ->
       class MySubEntity extends Entity
 
       mytopentity = new MyTopEntity
-      mytopentity.topcollection = new EntityCollection
+      mytopentity._set 'topcollection', new EntityCollection
 
       mysubentity = new MySubEntity
       mysubentity.id = 1
       mysubentity._set 'name', 'Wayne'
 
-      mytopentity.topcollection.add mysubentity
+      mytopentity._get('topcollection').add mysubentity
 
       changedPropsAndCollections =
         props: {}
@@ -155,4 +155,4 @@ describe 'AggregateEntity', ->
 
       mytopentity.applyChanges changedPropsAndCollections
 
-      expect(mytopentity.topcollection.get(1).name).to.eql 'ChangedWayne'
+      expect(mytopentity._get('topcollection').get(1)._get('name')).to.eql 'ChangedWayne'

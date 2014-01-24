@@ -95,16 +95,17 @@ class AggregateEntity
     @_trackPropsChanged = oldTrackPropsChanged
 
   _applyChangesToProps: (propChanges) ->
-    @[propName] = propValue for propName, propValue of propChanges
+    @_set propName, propValue for propName, propValue of propChanges
 
   _applyChangesToCollections: (collectionChanges) ->
     for collectionName, collection of collectionChanges
-      @[collectionName] ?= new AggregateEntityCollection
-      @_applyChangesToCollection collectionName, collection
+      if @_get collectionName
+        @_set collectionName, new AggregateEntityCollection
+        @_applyChangesToCollection collectionName, collection
 
   _applyChangesToCollection: (collectionName, collection) ->
     for entity in collection
-      entityInstance = @[collectionName].get entity.id
+      entityInstance = @_get[collectionName]?.get entity.id
       if !entityInstance
         if EntityClass = @getEntityClass entity.name
           entityInstance = new EntityClass
@@ -114,7 +115,7 @@ class AggregateEntity
 
         entityInstance.id = entity.id
         # this will actually add a reference, so we can applyChanges afterwards safely
-        @[collectionName].add entityInstance
+        @_get(collectionName).add entityInstance
 
       if entity.changed
         entityInstance.applyChanges entity.changed

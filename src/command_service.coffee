@@ -18,7 +18,7 @@ class CommandService
     aggregate.create()
 
     # apply given params
-    aggregate[key] = value for key, value of params
+    aggregate._set key, value for key, value of params
 
     @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
       return callback err, null if err

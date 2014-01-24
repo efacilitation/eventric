@@ -4,10 +4,12 @@ eventric = require 'eventric'
 AggregateEntity           = eventric 'AggregateEntity'
 AggregateEntityCollection = eventric 'AggregateEntityCollection'
 MixinSnapshot             = eventric 'MixinSnapshot'
+MixinSetGet               = eventric 'MixinSetGet'
 
 class AggregateRoot extends AggregateEntity
 
   _.extend @prototype, MixinSnapshot::
+  _.extend @prototype, MixinSetGet::
 
   constructor: ->
     @_domainEvents = []

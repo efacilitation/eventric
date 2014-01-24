@@ -56,6 +56,6 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
           # expectations
           expect(readAggregates.length).to.be 1
           expect(readAggregates[0]).to.be.a ReadExample
-          expect(readAggregates[0].name).to.be 'example'
+          expect(readAggregates[0]._get 'name').to.be 'example'
 
           done()

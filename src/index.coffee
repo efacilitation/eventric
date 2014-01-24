@@ -20,6 +20,7 @@ moduleDefinition =
   MongoDBEventStore: './event_store/mongodb_event_store'
 
   MixinSnapshot: './mixin_snapshot'
+  MixinSetGet: './mixin_setget'
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

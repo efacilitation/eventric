@@ -22,10 +22,9 @@ describe 'AggregateEntity', ->
 
     it 'should return changes to properties from the given entity', ->
       class MyEntity extends Entity
-        @prop 'name'
 
       myEntity = new MyEntity name: 'Willy'
-      myEntity.name = 'John'
+      myEntity._set 'name', 'John'
 
       expect(myEntity.getChanges()).to.eql
         props:
@@ -35,20 +34,17 @@ describe 'AggregateEntity', ->
 
     it 'should return changes to properties from the given entity collection', ->
       class MyEntity extends Entity
-        @prop 'name'
-        @prop 'things'
 
       class MyThingsEntity extends Entity
-        @prop 'name'
 
       myEntity = new MyEntity
-      myEntity.things = new EntityCollection
+      myEntity._set 'things', new EntityCollection
 
       myThingsEntity = new MyThingsEntity name: 'NotWayne'
       myThingsEntity.id = 2
-      myThingsEntity.name = 'Wayne'
+      myThingsEntity._set 'name', 'Wayne'
 
-      myEntity.things.add myThingsEntity
+      myEntity._get('things').add myThingsEntity
 
       expect(myEntity.getChanges()).to.eql
         props: {}
@@ -66,23 +62,22 @@ describe 'AggregateEntity', ->
 
     it 'should track changes to collections that are contained in other collections', ->
       class A extends Entity
-        @props 'name', 'things', 'formics'
 
       a1 = new A
-      a1.things = new EntityCollection
+      a1._set 'things', new EntityCollection
 
       a2 = new A
       a2.id = 2
-      a2.formics = new EntityCollection
-      a2.name = 'Wayne'
+      a2._set 'formics', new EntityCollection
+      a2._set 'name', 'Wayne'
 
-      a1.things.add a2
+      a1._get('things').add a2
 
       a3 = new A
       a3.id = 3
-      a3.name = 'Rocks'
+      a3._set 'name', 'Rocks'
 
-      a2.formics.add a3
+      a2._get('formics').add a3
 
       spy = sinon.spy a3, 'getChanges'
 
@@ -95,18 +90,17 @@ describe 'AggregateEntity', ->
 
     it 'should clear all changes', ->
       class A extends Entity
-        @props 'name', 'things'
 
       a1 = new A()
       a1.id = 1
-      a1.things = new EntityCollection
-      a1.name = 'John'
+      a1._set 'things', new EntityCollection
+      a1._set 'name', 'John'
 
       a2 = new A()
       a2.id = 2
-      a2.name = 'Wayne'
+      a2._set 'name', 'Wayne'
 
-      a1.things.add a2
+      a1._get('things').add a2
 
       a1.clearChanges()
 
@@ -116,7 +110,6 @@ describe 'AggregateEntity', ->
 
     it 'should apply given changes to properties and not track the changes', ->
       class MyEntity extends Entity
-        @props 'name'
 
       myEntity = new MyEntity
 
@@ -133,17 +126,15 @@ describe 'AggregateEntity', ->
     it 'should apply given changes to properties and collections', ->
 
       class MyTopEntity extends Entity
-        @props 'topcollection'
 
       class MySubEntity extends Entity
-        @props 'name'
 
       mytopentity = new MyTopEntity
       mytopentity.topcollection = new EntityCollection
 
       mysubentity = new MySubEntity
       mysubentity.id = 1
-      mysubentity.name = 'Wayne'
+      mysubentity._set 'name', 'Wayne'
 
       mytopentity.topcollection.add mysubentity
 
@@ -165,64 +156,3 @@ describe 'AggregateEntity', ->
       mytopentity.applyChanges changedPropsAndCollections
 
       expect(mytopentity.topcollection.get(1).name).to.eql 'ChangedWayne'
-
-
-  describe '#prop', ->
-
-    it 'should be defined', ->
-      class A extends Entity
-      expect(A.prop).to.be.a 'function'
-
-    it 'should provide a default setter and getter for a property', ->
-      class B extends Entity
-        @prop 'name'
-
-      b = new B()
-      b.name = 'Steve'
-      expect(b.name).to.be 'Steve'
-
-    it 'should override the setter', ->
-      class C extends Entity
-
-        @prop 'name'
-        @prop 'birthyear',
-          set: (val) ->
-            @_birthyear = val
-            @_props['age'] = 2013 - @_birthyear
-
-        @prop 'age',
-          set: (val) -> throw "Don't set age directly"
-
-      c = new C()
-      c.birthyear = 2000
-      expect(c.age).to.be 13
-
-    it 'should override the getter', ->
-      class D extends Entity
-        @prop 'name'
-        @prop 'welcomeMessage',
-          set: (val) -> throw "Don't set welcomeMessage directly"
-          get: ->
-            "Hello #{@name}!"
-
-      d = new D()
-      d.name = 'Hans'
-      expect(d.welcomeMessage).to.be 'Hello Hans!'
-
-    it 'should keep track of changes', ->
-      class E extends Entity
-        @prop 'name'
-
-      e = new E()
-      e.name = 'Wayne'
-      expect(e._propsChanged.name).to.be 'Wayne'
-
-    it 'should not keep track of property changes if _trackPropsChanged is set to false', ->
-      class E extends Entity
-        @prop 'name'
-
-      e = new E()
-      e._trackPropsChanged = false
-      e.name = 'Wayne'
-      expect(e._propsChanged.name).to.be undefined
-

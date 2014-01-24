@@ -1,10 +1,13 @@
 _                         = require 'underscore'
 eventric                  = require 'eventric'
 
+MixinSetGet               = eventric 'MixinSetGet'
 AggregateEntity           = eventric 'AggregateEntity'
 AggregateEntityCollection = eventric 'AggregateEntityCollection'
 
 class AggregateEntity
+
+  _.extend @prototype, MixinSetGet::
 
   constructor: (@_props = {}) ->
     @_trackPropsChanged = true
@@ -117,27 +120,12 @@ class AggregateEntity
         entityInstance.applyChanges entity.changed
 
 
-  _shouldTrackChangePropertiesFor: (propName, val) ->
-    @_trackPropsChanged and val not instanceof AggregateEntityCollection
+
 
   getEntityClass: (className) ->
     EntityClass = @_entityClasses[className] ? false
 
   registerEntityClass: (className, Class) ->
     @_entityClasses[className] = Class
-
-  # TODO: Replace with _set/_get, we dont want to define a prop-schema
-  @prop = (propName, desc) ->
-    Object.defineProperty @::, propName, _.defaults desc || {},
-      get: -> @_props[propName]
-      set: (val) ->
-        @_props = {} unless @_props
-
-        if @_shouldTrackChangePropertiesFor propName, val
-          @_propsChanged[propName] = val
-
-        @_props[propName] = val
-
-  @props = (propNames...) ->  @prop(propName) for propName in propNames
 
 module.exports = AggregateEntity

@@ -7,7 +7,6 @@ describe 'AggregateRoot', ->
   enderAggregate = null
   beforeEach ->
     class EnderAggregate extends AggregateRoot
-      @prop 'name'
 
     enderAggregate = new EnderAggregate
 
@@ -20,14 +19,14 @@ describe 'AggregateRoot', ->
   describe '#generateDomainEvent', ->
     eventName = null
     beforeEach ->
-      enderAggregate.name = 'John'
+      enderAggregate._set 'name', 'John'
       eventName = 'somethingHappend'
 
     it 'should create an event including changes', ->
       enderAggregate.generateDomainEvent eventName
 
       expect(enderAggregate.getDomainEvents()[0].name).to.be eventName
-      expect(enderAggregate.getDomainEvents()[0].aggregate.changed.props.name).to.be enderAggregate.name
+      expect(enderAggregate.getDomainEvents()[0].aggregate.changed.props.name).to.be enderAggregate._get 'name'
 
     describe 'given param includeAggregateChanges is set to false', ->
 
@@ -49,7 +48,7 @@ describe 'AggregateRoot', ->
 
     it 'should return the current state as special "_snapshot"-DomainEvent', ->
       enderAggregate.id = 42
-      enderAggregate.name = 'John'
+      enderAggregate._set 'name', 'John'
 
       expect(enderAggregate.getSnapshot()).to.eql
         name: '_snapshot'

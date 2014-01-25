@@ -13,7 +13,8 @@ moduleDefinition =
 
   CommandService: './command_service'
   DomainEventService: './domain_event_service'
-  SocketService: './socket_service'
+
+  SocketService: './remote_service/socket_service'
 
   Repository: './repository'
 

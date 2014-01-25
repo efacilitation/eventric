@@ -21,9 +21,7 @@ describe 'Create new Aggregate Scenario', ->
 
     describe 'when we tell the CommandService to create an Aggregate', ->
 
-      DomainEventServiceTriggerSpy = null
-      commandService               = null
-      beforeEach ->
+      it 'then the DomainEventService should have triggered a "create" DomainEvent', (done) ->
         # so we have an aggregate defined
         class EnderAggregate extends AggregateRoot
 
@@ -50,7 +48,6 @@ describe 'Create new Aggregate Scenario', ->
         # create the CommandService
         commandService = new CommandService domainEventService, aggregateRepository
 
-      it 'then the DomainEventService should have triggered a "create" DomainEvent', (done) ->
         # now we tell the commandservice to create the aggregate for us
         commandService.createAggregate 'EnderAggregate', (err, aggrageId) ->
 

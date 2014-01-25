@@ -8,7 +8,7 @@ describe 'RemoteService', ->
 
   describe '#rpc', ->
 
-    it 'call the rpc methid on the given RemoteServiceAdapter', ->
+    it 'call the rpc method on the RemoteServiceAdapter with the given parameters', ->
 
       class ExampleRemoteServiceAdapter
         rpc: ->
@@ -17,6 +17,13 @@ describe 'RemoteService', ->
 
       remoteService = new RemoteService remoteServiceAdapter
 
-      remoteService.rpc()
+      rpcPayload =
+        class: 'ExampleAggregate'
+        method: 'exampleMethod'
+        params: [
+          'exampleParams'
+        ]
 
-      expect(remoteServiceAdapter.rpc.calledOnce).to.be.ok()
+      remoteService.rpc rpcPayload
+
+      expect(remoteServiceAdapter.rpc.calledWith rpcPayload).to.be.ok()

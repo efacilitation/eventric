@@ -10,4 +10,15 @@ class RemoteCommandService
         aggregateName
       ]
 
+  commandAggregate: (aggregateName, aggregateId, commandName, commandParams) ->
+    @_remoteService.rpc
+      class: 'CommandService'
+      method: 'commandAggregate'
+      params: [
+        aggregateName,
+        aggregateId,
+        commandName,
+        commandParams
+      ]
+
 module.exports = RemoteCommandService

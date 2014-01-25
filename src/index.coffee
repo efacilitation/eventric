@@ -17,6 +17,9 @@ moduleDefinition =
 
   Repository: './repository'
 
+  RemoteService: './remote_service'
+  RemoteCommandService: './remote_command_service'
+
   MongoDBEventStore: './event_store/mongodb_event_store'
 
   MixinSnapshot: './mixin_snapshot'

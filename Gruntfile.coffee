@@ -26,15 +26,15 @@ module.exports = (grunt) ->
     watch:
       client:
         files: ['src/**/*.coffee', 'spec/**/*_spec.coffee']
-        tasks: ['karma']
+        tasks: ['karma', 'build']
 
       server:
         files: ['src/**/*.coffee', 'spec/**/*_spec.coffee']
-        tasks: ['mochaTest']
+        tasks: ['mochaTest', 'build']
 
       hybrid:
         files: ['src/**/*.coffee', 'spec/**/*_spec.coffee']
-        tasks: ['mochaTest', 'karma']
+        tasks: ['mochaTest', 'karma', 'build']
 
 
     commonjs:

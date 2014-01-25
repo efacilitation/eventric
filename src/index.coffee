@@ -1,10 +1,12 @@
 moduleDefinition =
+  Repository: './repository'
   AggregateRepository: './aggregate_repository'
+  ReadAggregateRepository: './read_aggregate_repository'
+
   AggregateRoot: './aggregate_root'
   AggregateEntity: './aggregate_entity'
   AggregateEntityCollection: './aggregate_entity_collection'
 
-  ReadAggregateRepository: './read_aggregate_repository'
   ReadAggregateRoot: './read_aggregate_root'
   ReadAggregateEntity: './read_aggregate_entity'
 
@@ -14,17 +16,15 @@ moduleDefinition =
   CommandService: './command_service'
   DomainEventService: './domain_event_service'
 
-  SocketService: './remote_service/socket_service'
-
-  Repository: './repository'
-
   RemoteService: './remote_service'
   RemoteCommandService: './remote_command_service'
 
-  MongoDBEventStore: './event_store/mongodb_event_store'
-
   MixinSnapshot: './mixin_snapshot'
   MixinSetGet: './mixin_setget'
+
+  # should be seperate modules
+  SocketIORemoteService: './remote_service/socketio_remote_service'
+  MongoDBEventStore: './event_store/mongodb_event_store'
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

@@ -1,4 +1,4 @@
-describe 'SocketService', ->
+describe 'SocketIORemoteService', ->
 
   _        = require 'underscore'
   expect   = require 'expect.js'
@@ -8,7 +8,7 @@ describe 'SocketService', ->
   class StubDomainEventService
     process: sinon.stub().callsArg(1)
 
-  SocketService = eventric 'SocketService'
+  SocketIORemoteService = eventric 'SocketIORemoteService'
 
   sessionUser            = null
   socketService          = null
@@ -30,7 +30,7 @@ describe 'SocketService', ->
 
     stubDomainEventService = new StubDomainEventService
 
-    socketService = new SocketService stubDomainEventService, stubIO
+    socketService = new SocketIORemoteService stubDomainEventService, stubIO
 
   afterEach ->
     stubIO.sockets.on.reset()
@@ -39,7 +39,7 @@ describe 'SocketService', ->
   describe 'given Socket.IO-Server provided as _io parameter', ->
 
     beforeEach ->
-      socketService = new SocketService stubDomainEventService, stubIO
+      socketService = new SocketIORemoteService stubDomainEventService, stubIO
 
     it 'should listen to Socket.IO connections ', ->
       listener       = stubIO.sockets.on
@@ -50,7 +50,7 @@ describe 'SocketService', ->
   describe 'given Socket.IO-Socket provided as _io parameter', ->
 
     beforeEach ->
-      socketService = new SocketService stubDomainEventService, stubSocket
+      socketService = new SocketIORemoteService stubDomainEventService, stubSocket
 
     it 'should initialize a socket.io listener for domain events', ->
       expect(socketService._socket).to.be.ok()

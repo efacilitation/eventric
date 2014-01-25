@@ -1,4 +1,4 @@
-class SocketService
+class SocketIORemoteService
 
   constructor: (@_domainEventService, @_io) ->
     if @_io.sockets
@@ -30,4 +30,4 @@ class SocketService
     @_socket.emit 'domainEvent', domainEvent
     @
 
-module.exports = SocketService
+module.exports = SocketIORemoteService

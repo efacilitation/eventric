@@ -6,6 +6,15 @@ describe 'RemoteService', ->
 
   RemoteService = eventric 'RemoteService'
 
+  rpcPayload = null
+  beforeEach ->
+    rpcPayload =
+      class: 'ExampleAggregate'
+      method: 'exampleMethod'
+      params: [
+        'exampleParams'
+      ]
+
   describe '#rpc', ->
 
     it 'call the rpc method on the RemoteServiceAdapter with the given parameters', ->
@@ -14,16 +23,25 @@ describe 'RemoteService', ->
         rpc: ->
 
       remoteServiceAdapter = sinon.createStubInstance ExampleRemoteServiceAdapter
-
       remoteService = new RemoteService remoteServiceAdapter
-
-      rpcPayload =
-        class: 'ExampleAggregate'
-        method: 'exampleMethod'
-        params: [
-          'exampleParams'
-        ]
-
       remoteService.rpc rpcPayload
 
       expect(remoteServiceAdapter.rpc.calledWith rpcPayload).to.be.ok()
+
+
+  describe '#handle', ->
+
+    it 'should execute the rpc', (done) ->
+
+      class ExampleAggregate
+        exampleMethod: ->
+
+      exampleAggregate = sinon.createStubInstance ExampleAggregate
+      exampleAggregate.exampleMethod.yields null, {}
+
+      remoteService = new RemoteService
+      remoteService.registerClass 'ExampleAggregate', exampleAggregate
+      remoteService.handle rpcPayload, ->
+
+        expect(exampleAggregate.exampleMethod.calledWith 'exampleParams').to.be.ok()
+        done()

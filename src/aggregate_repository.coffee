@@ -15,22 +15,21 @@ class AggregateRepository
     @_eventStore.find aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
 
-      if domainEvents.length == 0
-        # nothing found, return null
-        callback null, null
-        return
+      # nothing found, return null
+      return callback null, null if domainEvents.length == 0
 
-      # construct the Aggregate
+      # get the corresponding class
       AggregateClass = @getClass aggregateName
       if not AggregateClass
         err = new Error "Tried to command not registered Aggregate '#{aggregateName}'"
         callback err, null
         return
 
+      # construct the Aggregate and set the id
       aggregate = new AggregateClass
       aggregate.id = aggregateId
 
-      # apply the domainevents on the ReadAggregate
+      # apply the aggregate changes inside the domainevents on the ReadAggregate
       for domainEvent in domainEvents
         if domainEvent.aggregate.changed
           aggregate.applyChanges domainEvent.aggregate.changed

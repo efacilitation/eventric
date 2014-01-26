@@ -10,13 +10,15 @@ class AggregateEntity
   _.extend @prototype, MixinSetGet::
 
   constructor: (@_props = {}) ->
+    @_isNew             = false
+    @_propsChanged      = {}
+    @_domainEvents      = []
+    @_entityClasses     = {}
     @_trackPropsChanged = true
-    @_propsChanged = {}
-    @_domainEvents = []
-    @_entityClasses = {}
 
   create: ->
     @id = @_generateUid()
+    @_isNew = true
 
   _generateUid: (separator) ->
     # http://stackoverflow.com/a/12223573
@@ -65,9 +67,10 @@ class AggregateEntity
     changes = []
     for entity in collection.entities
       entityChanges = entity.getChanges()
-      if @_changesAreNotEmpty entityChanges
+      entityChanged = @_changesAreNotEmpty entityChanges
+      if entityChanged || entity._isNew
         entity = entity.getMetaData()
-        entity.changed = entityChanges
+        entity.changed = entityChanges if entityChanged
         changes.push entity
     changes
 

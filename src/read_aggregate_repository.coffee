@@ -7,6 +7,8 @@ MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
 
 class ReadAggregateRepository
 
+  _.extend @prototype, MixinRegisterAndGetClass::
+
   constructor: (@_aggregateName, @_eventStore) ->
 
   findById: ([readAggregateName]..., aggregateId, callback) =>
@@ -28,9 +30,9 @@ class ReadAggregateRepository
       readAggregate = new ReadAggregateClass
 
       # apply the domainevents on the ReadAggregate
-      # TODO readAggregate = @_applyDomainEventChangesOnReadAggregate readAggregate, domainEvent
-      readAggregate.applyChanges domainEvent.aggregate.changed for domainEvent in domainEvents when domainEvent.aggregate?.changed
-      readAggregate.id = aggregateId
+      for domainEvent in domainEvents when domainEvent.aggregate?.changed
+        readAggregate.applyChanges domainEvent.aggregate.changed
+        readAggregate.id = aggregateId
 
       # return the readAggregate
       callback null, readAggregate
@@ -65,6 +67,7 @@ class ReadAggregateRepository
   findOne: ([readAggregateName]..., query, callback) ->
     return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
+    # TODO returns only the first result, should actually do a limited query against the store
     @find readAggregateName, query, (err, results) =>
       return callback err, null if err
       return callback null, false if results.length == 0

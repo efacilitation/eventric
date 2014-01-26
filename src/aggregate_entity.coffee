@@ -16,9 +16,11 @@ class AggregateEntity
     @_entityClasses     = {}
     @_trackPropsChanged = true
 
+
   create: ->
     @id = @_generateUid()
     @_isNew = true
+
 
   _generateUid: (separator) ->
     # http://stackoverflow.com/a/12223573
@@ -27,9 +29,11 @@ class AggregateEntity
     delim = separator or "-"
     S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
 
+
   getMetaData: ->
     id: @id
     name: @constructor.name
+
 
   getChanges: ->
     changes =
@@ -48,11 +52,13 @@ class AggregateEntity
       # return empty object if nothing changed
       {}
 
+
   _changesOnProperties: ->
     changes = {}
     if Object.keys(@_propsChanged).length > 0
       changes = @_propsChanged
     changes
+
 
   _changesOnCollections: ->
     changes = {}
@@ -62,6 +68,7 @@ class AggregateEntity
         if collectionChanges.length > 0
           changes[propkey] = collectionChanges
     changes
+
 
   _changesOnCollection: (collectionName, collection) ->
     changes = []
@@ -74,6 +81,7 @@ class AggregateEntity
         changes.push entity
     changes
 
+
   _changesAreNotEmpty: (changes) ->
     for key, value of changes
       if Object.keys(value).length > 0
@@ -81,14 +89,17 @@ class AggregateEntity
 
     return false
 
+
   clearChanges: ->
     @_propsChanged = {}
 
     for propKey, propVal of @_props when propVal instanceof AggregateEntityCollection
       @_clearCollectionChanges propVal
 
+
   _clearCollectionChanges: (collection) ->
     entity.clearChanges() for entity in collection.entities
+
 
   applyChanges: (changes, params={}) ->
     oldTrackPropsChanged = @_trackPropsChanged
@@ -97,14 +108,17 @@ class AggregateEntity
     @_applyChangesToCollections changes.collections
     @_trackPropsChanged = oldTrackPropsChanged
 
+
   _applyChangesToProps: (propChanges) ->
     @_set propName, propValue for propName, propValue of propChanges
+
 
   _applyChangesToCollections: (collectionChanges) ->
     for collectionName, collection of collectionChanges
       if @_get collectionName
         @_set collectionName, new AggregateEntityCollection
         @_applyChangesToCollection collectionName, collection
+
 
   _applyChangesToCollection: (collectionName, collection) ->
     for entity in collection
@@ -124,10 +138,9 @@ class AggregateEntity
         entityInstance.applyChanges entity.changed
 
 
-
-
   getEntityClass: (className) ->
     EntityClass = @_entityClasses[className] ? false
+
 
   registerEntityClass: (className, Class) ->
     @_entityClasses[className] = Class

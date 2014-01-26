@@ -52,7 +52,7 @@ class CommandService
         return
 
       # EXECUTING
-      aggregate[commandName] params
+      aggregate[commandName] params...
 
       @_generateSaveAndTriggerDomainEvent commandName, aggregate, callback
 

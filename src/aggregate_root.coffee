@@ -21,6 +21,7 @@ class AggregateRoot extends AggregateEntity
 
     event =
       name: eventName
+      timestamp: new Date().getTime()
       aggregate: @getMetaData()
 
     if params.includeAggregateChanges

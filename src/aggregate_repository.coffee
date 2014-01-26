@@ -1,6 +1,12 @@
-Repository = require('eventric')('Repository')
+_        = require 'underscore'
+eventric = require 'eventric'
 
-class AggregateRepository extends Repository
+MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
+
+
+class AggregateRepository
+
+  _.extend @prototype, MixinRegisterAndGetClass::
 
   constructor: (@_eventStore) ->
 

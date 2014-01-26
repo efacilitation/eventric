@@ -1,8 +1,11 @@
-async = require 'async'
+_        = require 'underscore'
+async    = require 'async'
+eventric = require 'eventric'
 
-Repository = require('eventric')('Repository')
+MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
 
-class ReadAggregateRepository extends Repository
+
+class ReadAggregateRepository
 
   constructor: (@_aggregateName, @_eventStore) ->
 

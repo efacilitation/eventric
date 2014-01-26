@@ -1,5 +1,4 @@
 moduleDefinition =
-  Repository: './repository'
   AggregateRepository: './aggregate_repository'
   ReadAggregateRepository: './read_aggregate_repository'
 

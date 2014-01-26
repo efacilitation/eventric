@@ -18,7 +18,7 @@ describe 'SocketIORemoteService', ->
 
   describe '#rpc', ->
 
-    it 'should emit the given payload over socket.io-client', ->
+    it 'should emit the given payload over socket.io-client', (done) ->
 
       socketIOClientStub = sandbox.stub socketIOClient
       socketIOClientStub.emit = sandbox.stub()
@@ -28,6 +28,7 @@ describe 'SocketIORemoteService', ->
       rpcPayload =
         some: 'payload'
 
-      socketIORemoteService.rpc rpcPayload
+      socketIORemoteService.rpc rpcPayload, ->
 
-      expect(socketIOClientStub.emit.calledWith 'RPC_Request', rpcPayload).to.be.ok()
+        expect(socketIOClientStub.emit.calledWith 'RPC_Request', rpcPayload).to.be.ok()
+        done()

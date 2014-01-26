@@ -17,6 +17,7 @@ moduleDefinition =
 
   RemoteService: './remote_service'
   RemoteCommandService: './remote_command_service'
+  RemoteRepositoryService: './remote_repository_service'
 
   MixinRegisterAndGetClass: './mixin_registerandgetclass'
   MixinSnapshot: './mixin_snapshot'

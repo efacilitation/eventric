@@ -17,16 +17,17 @@ describe 'RemoteService', ->
 
   describe '#rpc', ->
 
-    it 'call the rpc method on the RemoteServiceAdapter with the given parameters', ->
+    it 'call the rpc method on the RemoteServiceAdapter with the given parameters', (done) ->
 
       class ExampleRemoteServiceAdapter
         rpc: ->
 
       remoteServiceAdapter = sinon.createStubInstance ExampleRemoteServiceAdapter
+      remoteServiceAdapter.rpc.yields null
       remoteService = new RemoteService remoteServiceAdapter
-      remoteService.rpc rpcPayload
-
-      expect(remoteServiceAdapter.rpc.calledWith rpcPayload).to.be.ok()
+      remoteService.rpc rpcPayload, ->
+        expect(remoteServiceAdapter.rpc.calledWith rpcPayload).to.be.ok()
+        done()
 
 
   describe '#handle', ->

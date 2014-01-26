@@ -6,13 +6,14 @@ MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
 
 class RemoteService
 
-  # TODO "class" is the wrong terminology here
+  # TODO "register*Class*" is the wrong terminology here, since its actually an instance
   _.extend @prototype, MixinRegisterAndGetClass::
 
   constructor: (@_adapter) ->
 
-  rpc: (payload) ->
-    @_adapter.rpc payload
+  rpc: (payload, callback) ->
+    @_adapter.rpc payload, ->
+      callback null
 
   handle: (payload, callback) ->
     instance = @getClass payload.class

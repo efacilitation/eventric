@@ -2,15 +2,16 @@ class RemoteCommandService
 
   constructor: (@_remoteService) ->
 
-  createAggregate: (aggregateName) ->
+  createAggregate: (aggregateName, callback) ->
     @_remoteService.rpc
       class: 'CommandService'
       method: 'createAggregate'
       params: [
         aggregateName
       ]
+      -> callback null
 
-  commandAggregate: (aggregateName, aggregateId, commandName, commandParams) ->
+  commandAggregate: (aggregateName, aggregateId, commandName, commandParams, callback) ->
     @_remoteService.rpc
       class: 'CommandService'
       method: 'commandAggregate'
@@ -20,5 +21,6 @@ class RemoteCommandService
         commandName,
         commandParams
       ]
+      -> callback null
 
 module.exports = RemoteCommandService

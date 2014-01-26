@@ -35,6 +35,6 @@ describe 'SocketIORemoteService', ->
       expect(socketIOClientStub.emit.calledWith 'RPC_Request', rpcPayload).to.be.ok()
 
     it 'should callback on rpc response', (done) ->
-      socketIORemoteService.rpc rpcPayload, (err, data) ->
+      socketIORemoteService.rpc rpcPayload, (data) ->
         expect(data).to.eql {some: 'data'}
         done()

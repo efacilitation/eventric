@@ -44,3 +44,41 @@ describe 'RemoteCommandService', ->
         ]
 
       expect(remoteServiceStub.rpc.calledWith expectedRpc).to.be.ok()
+
+  describe '#rpc', ->
+
+    it 'should call the RemoteService', ->
+
+      remoteServiceStub = sinon.createStubInstance RemoteService
+      remoteCommandService = new RemoteCommandService remoteServiceStub
+      remoteCommandService.rpc {some: 'rpc'}
+
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', {some: 'rpc'}).to.be.ok()
+
+  describe '#handle', ->
+
+    it 'should execute the class:method:params given in the rpc payload', ->
+
+      class ExampleAggregate
+        someMethod: ->
+
+      exampleAggregate = sinon.createStubInstance ExampleAggregate
+
+      rpc =
+        service: 'RemoteCommandService'
+        payload:
+          class: 'CommandService'
+          method: 'commandAggregate'
+          params: [
+            'ExampleAggregate'
+            42
+            'someMethod'
+            {some: 'params'}
+          ]
+
+      remoteServiceStub = sinon.createStubInstance RemoteService
+      remoteCommandService = new RemoteCommandService remoteServiceStub
+      remoteCommandService.registerClass 'ExampleAggregate', exampleAggregate
+      remoteCommandService.handle rpc, ->
+
+      expect(exampleAggregate.someMethod.calledWith {some: 'params'})

@@ -1,4 +1,4 @@
-describe.only 'RemoteRepositoryService', ->
+describe 'RemoteRepositoryService', ->
 
   expect   = require 'expect.js'
   sinon    = require 'sinon'
@@ -8,36 +8,42 @@ describe.only 'RemoteRepositoryService', ->
   RemoteService           = eventric 'RemoteService'
   RemoteRepositoryService = eventric 'RemoteRepositoryService'
 
-  describe '#rpc', ->
+  class ExampleAggregate extends AggregateEntity
 
-    class ExampleAggregate extends AggregateEntity
-    class ExampleRepository
+  class ExampleRepository
+    exampleMethod: ->
 
-    remoteRepositoryService = null
-    remoteServiceStub = null
-    rpcPayload = null
+  remoteRepositoryService = null
+  remoteServiceStub = null
+  rpcPayload = null
+  exampleRepository = null
 
-    beforeEach ->
-      remoteServiceStub = sinon.createStubInstance RemoteService
-      remoteServiceStub.rpc.yields null, [
-        name: '_snapshot'
-        aggregate:
-          id: 42
-          name: 'ExampleAggregate'
-          changed:
-            props:
-              name: 'John'
+  beforeEach ->
+    remoteServiceStub = sinon.createStubInstance RemoteService
+    remoteServiceStub.rpc.yields null, [
+      name: '_snapshot'
+      aggregate:
+        id: 42
+        name: 'ExampleAggregate'
+        changed:
+          props:
+            name: 'John'
+    ]
+
+    exampleRepository = sinon.createStubInstance ExampleRepository
+
+    remoteRepositoryService = new RemoteRepositoryService remoteServiceStub
+    remoteRepositoryService.registerClass 'ExampleAggregate', ExampleAggregate
+    remoteRepositoryService.registerClass 'ExampleRepository', exampleRepository
+
+    rpcPayload =
+      repository: 'ExampleRepository'
+      method: 'exampleMethod'
+      params: [
+        'exampleParams'
       ]
 
-      remoteRepositoryService = new RemoteRepositoryService remoteServiceStub
-      remoteRepositoryService.registerClass 'ExampleAggregate', ExampleAggregate
-
-      rpcPayload =
-        class: 'ExampleRepository'
-        method: 'exampleMethod'
-        params: [
-          'exampleParams'
-        ]
+  describe '#rpc', ->
 
     it 'should convert rpc responses to its corresponding class instances', (done) ->
       remoteRepositoryService.rpc rpcPayload, (err, results) ->
@@ -49,7 +55,15 @@ describe.only 'RemoteRepositoryService', ->
         expect(results[0]._get 'name').to.be 'John'
         done()
 
-    it 'should call the RemoteServiceAdapter', (done) ->
+    it 'should call the RemoteService', (done) ->
       remoteRepositoryService.rpc rpcPayload, (err, result) ->
-        expect(remoteServiceStub.rpc.calledWith rpcPayload).to.be.ok()
+        expect(remoteServiceStub.rpc.calledWith 'RemoteRepositoryService', rpcPayload).to.be.ok()
         done()
+
+
+  describe '#handle', ->
+
+    it 'should execute the given method on the given repository', ->
+      remoteRepositoryService.handle rpcPayload, ->
+      expect(exampleRepository.exampleMethod.calledWith 'exampleParams').to.be.ok()
+

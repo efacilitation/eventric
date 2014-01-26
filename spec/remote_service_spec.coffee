@@ -6,18 +6,21 @@ describe 'RemoteService', ->
 
   RemoteService = eventric 'RemoteService'
 
-  rpcPayload = null
+  rpc = null
   beforeEach ->
-    rpcPayload =
-      class: 'ExampleAggregate'
-      method: 'exampleMethod'
-      params: [
-        'exampleParams'
-      ]
+    rpc =
+      service: 'RemoteExampleService'
+      payload:
+        class: 'ExampleAggregate'
+        method: 'exampleMethod'
+        params: [
+          'exampleParams'
+        ]
+
 
   describe '#rpc', ->
 
-    it 'call the rpc method on the RemoteServiceAdapter with the given parameters', (done) ->
+    it 'should call the rpc method on the RemoteServiceAdapter', (done) ->
 
       class ExampleRemoteServiceAdapter
         rpc: ->
@@ -25,24 +28,22 @@ describe 'RemoteService', ->
       remoteServiceAdapter = sinon.createStubInstance ExampleRemoteServiceAdapter
       remoteServiceAdapter.rpc.yields null
       remoteService = new RemoteService remoteServiceAdapter
-      remoteService.rpc rpcPayload, ->
-        expect(remoteServiceAdapter.rpc.calledWith rpcPayload).to.be.ok()
+      remoteService.rpc 'RemoteExampleService', rpc.payload, ->
+        expect(remoteServiceAdapter.rpc.calledWith rpc).to.be.ok()
         done()
 
 
   describe '#handle', ->
 
-    it 'should execute the rpc', (done) ->
+    it 'should call the handle function on the corresponding registered service', ->
 
-      class ExampleAggregate
-        exampleMethod: ->
+      class RemoteExampleService
+        handle: ->
 
-      exampleAggregate = sinon.createStubInstance ExampleAggregate
-      exampleAggregate.exampleMethod.yields null, {}
+      remoteExampleService = sinon.createStubInstance RemoteExampleService
 
       remoteService = new RemoteService
-      remoteService.registerClass 'ExampleAggregate', exampleAggregate
-      remoteService.handle rpcPayload, ->
+      remoteService.registerServiceHandler 'RemoteExampleService', remoteExampleService
 
-        expect(exampleAggregate.exampleMethod.calledWith 'exampleParams').to.be.ok()
-        done()
+      remoteService.handle rpc, ->
+      expect(remoteExampleService.handle.calledWith rpc.payload).to.be.ok()

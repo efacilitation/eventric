@@ -5,8 +5,6 @@ describe 'SocketIORemoteService', ->
   sinon    = require 'sinon'
   eventric = require 'eventric'
 
-  socketIOClient = require 'socket.io-client'
-
   SocketIORemoteService = eventric 'SocketIORemoteService'
 
   sandbox = null
@@ -18,17 +16,25 @@ describe 'SocketIORemoteService', ->
 
   describe '#rpc', ->
 
-    it 'should emit the given payload over socket.io-client', (done) ->
+    rpcPayload = null
+    socketIORemoteService = null
+    socketIOClientStub = null
 
-      socketIOClientStub = sandbox.stub socketIOClient
+    beforeEach ->
+      socketIOClientStub = sandbox.stub()
       socketIOClientStub.emit = sandbox.stub()
-
-      socketIORemoteService = new SocketIORemoteService socketIOClient
+      socketIOClientStub.on = sandbox.stub().yields {some: 'data'}
+      socketIORemoteService = new SocketIORemoteService socketIOClientStub
 
       rpcPayload =
         some: 'payload'
 
-      socketIORemoteService.rpc rpcPayload, ->
 
-        expect(socketIOClientStub.emit.calledWith 'RPC_Request', rpcPayload).to.be.ok()
+    it 'should emit the given payload as rpc request over socket.io-client', ->
+      socketIORemoteService.rpc rpcPayload, ->
+      expect(socketIOClientStub.emit.calledWith 'RPC_Request', rpcPayload).to.be.ok()
+
+    it 'should callback on rpc response', (done) ->
+      socketIORemoteService.rpc rpcPayload, (err, data) ->
+        expect(data).to.eql {some: 'data'}
         done()

@@ -11,16 +11,21 @@ class RemoteRepositoryService
 
 
   rpc: (payload, callback) ->
-    RepositoryClass = @getClass payload.class
-    if not RepositoryClass
-      err = new Error "Tried to RemoteCall not registered Class #{payload.class}"
-      return callback err, null
 
-    repository = new RepositoryClass
+    @_remoteService.rpc payload, (err, responses) =>
+      results = []
+      for response in responses
+        Class = @getClass response.aggregate.name
+        if not Class
+          err = new Error "Tried to built not registered Class #{response.aggregate.name} from RPC Response"
+          return callback err, null
 
-    @_remoteService.rpc payload, (err) ->
-      return callback err, null if err
-      callback null, repository
+        instance = new Class
+        instance.applyChanges response.aggregate.changed if response.aggregate.changed?
+
+        results.push instance
+
+      callback null, results
 
 
 module.exports = RemoteRepositoryService

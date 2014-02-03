@@ -22,7 +22,7 @@ describe 'RemoteCommandService', ->
           'ExampleAggregate'
         ]
 
-      expect(remoteServiceStub.rpc.calledWith expectedRpc).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc).to.be.ok()
 
 
   describe '#commandAggregate', ->
@@ -43,7 +43,7 @@ describe 'RemoteCommandService', ->
           {some: 'params'}
         ]
 
-      expect(remoteServiceStub.rpc.calledWith expectedRpc).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc).to.be.ok()
 
   describe '#rpc', ->
 

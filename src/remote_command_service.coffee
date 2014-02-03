@@ -11,7 +11,7 @@ class RemoteCommandService
   constructor: (@_remoteService) ->
 
   createAggregate: (aggregateName, callback) ->
-    @_remoteService.rpc
+    @rpc
       class: 'CommandService'
       method: 'createAggregate'
       params: [
@@ -21,7 +21,7 @@ class RemoteCommandService
 
 
   commandAggregate: (aggregateName, aggregateId, commandName, commandParams, callback) ->
-    @_remoteService.rpc
+    @rpc
       class: 'CommandService'
       method: 'commandAggregate'
       params: [

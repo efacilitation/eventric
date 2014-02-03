@@ -37,4 +37,17 @@ class AggregateRoot extends AggregateEntity
     @_domainEvents
 
 
+  registerEntityCollection: (collectionName, entityName, entityClass) ->
+    @_set collectionName, new AggregateEntityCollection
+    @registerEntityClass entityName, entityClass
+
+
+  addEntityToCollection: (entity, collectionName) ->
+    # get collection
+    collection = @_get collectionName
+
+    # add entity to collection
+    collection.add entity
+
+
 module.exports = AggregateRoot

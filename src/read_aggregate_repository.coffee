@@ -12,6 +12,7 @@ class ReadAggregateRepository
   constructor: (@_aggregateName, @_eventStore) ->
 
   findById: ([readAggregateName]..., aggregateId, callback) =>
+    return unless @_callbackIsAFunction callback
     return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
     # create the ReadAggregate instance
@@ -39,6 +40,7 @@ class ReadAggregateRepository
 
 
   find: ([readAggregateName]..., query, callback) ->
+    return unless @_callbackIsAFunction callback
     return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
     # get ReadAggregates matching the query
@@ -65,6 +67,7 @@ class ReadAggregateRepository
 
 
   findOne: ([readAggregateName]..., query, callback) ->
+    return unless @_callbackIsAFunction callback
     return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
     # TODO returns only the first result, should actually do a limited query against the store
@@ -75,6 +78,8 @@ class ReadAggregateRepository
 
 
   findIds: (readAggregateName, query, callback) =>
+    return unless @_callbackIsAFunction callback
+
     # ask the adapter to find the ids and return them
     @_eventStore.find @_aggregateName, query, { 'aggregate.id': 1 }, (err, results) =>
       return callback err, null if err
@@ -94,6 +99,13 @@ class ReadAggregateRepository
         readAggregateName = @_readAggregateName
 
     return readAggregateName
+
+  _callbackIsAFunction: (callback) ->
+    if typeof callback == 'function'
+      return true
+
+    else
+      throw new Error 'No callback provided'
 
 
 module.exports = ReadAggregateRepository

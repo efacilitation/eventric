@@ -10,17 +10,18 @@ class RemoteCommandService
 
   constructor: (@_remoteService) ->
 
-  createAggregate: (aggregateName, callback) ->
+  createAggregate: ([aggregateName, aggregateParams]..., callback) ->
     @rpc
       class: 'CommandService'
       method: 'createAggregate'
       params: [
         aggregateName
+        aggregateParams
       ]
-      -> callback null
+      (err, data) -> callback null, data
 
 
-  commandAggregate: (aggregateName, aggregateId, commandName, commandParams, callback) ->
+  commandAggregate: ([aggregateName, aggregateId, commandName, commandParams]..., callback) ->
     @rpc
       class: 'CommandService'
       method: 'commandAggregate'
@@ -30,12 +31,12 @@ class RemoteCommandService
         commandName,
         commandParams
       ]
-      -> callback null
+      (err, data) -> callback null, data
 
 
   rpc: (payload, callback) ->
-    @_remoteService.rpc 'RemoteCommandService', payload, ->
-      callback null
+    @_remoteService.rpc 'RemoteCommandService', payload, (data) ->
+      callback data
 
 
   handle: (payload, callback) ->

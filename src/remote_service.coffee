@@ -9,7 +9,7 @@ class RemoteService
       service: serviceName
       payload: payload
 
-    @_adapter.rpc rpc, (data) ->
+    @_adapter.rpc rpc, (err, data) ->
       callback null, data
 
 

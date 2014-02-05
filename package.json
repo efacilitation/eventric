@@ -22,6 +22,9 @@
     "url": "git://sixsteps.com/efa/eventric.git"
   },
   "main": "src/index.coffee",
+  "scripts": {
+    "postinstall": "bower install"
+  },
   "devDependencies": {
     "mocha": "~1.17.0",
     "expect.js": "~0.2.0",

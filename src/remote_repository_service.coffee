@@ -24,6 +24,7 @@ class RemoteRepositoryService
 
         instance = new Class
         instance.applyChanges response.aggregate.changed if response.aggregate.changed?
+        instance.id = response.aggregate.id
 
         results.push instance
 

@@ -68,4 +68,4 @@ module.exports = (grunt) ->
 
     clean: ['tmp']
 
-  grunt.registerTask 'build', ['commonjs', 'coffee', 'clean']
+  grunt.registerTask 'build', ['commonjs', 'coffee', 'concat', 'clean']

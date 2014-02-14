@@ -48,7 +48,7 @@
     "karma-mocha": "~0.1.1",
     "bower": "~1.2.8",
     "grunt-karma": "~0.6.2",
-    "grunt-commonjs-coffee": "git://github.com/johannesbecker/grunt-commonjs-coffee.git",
+    "grunt-contrib-commonjs": "*",
     "grunt-contrib-coffee": "~0.8.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-clean": "~0.5.0"

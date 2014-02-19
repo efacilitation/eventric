@@ -23,7 +23,6 @@
   },
   "main": "src/index.coffee",
   "scripts": {
-    "postinstall": "bower install"
   },
   "devDependencies": {
     "mocha": "~1.17.0",

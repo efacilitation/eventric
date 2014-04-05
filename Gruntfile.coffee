@@ -69,3 +69,6 @@ module.exports = (grunt) ->
     clean: ['tmp']
 
   grunt.registerTask 'build', ['commonjs', 'coffee', 'concat', 'clean']
+  grunt.registerTask 'spec:client', ['karma']
+  grunt.registerTask 'spec:server', ['mochaTest']
+  grunt.registerTask 'spec', ['spec:server', 'spec:client']

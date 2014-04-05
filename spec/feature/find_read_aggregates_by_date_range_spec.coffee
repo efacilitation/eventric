@@ -6,7 +6,6 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
 
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
-  EventStore              = eventric 'MongoDBEventStore'
 
   describe 'given we want to get all ReadExampleAggregates between two dates', ->
 
@@ -34,6 +33,9 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
               callback null, readAggregates
 
         # create EventStoreStub and yield fake event
+        class EventStore
+          find: ->
+          save: ->
         EventStoreStub = sinon.createStubInstance EventStore
         EventStoreStub.find.yields null, [
           name: 'testEvent'

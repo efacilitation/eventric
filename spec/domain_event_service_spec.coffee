@@ -5,13 +5,15 @@ describe 'DomainEventService', ->
   eventric   = require 'eventric'
 
   DomainEventService = eventric 'DomainEventService'
-  EventStore         = eventric 'MongoDBEventStore'
 
   sandbox = null
   eventStore = null
   domainEventService = null
   beforeEach ->
     sandbox = sinon.sandbox.create()
+    class EventStore
+      find: ->
+      save: ->
     eventStore = sinon.createStubInstance EventStore
     eventStore.save.yields null
     domainEventService = new DomainEventService eventStore

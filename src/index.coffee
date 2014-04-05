@@ -23,9 +23,6 @@ moduleDefinition =
   MixinSnapshot: './mixin_snapshot'
   MixinSetGet: './mixin_setget'
 
-  # should be seperate modules
-  SocketIORemoteService: './remote_service/socketio_remote_service'
-  MongoDBEventStore: './event_store/mongodb_event_store'
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

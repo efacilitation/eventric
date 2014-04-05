@@ -46,13 +46,13 @@
     "grunt": "~0.4.2",
     "grunt-contrib-watch": "~0.5.3",
     "karma-mocha": "~0.1.1",
-    "bower": "~1.2.8",
     "grunt-cli": "^0.1.13",
     "grunt-karma": "~0.6.2",
     "grunt-contrib-coffee": "~0.8.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-commonjs": "^0.4.2"
+    "grunt-contrib-commonjs": "^0.4.2",
+    "commonjs-require-definition": "~0.1.2"
   },
   "dependencies": {
     "coffee-script": "~1.6.3",

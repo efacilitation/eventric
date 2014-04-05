@@ -8,7 +8,6 @@ describe 'Create new Aggregate Scenario', ->
   DomainEventService      = eventric 'DomainEventService'
   AggregateRoot           = eventric 'AggregateRoot'
   AggregateRepository     = eventric 'AggregateRepository'
-  EventStore              = eventric 'MongoDBEventStore'
 
   sandbox = null
   beforeEach ->
@@ -26,6 +25,9 @@ describe 'Create new Aggregate Scenario', ->
         class EnderAggregate extends AggregateRoot
 
         # create the EventStoreStub
+        class EventStore
+          find: ->
+          save: ->
         eventStore = sinon.createStubInstance EventStore
         # simulate successful saving
         eventStore.save.yields null

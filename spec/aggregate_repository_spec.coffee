@@ -6,7 +6,6 @@ describe 'AggregateRepository', ->
 
   AggregateRepository = eventric 'AggregateRepository'
   AggregateRoot       = eventric 'AggregateRoot'
-  EventStore          = eventric 'MongoDBEventStore'
 
 
   describe '#findById', ->
@@ -15,13 +14,16 @@ describe 'AggregateRepository', ->
     aggregateRepository = null
     EventStoreStub = null
     beforeEach ->
-
+      class EventStore
+        find: ->
+        save: ->
       EventStoreStub = sinon.createStubInstance EventStore
 
       class Foo extends AggregateRoot
 
       aggregateRepository = new AggregateRepository EventStoreStub
       aggregateRepository.registerClass 'Foo', Foo
+
 
     it 'should return a instantiated Aggregate', ->
       aggregateRepository.findById 'Foo', 42, (err, aggregate) ->

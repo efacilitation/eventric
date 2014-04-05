@@ -6,7 +6,6 @@ describe 'ReadAggregateRepositorySpec', ->
 
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
-  EventStore              = eventric 'MongoDBEventStore'
 
   class ReadFoo extends ReadAggregateRoot
     @prop 'name'
@@ -18,6 +17,9 @@ describe 'ReadAggregateRepositorySpec', ->
   beforeEach ->
     sandbox = sinon.sandbox.create()
 
+    class EventStore
+      find: ->
+      save: ->
     EventStoreStub = sinon.createStubInstance EventStore
     EventStoreStub.find.yields null, [
       name: 'create'

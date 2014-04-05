@@ -10,16 +10,16 @@ describe 'RemoteCommandService', ->
   describe '#createAggregate', ->
 
     it 'should tell the RemoteService to create an Aggregate with the given name', ->
-
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteCommandService = new RemoteCommandService remoteServiceStub
-      remoteCommandService.createAggregate 'ExampleAggregate'
+      remoteCommandService.createAggregate 'ExampleAggregate', ->
 
       expectedRpc =
         class: 'CommandService'
         method: 'createAggregate'
         params: [
           'ExampleAggregate'
+          undefined
         ]
 
       expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc).to.be.ok()
@@ -31,7 +31,7 @@ describe 'RemoteCommandService', ->
 
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteCommandService = new RemoteCommandService remoteServiceStub
-      remoteCommandService.commandAggregate 'ExampleAggregate', 42, 'someMethod', {some: 'params'}
+      remoteCommandService.commandAggregate 'ExampleAggregate', 42, 'someMethod', {some: 'params'}, ->
 
       expectedRpc =
         class: 'CommandService'

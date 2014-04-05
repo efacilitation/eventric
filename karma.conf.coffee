@@ -8,12 +8,13 @@ module.exports = (config) ->
     # list of files / patterns to load in the browser
     files: [
       # -- commonjs loader --
-      'bower_components/commonjs-require-definition/require.js'
+      'node_modules/commonjs-require-definition/require.js'
 
       # -- wrapped by commonjs --
       'node_modules/expect.js/expect.js'
       'node_modules/underscore/underscore.js'
       'node_modules/backbone/backbone.js'
+      'node_modules/async/lib/async.js'
       'vendor/sinon.js'
 
       'index.coffee'
@@ -37,6 +38,7 @@ module.exports = (config) ->
       'node_modules/expect.js/expect.js': ['commonjs']
       'node_modules/underscore/underscore.js': ['commonjs']
       'node_modules/backbone/backbone.js': ['commonjs']
+      'node_modules/async/lib/async.js': ['commonjs']
       'vendor/sinon.js': ['commonjs']
 
     coffeePreprocessor:
@@ -56,6 +58,9 @@ module.exports = (config) ->
 
           else if (path.indexOf 'node_modules/underscore') == 0
             newPath = 'underscore'
+
+          else if (path.indexOf 'node_modules/async') == 0
+            newPath = 'async'
 
           else if (path.indexOf 'vendor') == 0
             newPath = path.replace /^vendor\//, ''

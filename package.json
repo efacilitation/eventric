@@ -23,7 +23,6 @@
   },
   "main": "src/index.coffee",
   "scripts": {
-    "postinstall": "node_modules/.bin/grunt build"
   },
   "devDependencies": {
     "mocha": "~1.17.0",

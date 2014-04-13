@@ -8,7 +8,7 @@ module.exports = (config) ->
     # list of files / patterns to load in the browser
     files: [
       # -- commonjs loader --
-      'node_modules/commonjs-require-definition/require.js'
+      'node_modules/commonjs-require/commonjs-require.js'
 
       # -- wrapped by commonjs --
       'node_modules/expect.js/expect.js'

@@ -11,13 +11,14 @@ class RemoteCommandService
   constructor: (@_remoteService) ->
 
   createAggregate: ([aggregateName, aggregateParams]..., callback) ->
+    params = []
+    params.push aggregateName
+    if aggregateParams
+      params.push aggregateParams
     @rpc
       class: 'CommandService'
       method: 'createAggregate'
-      params: [
-        aggregateName
-        aggregateParams
-      ]
+      params: params
       (err, data) -> callback null, data
 
 

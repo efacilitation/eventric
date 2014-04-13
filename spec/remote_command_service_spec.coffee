@@ -19,7 +19,6 @@ describe 'RemoteCommandService', ->
         method: 'createAggregate'
         params: [
           'ExampleAggregate'
-          undefined
         ]
 
       expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc).to.be.ok()

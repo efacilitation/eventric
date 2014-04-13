@@ -50,8 +50,8 @@
     "grunt-contrib-coffee": "~0.8.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-commonjs": "^0.4.2",
-    "commonjs-require-definition": "~0.1.2"
+    "grunt-wrap-commonjs": "*",
+    "commonjs-require": "*"
   },
   "dependencies": {
     "coffee-script": "~1.6.3",

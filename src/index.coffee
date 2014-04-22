@@ -23,6 +23,9 @@ moduleDefinition =
   MixinSnapshot: './mixin_snapshot'
   MixinSetGet: './mixin_setget'
 
+  BoundedContext: './bounded_context'
+  BoundedContextService: './bounded_context_service'
+
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

@@ -51,7 +51,8 @@
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-wrap-commonjs": "*",
-    "commonjs-require": "*"
+    "commonjs-require": "*",
+    "mockery": "*"
   },
   "dependencies": {
     "coffee-script": "~1.6.3",

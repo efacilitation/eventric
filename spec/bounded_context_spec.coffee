@@ -1,7 +1,6 @@
 describe 'BoundedContext', ->
 
   expect         = require 'expect.js'
-  mockery        = require 'mockery'
   sinon          = require 'sinon'
   eventric       = require 'eventric'
 

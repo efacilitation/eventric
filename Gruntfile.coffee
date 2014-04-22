@@ -7,6 +7,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-wrap-commonjs'
+  grunt.loadNpmTasks 'grunt-symbolic-link'
 
   # Configure a mochaTest task
   grunt.initConfig
@@ -61,6 +62,14 @@ module.exports = (grunt) ->
         files:
           'dist/eventric.js': ['tmp/**/*.coffee']
 
+    symlink:
+      eventric:
+        target: '.'
+        link: 'node_modules/eventric'
+        options:
+          overwrite: true
+          force: true
+
     concat:
       dist:
         src: ['tmp/node_modules/**/*.js']
@@ -71,4 +80,4 @@ module.exports = (grunt) ->
   grunt.registerTask 'build', ['commonjs', 'coffee', 'concat', 'clean']
   grunt.registerTask 'spec:client', ['karma']
   grunt.registerTask 'spec:server', ['mochaTest']
-  grunt.registerTask 'spec', ['spec:server', 'spec:client']
+  grunt.registerTask 'spec', ['symlink', 'spec:server', 'spec:client']

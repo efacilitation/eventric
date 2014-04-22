@@ -64,7 +64,7 @@ module.exports = (grunt) ->
 
     symlink:
       eventric:
-        target: '.'
+        target: '..'
         link: 'node_modules/eventric'
         options:
           overwrite: true

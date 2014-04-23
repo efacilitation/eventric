@@ -12,7 +12,9 @@ describe 'BoundedContextService', ->
   exampleBoundedContextMock = null
 
   beforeEach ->
-    mockery.enable()
+    mockery.enable
+        warnOnReplace: false
+        warnOnUnregistered: false
 
     exampleBoundedContextMock =
       initialize: sinon.stub()
@@ -22,6 +24,7 @@ describe 'BoundedContextService', ->
 
   afterEach ->
     mockery.deregisterAll()
+    mockery.disable()
 
 
   describe '#load', ->

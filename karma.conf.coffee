@@ -9,7 +9,6 @@ module.exports = (config) ->
     files: [
       # -- commonjs loader --
       'node_modules/commonjs-require/commonjs-require.js'
-      'node_modules/commonjs-require/node-module-emulator.js'
 
       # -- wrapped by commonjs --
       'node_modules/expect.js/expect.js'

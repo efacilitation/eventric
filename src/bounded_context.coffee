@@ -6,36 +6,83 @@ DomainEventService    = eventric 'DomainEventService'
 
 class BoundedContext
   aggregates: {}
-  readAggregateRepositories: {}
 
+  readAggregateRepositories: {}
   _readAggregateRepositoriesInstances: {}
 
-  initialize: ->
-    # TODO provide an event store
-    @_eventStore = 'provideMe'
-    @aggregateRepository  = new AggregateRepository @_eventStore
-    @domainEventService   = new DomainEventService @_eventStore
-    @commandService       = new CommandService @domainEventService, @aggregateRepository
-    @_initializeAggregates()
-    @_initializeReadAggregateRepositories()
+  applicationServices: []
 
+  _applicationServiceCommands: {}
+  _applicationServiceQueries: {}
+
+  initialize: (eventStore) ->
+    @_initializeEventStore eventStore, =>
+      @_aggregateRepository  = new AggregateRepository @_eventStore
+      @_domainEventService   = new DomainEventService @_eventStore
+      @_commandService       = new CommandService @_domainEventService, @_aggregateRepository
+
+      @_initializeAggregates()
+      @_initializeReadAggregateRepositories()
+      @_initializeApplicationServices()
+
+
+  _initializeEventStore: (eventStore, next) ->
+    if eventStore
+      @_eventStore = eventStore
+      # TODO asynchron
+      @_eventStore.initialize()
+      next()
+    else
+      MongoDBEventStore = require 'eventric-store-mongodb'
+      @_eventStore = new MongoDBEventStore
+      @_eventStore.initialize (err) =>
+        next()
 
   _initializeAggregates: ->
-    @aggregateRepository.registerClass aggregateName, aggregateClass for aggregateName, aggregateClass of @aggregates
+    @_aggregateRepository.registerClass aggregateName, aggregateClass for aggregateName, aggregateClass of @aggregates
 
 
   _initializeReadAggregateRepositories: ->
-    for repositoryName, repositoryClass of @readAggregateRepositories
-      @_readAggregateRepositoriesInstances[repositoryName] = new repositoryClass 'foobar', @_eventStore
+    for repositoryName, ReadRepository of @readAggregateRepositories
+      @_readAggregateRepositoriesInstances[repositoryName] = new ReadRepository repositoryName, @_eventStore
+
+
+  _initializeApplicationServices: ->
+    for ApplicationService in @applicationServices
+      applicationService = new ApplicationService
+      for commandName, commandMethodName of applicationService.commands
+        # TODO check duplicates, warn and do some logging
+        @_applicationServiceCommands[commandName] = ->
+          applicationService[commandMethodName].apply applicationService, arguments
+
+      for queryName, queryMethodName of applicationService.queries
+        # TODO check duplicates, warn and do some logging
+        @_applicationServiceQueries[queryName] = ->
+         applicationService[queryMethodName].apply applicationService, arguments
 
 
   getReadAggregateRepository: (repositoryName) ->
     @_readAggregateRepositoriesInstances[repositoryName]
 
 
-  command: (command, aggregateId, params) ->
-    [aggregateName, methodName] = command.split ':'
-    @commandService.commandAggregate aggregateName, aggregateId, methodName, params
+  command: (commandName, aggregateId, params) ->
+    if @_applicationServiceCommands[commandName]
+      @_applicationServiceCommands[commandName] aggregateId, params
+    else
+      [aggregateName, methodName] = @_splitAggregateAndMethod commandName
+      @_commandService.commandAggregate aggregateName, aggregateId, methodName, params
+
+
+  query: (queryName, aggregateId, params) ->
+    if @_applicationServiceQueries[queryName]
+      @_applicationServiceQueries[queryName] aggregateId, params
+    else
+      [aggregateName, methodName] = @_splitAggregateAndMethod queryName
+      @getReadAggregateRepository(aggregateName)[methodName] aggregateId, params
+
+
+  _splitAggregateAndMethod: (input) ->
+    input.split ':'
 
 
 module.exports = BoundedContext

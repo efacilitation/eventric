@@ -5,9 +5,10 @@ describe 'BoundedContext', ->
   eventric       = require 'eventric'
   sandbox        = sinon.sandbox.create()
 
-  class eventStoreMock
-    initialize: sandbox.stub()
-  class eventricComponent
+
+  class MongoDbEventStoreMock
+      initialize: sinon.stub().yields null
+  class EventricComponent
     initialize: sandbox.stub().yields false
     registerClass: sandbox.stub()
     registerServiceHandler: sandbox.stub()
@@ -22,10 +23,11 @@ describe 'BoundedContext', ->
       warnOnUnregistered: false
 
     eventricMock = sandbox.stub()
-    eventricMock.returns eventricComponent
+    eventricMock.returns EventricComponent
     eventricMock.withArgs('CommandService').returns CommandServiceMock
     eventricMock.withArgs('AggregateRepository').returns AggregateRepositoryMock
     mockery.registerMock 'eventric', eventricMock
+    mockery.registerMock 'eventric-store-mongodb', MongoDbEventStoreMock
 
 
   afterEach ->
@@ -35,16 +37,23 @@ describe 'BoundedContext', ->
 
 
   describe '#initialize', ->
-    it 'should initialize an event store', ->
-      eventStoreMock =
-        initialize: sinon.stub()
-      mockery.registerMock 'eventric-store-mongodb', eventStoreMock
+    it 'should initialize the mongodb event store per default', ->
+      BoundedContext = eventric 'BoundedContext'
+      boundedContext = new BoundedContext
+      boundedContext.initialize()
+
+      expect(MongoDbEventStoreMock::initialize.calledOnce).to.be.ok()
+
+
+    it 'should initialize a custom event store if provided', ->
+      class CustomEventStoreMock
+        initialize: sandbox.stub().yields null
 
       BoundedContext = eventric 'BoundedContext'
       boundedContext = new BoundedContext
-      boundedContext.initialize eventStoreMock
+      boundedContext.initialize CustomEventStoreMock
 
-      expect(eventStoreMock.initialize.calledOnce).to.be.ok()
+      expect(CustomEventStoreMock::initialize.calledOnce).to.be.ok()
 
 
     it 'should register the configured aggregates at the aggregateRepository', ->
@@ -58,7 +67,7 @@ describe 'BoundedContext', ->
           'Bar': BarAggregateMock
 
       boundedContext = new ExampleBoundedContext
-      boundedContext.initialize eventStoreMock
+      boundedContext.initialize()
 
       expect(AggregateRepositoryMock::registerClass.calledWith 'Foo', FooAggregateMock).to.be.ok()
       expect(AggregateRepositoryMock::registerClass.calledWith 'Bar', BarAggregateMock).to.be.ok()
@@ -75,7 +84,7 @@ describe 'BoundedContext', ->
           'Bar': BarReadAggregateRepository
 
       boundedContext = new ExampleBoundedContext
-      boundedContext.initialize eventStoreMock
+      boundedContext.initialize()
 
       expect((boundedContext.getReadAggregateRepository 'Foo') instanceof FooReadAggregateRepository).to.be.ok()
       expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.ok()
@@ -86,7 +95,7 @@ describe 'BoundedContext', ->
       it 'should call the command service with the correct parameters', ->
         BoundedContext = eventric 'BoundedContext'
         boundedContext = new BoundedContext
-        boundedContext.initialize eventStoreMock
+        boundedContext.initialize()
         id = 42
         params = {foo: 'bar'}
         boundedContext.command 'Aggregate:function', id, params
@@ -107,7 +116,7 @@ describe 'BoundedContext', ->
           ]
 
         exampleBoundedContext = new ExampleBoundedContext
-        exampleBoundedContext.initialize eventStoreMock
+        exampleBoundedContext.initialize()
 
         id = 42
         params = {foo: 'bar'}
@@ -125,7 +134,7 @@ describe 'BoundedContext', ->
           readAggregateRepositories:
             'Aggregate': FooReadAggregateRepository
         exampleBoundedContext = new ExampleBoundedContext
-        exampleBoundedContext.initialize eventStoreMock
+        exampleBoundedContext.initialize()
 
         id = 42
         params = {foo: 'bar'}
@@ -150,7 +159,7 @@ describe 'BoundedContext', ->
         id = 42
         params = {foo: 'bar'}
         exampleBoundedContext = new ExampleBoundedContext
-        exampleBoundedContext.initialize eventStoreMock
+        exampleBoundedContext.initialize()
         exampleBoundedContext.query 'Aggregate:findByExample', id, params
 
         expect(ExampleApplicationService::aggregateFindByExample.calledOnce).to.be.ok()

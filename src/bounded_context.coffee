@@ -15,8 +15,8 @@ class BoundedContext
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
 
-  initialize: (eventStore) ->
-    @_initializeEventStore eventStore, =>
+  initialize: (EventStore) ->
+    @_initializeEventStore EventStore, =>
       @_aggregateRepository  = new AggregateRepository @_eventStore
       @_domainEventService   = new DomainEventService @_eventStore
       @_commandService       = new CommandService @_domainEventService, @_aggregateRepository
@@ -26,17 +26,15 @@ class BoundedContext
       @_initializeApplicationServices()
 
 
-  _initializeEventStore: (eventStore, next) ->
-    if eventStore
-      @_eventStore = eventStore
-      # TODO asynchron
-      @_eventStore.initialize()
-      next()
+  _initializeEventStore: (EventStore, next) ->
+    if EventStore
+      @_eventStore = new EventStore
     else
       MongoDBEventStore = require 'eventric-store-mongodb'
       @_eventStore = new MongoDBEventStore
-      @_eventStore.initialize (err) =>
-        next()
+
+    @_eventStore.initialize (err) =>
+      next()
 
   _initializeAggregates: ->
     @_aggregateRepository.registerClass aggregateName, aggregateClass for aggregateName, aggregateClass of @aggregates

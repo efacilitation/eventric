@@ -8,12 +8,9 @@ describe 'BoundedContext', ->
 
   class MongoDbEventStoreMock
       initialize: sinon.stub().yields null
-  class EventricComponent
-    initialize: sandbox.stub().yields false
-    registerClass: sandbox.stub()
-    registerServiceHandler: sandbox.stub()
   class CommandServiceMock
     commandAggregate: sandbox.stub()
+  class DomainEventServiceMock
   class AggregateRepositoryMock
     registerClass: sandbox.stub()
 
@@ -23,8 +20,8 @@ describe 'BoundedContext', ->
       warnOnUnregistered: false
 
     eventricMock = sandbox.stub()
-    eventricMock.returns EventricComponent
     eventricMock.withArgs('CommandService').returns CommandServiceMock
+    eventricMock.withArgs('DomainEventService').returns DomainEventServiceMock
     eventricMock.withArgs('AggregateRepository').returns AggregateRepositoryMock
     mockery.registerMock 'eventric', eventricMock
     mockery.registerMock 'eventric-store-mongodb', MongoDbEventStoreMock

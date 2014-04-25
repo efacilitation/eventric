@@ -5,17 +5,21 @@ describe 'BoundedContext', ->
   eventric       = require 'eventric'
   sandbox        = sinon.sandbox.create()
 
-  # TODO please, please refactor me
+
   class MongoDbEventStoreMock
     initialize: sandbox.stub().yields null
   class CommandServiceMock
     commandAggregate: sandbox.stub()
 
+  # TODO refactor me
   domainEventServiceMock = null
   class DomainEventServiceMock
     constructor: ->
       domainEventServiceMock.apply this, arguments
+    saveAndTrigger: sandbox.stub()
+    on: sandbox.stub()
 
+  # TODO refactor me
   aggregateRepositoryMock = null
   class AggregateRepositoryMock
     constructor: ->
@@ -118,10 +122,15 @@ describe 'BoundedContext', ->
         BoundedContext = eventric 'BoundedContext'
         boundedContext = new BoundedContext
         boundedContext.initialize()
-        id = 42
-        params = {foo: 'bar'}
-        boundedContext.command 'Aggregate:function', id, params
-        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', id, 'function', params).to.be.ok()
+
+        command =
+          name: 'Aggregate:doSomething'
+          id: 42
+          params:
+            foo: 'bar'
+
+        boundedContext.command command
+        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', command.id, 'doSomething', command.params).to.be.ok()
 
 
     describe 'has a registered handler', ->
@@ -140,10 +149,13 @@ describe 'BoundedContext', ->
         exampleBoundedContext = new ExampleBoundedContext
         exampleBoundedContext.initialize()
 
-        id = 42
-        params = {foo: 'bar'}
-        exampleBoundedContext.command 'Aggregate:doSomething', id, params
-        expect(ExampleApplicationService::accountDoSomething.calledWith id, params).to.be.ok()
+        command =
+          name: 'Aggregate:doSomething'
+          params:
+            foo: 'bar'
+        exampleBoundedContext.command command
+
+        expect(ExampleApplicationService::accountDoSomething.calledWith command.params).to.be.ok()
 
 
   describe '#query', ->
@@ -158,11 +170,16 @@ describe 'BoundedContext', ->
         exampleBoundedContext = new ExampleBoundedContext
         exampleBoundedContext.initialize()
 
-        id = 42
-        params = {foo: 'bar'}
-        exampleBoundedContext.query 'Aggregate:findByExample', id, params
+        query =
+          name: 'Aggregate:findByExample'
+          id: 42
+          params:
+            foo: 'bar'
 
-        expect(FooReadAggregateRepository::findByExample.calledWith id, params).to.be.ok()
+
+        exampleBoundedContext.query query
+
+        expect(FooReadAggregateRepository::findByExample.calledWith query.id, query.params).to.be.ok()
 
 
     describe 'has a registered handler', ->
@@ -178,10 +195,26 @@ describe 'BoundedContext', ->
             ExampleApplicationService
           ]
 
-        id = 42
-        params = {foo: 'bar'}
+        query =
+          name: 'Aggregate:findByExample'
+          params:
+            foo: 'bar'
         exampleBoundedContext = new ExampleBoundedContext
         exampleBoundedContext.initialize()
-        exampleBoundedContext.query 'Aggregate:findByExample', id, params
+        exampleBoundedContext.query query
 
-        expect(ExampleApplicationService::aggregateFindByExample.calledOnce).to.be.ok()
+        expect(ExampleApplicationService::aggregateFindByExample.calledWith query.params).to.be.ok()
+
+
+  describe 'onDomainEvent', ->
+    it 'should delegate the handler registration to the domain event service', ->
+      BoundedContext = eventric 'BoundedContext'
+      class ExampleBoundedContext extends BoundedContext
+      exampleBoundedContext = new ExampleBoundedContext
+      exampleBoundedContext.initialize()
+
+      eventName = 'Aggregate:method'
+      eventHandler = ->
+      exampleBoundedContext.onDomainEvent eventName, eventHandler
+
+      expect(DomainEventServiceMock::on.calledWith eventName, eventHandler).to.be.ok()

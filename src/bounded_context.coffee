@@ -63,24 +63,28 @@ class BoundedContext
     @_readAggregateRepositoriesInstances[repositoryName]
 
 
-  command: (commandName, aggregateId, params) ->
-    if @_applicationServiceCommands[commandName]
-      @_applicationServiceCommands[commandName] aggregateId, params
+  command: (command) ->
+    if @_applicationServiceCommands[command.name]
+      @_applicationServiceCommands[command.name] command.params
     else
-      [aggregateName, methodName] = @_splitAggregateAndMethod commandName
-      @_commandService.commandAggregate aggregateName, aggregateId, methodName, params
+      [aggregateName, methodName] = @_splitAggregateAndMethod command.name
+      @_commandService.commandAggregate aggregateName, command.id, methodName, command.params
 
 
-  query: (queryName, aggregateId, params) ->
-    if @_applicationServiceQueries[queryName]
-      @_applicationServiceQueries[queryName] aggregateId, params
+  query: (query) ->
+    if @_applicationServiceQueries[query.name]
+      @_applicationServiceQueries[query.name] query.params
     else
-      [aggregateName, methodName] = @_splitAggregateAndMethod queryName
-      @getReadAggregateRepository(aggregateName)[methodName] aggregateId, params
+      [aggregateName, methodName] = @_splitAggregateAndMethod query.name
+      @getReadAggregateRepository(aggregateName)[methodName] query.id, query.params
 
 
   _splitAggregateAndMethod: (input) ->
     input.split ':'
+
+
+  onDomainEvent: (eventName, eventHandler) ->
+    @_domainEventService.on eventName, eventHandler
 
 
 module.exports = BoundedContext

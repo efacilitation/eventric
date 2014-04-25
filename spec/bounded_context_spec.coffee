@@ -116,6 +116,19 @@ describe 'BoundedContext', ->
       expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.ok()
 
 
+    it 'should inject the command service into the application services ', ->
+      exampleApplicationService = {}
+      BoundedContext = eventric 'BoundedContext'
+      class ExampleBoundedContext extends BoundedContext
+        applicationServices: [
+          exampleApplicationService
+        ]
+      exampleBoundedContext = new ExampleBoundedContext
+      exampleBoundedContext.initialize()
+
+      expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.ok()
+
+
   describe '#command', ->
     describe 'given the command has no registered handler', ->
       it 'should call the command service with the correct parameters', ->
@@ -135,7 +148,7 @@ describe 'BoundedContext', ->
 
     describe 'has a registered handler', ->
       it 'should execute the command handler', ->
-        class ExampleApplicationService
+        exampleApplicationService =
           commands:
             'Aggregate:doSomething': 'accountDoSomething'
           accountDoSomething: sandbox.stub()
@@ -143,7 +156,7 @@ describe 'BoundedContext', ->
         BoundedContext = eventric 'BoundedContext'
         class ExampleBoundedContext extends BoundedContext
           applicationServices: [
-            ExampleApplicationService
+            exampleApplicationService
           ]
 
         exampleBoundedContext = new ExampleBoundedContext
@@ -155,7 +168,7 @@ describe 'BoundedContext', ->
             foo: 'bar'
         exampleBoundedContext.command command
 
-        expect(ExampleApplicationService::accountDoSomething.calledWith command.params).to.be.ok()
+        expect(exampleApplicationService.accountDoSomething.calledWith command.params).to.be.ok()
 
 
   describe '#query', ->
@@ -185,14 +198,14 @@ describe 'BoundedContext', ->
     describe 'has a registered handler', ->
       it 'should execute the query handler', ->
         BoundedContext = eventric 'BoundedContext'
-        class ExampleApplicationService
+        exampleApplicationService =
           queries:
             'Aggregate:findByExample': 'aggregateFindByExample'
           aggregateFindByExample: sandbox.stub()
 
         class ExampleBoundedContext extends BoundedContext
           applicationServices: [
-            ExampleApplicationService
+            exampleApplicationService
           ]
 
         query =
@@ -203,7 +216,7 @@ describe 'BoundedContext', ->
         exampleBoundedContext.initialize()
         exampleBoundedContext.query query
 
-        expect(ExampleApplicationService::aggregateFindByExample.calledWith query.params).to.be.ok()
+        expect(exampleApplicationService.aggregateFindByExample.calledWith query.params).to.be.ok()
 
 
   describe 'onDomainEvent', ->

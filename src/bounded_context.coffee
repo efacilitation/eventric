@@ -46,8 +46,9 @@ class BoundedContext
 
 
   _initializeApplicationServices: ->
-    for ApplicationService in @applicationServices
-      applicationService = new ApplicationService
+    for applicationService in @applicationServices
+      applicationService.commandService = @_commandService
+
       for commandName, commandMethodName of applicationService.commands
         # TODO check duplicates, warn and do some logging
         @_applicationServiceCommands[commandName] = ->
@@ -63,6 +64,7 @@ class BoundedContext
     @_readAggregateRepositoriesInstances[repositoryName]
 
 
+  # TODO emit error if command is not registered and not valid for default call
   command: (command) ->
     if @_applicationServiceCommands[command.name]
       @_applicationServiceCommands[command.name] command.params
@@ -71,6 +73,7 @@ class BoundedContext
       @_commandService.commandAggregate aggregateName, command.id, methodName, command.params
 
 
+  # TODO emit error if query is not registered and not valid for default call
   query: (query) ->
     if @_applicationServiceQueries[query.name]
       @_applicationServiceQueries[query.name] query.params

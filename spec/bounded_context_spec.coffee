@@ -176,7 +176,7 @@ describe 'BoundedContext', ->
       it 'should execute the query directly on the correct read aggregate repository', ->
         BoundedContext = eventric 'BoundedContext'
         class FooReadAggregateRepository
-          findByExample: sandbox.stub()
+          findById: sandbox.stub()
         class ExampleBoundedContext extends BoundedContext
           readAggregateRepositories:
             'Aggregate': FooReadAggregateRepository
@@ -184,15 +184,12 @@ describe 'BoundedContext', ->
         exampleBoundedContext.initialize()
 
         query =
-          name: 'Aggregate:findByExample'
+          name: 'Aggregate:findById'
           id: 42
-          params:
-            foo: 'bar'
-
 
         exampleBoundedContext.query query
 
-        expect(FooReadAggregateRepository::findByExample.calledWith query.id, query.params).to.be.ok()
+        expect(FooReadAggregateRepository::findById.calledWith query.id).to.be.ok()
 
 
     describe 'has a registered handler', ->
@@ -200,23 +197,23 @@ describe 'BoundedContext', ->
         BoundedContext = eventric 'BoundedContext'
         exampleApplicationService =
           queries:
-            'Aggregate:findByExample': 'aggregateFindByExample'
-          aggregateFindByExample: sandbox.stub()
+            'customQuery': 'customQueryMethod'
+          customQueryMethod: sandbox.stub()
 
         class ExampleBoundedContext extends BoundedContext
           applicationServices: [
             exampleApplicationService
           ]
-
-        query =
-          name: 'Aggregate:findByExample'
-          params:
-            foo: 'bar'
         exampleBoundedContext = new ExampleBoundedContext
         exampleBoundedContext.initialize()
+
+        query =
+          name: 'customQuery'
+          params:
+            foo: 'bar'
         exampleBoundedContext.query query
 
-        expect(exampleApplicationService.aggregateFindByExample.calledWith query.params).to.be.ok()
+        expect(exampleApplicationService.customQueryMethod.calledWith query.params).to.be.ok()
 
 
   describe 'onDomainEvent', ->

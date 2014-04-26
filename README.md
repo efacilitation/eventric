@@ -4,7 +4,7 @@
 
 So we want to implement some simple TodoApp with eventric.
 
-### CommandAggregate
+### TodoCommand
 
 First we need a `CommandAggregate` for our `Todo` which will be responsible for command-handling.
 
@@ -18,7 +18,7 @@ class TodoCommand extends eventric.CommandAggregateRoot
 ```
 
 
-### QueryAggregate
+### TodoQuery
 
 The `QueryAggregate` will handle all queries that we might need, e.g. `getTitle` or `isCompleted`
 
@@ -32,7 +32,7 @@ class TodoQuery extends eventric.QueryAggregateRoot
 ```
 
 
-### BoundedContext
+### TodoContext
 
 The public interface for our TodoApp will be accessible through a `BoundedContext`
 

@@ -2,40 +2,28 @@
 
 ## Setup
 
-### Aggregate
+So we want to implement some simple TodoApp with eventric.
 
-So we want to implement some simple Todo App. First we need a `Aggregate` for our `Todo`
+### CommandAggregate
 
-```
-class Todo extends eventric.AggregateRoot
-```
+First we need a `CommandAggregate` for our `Todo` which will be responsible for command-handling.
 
-Our `Aggregate` will be responsible for `command`-handling. Lets add some commands
-
-```
+```coffeescript
+class TodoCommand extends eventric.CommandAggregateRoot
   updateTitle: (title) ->
     @_set 'title' = title
-
 
   updateCompleted: (completed) ->
     @_set 'completed' = completed
 ```
 
- Having some default values for our `Todo` upon construction might be handy, so lets do this by adding a `constructor`
 
-```
-  constructor: (title) ->
-    @updateTitle title
-    @updateCompleted false
-```
+### QueryAggregate
 
+The `QueryAggregate` will handle all queries that we might need, e.g. `getTitle` or `isCompleted`
 
-### ReadAggregate
-
-The `ReadAggregate` will handle all queries that we might need, e.g. `getTitle` or `isCompleted`
-
-```
-class ReadTodo extends eventric.ReadAggregateRoot
+```coffeescript
+class TodoQuery extends eventric.QueryAggregateRoot
   getTitle: ->
     @_get 'title'
 
@@ -46,12 +34,14 @@ class ReadTodo extends eventric.ReadAggregateRoot
 
 ### BoundedContext
 
-The public interface for our Todo App will be accessible through a `BoundedContext`
+The public interface for our TodoApp will be accessible through a `BoundedContext`
 
-```
-class TodosContext extends eventric.BoundedContext
+```coffeescript
+class TodoContext extends eventric.BoundedContext
   aggregates:
-    'Todo': Todo
+    'Todo':
+      'command': TodoCommand
+      'query': TodoQuery
 ```
 
 
@@ -59,39 +49,42 @@ class TodosContext extends eventric.BoundedContext
 
 To get it all running we first initialize our TodoApp BoundedContext
 
-```
-todoContext = new TodosContext
+```coffeescript
+todoContext = new TodoContext
 ```
 
-Now we're ready. Lets create a Todo
+Now we're ready. Lets create a Todo.
 
-```
+```coffeescript
 todoId = todoContext.command 'Todo:create', 'Temporary title'
 ```
 
-Change the Title and updated the completed-status
+Info: `create` is special command which creates an aggregate.
 
-```
+
+Change the title and updated the completed-status
+
+```coffeescript
 todoContext.command 'Todo:updateTitle', todoId, 'There is something to do!'
 todoContext.command 'Todo:updateCompleted', todoId, true
 ```
 
 Get all Todos
 
-```
+```coffeescript
 todos = todoContext.query 'Todo:find'
 ```
 
 and output their title and completed-status
 
-```
+```coffeescript
 for todo in todos
   console.log "#{todo.getTitle()} -- completed: #{todo.isCompleted()}"
 ```
 
 This will output
 
-```
+```coffeescript
 There is something to do! -- completed: true
 ```
 

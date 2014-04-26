@@ -6,7 +6,7 @@ So we want to implement some simple TodoApp with eventric.
 
 ### TodoCommand
 
-First we need a `CommandAggregate` for our `Todo` which will be responsible for command-handling.
+First we need a `CommandAggregate` for our `Todo` which will be responsible for command-handling
 
 ```coffeescript
 class TodoCommand extends eventric.CommandAggregateRoot
@@ -20,7 +20,7 @@ class TodoCommand extends eventric.CommandAggregateRoot
 
 ### TodoQuery
 
-The `QueryAggregate` will handle all queries that we might need, e.g. `getTitle` or `isCompleted`
+The `QueryAggregate` will handle all queries that we might need
 
 ```coffeescript
 class TodoQuery extends eventric.QueryAggregateRoot
@@ -56,7 +56,7 @@ todoContext = new TodoContext
 Now we're ready. Lets create a Todo.
 
 ```coffeescript
-todoId = todoContext.command 'Todo:create', 'Temporary title'
+todoId = todoContext.command 'Todo:create'
 ```
 
 Info: `create` is special command which creates an aggregate.
@@ -84,7 +84,7 @@ for todo in todos
 
 This will output
 
-```coffeescript
+```
 There is something to do! -- completed: true
 ```
 

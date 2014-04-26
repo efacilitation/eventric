@@ -1,3 +1,102 @@
+# Todo App Example
+
+## Setup
+
+### Aggregate
+
+So we want to implement some simple Todo App. First we need a `Aggregate` for our `Todo`
+
+```
+class Todo extends eventric.AggregateRoot
+```
+
+Our `Aggregate` will be responsible for `command`-handling. Lets add some commands
+
+```
+  updateTitle: (title) ->
+    @_set 'title' = title
+
+
+  updateCompleted: (completed) ->
+    @_set 'completed' = completed
+```
+
+ Having some default values for our `Todo` upon construction might be handy, so lets do this by adding a `constructor`
+
+```
+  constructor: (title) ->
+    @updateTitle title
+    @updateCompleted false
+```
+
+
+### ReadAggregate
+
+The `ReadAggregate` will handle all queries that we might need, e.g. `getTitle` or `isCompleted`
+
+```
+class ReadTodo extends eventric.ReadAggregateRoot
+  getTitle: ->
+    @_get 'title'
+
+  isCompleted: ->
+    @_get 'completed'
+```
+
+
+### BoundedContext
+
+The public interface for our Todo App will be accessible through a `BoundedContext`
+
+```
+class TodosContext extends eventric.BoundedContext
+  aggregates:
+    'Todo': Todo
+```
+
+
+## Usage
+
+To get it all running we first initialize our TodoApp BoundedContext
+
+```
+todoContext = new TodosContext
+```
+
+Now we're ready. Lets create a Todo
+
+```
+todoId = todoContext.command 'Todo:create', 'Temporary title'
+```
+
+Change the Title and updated the completed-status
+
+```
+todoContext.command 'Todo:updateTitle', todoId, 'There is something to do!'
+todoContext.command 'Todo:updateCompleted', todoId, true
+```
+
+Get all Todos
+
+```
+todos = todoContext.query 'Todo:find'
+```
+
+and output their title and completed-status
+
+```
+for todo in todos
+  console.log "#{todo.getTitle()} -- completed: #{todo.isCompleted()}"
+```
+
+This will output
+
+```
+There is something to do! -- completed: true
+```
+
+---
+
 # Aggregate
 
 > A collection of objects that are bound together by a root entity, otherwise known as an aggregate root. The aggregate root guarantees the consistency of changes being made within the aggregate by forbidding external objects from holding references to its members. [[Wikipedia](https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks_of_DDD)]

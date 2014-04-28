@@ -16,6 +16,7 @@ moduleDefinition =
   DomainEventService: './domain_event_service'
 
   RemoteService: './remote_service'
+  RemoteBoundedContext: './remote_bounded_context'
   RemoteCommandService: './remote_command_service'
   RemoteRepositoryService: './remote_repository_service'
 

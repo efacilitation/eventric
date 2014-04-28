@@ -42,16 +42,16 @@ class RemoteCommandService
 
   handle: (payload, callback) ->
 
-    instance = @getClass payload.class
-    if not instance
+    commandService = @getClass payload.class
+    if not commandService
       err = new Error "Tried to handle RPC class with not registered Class #{payload.class}"
       return callback err, null
 
-    if payload.method not of instance
+    if payload.method not of commandService
       err = new Error "RPC method #{payload.method} not found on Class #{payload.class}"
       return callback err, null
 
-    instance[payload.method] payload.params..., (err, result) ->
+    commandService[payload.method] payload.params..., (err, result) ->
       return callback err, null if err
       callback null, result
 

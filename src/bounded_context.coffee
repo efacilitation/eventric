@@ -37,7 +37,8 @@ class BoundedContext
         next()
 
   _initializeAggregates: ->
-    @_aggregateRepository.registerClass aggregateName, aggregateClass for aggregateName, aggregateClass of @aggregates
+    for aggregateName, aggregateClass of @aggregates
+      @_aggregateRepository.registerClass aggregateName, aggregateClass
 
 
   _initializeReadAggregateRepositories: ->

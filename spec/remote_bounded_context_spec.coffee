@@ -15,9 +15,8 @@ describe 'Remote Bounded Context', ->
         aggregateId: 42
 
       remoteServiceStub = sinon.createStubInstance RemoteService
-      remoteBoundedContext = new RemoteBoundedContext remoteServiceStub, boundedContextName
-      remoteBoundedContext.command commandName,
-        commandPayload
+      remoteBoundedContext = new RemoteBoundedContext remoteServiceStub
+      remoteBoundedContext.command boundedContextName, commandName, commandPayload
 
       expectedRpc =
         class: 'BoundedContext'
@@ -40,8 +39,8 @@ describe 'Remote Bounded Context', ->
         aggregateId: 23
 
       remoteServiceStub = sinon.createStubInstance RemoteService
-      remoteBoundedContext = new RemoteBoundedContext remoteServiceStub, boundedContextName
-      remoteBoundedContext.query queryName, queryPayload
+      remoteBoundedContext = new RemoteBoundedContext remoteServiceStub
+      remoteBoundedContext.query boundedContextName, queryName, queryPayload
 
       expectedRpc =
         class: 'BoundedContext'

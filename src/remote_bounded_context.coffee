@@ -7,25 +7,25 @@ class RemoteBoundedContext
 
   _.extend @prototype, MixinRegisterAndGetClass::
 
-  constructor: (@_remoteService, @_boundedContextName) ->
+  constructor: (@_remoteService) ->
 
-  command: (commandName, commandPayload) ->
+  command: (boundedContextName, commandName, commandPayload) ->
     @rpc
       class: 'BoundedContext'
       method: 'command'
       params: [
-        @_boundedContextName
+        boundedContextName
         commandName
         commandPayload
       ]
       (err, data) -> callback null, data
 
-  query: (queryName, queryPayload) ->
+  query: (boundedContextName, queryName, queryPayload) ->
     @rpc
       class: 'BoundedContext'
       method: 'query'
       params: [
-        @_boundedContextName
+        boundedContextName
         queryName
         queryPayload
       ]

@@ -92,4 +92,7 @@ describe 'Remote Bounded Context', ->
       remoteBoundedContext.registerClass 'exampleContext', exampleContext
       remoteBoundedContext.handle rpc.payload, ->
 
-      expect(exampleContext.command.calledWith commandName, commandPayload).to.be.ok()
+      command =
+        name: commandName
+        params: commandPayload
+      expect(exampleContext.command.calledWith command).to.be.ok()

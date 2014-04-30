@@ -18,12 +18,12 @@ class ReadAggregateRepository
     # create the ReadAggregate instance
     ReadAggregateClass = @getClass readAggregateName
 
-    # TODO return if @_checkReadAggregateClassNotSet ReadAggregateClass, callback
+    # TODO: return if @_checkReadAggregateClassNotSet ReadAggregateClass, callback
     if not ReadAggregateClass
       err = new Error "Tried 'findById' on not registered ReadAggregate '#{readAggregateName}'"
       return callback err, null
 
-    # TODO @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
+    # TODO: @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
     @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
@@ -70,7 +70,7 @@ class ReadAggregateRepository
     return unless @_callbackIsAFunction callback
     return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
-    # TODO returns only the first result, should actually do a limited query against the store
+    # TODO: returns only the first result, should actually do a limited query against the store
     @find readAggregateName, query, (err, results) =>
       return callback err, null if err
       return callback null, false if results.length == 0

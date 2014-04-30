@@ -29,7 +29,7 @@ class AggregateRoot extends AggregateEntity
       if Object.keys(changes).length > 0
         event.aggregate.changed = changes
 
-    # TODO return error if DomainEvent is empty (no changes, no payload)
+    # TODO: return error if DomainEvent is empty (no changes, no payload)
 
     @_domainEvents.push event
 

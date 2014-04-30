@@ -5,10 +5,11 @@ MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
 
 class RemoteCommandService
 
-  # TODO "register*Class*" is the wrong terminology here, since its actually an instance
+  # TODO: "register*Class*" is the wrong terminology here, since its actually an instance
   _.extend @prototype, MixinRegisterAndGetClass::
 
   constructor: (@_remoteService) ->
+
 
   createAggregate: ([aggregateName, aggregateParams]..., callback) ->
     params = []
@@ -19,7 +20,7 @@ class RemoteCommandService
       class: 'CommandService'
       method: 'createAggregate'
       params: params
-      (err, data) -> callback null, data
+      callback
 
 
   commandAggregate: ([aggregateName, aggregateId, commandName, commandParams]..., callback) ->
@@ -32,12 +33,11 @@ class RemoteCommandService
         commandName,
         commandParams
       ]
-      (err, data) -> callback null, data
+      callback
 
 
   rpc: (payload, callback) ->
-    @_remoteService.rpc 'RemoteCommandService', payload, (data) ->
-      callback data
+    @_remoteService.rpc 'RemoteCommandService', payload, callback
 
 
   handle: (payload, callback) ->

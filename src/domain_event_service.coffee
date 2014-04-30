@@ -8,7 +8,7 @@ class DomainEventService
   constructor: (@_eventStore) ->
 
   saveAndTrigger: (domainEvents, callback) ->
-    # TODO, this should be an transaction to guarantee the consistency of the aggregate
+    # TODO: this should be an transaction to guarantee the consistency of the aggregate
 
     for domainEvent in domainEvents
 

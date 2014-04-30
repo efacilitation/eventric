@@ -8,9 +8,10 @@ describe 'RemoteCommandService', ->
 
   describe '#createAggregate', ->
     it 'should tell the RemoteService to create an Aggregate with the given name', ->
+      callback = ->
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteCommandService = new RemoteCommandService remoteServiceStub
-      remoteCommandService.createAggregate 'ExampleAggregate', ->
+      remoteCommandService.createAggregate 'ExampleAggregate', callback
 
       expectedRpc =
         class: 'CommandService'
@@ -19,14 +20,15 @@ describe 'RemoteCommandService', ->
           'ExampleAggregate'
         ]
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc, callback).to.be.ok()
 
 
   describe '#commandAggregate', ->
     it 'should tell the RemoteService to command the Aggregate with the given name/id', ->
+      callback = ->
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteCommandService = new RemoteCommandService remoteServiceStub
-      remoteCommandService.commandAggregate 'ExampleAggregate', 42, 'someMethod', {some: 'params'}, ->
+      remoteCommandService.commandAggregate 'ExampleAggregate', 42, 'someMethod', {some: 'params'}, callback
 
       expectedRpc =
         class: 'CommandService'
@@ -38,7 +40,7 @@ describe 'RemoteCommandService', ->
           {some: 'params'}
         ]
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc, callback).to.be.ok()
 
 
   describe '#rpc', ->

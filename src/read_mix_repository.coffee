@@ -21,7 +21,7 @@ class ReadMixRepository
     else
       readMix = new ReadMixClass
 
-      # TODO refactor the uglyness
+      # TODO: refactor the uglyness
       @_eventStore.findByAggregateName readMix.applyDomainEventsFromAggregate, (err, events) =>
 
         if err

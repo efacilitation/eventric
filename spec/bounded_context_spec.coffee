@@ -151,8 +151,10 @@ describe 'BoundedContext', ->
           params:
             foo: 'bar'
 
-        boundedContext.command command
-        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', command.id, 'doSomething', command.params).to.be.ok()
+        callback = ->
+
+        boundedContext.command command, callback
+        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', command.id, 'doSomething', command.params, callback).to.be.ok()
 
 
     describe 'has a registered handler', ->
@@ -175,9 +177,12 @@ describe 'BoundedContext', ->
           name: 'Aggregate:doSomething'
           params:
             foo: 'bar'
-        exampleBoundedContext.command command
 
-        expect(exampleApplicationService.accountDoSomething.calledWith command.params).to.be.ok()
+        callback = ->
+
+        exampleBoundedContext.command command, callback
+
+        expect(exampleApplicationService.accountDoSomething.calledWith command.params, callback).to.be.ok()
 
 
   describe '#query', ->
@@ -195,10 +200,11 @@ describe 'BoundedContext', ->
         query =
           name: 'Aggregate:findById'
           id: 42
+        callback = ->
 
-        exampleBoundedContext.query query
+        exampleBoundedContext.query query, callback
 
-        expect(FooReadAggregateRepository::findById.calledWith query.id).to.be.ok()
+        expect(FooReadAggregateRepository::findById.calledWith query.id, undefined, callback).to.be.ok()
 
 
     describe 'has a registered handler', ->
@@ -220,9 +226,11 @@ describe 'BoundedContext', ->
           name: 'customQuery'
           params:
             foo: 'bar'
-        exampleBoundedContext.query query
+        callback = ->
 
-        expect(exampleApplicationService.customQueryMethod.calledWith query.params).to.be.ok()
+        exampleBoundedContext.query query, callback
+
+        expect(exampleApplicationService.customQueryMethod.calledWith query.params, callback).to.be.ok()
 
 
   describe 'onDomainEvent', ->

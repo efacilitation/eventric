@@ -52,12 +52,12 @@ class BoundedContext
       applicationService.getReadAggregateRepository = => @getReadAggregateRepository.apply @, arguments
 
       for commandName, commandMethodName of applicationService.commands
-        # TODO check duplicates, warn and do some logging
+        # TODO: check duplicates, warn and do some logging
         @_applicationServiceCommands[commandName] = ->
           applicationService[commandMethodName].apply applicationService, arguments
 
       for queryName, queryMethodName of applicationService.queries
-        # TODO check duplicates, warn and do some logging
+        # TODO: check duplicates, warn and do some logging
         @_applicationServiceQueries[queryName] = ->
          applicationService[queryMethodName].apply applicationService, arguments
 
@@ -66,22 +66,23 @@ class BoundedContext
     @_readAggregateRepositoriesInstances[repositoryName]
 
 
-  # TODO emit error if command is not registered and not valid for default call
-  command: (command) ->
+  # TODO: emit error if command is not registered and not valid for default call
+  command: (command, callback) ->
     if @_applicationServiceCommands[command.name]
-      @_applicationServiceCommands[command.name] command.params
+      @_applicationServiceCommands[command.name] command.params, callback
     else
       [aggregateName, methodName] = @_splitAggregateAndMethod command.name
-      @_commandService.commandAggregate aggregateName, command.id, methodName, command.params
+      @_commandService.commandAggregate aggregateName, command.id, methodName, command.params, callback
 
 
-  # TODO emit error if query is not registered and not valid for default call
-  query: (query) ->
+  # TODO: emit error if query is not registered and not valid for default call
+  query: (query, callback) ->
     if @_applicationServiceQueries[query.name]
-      @_applicationServiceQueries[query.name] query.params
+      @_applicationServiceQueries[query.name] query.params, callback
     else
       [aggregateName, methodName] = @_splitAggregateAndMethod query.name
-      @getReadAggregateRepository(aggregateName)[methodName] query.id, query.params
+      # TODO: this will not call the callback with findById
+      @getReadAggregateRepository(aggregateName)[methodName] query.id, query.params, callback
 
 
   _splitAggregateAndMethod: (input) ->

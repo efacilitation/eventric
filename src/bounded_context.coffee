@@ -49,6 +49,7 @@ class BoundedContext
   _initializeApplicationServices: ->
     for applicationService in @applicationServices
       applicationService.commandService = @_commandService
+      applicationService.getReadAggregateRepository = => @getReadAggregateRepository.apply @, arguments
 
       for commandName, commandMethodName of applicationService.commands
         # TODO check duplicates, warn and do some logging

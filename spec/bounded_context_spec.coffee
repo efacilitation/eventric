@@ -116,17 +116,26 @@ describe 'BoundedContext', ->
       expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.ok()
 
 
-    it 'should inject the command service into the application services ', ->
-      exampleApplicationService = {}
-      BoundedContext = eventric 'BoundedContext'
-      class ExampleBoundedContext extends BoundedContext
-        applicationServices: [
-          exampleApplicationService
-        ]
-      exampleBoundedContext = new ExampleBoundedContext
-      exampleBoundedContext.initialize()
+    describe 'magic injection', ->
+      exampleApplicationService = null
 
-      expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.ok()
+      beforeEach ->
+        exampleApplicationService = {}
+        BoundedContext = eventric 'BoundedContext'
+        class ExampleBoundedContext extends BoundedContext
+          applicationServices: [
+            exampleApplicationService
+          ]
+        exampleBoundedContext = new ExampleBoundedContext
+        exampleBoundedContext.initialize()
+
+
+      it 'should inject the command service into the application services ', ->
+        expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.ok()
+
+
+      it 'should inject the getReadAggregateRepository function into the application services', ->
+        expect(exampleApplicationService.getReadAggregateRepository).to.be.a 'function'
 
 
   describe '#command', ->

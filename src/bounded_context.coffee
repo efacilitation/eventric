@@ -50,6 +50,7 @@ class BoundedContext
     for applicationService in @applicationServices
       applicationService.commandService = @_commandService
       applicationService.getReadAggregateRepository = => @getReadAggregateRepository.apply @, arguments
+      applicationService.onDomainEvent = => @onDomainEvent.apply @, arguments
 
       for commandName, commandMethodName of applicationService.commands
         # TODO: check duplicates, warn and do some logging
@@ -60,6 +61,8 @@ class BoundedContext
         # TODO: check duplicates, warn and do some logging
         @_applicationServiceQueries[queryName] = ->
          applicationService[queryMethodName].apply applicationService, arguments
+
+      applicationService.initialize?()
 
 
   getReadAggregateRepository: (repositoryName) ->

@@ -116,8 +116,9 @@ describe 'BoundedContext', ->
       expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.ok()
 
 
-    describe 'magic injection', ->
+    describe 'processing application services', ->
       exampleApplicationService = null
+      exampleBoundedContext = null
 
       beforeEach ->
         exampleApplicationService = {}
@@ -127,15 +128,29 @@ describe 'BoundedContext', ->
             exampleApplicationService
           ]
         exampleBoundedContext = new ExampleBoundedContext
+
+      describe 'injections', ->
+
+        beforeEach ->
+          exampleBoundedContext.initialize()
+
+
+        it 'should inject the command service into the application services ', ->
+          expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.ok()
+
+
+        it 'should inject the getReadAggregateRepository function into the application services', ->
+          expect(exampleApplicationService.getReadAggregateRepository).to.be.a 'function'
+
+
+        it 'should inject the onDomainEvent function into the application service', ->
+          expect(exampleApplicationService.onDomainEvent).to.be.a 'function'
+
+
+      it 'should call initialize on the application service if available', ->
+        exampleApplicationService.initialize = sinon.spy()
         exampleBoundedContext.initialize()
-
-
-      it 'should inject the command service into the application services ', ->
-        expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.ok()
-
-
-      it 'should inject the getReadAggregateRepository function into the application services', ->
-        expect(exampleApplicationService.getReadAggregateRepository).to.be.a 'function'
+        expect(exampleApplicationService.initialize.calledOnce).to.be.ok()
 
 
   describe '#command', ->
@@ -233,7 +248,7 @@ describe 'BoundedContext', ->
         expect(exampleApplicationService.customQueryMethod.calledWith query.params, callback).to.be.ok()
 
 
-  describe 'onDomainEvent', ->
+  describe '#onDomainEvent', ->
     it 'should delegate the handler registration to the domain event service', ->
       BoundedContext = eventric 'BoundedContext'
       class ExampleBoundedContext extends BoundedContext

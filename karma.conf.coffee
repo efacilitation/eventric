@@ -11,7 +11,7 @@ module.exports = (config) ->
       'node_modules/commonjs-require/commonjs-require.js'
 
       # -- wrapped by commonjs --
-      'node_modules/expect.js/expect.js'
+      'node_modules/expect.js/index.js'
       'node_modules/underscore/underscore.js'
       'node_modules/backbone/backbone.js'
       'node_modules/async/lib/async.js'
@@ -36,7 +36,7 @@ module.exports = (config) ->
       'src/**/*.coffee': ['commonjs', 'coffee']
       'spec/**/*.coffee': ['coffee']
 
-      'node_modules/expect.js/expect.js': ['commonjs']
+      'node_modules/expect.js/index.js': ['commonjs']
       'node_modules/underscore/underscore.js': ['commonjs']
       'node_modules/backbone/backbone.js': ['commonjs']
       'node_modules/async/lib/async.js': ['commonjs']

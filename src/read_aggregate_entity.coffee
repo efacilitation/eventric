@@ -5,6 +5,4 @@ MixinSetGet     = eventric 'MixinSetGet'
 
 class ReadAggregateEntity extends AggregateEntity
 
-  _.extend @prototype, MixinSetGet::
-
 module.exports = ReadAggregateEntity

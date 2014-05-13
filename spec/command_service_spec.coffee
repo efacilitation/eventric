@@ -74,6 +74,16 @@ describe 'CommandService', ->
         expect(exampleAggregateStub.doSomething.calledOnce).to.be.ok()
         done()
 
+    it 'should call the command on the aggregate with the given argument', (done) ->
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', 'foo',  (err, aggregateId) ->
+        expect(exampleAggregateStub.doSomething.calledWith 'foo').to.be.ok()
+        done()
+
+    it 'should call the command on the aggregate with the given arguments', (done) ->
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'],  (err, aggregateId) ->
+        expect(exampleAggregateStub.doSomething.calledWith 'foo', 'bar').to.be.ok()
+        done()
+
     it 'should call the generateDomainEvent method of the given aggregate', (done) ->
       commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
         expect(exampleAggregateStub.generateDomainEvent.calledWith 'doSomething').to.be.ok()

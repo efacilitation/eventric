@@ -51,6 +51,10 @@ class CommandService
         callback err, null
         return
 
+      # make sure we have a params array
+      if typeof params != 'object'
+        params = [params]
+
       # EXECUTING
       aggregate[commandName] params...
 

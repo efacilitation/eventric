@@ -22,7 +22,9 @@
     "url": "git://sixsteps.com/efa/eventric.git"
   },
   "main": "src/index.coffee",
-  "scripts": {},
+  "scripts": {
+    "test": "node_modules/.bin/grunt spec"
+  },
   "devDependencies": {
     "mocha": "~1.17.0",
     "expect.js": "~0.2.0",

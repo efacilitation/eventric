@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "description": "eventric is a JavaScript Framework which helps developers to built modern full-stack applications",
+  "description": "eventric is a JavaScript Framework which helps developers to build modern full-stack applications",
   "url": "http://eventric.org",
   "keywords": [
     "cqrs",
@@ -16,7 +16,7 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "git://sixsteps.com/efa/eventric.git"

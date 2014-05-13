@@ -1,3 +1,5 @@
+![express logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
+
 ## Introduction [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
 **eventric** is a JavaScript Framework (written in CoffeeScript) which helps developers to built modern applications. It aims to be an alternative to CRUD-style Frameworks where you put a lot of effort into defining how your data structure has to look like. With **eventric** you concentrate on the **behaviour** of your application and build your business on it.

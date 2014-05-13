@@ -1,4 +1,4 @@
-![express logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
+![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
 
 ## Introduction [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 

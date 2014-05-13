@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "description": "eventric emphasizes Domain-driven design, Event-driven architecture and Task-based UI",
+  "description": "eventric is a JavaScript Framework which helps developers to built modern full-stack applications",
   "url": "http://eventric.org",
   "keywords": [
     "cqrs",
@@ -16,7 +16,7 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "git://sixsteps.com/efa/eventric.git"
@@ -60,8 +60,6 @@
     "coffee-script": "~1.6.3",
     "backbone": "~1.1.0",
     "underscore": "~1.5.2",
-    "mongodb": "~1.3.23",
-    "async": "~0.2.9",
-    "socket.io-client": "~0.9.16"
+    "async": "~0.2.9"
   }
 }

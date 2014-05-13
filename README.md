@@ -4,7 +4,7 @@
 
 **eventric** is a JavaScript Framework (written in CoffeeScript) which helps developers to built modern applications. It aims to be an alternative to CRUD-style Frameworks where you put a lot of effort into defining how your data structure has to look like. With **eventric** you concentrate on the **behaviour** of your application and build your business on it.
 
-The **eventric** philosopy is to emphasize Domain-driven design, Event-driven architecture and Task-based UIs.
+The **eventric** philosophy is to emphasize Domain-driven design, Event-driven architecture and Task-based UIs.
 
 
 ## Features
@@ -17,7 +17,7 @@ The **eventric** philosopy is to emphasize Domain-driven design, Event-driven ar
 More Informations in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
 
-## Quick start
+## Quick Start
 
 For a brief overview on how to use eventric check out one of the following examples:
 

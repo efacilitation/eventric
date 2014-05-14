@@ -1,4 +1,5 @@
 _ = require 'underscore'
+async = require 'async'
 Backbone = require 'backbone'
 
 class DomainEventService
@@ -10,11 +11,10 @@ class DomainEventService
   saveAndTrigger: (domainEvents, callback) ->
     # TODO: this should be an transaction to guarantee the consistency of the aggregate
 
-    for domainEvent in domainEvents
-
+    async.eachSeries domainEvents, (domainEvent, next) =>
       # store the DomainEvent
       @_eventStore.save domainEvent, (err) =>
-        return callback err if err
+        return next err if err
 
         # now trigger the DomainEvent in multiple fashions
         @trigger 'DomainEvent', domainEvent
@@ -23,7 +23,10 @@ class DomainEventService
         @trigger "#{domainEvent.aggregate.name}/#{domainEvent.aggregate.id}", domainEvent
         @trigger "#{domainEvent.aggregate.name}:#{domainEvent.name}/#{domainEvent.aggregate.id}", domainEvent
 
-    callback null
+        next null
+    , (err) =>
+      return callback err if err
+      callback null
 
 
 module.exports = DomainEventService

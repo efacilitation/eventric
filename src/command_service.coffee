@@ -1,3 +1,4 @@
+async = require 'async'
 eventric = require 'eventric'
 
 DomainEventService = eventric 'DomainEventService'
@@ -5,6 +6,26 @@ DomainEventService = eventric 'DomainEventService'
 class CommandService
 
   constructor: (@_domainEventService, @_aggregateRepository) ->
+    # proxy & queue public api
+    _queue = async.queue (payload, next) =>
+      payload.originalFunction.call @, payload.arguments..., next
+    , 1
+
+    _proxy = (_originalFunctionName, _originalFunction) -> ->
+      originalCallback = arguments[arguments.length - 1]
+      delete arguments[arguments.length - 1]
+      _queue.push
+        originalFunction: _originalFunction
+        arguments: arguments
+      , originalCallback
+
+    for originalFunctionName, originalFunction of @
+      if typeof originalFunction isnt 'function' or originalFunctionName is 'constructor' or (originalFunctionName.indexOf '_') is 0
+        # only check non-constructor functions for now
+        continue
+
+      @[originalFunctionName] = _proxy originalFunctionName, originalFunction
+
 
   createAggregate: ([aggregateName, params]..., callback) ->
     AggregateClass = @_aggregateRepository.getClass aggregateName
@@ -31,10 +52,6 @@ class CommandService
 
       @_generateSaveAndTriggerDomainEvent 'create', aggregate, callback
 
-
-  commandAggregateClosure: (aggregateName, aggregateId) ->
-    ([commandName, params]..., callback) =>
-      @commandAggregate aggregateName, aggregateId, commandName, params, callback
 
   commandAggregate: ([aggregateName, aggregateId, commandName, params]..., callback) ->
     # get the aggregate from the AggregateRepository
@@ -67,13 +84,13 @@ class CommandService
 
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
-    @_domainEventService.saveAndTrigger domainEvents, (err) ->
+    @_domainEventService.saveAndTrigger domainEvents, (err) =>
       return callback err, null if err
 
       aggregate.clearChanges()
 
       # return the aggregateId
-      callback null, aggregate.id
+      callback? null, aggregate.id
 
 
 module.exports = CommandService

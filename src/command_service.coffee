@@ -52,7 +52,7 @@ class CommandService
         return
 
       # make sure we have a params array
-      if typeof params != 'object'
+      if not (params instanceof Array)
         params = [params]
 
       # EXECUTING

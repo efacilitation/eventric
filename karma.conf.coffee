@@ -12,7 +12,6 @@ module.exports = (config) ->
 
       # -- wrapped by commonjs --
       'node_modules/expect.js/index.js'
-      'node_modules/async/lib/async.js'
       'node_modules/mockery/mockery.js'
       'vendor/sinon.js'
 

@@ -1,6 +1,6 @@
-async = require 'async'
 eventric = require 'eventric'
 
+async              = eventric 'HelperAsync'
 DomainEventService = eventric 'DomainEventService'
 
 class CommandService

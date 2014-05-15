@@ -1,6 +1,6 @@
-_        = require 'underscore'
 eventric = require 'eventric'
 
+_                         = eventric 'HelperUnderscore'
 AggregateEntity           = eventric 'AggregateEntity'
 AggregateEntityCollection = eventric 'AggregateEntityCollection'
 MixinSnapshot             = eventric 'MixinSnapshot'

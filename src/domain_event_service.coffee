@@ -1,10 +1,12 @@
-_ = require 'underscore'
-async = require 'async'
-Backbone = require 'backbone'
+eventric = require 'eventric'
+
+_           = eventric 'HelperUnderscore'
+async       = eventric 'HelperAsync'
+MixinEvents = eventric 'MixinEvents'
 
 class DomainEventService
 
-  _.extend @prototype, Backbone.Events
+  _.extend @prototype, MixinEvents
 
   constructor: (@_eventStore) ->
 

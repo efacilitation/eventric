@@ -1,6 +1,6 @@
-_                         = require 'underscore'
 eventric                  = require 'eventric'
 
+_                         = eventric 'HelperUnderscore'
 MixinSetGet               = eventric 'MixinSetGet'
 AggregateEntity           = eventric 'AggregateEntity'
 AggregateEntityCollection = eventric 'AggregateEntityCollection'

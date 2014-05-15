@@ -1,6 +1,6 @@
-_        = require 'underscore'
 eventric = require 'eventric'
 
+_                        = eventric 'HelperUnderscore'
 MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
 
 class RemoteBoundedContext

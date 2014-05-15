@@ -1,14 +1,13 @@
-_                   = require 'underscore'
-Backbone            = require 'backbone'
 eventric            = require 'eventric'
 
+_                   = eventric 'HelperUnderscore'
 ReadAggregateEntity = eventric 'ReadAggregateEntity'
 MixinSnapshot       = eventric 'MixinSnapshot'
-MixinSetGet         = eventric 'MixinSetGet'
+MixinEvents         = eventric 'MixinEvents'
 
 class ReadAggregateRoot extends ReadAggregateEntity
 
-  _.extend @prototype, Backbone.Events
+  _.extend @prototype, MixinEvents
   _.extend @prototype, MixinSnapshot::
 
 module.exports = ReadAggregateRoot

@@ -12,14 +12,12 @@ module.exports = (config) ->
 
       # -- wrapped by commonjs --
       'node_modules/expect.js/index.js'
-      'node_modules/underscore/underscore.js'
-      'node_modules/backbone/backbone.js'
       'node_modules/async/lib/async.js'
       'node_modules/mockery/mockery.js'
       'vendor/sinon.js'
 
       'index.coffee'
-      'src/**/*.coffee'
+      'src/**/*.+(coffee|js)'
 
       # -- not wrapped by commonjs and therefore directly executed --
       'spec/**/*_spec.coffee'
@@ -34,11 +32,10 @@ module.exports = (config) ->
     preprocessors:
       'index.coffee': ['commonjs', 'coffee']
       'src/**/*.coffee': ['commonjs', 'coffee']
+      'src/**/*.js': ['commonjs']
       'spec/**/*.coffee': ['coffee']
 
       'node_modules/expect.js/index.js': ['commonjs']
-      'node_modules/underscore/underscore.js': ['commonjs']
-      'node_modules/backbone/backbone.js': ['commonjs']
       'node_modules/async/lib/async.js': ['commonjs']
       'node_modules/mockery/mockery.js': ['commonjs']
       'vendor/sinon.js': ['commonjs']
@@ -54,15 +51,6 @@ module.exports = (config) ->
           if (path.indexOf 'node_modules/expect.js') == 0
             # commonjs-preprocessor strips the extension, but the module is named 'expect.js' in node..
             newPath = 'expect.js.js'
-
-          else if (path.indexOf 'node_modules/backbone') == 0
-            newPath = 'backbone'
-
-          else if (path.indexOf 'node_modules/underscore') == 0
-            newPath = 'underscore'
-
-          else if (path.indexOf 'node_modules/async') == 0
-            newPath = 'async'
 
           else if (path.indexOf 'node_modules/mockery') == 0
             newPath = 'mockery'

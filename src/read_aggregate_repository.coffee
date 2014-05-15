@@ -1,7 +1,7 @@
-_        = require 'underscore'
-async    = require 'async'
 eventric = require 'eventric'
 
+_                        = eventric 'HelperUnderscore'
+async                    = eventric 'HelperAsync'
 MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
 
 

@@ -50,11 +50,7 @@
     "grunt-symbolic-link": "*",
     "coffee-script": "*"
   },
-  "dependencies": {
-    "backbone": "*",
-    "underscore": "*",
-    "async": "*"
-  },
+  "dependencies": {},
   "licenses": [
     {
       "type": "MIT",

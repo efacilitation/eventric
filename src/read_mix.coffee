@@ -1,4 +1,5 @@
-_ = require 'underscore'
+eventric = require 'eventric'
+_ = eventric 'HelperUnderscore'
 
 class ReadMix
 

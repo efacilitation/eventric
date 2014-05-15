@@ -1,4 +1,5 @@
-_ = require 'underscore'
+eventric = require 'eventric'
+_ = eventric 'HelperUnderscore'
 
 Function::prop = (propName, desc = {}) ->
   Object.defineProperty @::, propName, _.defaults desc,

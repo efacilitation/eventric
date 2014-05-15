@@ -23,6 +23,10 @@ moduleDefinition =
   MixinRegisterAndGetClass: './mixin_registerandgetclass'
   MixinSnapshot: './mixin_snapshot'
   MixinSetGet: './mixin_setget'
+  MixinEvents: './mixin_events'
+
+  HelperUnderscore: './helper_underscore'
+  HelperAsync: './helper_async'
 
   BoundedContext: './bounded_context'
   BoundedContextService: './bounded_context_service'

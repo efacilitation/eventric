@@ -4,7 +4,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-karma'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
-  grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-wrap-commonjs'
   grunt.loadNpmTasks 'grunt-symbolic-link'
@@ -26,15 +25,15 @@ module.exports = (grunt) ->
     # Configure watcher
     watch:
       client:
-        files: ['src/**/*.coffee', 'spec/**/*_spec.coffee']
+        files: ['src/**/*.+(coffee|js)', 'spec/**/*_spec.coffee']
         tasks: ['karma', 'build']
 
       server:
-        files: ['src/**/*.coffee', 'spec/**/*_spec.coffee']
+        files: ['src/**/*.+(coffee|js)', 'spec/**/*_spec.coffee']
         tasks: ['mochaTest', 'build']
 
       hybrid:
-        files: ['src/**/*.coffee', 'spec/**/*_spec.coffee']
+        files: ['src/**/*.+(coffee|js)', 'spec/**/*_spec.coffee']
         tasks: ['mochaTest', 'karma', 'build']
 
 
@@ -43,15 +42,10 @@ module.exports = (grunt) ->
         options:
           pathReplace: (path) ->
             path = path.replace 'src', 'eventric'
-            path = path.replace 'node_modules/backbone/backbone', 'backbone'
-            path = path.replace 'node_modules/underscore/underscore', 'underscore'
-            path = path.replace 'node_modules/async/lib/async', 'async'
 
         cwd: '.'
         src: ['src/**/*.coffee'
-              'node_modules/underscore/underscore.js'
-              'node_modules/backbone/backbone.js'
-              'node_modules/async/lib/async.js'
+              'src/**/*.js'
             ]
         dest: 'tmp/'
 
@@ -70,14 +64,9 @@ module.exports = (grunt) ->
           overwrite: true
           force: true
 
-    concat:
-      dist:
-        src: ['tmp/node_modules/**/*.js']
-        dest: 'dist/vendor.js'
-
     clean: ['tmp']
 
-  grunt.registerTask 'build', ['commonjs', 'coffee', 'concat', 'clean']
+  grunt.registerTask 'build', ['commonjs', 'coffee', 'clean']
   grunt.registerTask 'spec:client', ['karma']
   grunt.registerTask 'spec:server', ['mochaTest']
   grunt.registerTask 'spec', ['symlink', 'spec:server', 'spec:client']

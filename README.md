@@ -9,7 +9,7 @@ The **eventric** philosophy is to emphasize Domain-driven design, Event-driven a
 
 ## Features
 
-* BoundedContexts
+* BoundedContexts / MicroServices
 * CQRS
 * EventSourcing
 * DomainEvents

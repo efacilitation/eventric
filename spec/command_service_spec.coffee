@@ -74,14 +74,26 @@ describe 'CommandService', ->
         expect(exampleAggregateStub.doSomething.calledOnce).to.be.ok()
         done()
 
-    it 'should call the command on the aggregate with the given argument', (done) ->
+    it 'should call the command on the aggregate with the given argument and an error callback', (done) ->
       commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', 'foo',  (err, aggregateId) ->
-        expect(exampleAggregateStub.doSomething.calledWith 'foo').to.be.ok()
+        expect(exampleAggregateStub.doSomething.calledWith 'foo', sinon.match.func).to.be.ok()
         done()
 
-    it 'should call the command on the aggregate with the given arguments', (done) ->
+    it 'should call the command on the aggregate with the given arguments and an error callback', (done) ->
       commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'],  (err, aggregateId) ->
-        expect(exampleAggregateStub.doSomething.calledWith 'foo', 'bar').to.be.ok()
+        expect(exampleAggregateStub.doSomething.calledWith 'foo', 'bar', sinon.match.func).to.be.ok()
+        done()
+
+    it 'should call the callback with an error if there was an error at the aggregate', (done) ->
+      exampleAggregateStub.doSomething.yields 'AGGREGATE_ERROR'
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
+        expect(err).to.equal 'AGGREGATE_ERROR'
+        done()
+
+    it 'should not call the generateDomainEvent method of the given aggregate if there was an error at the aggregate', (done) ->
+      exampleAggregateStub.doSomething.yields 'AGGREGATE_ERROR'
+      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
+        expect(exampleAggregateStub.generateDomainEvent.notCalled).to.be.ok()
         done()
 
     it 'should call the generateDomainEvent method of the given aggregate', (done) ->

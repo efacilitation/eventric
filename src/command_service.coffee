@@ -72,8 +72,16 @@ class CommandService
       if not (params instanceof Array)
         params = [params]
 
+      # Should be ok because aggregates shouldn't be async!
+      errorCallbackCalled = false
+      errorCallback = (err) =>
+        errorCallbackCalled = true
+        callback err
+
       # EXECUTING
-      aggregate[commandName] params...
+      aggregate[commandName] params..., errorCallback
+
+      return if errorCallbackCalled
 
       @_generateSaveAndTriggerDomainEvent commandName, aggregate, callback
 

@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "description": "eventric.js helps developers to build flexible, maintainable, long lasting web applications",
+  "description": "eventric.js helps developers to build flexible, maintainable, long-lasting web applications",
   "url": "http://eventricjs.org",
   "keywords": [
     "cqrs",
@@ -16,7 +16,7 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"

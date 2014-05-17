@@ -1,7 +1,7 @@
 {
   "name": "eventric",
-  "description": "eventric is a JavaScript Framework which helps developers to build modern full-stack applications",
-  "url": "http://eventric.org",
+  "description": "eventric.js helps developers to build flexible, maintainable, long lasting web applications",
+  "url": "http://eventricjs.org",
   "keywords": [
     "cqrs",
     "cqs",

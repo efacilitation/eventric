@@ -40,6 +40,9 @@
 eventric = require 'eventric'
 _ = eventric 'HelperUnderscore'
 
+array = []
+slice = array.slice
+
 Events = MixinEvents =
 
   # Bind an event to a `callback` function. Passing `"all"` will bind
@@ -69,7 +72,7 @@ Events = MixinEvents =
     self = this
     once = _.once(->
       self.off name, once
-      callback.apply this, arguments_
+      callback.apply this, arguments
       return
     )
     once._callback = callback
@@ -123,12 +126,12 @@ Events = MixinEvents =
   # receive the true name of the event as the first argument).
   trigger: (name) ->
     return this  unless @_events
-    args = slice.call(arguments_, 1)
+    args = slice.call(arguments, 1)
     return this  unless eventsApi(this, "trigger", name, args)
     events = @_events[name]
     allEvents = @_events.all
     triggerEvents events, args  if events
-    triggerEvents allEvents, arguments_  if allEvents
+    triggerEvents allEvents, arguments  if allEvents
     this
 
 

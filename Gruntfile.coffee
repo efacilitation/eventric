@@ -5,6 +5,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-wrap-commonjs'
   grunt.loadNpmTasks 'grunt-symbolic-link'
@@ -37,30 +38,36 @@ module.exports = (grunt) ->
         files: ['src/**/*.+(coffee|js)', 'spec/**/*_spec.coffee']
         tasks: ['mochaTest', 'karma', 'build']
 
-
-    commonjs:
-      modules:
-        options:
-          pathReplace: (path) ->
-            path = path.replace 'src', 'eventric'
-
-        cwd: '.'
-        src: ['src/**/*.+(coffee|js)']
-        dest: 'tmp/'
+    copy:
+      main:
+        expand: true
+        flatten: true
+        src: 'src/*.js'
+        dest: 'build/src'
 
     coffee:
       glob_to_multiple:
         expand: true
         flatten: true
-        cwd: 'tmp/src'
+        cwd: 'src'
         src: ['*.coffee']
-        dest: 'tmp/src'
+        dest: 'build/src'
         ext: '.js'
+
+    commonjs:
+      modules:
+        options:
+          pathReplace: (path) ->
+            path = path.replace 'build/src', 'eventric'
+
+        cwd: '.'
+        src: ['build/src/**/*.js']
+        dest: 'tmp/'
 
     concat:
       dist:
         src: ['tmp/**/*.js'],
-        dest: 'dist/eventric.js',
+        dest: 'build/release/eventric.js',
 
     symlink:
       eventric:
@@ -72,7 +79,8 @@ module.exports = (grunt) ->
 
     clean: ['tmp']
 
-  grunt.registerTask 'build', ['commonjs', 'coffee', 'concat', 'clean']
+  grunt.registerTask 'build', ['copy', 'coffee', 'release']
+  grunt.registerTask 'release', ['commonjs', 'concat', 'clean']
   grunt.registerTask 'spec:client', ['karma']
   grunt.registerTask 'spec:server', ['mochaTest']
   grunt.registerTask 'spec', ['symlink', 'spec:server', 'spec:client']

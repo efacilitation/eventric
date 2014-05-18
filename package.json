@@ -16,12 +16,12 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"
   },
-  "main": "src/index.coffee",
+  "main": "build/src/index.js",
   "scripts": {
     "test": "node_modules/.bin/grunt spec",
     "prepublish": "node_modules/.bin/grunt build"
@@ -48,7 +48,8 @@
     "commonjs-require": "*",
     "mockery": "*",
     "grunt-symbolic-link": "*",
-    "coffee-script": "*"
+    "coffee-script": "*",
+    "grunt-contrib-copy": "*"
   },
   "dependencies": {},
   "licenses": [

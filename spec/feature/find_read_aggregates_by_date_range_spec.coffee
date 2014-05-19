@@ -1,9 +1,4 @@
 describe 'Find ReadAggregates By Date Range Scenario', ->
-
-  expect   = require 'expect.js'
-  sinon    = require 'sinon'
-  eventric = require 'eventric'
-
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
 
@@ -56,8 +51,8 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
         # ask the ReadExampleRepository to find ReagAggregates by DateRange
         readAggregates = readExampleRepository.findByDateRange start, end, (err, readAggregates) ->
           # expectations
-          expect(readAggregates.length).to.be 1
-          expect(readAggregates[0]).to.be.a ReadExample
-          expect(readAggregates[0]._get 'name').to.be 'example'
+          expect(readAggregates.length).to.equal 1
+          expect(readAggregates[0]).to.be.an.instanceof ReadExample
+          expect(readAggregates[0]._get 'name').to.equal 'example'
 
           done()

@@ -1,8 +1,4 @@
 describe 'MixinSetGet', ->
-
-  expect   = require 'expect.js'
-  eventric = require 'eventric'
-
   AggregateRoot = eventric 'AggregateRoot'
 
   exampleAggregate = null
@@ -14,10 +10,10 @@ describe 'MixinSetGet', ->
   describe '#_set', ->
 
     it  'should set a property', ->
-      expect(exampleAggregate._get('someProperty')).to.be 'someValue'
+      expect(exampleAggregate._get('someProperty')).to.equal 'someValue'
 
 
   describe '#_get', ->
 
     it 'should get some property', ->
-      expect(exampleAggregate._get('someProperty')).to.be 'someValue'
+      expect(exampleAggregate._get('someProperty')).to.equal 'someValue'

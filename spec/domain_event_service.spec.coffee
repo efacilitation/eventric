@@ -1,9 +1,4 @@
 describe 'DomainEventService', ->
-
-  sinon      = require 'sinon'
-  expect     = require 'expect.js'
-  eventric   = require 'eventric'
-
   DomainEventService = eventric 'DomainEventService'
 
   sandbox = null
@@ -21,9 +16,6 @@ describe 'DomainEventService', ->
   afterEach ->
     sandbox.restore()
 
-  it 'should have extended Backbone.Events', ->
-    expect(domainEventService.trigger).to.be.ok()
-
   describe '#saveAndTrigger', ->
 
     domainEvent = null
@@ -40,15 +32,15 @@ describe 'DomainEventService', ->
 
     it 'should tell the EventStore to save the DomainEvent', (done) ->
       domainEventService.saveAndTrigger [domainEvent], (err) ->
-        expect(eventStore.save.calledOnce).to.be.ok()
+        expect(eventStore.save.calledOnce).to.be.true
         done()
 
     it 'should trigger the given DomainEvent', (done) ->
       triggerSpy = sandbox.spy domainEventService, 'trigger'
       domainEventService.saveAndTrigger [domainEvent], (err) ->
-        expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.ok()
-        expect(triggerSpy.calledWith 'Example', domainEvent).to.be.ok()
-        expect(triggerSpy.calledWith 'Example/1', domainEvent).to.be.ok()
-        expect(triggerSpy.calledWith 'Example:testMethod', domainEvent).to.be.ok()
-        expect(triggerSpy.calledWith 'Example:testMethod/1', domainEvent).to.be.ok()
+        expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.true
+        expect(triggerSpy.calledWith 'Example', domainEvent).to.be.true
+        expect(triggerSpy.calledWith 'Example/1', domainEvent).to.be.true
+        expect(triggerSpy.calledWith 'Example:testMethod', domainEvent).to.be.true
+        expect(triggerSpy.calledWith 'Example:testMethod/1', domainEvent).to.be.true
         done()

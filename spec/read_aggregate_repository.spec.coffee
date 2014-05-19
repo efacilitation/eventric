@@ -1,9 +1,4 @@
 describe 'ReadAggregateRepositorySpec', ->
-
-  sinon    = require 'sinon'
-  expect   = require 'expect.js'
-  eventric = require 'eventric'
-
   ReadAggregateRepository = eventric 'ReadAggregateRepository'
   ReadAggregateRoot       = eventric 'ReadAggregateRoot'
 
@@ -41,17 +36,17 @@ describe 'ReadAggregateRepositorySpec', ->
 
     it 'should return an instantiated ReadAggregate', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
-        expect(readAggregate).to.be.a ReadFoo
+        expect(readAggregate).to.be.an.instanceof ReadFoo
         done()
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, ->
-        expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.ok()
+        expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.true
         done()
 
     it 'should return an instantiated ReadAggregate containing the applied DomainEvents', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
-        expect(readAggregate._get 'name').to.be 'John'
+        expect(readAggregate._get 'name').to.equal 'John'
         done()
 
 
@@ -71,20 +66,20 @@ describe 'ReadAggregateRepositorySpec', ->
 
     it 'should call findIds to get all aggregateIds matching the query', (done) ->
       readAggregateRepository.find 'ReadFoo', query, ->
-        expect(findIdsStub.calledWith 'ReadFoo', query).to.be.ok()
+        expect(findIdsStub.calledWith 'ReadFoo', query).to.be.true
         done()
 
     it 'should call findById for every aggregateId found', (done) ->
       readAggregateRepository.find 'ReadFoo', query, ->
-        expect(findByIdStub.calledWith 'ReadFoo', 42).to.be.ok()
-        expect(findByIdStub.calledWith 'ReadFoo', 23).to.be.ok()
+        expect(findByIdStub.calledWith 'ReadFoo', 42).to.be.true
+        expect(findByIdStub.calledWith 'ReadFoo', 23).to.be.true
         done()
 
     it 'should return ReadAggregate instances matching the given query', (done) ->
       readAggregateRepository.find 'ReadFoo', query, (err, readAggregates) ->
-        expect(readAggregates.length).to.be 2
-        expect(readAggregates[0]).to.be.a ReadFoo
-        expect(readAggregates[1]).to.be.a ReadFoo
+        expect(readAggregates.length).to.equal 2
+        expect(readAggregates[0]).to.be.an.instanceof ReadFoo
+        expect(readAggregates[1]).to.be.an.instanceof ReadFoo
         done()
 
   describe '#findOne', ->
@@ -93,7 +88,7 @@ describe 'ReadAggregateRepositorySpec', ->
       findStub = sandbox.stub readAggregateRepository, 'find'
       findStub.yields null, [1, 2]
       readAggregateRepository.findOne 'ReadFoo', {}, (err, result) ->
-        expect(result).to.be 1
+        expect(result).to.equal 1
         done()
 
 
@@ -101,6 +96,6 @@ describe 'ReadAggregateRepositorySpec', ->
 
     it 'should return all AggregateIds matching the given query', (done) ->
       readAggregateRepository.findIds 'ReadFoo', {}, (err, aggregateIds) ->
-        expect(aggregateIds.length).to.be 1
-        expect(aggregateIds[0]).to.be 23
+        expect(aggregateIds.length).to.equal 1
+        expect(aggregateIds[0]).to.equal 23
         done()

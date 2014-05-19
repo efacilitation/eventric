@@ -1,8 +1,4 @@
 describe 'Remote Bounded Context', ->
-
-  expect   = require 'expect.js'
-  sinon    = require 'sinon'
-  eventric = require 'eventric'
   RemoteService        = eventric 'RemoteService'
   RemoteBoundedContext = eventric 'RemoteBoundedContext'
 
@@ -28,7 +24,7 @@ describe 'Remote Bounded Context', ->
           methodName: commandName
           methodParams: commandPayload
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', expectedRpc, callback).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', expectedRpc, callback).to.be.true
 
 
   describe '#query', ->
@@ -51,7 +47,7 @@ describe 'Remote Bounded Context', ->
           methodName: queryName
           methodParams: queryPayload
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', expectedRpc).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', expectedRpc).to.be.true
 
   describe '#rpc', ->
 
@@ -61,7 +57,7 @@ describe 'Remote Bounded Context', ->
       remoteBoundedContext = new RemoteBoundedContext remoteServiceStub
       remoteBoundedContext.rpc {some: 'rpc'}
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', {some: 'rpc'}).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', {some: 'rpc'}).to.be.true
 
   describe '#handle', ->
 
@@ -95,4 +91,4 @@ describe 'Remote Bounded Context', ->
       command =
         name: commandName
         params: commandPayload
-      expect(exampleContext.command.calledWith command, callback).to.be.ok()
+      expect(exampleContext.command.calledWith command, callback).to.be.true

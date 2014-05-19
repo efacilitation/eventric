@@ -7,19 +7,18 @@ module.exports = (config) ->
 
     # list of files / patterns to load in the browser
     files: [
-      # -- commonjs loader --
+      # commonjs require
       'node_modules/commonjs-require/commonjs-require.js'
 
-      # -- wrapped by commonjs --
-      'node_modules/expect.js/index.js'
-      'node_modules/mockery/mockery.js'
-      'vendor/sinon.js'
+      # spec helper
+      'build/spec/helper.js'
 
-      'index.coffee'
+      # source
       'src/**/*.+(coffee|js)'
 
-      # -- not wrapped by commonjs and therefore directly executed --
-      'spec/**/*_spec.coffee'
+      # specs
+      'spec/helper/setup.coffee'
+      'spec/**/*.spec.coffee'
     ]
 
     # list of files to exclude
@@ -29,15 +28,9 @@ module.exports = (config) ->
 
     # compile coffee scripts and wrap into commonjs
     preprocessors:
-      'index.coffee': ['commonjs', 'coffee']
       'src/**/*.coffee': ['commonjs', 'coffee']
       'src/**/*.js': ['commonjs']
       'spec/**/*.coffee': ['coffee']
-
-      'node_modules/expect.js/index.js': ['commonjs']
-      'node_modules/async/lib/async.js': ['commonjs']
-      'node_modules/mockery/mockery.js': ['commonjs']
-      'vendor/sinon.js': ['commonjs']
 
     coffeePreprocessor:
       options:
@@ -46,19 +39,7 @@ module.exports = (config) ->
     commonjsPreprocessor:
       options:
         pathReplace: (path) ->
-          newPath = path
-          if (path.indexOf 'node_modules/expect.js') == 0
-            # commonjs-preprocessor strips the extension, but the module is named 'expect.js' in node..
-            newPath = 'expect.js.js'
-
-          else if (path.indexOf 'node_modules/mockery') == 0
-            newPath = 'mockery'
-
-          else if (path.indexOf 'vendor') == 0
-            newPath = path.replace /^vendor\//, ''
-
-          else
-            newPath = "eventric/#{path}"
+          path.replace 'src', 'eventric'
 
     # web server port
     port: 9876

@@ -1,9 +1,4 @@
 describe 'AggregateRepository', ->
-
-  sinon    = require 'sinon'
-  expect   = require 'expect.js'
-  eventric = require 'eventric'
-
   AggregateRepository = eventric 'AggregateRepository'
   AggregateRoot       = eventric 'AggregateRoot'
 
@@ -31,9 +26,9 @@ describe 'AggregateRepository', ->
 
     it 'should ask the EventStore for DomainEvents matching the AggregateId', ->
       aggregateRepository.findById 'Foo', 42, ->
-      expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 42})).to.be.ok()
+      expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 42})).to.be.true
 
     it 'should return the Aggregate matching the given Id with all DomainEvents applied', ->
       aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
         expect(aggregate).to.be.a Foo
-        expect(aggregate.name).to.be 'John'
+        expect(aggregate.name).to.equal 'John'

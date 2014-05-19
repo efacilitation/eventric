@@ -1,11 +1,4 @@
 describe 'BoundedContext', ->
-  expect         = require 'expect.js'
-  sinon          = require 'sinon'
-  mockery        = require 'mockery'
-  eventric       = require 'eventric'
-  sandbox        = sinon.sandbox.create()
-
-
   class MongoDbEventStoreMock
     initialize: sandbox.stub().yields null
   class CommandServiceMock
@@ -58,7 +51,7 @@ describe 'BoundedContext', ->
       boundedContext = new BoundedContext
       boundedContext.initialize()
 
-      expect(MongoDbEventStoreMock::initialize.calledOnce).to.be.ok()
+      expect(MongoDbEventStoreMock::initialize.calledOnce).to.be.true
 
 
     describe 'should initialize aggregaterepository and domaineventservice', ->
@@ -67,8 +60,8 @@ describe 'BoundedContext', ->
         boundedContext = new BoundedContext
         boundedContext.initialize()
 
-        expect(aggregateRepositoryMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.ok()
-        expect(domainEventServiceMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.ok()
+        expect(aggregateRepositoryMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
+        expect(domainEventServiceMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
 
 
       it 'with the custom event store if provided', ->
@@ -78,8 +71,8 @@ describe 'BoundedContext', ->
         boundedContext = new BoundedContext
         boundedContext.initialize customEventStoreMock
 
-        expect(aggregateRepositoryMock.calledWith customEventStoreMock).to.be.ok()
-        expect(domainEventServiceMock.calledWith customEventStoreMock).to.be.ok()
+        expect(aggregateRepositoryMock.calledWith customEventStoreMock).to.be.true
+        expect(domainEventServiceMock.calledWith customEventStoreMock).to.be.true
 
 
     it 'should register the configured aggregates at the aggregateRepository', ->
@@ -95,8 +88,8 @@ describe 'BoundedContext', ->
       boundedContext = new ExampleBoundedContext
       boundedContext.initialize()
 
-      expect(AggregateRepositoryMock::registerClass.calledWith 'Foo', FooAggregateMock).to.be.ok()
-      expect(AggregateRepositoryMock::registerClass.calledWith 'Bar', BarAggregateMock).to.be.ok()
+      expect(AggregateRepositoryMock::registerClass.calledWith 'Foo', FooAggregateMock).to.be.true
+      expect(AggregateRepositoryMock::registerClass.calledWith 'Bar', BarAggregateMock).to.be.true
 
 
     it 'should instantiate and save the configured read aggregate repositories', ->
@@ -112,8 +105,8 @@ describe 'BoundedContext', ->
       boundedContext = new ExampleBoundedContext
       boundedContext.initialize()
 
-      expect((boundedContext.getReadAggregateRepository 'Foo') instanceof FooReadAggregateRepository).to.be.ok()
-      expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.ok()
+      expect((boundedContext.getReadAggregateRepository 'Foo') instanceof FooReadAggregateRepository).to.be.true
+      expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.true
 
 
     describe 'processing application services', ->
@@ -136,7 +129,7 @@ describe 'BoundedContext', ->
 
 
         it 'should inject the command service into the application services ', ->
-          expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.ok()
+          expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.true
 
 
         it 'should inject the getReadAggregateRepository function into the application services', ->
@@ -150,7 +143,7 @@ describe 'BoundedContext', ->
       it 'should call initialize on the application service if available', ->
         exampleApplicationService.initialize = sinon.spy()
         exampleBoundedContext.initialize()
-        expect(exampleApplicationService.initialize.calledOnce).to.be.ok()
+        expect(exampleApplicationService.initialize.calledOnce).to.be.true
 
 
   describe '#command', ->
@@ -169,7 +162,7 @@ describe 'BoundedContext', ->
         callback = ->
 
         boundedContext.command command, callback
-        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', command.id, 'doSomething', command.params, callback).to.be.ok()
+        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', command.id, 'doSomething', command.params, callback).to.be.true
 
 
     describe 'has a registered handler', ->
@@ -197,7 +190,7 @@ describe 'BoundedContext', ->
 
         exampleBoundedContext.command command, callback
 
-        expect(exampleApplicationService.accountDoSomething.calledWith command.params, callback).to.be.ok()
+        expect(exampleApplicationService.accountDoSomething.calledWith command.params, callback).to.be.true
 
 
   describe '#query', ->
@@ -219,7 +212,7 @@ describe 'BoundedContext', ->
 
         exampleBoundedContext.query query, callback
 
-        expect(FooReadAggregateRepository::findById.calledWith query.id, undefined, callback).to.be.ok()
+        expect(FooReadAggregateRepository::findById.calledWith query.id, undefined, callback).to.be.true
 
 
     describe 'has a registered handler', ->
@@ -245,7 +238,7 @@ describe 'BoundedContext', ->
 
         exampleBoundedContext.query query, callback
 
-        expect(exampleApplicationService.customQueryMethod.calledWith query.params, callback).to.be.ok()
+        expect(exampleApplicationService.customQueryMethod.calledWith query.params, callback).to.be.true
 
 
   describe '#onDomainEvent', ->
@@ -259,4 +252,4 @@ describe 'BoundedContext', ->
       eventHandler = ->
       exampleBoundedContext.onDomainEvent eventName, eventHandler
 
-      expect(DomainEventServiceMock::on.calledWith eventName, eventHandler).to.be.ok()
+      expect(DomainEventServiceMock::on.calledWith eventName, eventHandler).to.be.true

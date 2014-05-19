@@ -1,9 +1,4 @@
 describe 'Create new Aggregate Scenario', ->
-
-  sinon    = require 'sinon'
-  expect   = require 'expect.js'
-  eventric = require 'eventric'
-
   CommandService          = eventric 'CommandService'
   DomainEventService      = eventric 'DomainEventService'
   AggregateRoot           = eventric 'AggregateRoot'
@@ -53,5 +48,5 @@ describe 'Create new Aggregate Scenario', ->
         # now we tell the commandservice to create the aggregate for us
         commandService.createAggregate 'EnderAggregate', (err, aggrageId) ->
 
-          expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.ok()
+          expect(DomainEventServiceTriggerSpy.calledWith 'DomainEvent', sinon.match.has 'name', 'create').to.be.true
           done()

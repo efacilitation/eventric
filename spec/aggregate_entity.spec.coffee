@@ -1,8 +1,4 @@
 describe 'AggregateEntity', ->
-
-  expect            = require 'expect.js'
-  sinon             = require 'sinon'
-  eventric          = require 'eventric'
   Entity            = eventric 'AggregateEntity'
   EntityCollection  = eventric 'AggregateEntityCollection'
 
@@ -14,7 +10,7 @@ describe 'AggregateEntity', ->
       myEntity = new MyEntity
       myEntity.id = 1
 
-      expect(myEntity.getMetaData()).to.eql
+      expect(myEntity.getMetaData()).to.deep.equal
         id: 1
         name: 'MyEntity'
 
@@ -26,7 +22,7 @@ describe 'AggregateEntity', ->
       myEntity = new MyEntity name: 'Willy'
       myEntity._set 'name', 'John'
 
-      expect(myEntity.getChanges()).to.eql
+      expect(myEntity.getChanges()).to.deep.equal
         props:
           name: 'John'
         entities: {}
@@ -46,7 +42,7 @@ describe 'AggregateEntity', ->
 
       myEntity._get('things').add myThingsEntity
 
-      expect(myEntity.getChanges()).to.eql
+      expect(myEntity.getChanges()).to.deep.equal
         props: {}
         entities: {}
         collections:
@@ -83,7 +79,7 @@ describe 'AggregateEntity', ->
 
       a1.getChanges()
 
-      expect(spy.calledOnce).to.be.ok()
+      expect(spy.calledOnce).to.be.true
 
 
   describe '#clearChanges', ->
@@ -104,7 +100,7 @@ describe 'AggregateEntity', ->
 
       a1.clearChanges()
 
-      expect(a1.getChanges()).to.eql {}
+      expect(a1.getChanges()).to.deep.equal {}
 
   describe '#applyChanges', ->
 
@@ -119,8 +115,8 @@ describe 'AggregateEntity', ->
 
       myEntity.applyChanges changedPropsAndCollections
 
-      expect(myEntity._get 'name').to.eql 'ChangedJohn'
-      expect(myEntity.getChanges()).to.eql {}
+      expect(myEntity._get 'name').to.equal 'ChangedJohn'
+      expect(myEntity.getChanges()).to.deep.equal {}
 
 
     it 'should apply given changes to properties and collections', ->
@@ -155,4 +151,4 @@ describe 'AggregateEntity', ->
 
       mytopentity.applyChanges changedPropsAndCollections
 
-      expect(mytopentity._get('topcollection').get(1)._get('name')).to.eql 'ChangedWayne'
+      expect(mytopentity._get('topcollection').get(1)._get('name')).to.equal 'ChangedWayne'

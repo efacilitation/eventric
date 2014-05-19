@@ -1,9 +1,4 @@
 describe 'RemoteService', ->
-
-  expect   = require 'expect.js'
-  sinon    = require 'sinon'
-  eventric = require 'eventric'
-
   RemoteService = eventric 'RemoteService'
 
   rpc = null
@@ -29,7 +24,7 @@ describe 'RemoteService', ->
       remoteServiceAdapter.rpc.yields null
       remoteService = new RemoteService remoteServiceAdapter
       remoteService.rpc 'RemoteExampleService', rpc.payload, ->
-        expect(remoteServiceAdapter.rpc.calledWith rpc).to.be.ok()
+        expect(remoteServiceAdapter.rpc.calledWith rpc).to.be.true
         done()
 
 
@@ -46,4 +41,4 @@ describe 'RemoteService', ->
       remoteService.registerServiceHandler 'RemoteExampleService', remoteExampleService
 
       remoteService.handle rpc, ->
-      expect(remoteExampleService.handle.calledWith rpc.payload).to.be.ok()
+      expect(remoteExampleService.handle.calledWith rpc.payload).to.be.true

@@ -1,9 +1,4 @@
 describe 'RemoteRepositoryService', ->
-
-  expect   = require 'expect.js'
-  sinon    = require 'sinon'
-  eventric = require 'eventric'
-
   AggregateEntity         = eventric 'AggregateEntity'
   RemoteService           = eventric 'RemoteService'
   RemoteRepositoryService = eventric 'RemoteRepositoryService'
@@ -47,17 +42,17 @@ describe 'RemoteRepositoryService', ->
 
     it 'should convert rpc responses to its corresponding class instances', (done) ->
       remoteRepositoryService.rpc rpcPayload, (err, results) ->
-        expect(results[0]).to.be.a ExampleAggregate
+        expect(results[0]).to.be.an.instanceof ExampleAggregate
         done()
 
     it 'should apply changes on converted rpc responses', (done) ->
       remoteRepositoryService.rpc rpcPayload, (err, results) ->
-        expect(results[0]._get 'name').to.be 'John'
+        expect(results[0]._get 'name').to.equal 'John'
         done()
 
     it 'should call the RemoteService', (done) ->
       remoteRepositoryService.rpc rpcPayload, (err, result) ->
-        expect(remoteServiceStub.rpc.calledWith 'RemoteRepositoryService', rpcPayload).to.be.ok()
+        expect(remoteServiceStub.rpc.calledWith 'RemoteRepositoryService', rpcPayload).to.be.true
         done()
 
 
@@ -65,5 +60,5 @@ describe 'RemoteRepositoryService', ->
 
     it 'should execute the given method on the given repository', ->
       remoteRepositoryService.handle rpcPayload, ->
-      expect(exampleRepository.exampleMethod.calledWith 'exampleParams').to.be.ok()
+      expect(exampleRepository.exampleMethod.calledWith 'exampleParams').to.be.true
 

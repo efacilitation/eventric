@@ -1,8 +1,4 @@
 describe 'RemoteCommandService', ->
-  expect   = require 'expect.js'
-  sinon    = require 'sinon'
-  eventric = require 'eventric'
-
   RemoteService        = eventric 'RemoteService'
   RemoteCommandService = eventric 'RemoteCommandService'
 
@@ -20,7 +16,7 @@ describe 'RemoteCommandService', ->
           'ExampleAggregate'
         ]
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc, callback).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc, callback).to.be.true
 
 
   describe '#commandAggregate', ->
@@ -40,7 +36,7 @@ describe 'RemoteCommandService', ->
           {some: 'params'}
         ]
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc, callback).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', expectedRpc, callback).to.be.true
 
 
   describe '#rpc', ->
@@ -49,7 +45,7 @@ describe 'RemoteCommandService', ->
       remoteCommandService = new RemoteCommandService remoteServiceStub
       remoteCommandService.rpc {some: 'rpc'}
 
-      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', {some: 'rpc'}).to.be.ok()
+      expect(remoteServiceStub.rpc.calledWith 'RemoteCommandService', {some: 'rpc'}).to.be.true
 
 
   describe '#handle', ->
@@ -75,4 +71,4 @@ describe 'RemoteCommandService', ->
       remoteCommandService.registerClass 'CommandService', commandServiceStub
       remoteCommandService.handle rpc.payload, ->
 
-      expect(commandServiceStub.commandAggregate.calledWith rpc.payload.params...).to.be.ok()
+      expect(commandServiceStub.commandAggregate.calledWith rpc.payload.params...).to.be.true

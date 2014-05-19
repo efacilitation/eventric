@@ -31,13 +31,13 @@ For a brief overview on how to use eventric check out this example:
 To execute all (client+server) tests, use:
 
 ```shell
-coffeegulp spec
+gulp spec
 ```
 
 You can watch for file-changes with
 
 ```shell
-NODE_ENV=workstation coffeegulp watch
+NODE_ENV=workstation gulp watch
 ```
 
 

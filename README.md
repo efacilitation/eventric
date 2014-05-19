@@ -29,13 +29,13 @@ For a brief overview on how to use eventric check out one of the following examp
 To execute all (client+server) tests, use:
 
 ```javascript
-grunt spec
+coffeegulp spec
 ```
 
 You can watch for file-changes with
 
 ```javascript
-grunt watch:hybrid
+coffeegulp watch
 ```
 
 

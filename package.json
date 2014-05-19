@@ -33,7 +33,7 @@
     "commonjs-require": "*",
     "expect.js": "*",
     "gulp": "*",
-    "gulp-grep-stream": "*",
+    "gulp-clean": "*",
     "gulp-util": "*",
     "gulp-mocha": "*",
     "gulp-watch": "*",

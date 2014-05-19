@@ -14,7 +14,7 @@
 
 ## Features
 
-Informations on Features, Best Practices, API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
+Informations on the Building Blocks, Best Practices, API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
 
 ## Quick Start

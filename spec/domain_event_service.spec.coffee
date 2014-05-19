@@ -1,4 +1,5 @@
 describe 'DomainEventService', ->
+  DomainEvent        = eventric 'DomainEvent'
   DomainEventService = eventric 'DomainEventService'
 
   eventStore = null
@@ -16,7 +17,7 @@ describe 'DomainEventService', ->
 
     domainEvent = null
     beforeEach ->
-      domainEvent =
+      domainEvent = new DomainEvent
         name: 'testMethod'
         aggregate:
           id: 1

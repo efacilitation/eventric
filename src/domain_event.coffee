@@ -5,12 +5,27 @@ class DomainEvent
     @aggregate = params.aggregate
 
 
-  getChangedAggregateProps: ->
-    @aggregate.changed.props
+  getAggregateChanges: (type) ->
+    switch type
+      when 'props', 'entities', 'collections'
+        @aggregate.changed[type]
+      else @aggregate.changed
+
+
+  getAggregateName: ->
+    @aggregate.name
+
+
+  getAggregateId: ->
+    @aggregate.id
 
 
   getTimestamp: ->
     @timestamp
+
+
+  getName: ->
+    @name
 
 
 module.exports = DomainEvent

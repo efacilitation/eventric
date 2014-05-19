@@ -22,6 +22,7 @@ afterEach ->
   mockery.resetCache()
   mockery.deregisterAll()
   sandbox.restore()
+  require.cache = {}
 
 
 after ->

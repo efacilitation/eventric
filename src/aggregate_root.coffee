@@ -19,19 +19,17 @@ class AggregateRoot extends AggregateEntity
 
     params.includeAggregateChanges = true unless params.includeAggregateChanges is false
 
-    event =
+    eventParams =
       name: eventName
-      timestamp: new Date().getTime()
       aggregate: @getMetaData()
 
     if params.includeAggregateChanges
       changes = @getChanges()
       if Object.keys(changes).length > 0
-        event.aggregate.changed = changes
+        eventParams.aggregate.changed = changes
 
-    # TODO: return error if DomainEvent is empty (no changes, no payload)
-
-    @_domainEvents.push event
+    domainEvent = new DomainEvent eventParams
+    @_domainEvents.push domainEvent
 
   getDomainEvents: ->
     @_domainEvents

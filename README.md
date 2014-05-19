@@ -8,7 +8,7 @@
 ## Philosophy
 
 * Emphasize [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design), [Event-driven architecture](https://www.goodreads.com/book/show/12369902-event-centric) and [Task-based UIs](http://cqrs.wordpress.com/documents/task-based-ui).
-* Explicitly set boundaries for and encapsulate parts of your application using [BoundedContexts]() (xor [MicroServices](http://martinfowler.com/articles/microservices.html))
+* Explicitly set boundaries for parts of your application using [BoundedContexts]() (xor [MicroServices](http://martinfowler.com/articles/microservices.html))
 * Separation of concerns with Commands and Queries using [CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx)
 * Capture all changes to your application state as a sequence of events using [EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html)
 * Listen to all your application changes using [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/)

@@ -3,9 +3,29 @@ if typeof window isnt 'undefined'
 else
   root = global
 
-root.eventric = require 'eventric'
-root.sinon    = require 'sinon'
-root.mockery  = require 'mockery'
-root.chai     = require 'chai'
-root.expect   = chai.expect
-root.sandbox  = sinon.sandbox.create()
+if !root._spec_setup
+  root.eventric = require 'eventric'
+  root.sinon    = require 'sinon'
+  root.mockery  = require 'mockery'
+  root.chai     = require 'chai'
+  root.expect   = chai.expect
+  root.sandbox  = sinon.sandbox.create()
+
+
+before ->
+  mockery.enable useCleanCache: true
+  mockery.warnOnUnregistered false
+  mockery.warnOnReplace false
+
+
+afterEach ->
+  mockery.resetCache()
+  mockery.deregisterAll()
+  sandbox.restore()
+
+
+after ->
+  mockery.disable()
+
+
+root._spec_setup = true

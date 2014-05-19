@@ -4,13 +4,6 @@ describe 'Create new Aggregate Scenario', ->
   AggregateRoot           = eventric 'AggregateRoot'
   AggregateRepository     = eventric 'AggregateRepository'
 
-  sandbox = null
-  beforeEach ->
-    sandbox = sinon.sandbox.create()
-
-  afterEach ->
-    sandbox.restore()
-
   describe 'given we want to instantiate a new Aggregate', ->
 
     describe 'when we tell the CommandService to create an Aggregate', ->

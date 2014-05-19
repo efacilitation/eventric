@@ -5,6 +5,7 @@ AggregateEntity           = eventric 'AggregateEntity'
 AggregateEntityCollection = eventric 'AggregateEntityCollection'
 MixinSnapshot             = eventric 'MixinSnapshot'
 MixinSetGet               = eventric 'MixinSetGet'
+DomainEvent               = eventric 'DomainEvent'
 
 class AggregateRoot extends AggregateEntity
 

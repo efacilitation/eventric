@@ -31,6 +31,8 @@ moduleDefinition =
   BoundedContext: './bounded_context'
   BoundedContextService: './bounded_context_service'
 
+  DomainEvent: './domain_event'
+
 
 module.exports = (required) ->
   path = moduleDefinition[required] ? required

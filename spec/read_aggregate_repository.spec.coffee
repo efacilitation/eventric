@@ -6,12 +6,9 @@ describe 'ReadAggregateRepositorySpec', ->
     @prop 'name'
 
 
-  sandbox = null
   readAggregateRepository = null
   EventStoreStub = null
   beforeEach ->
-    sandbox = sinon.sandbox.create()
-
     class EventStore
       find: ->
       save: ->
@@ -29,8 +26,6 @@ describe 'ReadAggregateRepositorySpec', ->
     readAggregateRepository = new ReadAggregateRepository 'Foo', EventStoreStub
     readAggregateRepository.registerClass 'ReadFoo', ReadFoo
 
-  afterEach ->
-    sandbox.restore()
 
   describe '#findById', ->
 

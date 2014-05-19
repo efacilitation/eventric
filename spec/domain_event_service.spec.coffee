@@ -1,11 +1,9 @@
 describe 'DomainEventService', ->
   DomainEventService = eventric 'DomainEventService'
 
-  sandbox = null
   eventStore = null
   domainEventService = null
   beforeEach ->
-    sandbox = sinon.sandbox.create()
     class EventStore
       find: ->
       save: ->
@@ -13,8 +11,6 @@ describe 'DomainEventService', ->
     eventStore.save.yields null
     domainEventService = new DomainEventService eventStore
 
-  afterEach ->
-    sandbox.restore()
 
   describe '#saveAndTrigger', ->
 

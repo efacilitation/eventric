@@ -5,14 +5,11 @@ describe 'CommandService', ->
   DomainEventService      = eventric 'DomainEventService'
   CommandService          = eventric 'CommandService'
 
-  sandbox = null
   aggregateStubId = 1
   exampleAggregateStub = null
   aggregateRepositoryStub = null
   domainEventService = null
   beforeEach ->
-    sandbox = sinon.sandbox.create()
-
     # example aggregate
     class ExampleAggregate extends AggregateRoot
 
@@ -31,8 +28,6 @@ describe 'CommandService', ->
     domainEventService = sinon.createStubInstance DomainEventService
     domainEventService.saveAndTrigger.yields null
 
-  afterEach ->
-    sandbox.restore()
 
   describe '#createAggregate', ->
 

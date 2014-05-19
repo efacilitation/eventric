@@ -4,7 +4,6 @@ describe 'BoundedContext', ->
   class CommandServiceMock
     commandAggregate: sandbox.stub()
 
-  # TODO refactor me
   domainEventServiceMock = null
   class DomainEventServiceMock
     constructor: ->
@@ -12,17 +11,11 @@ describe 'BoundedContext', ->
     saveAndTrigger: sandbox.stub()
     on: sandbox.stub()
 
-  # TODO refactor me
   aggregateRepositoryMock = null
   class AggregateRepositoryMock
     constructor: ->
       aggregateRepositoryMock.apply this, arguments
     registerClass: sandbox.stub()
-
-  before ->
-    mockery.enable
-      warnOnReplace: true
-      warnOnUnregistered: false
 
 
   beforeEach ->
@@ -34,15 +27,6 @@ describe 'BoundedContext', ->
     mockery.registerMock 'eventric-store-mongodb', MongoDbEventStoreMock
     aggregateRepositoryMock = sandbox.stub()
     domainEventServiceMock = sandbox.stub()
-
-
-  afterEach ->
-    mockery.deregisterAll()
-    sandbox.restore()
-
-
-  after ->
-    mockery.disable()
 
 
   describe '#initialize', ->

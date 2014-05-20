@@ -54,13 +54,15 @@ class BoundedContext
 
       for commandName, commandMethodName of applicationService.commands
         # TODO: check duplicates, warn and do some logging
-        @_applicationServiceCommands[commandName] = ->
-          applicationService[commandMethodName].apply applicationService, arguments
+        do (commandName, commandMethodName, applicationService) =>
+          @_applicationServiceCommands[commandName] = ->
+            applicationService[commandMethodName].apply applicationService, arguments
 
       for queryName, queryMethodName of applicationService.queries
         # TODO: check duplicates, warn and do some logging
-        @_applicationServiceQueries[queryName] = ->
-         applicationService[queryMethodName].apply applicationService, arguments
+        do (queryName, queryMethodName, applicationService) =>
+          @_applicationServiceQueries[queryName] = ->
+            applicationService[queryMethodName].apply applicationService, arguments
 
       applicationService.initialize?()
 

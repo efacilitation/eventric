@@ -28,6 +28,7 @@ class AggregateEntity
   create: ->
     @id = @_generateUid()
     @_isNew = true
+    @_observerDiscard()
 
 
   _observerOpen: ->

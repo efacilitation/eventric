@@ -35,8 +35,11 @@ class CommandService
       return
 
     # create Aggregate
-    aggregate = new AggregateClass params
+    aggregate = new AggregateClass
     aggregate.create()
+
+    # set given params
+    aggregate[key] = value for key, value of params
 
     @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
       return callback err, null if err

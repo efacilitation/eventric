@@ -2,6 +2,7 @@ coffee      = require 'gulp-coffee'
 concat      = require 'gulp-concat'
 clean       = require 'gulp-clean'
 commonjs    = require 'gulp-wrap-commonjs'
+uglify      = require 'gulp-uglify'
 runSequence = require 'run-sequence'
 
 module.exports = (gulp) ->
@@ -30,4 +31,7 @@ module.exports = (gulp) ->
           return path
         ))
       .pipe(concat('eventric.js'))
+      .pipe(gulp.dest('build/release'))
+      .pipe(uglify())
+      .pipe(concat('eventric-min.js'))
       .pipe(gulp.dest('build/release'))

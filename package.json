@@ -11,6 +11,8 @@
     "event-driven",
     "es",
     "ead",
+    "boundedcontexts",
+    "microservices",
     "shared",
     "client",
     "server"
@@ -41,6 +43,7 @@
     "gulp-concat": "*",
     "gulp-newer": "*",
     "gulp-wrap-commonjs": "*",
+    "gulp-uglify": "*",
     "karma": "*",
     "karma-coffee-preprocessor": "*",
     "karma-phantomjs-launcher": "*",

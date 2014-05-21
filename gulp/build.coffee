@@ -23,7 +23,7 @@ module.exports = (gulp) ->
       .pipe(gulp.dest('build/node'))
 
   gulp.task 'build:release', ->
-    gulp.src('build/node/*.js')
+    gulp.src('build/node/**/*.js')
       .pipe(commonjs(
         pathModifier: (path) ->
           path = path.replace "#{process.cwd()}/build/node", 'eventric'

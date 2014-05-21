@@ -12,6 +12,11 @@ class AggregateEntity
   _.extend @prototype, MixinSetGet::
 
   constructor: (@_props = {}) ->
+    for key, value of @_props
+      Object.defineProperty @, key,
+        get: -> @_props[key]
+        set: (newValue) -> @_set key, newValue
+
     @_isNew             = false
     @_propsChanged      = {}
     @_domainEvents      = []

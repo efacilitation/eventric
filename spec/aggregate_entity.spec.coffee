@@ -30,6 +30,19 @@ describe 'AggregateEntity', ->
         collections: {}
 
 
+    it 'should return a change to a property even if its the same value', ->
+      class MyEntity extends Entity
+
+      myEntity = new MyEntity name: 'Willy'
+      myEntity.name = 'Willy'
+
+      expect(myEntity.getChanges()).to.deep.equal
+        props:
+          name: 'Willy'
+        entities: {}
+        collections: {}
+
+
     it 'should return changes to properties from the given entity collection', ->
       class MyEntity extends Entity
 
@@ -150,7 +163,6 @@ describe 'AggregateEntity', ->
               entities: {}
               collections: {}
           } ]
-
 
       mytopentity.applyChanges changedPropsAndCollections
 

@@ -21,7 +21,6 @@ moduleDefinition =
   RemoteRepositoryService: './remote_repository_service'
 
   MixinRegisterAndGetClass: './mixin_registerandgetclass'
-  MixinSnapshot: './mixin_snapshot'
   MixinSetGet: './mixin_setget'
   MixinEvents: './mixin_events'
 

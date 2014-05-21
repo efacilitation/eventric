@@ -81,14 +81,14 @@ class AggregateEntity
       {}
 
 
-  _changesOnProperties: ->
+  _changesOnProperties: () ->
     changes = {}
     if Object.keys(@_propsChanged).length > 0
       changes = @_propsChanged
     changes
 
 
-  _changesOnCollections: ->
+  _changesOnCollections: () ->
     changes = {}
     for propkey, propvalue of @_props
       if propvalue instanceof AggregateEntityCollection

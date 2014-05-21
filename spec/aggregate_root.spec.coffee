@@ -1,5 +1,7 @@
 describe 'AggregateRoot', ->
-  AggregateRoot = eventric 'AggregateRoot'
+  AggregateRoot             = eventric 'AggregateRoot'
+  AggregateEntity           = eventric 'AggregateEntity'
+  AggregateEntityCollection = eventric 'AggregateEntityCollection'
   enderAggregate = null
   beforeEach ->
     class EnderAggregate extends AggregateRoot
@@ -15,7 +17,7 @@ describe 'AggregateRoot', ->
   describe '#generateDomainEvent', ->
     eventName = null
     beforeEach ->
-      enderAggregate._set 'name', 'John'
+      enderAggregate.name = 'John'
       eventName = 'somethingHappend'
 
 
@@ -24,7 +26,7 @@ describe 'AggregateRoot', ->
       expect(enderAggregate.getDomainEvents()[0].getName()).to.equal eventName
       expect(enderAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal
         props:
-          name: enderAggregate._get 'name'
+          name: enderAggregate.name
         collections: {}
         entities: {}
 
@@ -45,15 +47,29 @@ describe 'AggregateRoot', ->
 
   describe '#getSnapshot', ->
     it 'should return the current state as special "_snapshot"-DomainEvent', ->
+      class MyThingsEntity extends AggregateEntity
+      myThingsEntity = new MyThingsEntity name: 'NotWayne'
+      myThingsEntity.id = 2
+      myThingsEntity.name = 'Wayne'
+
       enderAggregate.id = 42
-      enderAggregate._set 'name', 'John'
-      expect(enderAggregate.getSnapshot()).to.eql
-        name: '_snapshot'
-        aggregate:
-          id: 42
-          name: 'EnderAggregate'
-          changed:
-            props:
-              name: 'John'
-            entities: {}
-            collections: {}
+      enderAggregate.name = 'John'
+      enderAggregate.things = new AggregateEntityCollection
+
+      enderAggregate.things.add myThingsEntity
+
+      snapshotEvent = enderAggregate.getSnapshot()
+      expect(snapshotEvent.getAggregateChanges()).to.deep.equal
+        props:
+          name: 'John'
+        entities: {}
+        collections:
+          things: [ {
+            id: 2
+            name: 'MyThingsEntity'
+            changed:
+              props:
+                name: 'Wayne'
+              entities: {}
+              collections: {}
+          } ]

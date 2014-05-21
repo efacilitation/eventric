@@ -47,7 +47,7 @@ describe 'RemoteRepositoryService', ->
 
     it 'should apply changes on converted rpc responses', (done) ->
       remoteRepositoryService.rpc rpcPayload, (err, results) ->
-        expect(results[0]._get 'name').to.equal 'John'
+        expect(results[0].name).to.equal 'John'
         done()
 
     it 'should call the RemoteService', (done) ->

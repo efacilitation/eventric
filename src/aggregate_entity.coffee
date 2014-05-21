@@ -5,6 +5,8 @@ MixinSetGet               = eventric 'MixinSetGet'
 AggregateEntity           = eventric 'AggregateEntity'
 AggregateEntityCollection = eventric 'AggregateEntityCollection'
 
+eventric 'HelperObserve'
+
 class AggregateEntity
 
   _.extend @prototype, MixinSetGet::
@@ -15,11 +17,30 @@ class AggregateEntity
     @_domainEvents      = []
     @_entityClasses     = {}
     @_trackPropsChanged = true
+    @_observerOpen()
 
 
   create: ->
     @id = @_generateUid()
     @_isNew = true
+
+
+  _observerOpen: ->
+    @_observer = new ObjectObserver @
+    @_observer.open (added, removed, changed, getOldValueFn) =>
+      Object.keys(added).forEach (property) =>
+        @_set property, added[property]
+
+      Object.keys(changed).forEach (property) =>
+        @_set property, changed[property]
+
+
+  _observerDiscard: ->
+    @_observer.discardChanges()
+
+
+  _observerClose: ->
+    @_observer.close()
 
 
   _generateUid: (separator) ->
@@ -36,6 +57,8 @@ class AggregateEntity
 
 
   getChanges: ->
+    @_observer.deliver()
+
     changes =
       props: @_changesOnProperties()
 
@@ -91,38 +114,46 @@ class AggregateEntity
 
 
   clearChanges: ->
+    @_observerClose()
     @_propsChanged = {}
 
     for propKey, propVal of @_props when propVal instanceof AggregateEntityCollection
       @_clearCollectionChanges propVal
 
+    @_observerOpen()
 
   _clearCollectionChanges: (collection) ->
     entity.clearChanges() for entity in collection.entities
 
 
   applyChanges: (changes, params={}) ->
+    @_observerClose()
     oldTrackPropsChanged = @_trackPropsChanged
     @_trackPropsChanged = false
     @_applyChangesToProps changes.props
     @_applyChangesToCollections changes.collections
     @_trackPropsChanged = oldTrackPropsChanged
 
+    @_observerOpen()
+
 
   _applyChangesToProps: (propChanges) ->
-    @_set propName, propValue for propName, propValue of propChanges
+
+    for propName, propValue of propChanges
+      @[propName] = propValue
 
 
   _applyChangesToCollections: (collectionChanges) ->
     for collectionName, collection of collectionChanges
-      if @_get collectionName
-        @_set collectionName, new AggregateEntityCollection
-        @_applyChangesToCollection collectionName, collection
+      if !@[collectionName]
+        @[collectionName] = new AggregateEntityCollection
+
+      @_applyChangesToCollection collectionName, collection
 
 
   _applyChangesToCollection: (collectionName, collection) ->
     for entity in collection
-      entityInstance = @_get[collectionName]?.get entity.id
+      entityInstance = @[collectionName]?.get entity.id
       if !entityInstance
         if EntityClass = @getEntityClass entity.name
           entityInstance = new EntityClass
@@ -132,7 +163,7 @@ class AggregateEntity
 
         entityInstance.id = entity.id
         # this will actually add a reference, so we can applyChanges afterwards safely
-        @_get(collectionName).add entityInstance
+        @[collectionName].add entityInstance
 
       if entity.changed
         entityInstance.applyChanges entity.changed
@@ -144,5 +175,6 @@ class AggregateEntity
 
   registerEntityClass: (className, Class) ->
     @_entityClasses[className] = Class
+
 
 module.exports = AggregateEntity

@@ -25,8 +25,9 @@ moduleDefinition =
   MixinSetGet: './mixin_setget'
   MixinEvents: './mixin_events'
 
-  HelperUnderscore: './helper_underscore'
-  HelperAsync: './helper_async'
+  HelperUnderscore: './helper/underscore'
+  HelperAsync: './helper/async'
+  HelperObserve: './helper/observe'
 
   BoundedContext: './bounded_context'
   BoundedContextService: './bounded_context_service'

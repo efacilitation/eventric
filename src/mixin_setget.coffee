@@ -8,7 +8,7 @@ class MixinSetGet
     @_props ?= {}
     @_propsChanged ?= {}
 
-    if @_shouldTrackChangePropertiesFor value
+    if @_shouldTrackChangePropertiesFor key, value
      @_propsChanged[key] = value
 
     @_props[key] = value
@@ -18,8 +18,8 @@ class MixinSetGet
     @_props[key]
 
 
-  _shouldTrackChangePropertiesFor: (value) ->
-    @_trackPropsChanged and value not instanceof AggregateEntityCollection
+  _shouldTrackChangePropertiesFor: (key, value) ->
+    @_trackPropsChanged and value not instanceof AggregateEntityCollection and key != 'id'
 
 
 module.exports = MixinSetGet

@@ -41,7 +41,7 @@ describe 'ReadAggregateRepositorySpec', ->
 
     it 'should return an instantiated ReadAggregate containing the applied DomainEvents', (done) ->
       readAggregateRepository.findById 'ReadFoo', 23, (err, readAggregate) ->
-        expect(readAggregate._get 'name').to.equal 'John'
+        expect(readAggregate.name).to.equal 'John'
         done()
 
 

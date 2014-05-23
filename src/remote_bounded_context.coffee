@@ -9,28 +9,21 @@ class RemoteBoundedContext
 
   constructor: (@_remoteService) ->
 
-
   # TODO: split into client class
-  command: (boundedContextName, commandName, commandPayload, callback) ->
+  command: (boundedContextName, command, callback) ->
     @rpc
-      class: 'BoundedContext'
+      boundedContextName: boundedContextName
       method: 'command'
-      params:
-        boundedContextName: boundedContextName
-        methodName: commandName
-        methodParams: commandPayload
+      params: command
       callback
 
 
   # TODO: split into client class
-  query: (boundedContextName, queryName, queryPayload, callback) ->
+  query: (boundedContextName, query, callback) ->
     @rpc
-      class: 'BoundedContext'
+      boundedContextName: boundedContextName
       method: 'query'
-      params:
-        boundedContextName: boundedContextName
-        methodName: queryName
-        methodParams: queryPayload
+      params: query
       callback
 
   # TODO: split into client class
@@ -40,19 +33,16 @@ class RemoteBoundedContext
 
   # TODO: split into server class
   handle: (payload, callback) ->
-    boundedContext = @getClass payload.params.boundedContextName
+    boundedContext = @getClass payload.boundedContextName
     if not boundedContext
-      err = new Error "Tried to handle RPC class with not registered boundedContext #{payload.params[0]}"
+      err = new Error "Tried to handle RPC class with not registered boundedContext #{payload.boundedContextName}"
       return callback err, null
 
     if payload.method   not of boundedContext
-      err = new Error "RPC method #{payload.method} not found on Class #{payload.params[0]}"
+      err = new Error "RPC method #{payload.method} not found on Class #{payload.boundedContextName}"
       return callback err, null
 
-    methodParams =
-      name: payload.params.methodName
-      params: payload.params.methodParams
-    boundedContext[payload.method] methodParams, callback
+    boundedContext[payload.method] payload.params, callback
 
 
 module.exports = RemoteBoundedContext

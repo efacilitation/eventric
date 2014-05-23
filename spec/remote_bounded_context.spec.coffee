@@ -6,23 +6,22 @@ describe 'Remote Bounded Context', ->
 
     it 'should tell the RemoteService to execute a command on the BoundedContext', ->
       boundedContextName = 'exampleContext'
-      commandName = 'ExampleAggregate:doSomething'
-      commandPayload =
-        aggregateId: 42
+      command =
+        name: 'ExampleAggregate:doSomething'
+        id: 42
 
       callback = ->
 
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteBoundedContext = new RemoteBoundedContext remoteServiceStub
-      remoteBoundedContext.command boundedContextName, commandName, commandPayload, callback
+      remoteBoundedContext.command boundedContextName, command, callback
 
       expectedRpc =
-        class: 'BoundedContext'
+        boundedContextName: boundedContextName
         method: 'command'
         params:
-          boundedContextName: boundedContextName
-          methodName: commandName
-          methodParams: commandPayload
+          name: 'ExampleAggregate:doSomething'
+          id: 42
 
       expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', expectedRpc, callback).to.be.true
 
@@ -31,21 +30,22 @@ describe 'Remote Bounded Context', ->
 
     it 'should tell the RemoteService to execute a query on the BoundedContext', ->
       boundedContextName = 'exampleContext'
-      queryName = 'ExampleAggregate:findById'
-      queryPayload =
-        aggregateId: 23
+      query =
+        name: 'ExampleAggregate:findById'
+        id: 23
+
+      callback = ->
 
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteBoundedContext = new RemoteBoundedContext remoteServiceStub
-      remoteBoundedContext.query boundedContextName, queryName, queryPayload
+      remoteBoundedContext.query boundedContextName, query, callback
 
       expectedRpc =
-        class: 'BoundedContext'
+        boundedContextName: boundedContextName
         method: 'query'
         params:
-          boundedContextName: boundedContextName
-          methodName: queryName
-          methodParams: queryPayload
+          name: 'ExampleAggregate:findById'
+          id: 23
 
       expect(remoteServiceStub.rpc.calledWith 'RemoteBoundedContext', expectedRpc).to.be.true
 
@@ -70,25 +70,21 @@ describe 'Remote Bounded Context', ->
 
       callback = ->
       boundedContextName = 'exampleContext'
-      commandName = 'ExampleAggregate:doSomething'
-      commandPayload =
-        aggregateId: 42
+      command =
+        name: 'ExampleAggregate:doSomething'
+        id: 42
+        params:
+          foo: 'bar'
 
       rpc =
         payload:
-          class: 'BoundedContext'
+          boundedContextName: boundedContextName
           method: 'command'
-          params:
-            boundedContextName: boundedContextName
-            methodName: commandName
-            methodParams: commandPayload
+          params: command
 
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteBoundedContext = new RemoteBoundedContext remoteServiceStub
       remoteBoundedContext.registerClass 'exampleContext', exampleContext
       remoteBoundedContext.handle rpc.payload, callback
 
-      command =
-        name: commandName
-        params: commandPayload
       expect(exampleContext.command.calledWith command, callback).to.be.true

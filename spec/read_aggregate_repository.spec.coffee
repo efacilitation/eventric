@@ -1,6 +1,6 @@
 describe 'ReadAggregateRepositorySpec', ->
-  ReadAggregateRepository = eventric 'ReadAggregateRepository'
-  ReadAggregateRoot       = eventric 'ReadAggregateRoot'
+  ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
+  ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
 
   class ReadFoo extends ReadAggregateRoot
     @prop 'name'

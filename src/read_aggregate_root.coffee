@@ -1,8 +1,8 @@
 eventric            = require 'eventric'
 
-_                   = eventric 'HelperUnderscore'
-ReadAggregateEntity = eventric 'ReadAggregateEntity'
-MixinEvents         = eventric 'MixinEvents'
+_                   = eventric.require 'HelperUnderscore'
+ReadAggregateEntity = eventric.require 'ReadAggregateEntity'
+MixinEvents         = eventric.require 'MixinEvents'
 
 class ReadAggregateRoot extends ReadAggregateEntity
 

@@ -1,6 +1,6 @@
 eventric        = require 'eventric'
-AggregateEntity = eventric 'AggregateEntity'
-MixinSetGet     = eventric 'MixinSetGet'
+AggregateEntity = eventric.require 'AggregateEntity'
+MixinSetGet     = eventric.require 'MixinSetGet'
 
 class ReadAggregateEntity extends AggregateEntity
 

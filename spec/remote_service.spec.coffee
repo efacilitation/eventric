@@ -1,5 +1,5 @@
 describe 'RemoteService', ->
-  RemoteService = eventric 'RemoteService'
+  RemoteService = eventric.require 'RemoteService'
 
   rpc = null
   beforeEach ->

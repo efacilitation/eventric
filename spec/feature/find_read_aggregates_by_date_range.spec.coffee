@@ -1,6 +1,6 @@
 describe 'Find ReadAggregates By Date Range Scenario', ->
-  ReadAggregateRoot       = eventric 'ReadAggregateRoot'
-  ReadAggregateRepository = eventric 'ReadAggregateRepository'
+  ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
+  ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
 
   describe 'given we want to get all ReadExampleAggregates between two dates', ->
 

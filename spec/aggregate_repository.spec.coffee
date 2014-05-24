@@ -1,6 +1,6 @@
 describe 'AggregateRepository', ->
-  AggregateRepository = eventric 'AggregateRepository'
-  AggregateRoot       = eventric 'AggregateRoot'
+  AggregateRepository = eventric.require 'AggregateRepository'
+  AggregateRoot       = eventric.require 'AggregateRoot'
 
 
   describe '#findById', ->

@@ -1,6 +1,6 @@
 describe 'AggregateEntity', ->
-  Entity            = eventric 'AggregateEntity'
-  EntityCollection  = eventric 'AggregateEntityCollection'
+  Entity            = eventric.require 'AggregateEntity'
+  EntityCollection  = eventric.require 'AggregateEntityCollection'
 
   describe '#getMetaData', ->
 

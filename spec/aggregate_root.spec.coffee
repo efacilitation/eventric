@@ -1,7 +1,7 @@
 describe 'AggregateRoot', ->
-  AggregateRoot             = eventric 'AggregateRoot'
-  AggregateEntity           = eventric 'AggregateEntity'
-  AggregateEntityCollection = eventric 'AggregateEntityCollection'
+  AggregateRoot             = eventric.require 'AggregateRoot'
+  AggregateEntity           = eventric.require 'AggregateEntity'
+  AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
   enderAggregate = null
   beforeEach ->
     class EnderAggregate extends AggregateRoot

@@ -1,6 +1,6 @@
 describe 'Remote Bounded Context', ->
-  RemoteService        = eventric 'RemoteService'
-  RemoteBoundedContext = eventric 'RemoteBoundedContext'
+  RemoteService        = eventric.require 'RemoteService'
+  RemoteBoundedContext = eventric.require 'RemoteBoundedContext'
 
   describe '#command', ->
 

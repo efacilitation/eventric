@@ -1,7 +1,7 @@
 describe 'RemoteRepositoryService', ->
-  AggregateEntity         = eventric 'AggregateEntity'
-  RemoteService           = eventric 'RemoteService'
-  RemoteRepositoryService = eventric 'RemoteRepositoryService'
+  AggregateEntity         = eventric.require 'AggregateEntity'
+  RemoteService           = eventric.require 'RemoteService'
+  RemoteRepositoryService = eventric.require 'RemoteRepositoryService'
 
   class ExampleAggregate extends AggregateEntity
 

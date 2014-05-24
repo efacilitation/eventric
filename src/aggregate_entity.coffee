@@ -1,11 +1,11 @@
 eventric                  = require 'eventric'
 
-_                         = eventric 'HelperUnderscore'
-MixinSetGet               = eventric 'MixinSetGet'
-AggregateEntity           = eventric 'AggregateEntity'
-AggregateEntityCollection = eventric 'AggregateEntityCollection'
+_                         = eventric.require 'HelperUnderscore'
+MixinSetGet               = eventric.require 'MixinSetGet'
+AggregateEntity           = eventric.require 'AggregateEntity'
+AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
 
-eventric 'HelperObserve'
+eventric.require 'HelperObserve'
 
 class AggregateEntity
 

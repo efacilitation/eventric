@@ -3,7 +3,7 @@ describe 'DomainEvent', ->
   domainEventData = null
 
   beforeEach ->
-    DomainEvent = eventric 'DomainEvent'
+    DomainEvent = eventric.require 'DomainEvent'
     domainEventData =
       name: 'somethingHappened'
       aggregate:

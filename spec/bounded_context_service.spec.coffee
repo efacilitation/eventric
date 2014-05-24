@@ -1,6 +1,6 @@
 describe 'BoundedContextService', ->
-  BoundedContextService  = eventric 'BoundedContextService'
-  CommandService         = eventric 'CommandService'
+  BoundedContextService  = eventric.require 'BoundedContextService'
+  CommandService         = eventric.require 'CommandService'
 
   exampleBoundedContextMock = null
 

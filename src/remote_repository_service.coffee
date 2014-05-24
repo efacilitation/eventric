@@ -1,7 +1,7 @@
 eventric = require 'eventric'
 
-_                        = eventric 'HelperUnderscore'
-MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
+_                        = eventric.require 'HelperUnderscore'
+MixinRegisterAndGetClass = eventric.require 'MixinRegisterAndGetClass'
 
 class RemoteRepositoryService
 

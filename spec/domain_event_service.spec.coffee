@@ -1,6 +1,6 @@
 describe 'DomainEventService', ->
-  DomainEvent        = eventric 'DomainEvent'
-  DomainEventService = eventric 'DomainEventService'
+  DomainEvent        = eventric.require 'DomainEvent'
+  DomainEventService = eventric.require 'DomainEventService'
 
   eventStore = null
   domainEventService = null

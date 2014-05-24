@@ -38,7 +38,7 @@
 # https://github.com/jashkenas/backbone
 
 eventric = require 'eventric'
-_ = eventric 'HelperUnderscore'
+_ = eventric.require 'HelperUnderscore'
 
 array = []
 slice = array.slice

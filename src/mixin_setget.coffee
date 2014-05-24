@@ -1,6 +1,6 @@
 eventric = require 'eventric'
 
-AggregateEntityCollection = eventric 'AggregateEntityCollection'
+AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
 
 class MixinSetGet
 

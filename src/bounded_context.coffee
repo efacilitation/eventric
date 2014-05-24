@@ -1,8 +1,8 @@
 eventric              = require 'eventric'
 
-AggregateRepository   = eventric 'AggregateRepository'
-CommandService        = eventric 'CommandService'
-DomainEventService    = eventric 'DomainEventService'
+AggregateRepository   = eventric.require 'AggregateRepository'
+CommandService        = eventric.require 'CommandService'
+DomainEventService    = eventric.require 'DomainEventService'
 
 class BoundedContext
   aggregates: {}

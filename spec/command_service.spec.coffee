@@ -1,9 +1,9 @@
 describe 'CommandService', ->
-  AggregateRoot           = eventric 'AggregateRoot'
-  AggregateRepository     = eventric 'AggregateRepository'
-  ReadAggregateRoot       = eventric 'ReadAggregateRoot'
-  DomainEventService      = eventric 'DomainEventService'
-  CommandService          = eventric 'CommandService'
+  AggregateRoot           = eventric.require 'AggregateRoot'
+  AggregateRepository     = eventric.require 'AggregateRepository'
+  ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
+  DomainEventService      = eventric.require 'DomainEventService'
+  CommandService          = eventric.require 'CommandService'
 
   aggregateStubId = 1
   exampleAggregateStub = null

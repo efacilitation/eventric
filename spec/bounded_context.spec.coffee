@@ -19,10 +19,11 @@ describe 'BoundedContext', ->
 
 
   beforeEach ->
-    eventricMock = sandbox.stub()
-    eventricMock.withArgs('CommandService').returns CommandServiceMock
-    eventricMock.withArgs('DomainEventService').returns DomainEventServiceMock
-    eventricMock.withArgs('AggregateRepository').returns AggregateRepositoryMock
+    eventricMock =
+      require: sandbox.stub()
+    eventricMock.require.withArgs('CommandService').returns CommandServiceMock
+    eventricMock.require.withArgs('DomainEventService').returns DomainEventServiceMock
+    eventricMock.require.withArgs('AggregateRepository').returns AggregateRepositoryMock
     mockery.registerMock 'eventric', eventricMock
     mockery.registerMock 'eventric-store-mongodb', MongoDbEventStoreMock
     aggregateRepositoryMock = sandbox.stub()
@@ -31,36 +32,15 @@ describe 'BoundedContext', ->
 
   describe '#initialize', ->
     it 'should initialize the mongodb event store per default', ->
-      BoundedContext = eventric 'BoundedContext'
+      BoundedContext = eventric.require 'BoundedContext'
       boundedContext = new BoundedContext
       boundedContext.initialize()
 
       expect(MongoDbEventStoreMock::initialize.calledOnce).to.be.true
 
 
-    describe 'should initialize aggregaterepository and domaineventservice', ->
-      it 'with the mongodb event store per default', ->
-        BoundedContext = eventric 'BoundedContext'
-        boundedContext = new BoundedContext
-        boundedContext.initialize()
-
-        expect(aggregateRepositoryMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
-        expect(domainEventServiceMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
-
-
-      it 'with the custom event store if provided', ->
-        customEventStoreMock = {}
-
-        BoundedContext = eventric 'BoundedContext'
-        boundedContext = new BoundedContext
-        boundedContext.initialize customEventStoreMock
-
-        expect(aggregateRepositoryMock.calledWith customEventStoreMock).to.be.true
-        expect(domainEventServiceMock.calledWith customEventStoreMock).to.be.true
-
-
     it 'should register the configured aggregates at the aggregateRepository', ->
-      BoundedContext = eventric 'BoundedContext'
+      BoundedContext = eventric.require 'BoundedContext'
 
       class FooAggregateMock
       class BarAggregateMock
@@ -77,7 +57,7 @@ describe 'BoundedContext', ->
 
 
     it 'should instantiate and save the configured read aggregate repositories', ->
-      BoundedContext = eventric 'BoundedContext'
+      BoundedContext = eventric.require 'BoundedContext'
 
       class FooReadAggregateRepository
       class BarReadAggregateRepository
@@ -93,18 +73,46 @@ describe 'BoundedContext', ->
       expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.true
 
 
+    describe 'should initialize aggregaterepository and domaineventservice', ->
+      it 'with the mongodb event store per default', ->
+        BoundedContext = eventric.require 'BoundedContext'
+        boundedContext = new BoundedContext
+        boundedContext.initialize()
+
+        expect(aggregateRepositoryMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
+        expect(domainEventServiceMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
+
+
+      it 'with the custom event store if provided', ->
+        customEventStoreMock = {}
+
+        BoundedContext = eventric.require 'BoundedContext'
+        boundedContext = new BoundedContext
+        boundedContext.initialize customEventStoreMock
+
+        expect(aggregateRepositoryMock.calledWith customEventStoreMock).to.be.true
+        expect(domainEventServiceMock.calledWith customEventStoreMock).to.be.true
+
+
     describe 'processing application services', ->
       exampleApplicationService = null
       exampleBoundedContext = null
 
       beforeEach ->
         exampleApplicationService = {}
-        BoundedContext = eventric 'BoundedContext'
+        BoundedContext = eventric.require 'BoundedContext'
         class ExampleBoundedContext extends BoundedContext
           applicationServices: [
             exampleApplicationService
           ]
         exampleBoundedContext = new ExampleBoundedContext
+
+
+      it 'should call initialize on the application service if available', ->
+        exampleApplicationService.initialize = sinon.spy()
+        exampleBoundedContext.initialize()
+        expect(exampleApplicationService.initialize.calledOnce).to.be.true
+
 
       describe 'injections', ->
 
@@ -124,16 +132,10 @@ describe 'BoundedContext', ->
           expect(exampleApplicationService.onDomainEvent).to.be.a 'function'
 
 
-      it 'should call initialize on the application service if available', ->
-        exampleApplicationService.initialize = sinon.spy()
-        exampleBoundedContext.initialize()
-        expect(exampleApplicationService.initialize.calledOnce).to.be.true
-
-
   describe '#command', ->
     describe 'given the command has no registered handler', ->
       it 'should call the command service with the correct parameters', ->
-        BoundedContext = eventric 'BoundedContext'
+        BoundedContext = eventric.require 'BoundedContext'
         boundedContext = new BoundedContext
         boundedContext.initialize()
 
@@ -156,7 +158,7 @@ describe 'BoundedContext', ->
             'Aggregate:doSomething': 'accountDoSomething'
           accountDoSomething: sandbox.stub()
 
-        BoundedContext = eventric 'BoundedContext'
+        BoundedContext = eventric.require 'BoundedContext'
         class ExampleBoundedContext extends BoundedContext
           applicationServices: [
             exampleApplicationService
@@ -180,7 +182,7 @@ describe 'BoundedContext', ->
   describe '#query', ->
     describe 'has no registered handler', ->
       it 'should execute the query directly on the correct read aggregate repository', ->
-        BoundedContext = eventric 'BoundedContext'
+        BoundedContext = eventric.require 'BoundedContext'
         class FooReadAggregateRepository
           findById: sandbox.stub()
         class ExampleBoundedContext extends BoundedContext
@@ -201,7 +203,7 @@ describe 'BoundedContext', ->
 
     describe 'has a registered handler', ->
       it 'should execute the query handler', ->
-        BoundedContext = eventric 'BoundedContext'
+        BoundedContext = eventric.require 'BoundedContext'
         exampleApplicationService =
           queries:
             'customQuery': 'customQueryMethod'
@@ -227,7 +229,7 @@ describe 'BoundedContext', ->
 
   describe '#onDomainEvent', ->
     it 'should delegate the handler registration to the domain event service', ->
-      BoundedContext = eventric 'BoundedContext'
+      BoundedContext = eventric.require 'BoundedContext'
       class ExampleBoundedContext extends BoundedContext
       exampleBoundedContext = new ExampleBoundedContext
       exampleBoundedContext.initialize()

@@ -1,8 +1,8 @@
 describe 'Create new Aggregate Scenario', ->
-  CommandService          = eventric 'CommandService'
-  DomainEventService      = eventric 'DomainEventService'
-  AggregateRoot           = eventric 'AggregateRoot'
-  AggregateRepository     = eventric 'AggregateRepository'
+  CommandService          = eventric.require 'CommandService'
+  DomainEventService      = eventric.require 'DomainEventService'
+  AggregateRoot           = eventric.require 'AggregateRoot'
+  AggregateRepository     = eventric.require 'AggregateRepository'
 
   describe 'given we want to instantiate a new Aggregate', ->
 

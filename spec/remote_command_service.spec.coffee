@@ -1,6 +1,6 @@
 describe 'RemoteCommandService', ->
-  RemoteService        = eventric 'RemoteService'
-  RemoteCommandService = eventric 'RemoteCommandService'
+  RemoteService        = eventric.require 'RemoteService'
+  RemoteCommandService = eventric.require 'RemoteCommandService'
 
   describe '#createAggregate', ->
     it 'should tell the RemoteService to create an Aggregate with the given name', ->

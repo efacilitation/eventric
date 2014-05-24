@@ -1,5 +1,5 @@
 describe 'MixinSetGet', ->
-  AggregateRoot = eventric 'AggregateRoot'
+  AggregateRoot = eventric.require 'AggregateRoot'
 
   exampleAggregate = null
   beforeEach ->

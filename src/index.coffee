@@ -34,7 +34,7 @@ moduleDefinition =
   DomainEvent: './domain_event'
 
 
-module.exports = (required) ->
+module.exports.require = (required) ->
   path = moduleDefinition[required] ? required
 
   try

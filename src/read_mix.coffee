@@ -1,5 +1,5 @@
 eventric = require 'eventric'
-_ = eventric 'HelperUnderscore'
+_ = eventric.require 'HelperUnderscore'
 
 class ReadMix
 

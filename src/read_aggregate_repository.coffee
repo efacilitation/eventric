@@ -1,8 +1,8 @@
 eventric = require 'eventric'
 
-_                        = eventric 'HelperUnderscore'
-async                    = eventric 'HelperAsync'
-MixinRegisterAndGetClass = eventric 'MixinRegisterAndGetClass'
+_                        = eventric.require 'HelperUnderscore'
+async                    = eventric.require 'HelperAsync'
+MixinRegisterAndGetClass = eventric.require 'MixinRegisterAndGetClass'
 
 
 class ReadAggregateRepository

@@ -1,10 +1,10 @@
 eventric = require 'eventric'
 
-_                         = eventric 'HelperUnderscore'
-AggregateEntity           = eventric 'AggregateEntity'
-AggregateEntityCollection = eventric 'AggregateEntityCollection'
-MixinSetGet               = eventric 'MixinSetGet'
-DomainEvent               = eventric 'DomainEvent'
+_                         = eventric.require 'HelperUnderscore'
+AggregateEntity           = eventric.require 'AggregateEntity'
+AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
+MixinSetGet               = eventric.require 'MixinSetGet'
+DomainEvent               = eventric.require 'DomainEvent'
 
 class AggregateRoot extends AggregateEntity
 

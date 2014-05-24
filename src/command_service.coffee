@@ -1,7 +1,7 @@
 eventric = require 'eventric'
 
-async              = eventric 'HelperAsync'
-DomainEventService = eventric 'DomainEventService'
+async              = eventric.require 'HelperAsync'
+DomainEventService = eventric.require 'DomainEventService'
 
 class CommandService
 

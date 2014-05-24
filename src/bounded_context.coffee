@@ -17,8 +17,6 @@ class BoundedContext
   _applicationServiceQueries: {}
 
   initialize: (callback) ->
-    @set key, value for key, value of params
-
     @_initializeEventStore =>
       @_aggregateRepository  = new AggregateRepository @_eventStore
       @_domainEventService   = new DomainEventService @_eventStore

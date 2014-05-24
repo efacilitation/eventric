@@ -1,4 +1,5 @@
 describe 'BoundedContext', ->
+  mongoDbEventStoreMock = null
   class MongoDbEventStoreMock
     initialize: sandbox.stub().yields null
   class CommandServiceMock
@@ -19,13 +20,14 @@ describe 'BoundedContext', ->
 
 
   beforeEach ->
+    mongoDbEventStoreMock = new MongoDbEventStoreMock
     eventricMock =
       require: sandbox.stub()
     eventricMock.require.withArgs('CommandService').returns CommandServiceMock
     eventricMock.require.withArgs('DomainEventService').returns DomainEventServiceMock
     eventricMock.require.withArgs('AggregateRepository').returns AggregateRepositoryMock
     mockery.registerMock 'eventric', eventricMock
-    mockery.registerMock 'eventric-store-mongodb', MongoDbEventStoreMock
+    mockery.registerMock 'eventric-store-mongodb', mongoDbEventStoreMock
     aggregateRepositoryMock = sandbox.stub()
     domainEventServiceMock = sandbox.stub()
 
@@ -34,7 +36,7 @@ describe 'BoundedContext', ->
     it 'should initialize the mongodb event store per default', ->
       boundedContext = eventric.boundedContext()
       boundedContext.initialize()
-      expect(MongoDbEventStoreMock::initialize.calledOnce).to.be.true
+      expect(mongoDbEventStoreMock.initialize.calledOnce).to.be.true
 
 
     it 'should register the configured aggregates at the aggregateRepository', ->

@@ -32,7 +32,6 @@
     "chai": "*",
     "coffee-script": "*",
     "commonjs-require": "*",
-    "expect.js": "*",
     "gulp": "*",
     "gulp-clean": "*",
     "gulp-util": "*",

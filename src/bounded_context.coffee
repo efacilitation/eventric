@@ -16,7 +16,7 @@ class BoundedContext
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
 
-  initialize: (params) ->
+  initialize: (callback) ->
     @set key, value for key, value of params
 
     @_initializeEventStore =>
@@ -27,6 +27,8 @@ class BoundedContext
       @_initializeAggregates()
       @_initializeReadAggregateRepositories()
       @_initializeApplicationServices()
+
+      callback? null
 
 
   set: (key, value) ->
@@ -58,8 +60,7 @@ class BoundedContext
       next()
     else
       # TODO: refactor to use a pseudo-store (which just logs that it wont save anything)
-      MongoDBEventStore = require 'eventric-store-mongodb'
-      @_eventStore = new MongoDBEventStore
+      @_eventStore = require 'eventric-store-mongodb'
       @_eventStore.initialize (err) =>
         next()
 

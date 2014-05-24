@@ -34,7 +34,7 @@ moduleDefinition =
   DomainEvent: './domain_event'
 
 
-module.exports.require = (required) ->
+_require = (required) ->
   path = moduleDefinition[required] ? required
 
   try
@@ -42,3 +42,10 @@ module.exports.require = (required) ->
   catch e
     console.log e
     throw e
+
+module.exports.require = _require
+
+
+module.exports.boundedContext = ->
+  BoundedContext = _require 'BoundedContext'
+  new BoundedContext

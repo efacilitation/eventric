@@ -5,6 +5,7 @@ CommandService        = eventric.require 'CommandService'
 DomainEventService    = eventric.require 'DomainEventService'
 
 class BoundedContext
+  _params: {}
   aggregates: {}
 
   readAggregateRepositories: {}
@@ -15,8 +16,10 @@ class BoundedContext
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
 
-  initialize: (eventStore) ->
-    @_initializeEventStore eventStore, =>
+  initialize: (params) ->
+    @set key, value for key, value of params
+
+    @_initializeEventStore =>
       @_aggregateRepository  = new AggregateRepository @_eventStore
       @_domainEventService   = new DomainEventService @_eventStore
       @_commandService       = new CommandService @_domainEventService, @_aggregateRepository
@@ -26,15 +29,40 @@ class BoundedContext
       @_initializeApplicationServices()
 
 
-  _initializeEventStore: (eventStore, next) ->
-    if eventStore
-      @_eventStore = eventStore
+  set: (key, value) ->
+    @_params[key] = value
+
+
+  add: (type, key, value) ->
+    switch type
+      when 'aggregate'
+        @aggregates[key] = value
+      when 'aggregates'
+        for name, obj of key
+          @aggregates[name] = obj
+      when 'repository'
+        @readAggregateRepositories[key] = value
+      when 'repositories'
+        for name, obj of key
+          @readAggregateRepositories[name] = obj
+      when 'application'
+        @applicationServices.push key
+      when 'applications'
+        for obj in key
+          @applicationServices.push obj
+
+
+  _initializeEventStore: (next) ->
+    if @_params.store
+      @_eventStore = @_params.store
       next()
     else
+      # TODO: refactor to use a pseudo-store (which just logs that it wont save anything)
       MongoDBEventStore = require 'eventric-store-mongodb'
       @_eventStore = new MongoDBEventStore
       @_eventStore.initialize (err) =>
         next()
+
 
   _initializeAggregates: ->
     for aggregateName, aggregateClass of @aggregates

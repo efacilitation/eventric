@@ -32,24 +32,20 @@ describe 'BoundedContext', ->
 
   describe '#initialize', ->
     it 'should initialize the mongodb event store per default', ->
-      BoundedContext = eventric.require 'BoundedContext'
-      boundedContext = new BoundedContext
+      boundedContext = eventric.boundedContext()
       boundedContext.initialize()
-
       expect(MongoDbEventStoreMock::initialize.calledOnce).to.be.true
 
 
     it 'should register the configured aggregates at the aggregateRepository', ->
-      BoundedContext = eventric.require 'BoundedContext'
+      boundedContext = eventric.boundedContext()
 
       class FooAggregateMock
       class BarAggregateMock
-      class ExampleBoundedContext extends BoundedContext
-        aggregates:
-          'Foo': FooAggregateMock
-          'Bar': BarAggregateMock
+      boundedContext.add 'aggregate', 'Foo', FooAggregateMock
+      boundedContext.add 'aggregates',
+        'Bar': BarAggregateMock
 
-      boundedContext = new ExampleBoundedContext
       boundedContext.initialize()
 
       expect(AggregateRepositoryMock::registerClass.calledWith 'Foo', FooAggregateMock).to.be.true
@@ -57,16 +53,14 @@ describe 'BoundedContext', ->
 
 
     it 'should instantiate and save the configured read aggregate repositories', ->
-      BoundedContext = eventric.require 'BoundedContext'
+      boundedContext = eventric.boundedContext()
 
       class FooReadAggregateRepository
       class BarReadAggregateRepository
-      class ExampleBoundedContext extends BoundedContext
-        readAggregateRepositories:
-          'Foo': FooReadAggregateRepository
-          'Bar': BarReadAggregateRepository
+      boundedContext.add 'repository', 'Foo', FooReadAggregateRepository
+      boundedContext.add 'repositories',
+        'Bar': BarReadAggregateRepository
 
-      boundedContext = new ExampleBoundedContext
       boundedContext.initialize()
 
       expect((boundedContext.getReadAggregateRepository 'Foo') instanceof FooReadAggregateRepository).to.be.true
@@ -75,8 +69,7 @@ describe 'BoundedContext', ->
 
     describe 'should initialize aggregaterepository and domaineventservice', ->
       it 'with the mongodb event store per default', ->
-        BoundedContext = eventric.require 'BoundedContext'
-        boundedContext = new BoundedContext
+        boundedContext = eventric.boundedContext()
         boundedContext.initialize()
 
         expect(aggregateRepositoryMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
@@ -86,9 +79,9 @@ describe 'BoundedContext', ->
       it 'with the custom event store if provided', ->
         customEventStoreMock = {}
 
-        BoundedContext = eventric.require 'BoundedContext'
-        boundedContext = new BoundedContext
-        boundedContext.initialize customEventStoreMock
+        boundedContext = eventric.boundedContext()
+        boundedContext.set 'store', customEventStoreMock
+        boundedContext.initialize()
 
         expect(aggregateRepositoryMock.calledWith customEventStoreMock).to.be.true
         expect(domainEventServiceMock.calledWith customEventStoreMock).to.be.true
@@ -100,12 +93,8 @@ describe 'BoundedContext', ->
 
       beforeEach ->
         exampleApplicationService = {}
-        BoundedContext = eventric.require 'BoundedContext'
-        class ExampleBoundedContext extends BoundedContext
-          applicationServices: [
-            exampleApplicationService
-          ]
-        exampleBoundedContext = new ExampleBoundedContext
+        exampleBoundedContext = eventric.boundedContext()
+        exampleBoundedContext.add 'application', exampleApplicationService
 
 
       it 'should call initialize on the application service if available', ->
@@ -135,8 +124,7 @@ describe 'BoundedContext', ->
   describe '#command', ->
     describe 'given the command has no registered handler', ->
       it 'should call the command service with the correct parameters', ->
-        BoundedContext = eventric.require 'BoundedContext'
-        boundedContext = new BoundedContext
+        boundedContext = eventric.boundedContext()
         boundedContext.initialize()
 
         command =
@@ -158,13 +146,8 @@ describe 'BoundedContext', ->
             'Aggregate:doSomething': 'accountDoSomething'
           accountDoSomething: sandbox.stub()
 
-        BoundedContext = eventric.require 'BoundedContext'
-        class ExampleBoundedContext extends BoundedContext
-          applicationServices: [
-            exampleApplicationService
-          ]
-
-        exampleBoundedContext = new ExampleBoundedContext
+        exampleBoundedContext = eventric.boundedContext()
+        exampleBoundedContext.add 'application', exampleApplicationService
         exampleBoundedContext.initialize()
 
         command =
@@ -182,13 +165,10 @@ describe 'BoundedContext', ->
   describe '#query', ->
     describe 'has no registered handler', ->
       it 'should execute the query directly on the correct read aggregate repository', ->
-        BoundedContext = eventric.require 'BoundedContext'
+        exampleBoundedContext = eventric.boundedContext()
         class FooReadAggregateRepository
           findById: sandbox.stub()
-        class ExampleBoundedContext extends BoundedContext
-          readAggregateRepositories:
-            'Aggregate': FooReadAggregateRepository
-        exampleBoundedContext = new ExampleBoundedContext
+        exampleBoundedContext.add 'repository', 'Aggregate', FooReadAggregateRepository
         exampleBoundedContext.initialize()
 
         query =
@@ -203,17 +183,12 @@ describe 'BoundedContext', ->
 
     describe 'has a registered handler', ->
       it 'should execute the query handler', ->
-        BoundedContext = eventric.require 'BoundedContext'
+        exampleBoundedContext = eventric.boundedContext()
         exampleApplicationService =
           queries:
             'customQuery': 'customQueryMethod'
           customQueryMethod: sandbox.stub()
-
-        class ExampleBoundedContext extends BoundedContext
-          applicationServices: [
-            exampleApplicationService
-          ]
-        exampleBoundedContext = new ExampleBoundedContext
+        exampleBoundedContext.add 'application', exampleApplicationService
         exampleBoundedContext.initialize()
 
         query =
@@ -229,9 +204,7 @@ describe 'BoundedContext', ->
 
   describe '#onDomainEvent', ->
     it 'should delegate the handler registration to the domain event service', ->
-      BoundedContext = eventric.require 'BoundedContext'
-      class ExampleBoundedContext extends BoundedContext
-      exampleBoundedContext = new ExampleBoundedContext
+      exampleBoundedContext = eventric.boundedContext()
       exampleBoundedContext.initialize()
 
       eventName = 'Aggregate:method'

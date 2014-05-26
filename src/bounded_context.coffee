@@ -113,8 +113,11 @@ class BoundedContext
       @_applicationServiceQueries[query.name] query.params, callback
     else
       [aggregateName, methodName] = @_splitAggregateAndMethod query.name
-      # TODO: this will not call the callback with findById
-      @getReadAggregateRepository(aggregateName)[methodName] query.id, query.params, callback
+      # TODO: Refactor the bounded context API to be consistent or remove default mapping of commands/queries
+      if methodName is 'findById'
+        @getReadAggregateRepository(aggregateName)[methodName] query.id, callback
+      else
+        @getReadAggregateRepository(aggregateName)[methodName] query.id, query.params, callback
 
 
   _splitAggregateAndMethod: (input) ->

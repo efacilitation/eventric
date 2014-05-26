@@ -169,6 +169,26 @@ describe 'BoundedContext', ->
       it 'should execute the query directly on the correct read aggregate repository', ->
         exampleBoundedContext = eventric.boundedContext()
         class FooReadAggregateRepository
+          find: sandbox.stub()
+        exampleBoundedContext.add 'repository', 'Aggregate', FooReadAggregateRepository
+        exampleBoundedContext.initialize()
+
+        query =
+          name: 'Aggregate:find'
+          id: 42
+          params:
+            foo: 'bar'
+        callback = ->
+
+        exampleBoundedContext.query query, callback
+
+        expect(FooReadAggregateRepository::find.calledWith query.id, query.params, callback).to.be.true
+
+
+    describe 'has no registered handler for Aggregate:findById', ->
+      it 'should execute findById directly on the correct read aggregate repository without passing the params', ->
+        exampleBoundedContext = eventric.boundedContext()
+        class FooReadAggregateRepository
           findById: sandbox.stub()
         exampleBoundedContext.add 'repository', 'Aggregate', FooReadAggregateRepository
         exampleBoundedContext.initialize()
@@ -180,7 +200,7 @@ describe 'BoundedContext', ->
 
         exampleBoundedContext.query query, callback
 
-        expect(FooReadAggregateRepository::findById.calledWith query.id, undefined, callback).to.be.true
+        expect(FooReadAggregateRepository::findById.calledWithExactly query.id, callback).to.be.true
 
 
     describe 'has a registered handler', ->

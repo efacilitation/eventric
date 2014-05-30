@@ -125,35 +125,35 @@ describe 'BoundedContext', ->
 
   describe '#command', ->
     describe 'given the command has no registered handler', ->
-      it 'should call the command service with the correct parameters', ->
+      it 'should call the callback with a command not found error', ->
         boundedContext = eventric.boundedContext()
         boundedContext.initialize()
 
         command =
-          name: 'Aggregate:doSomething'
-          id: 42
+          name: 'doSomething'
           params:
+            id: 42
             foo: 'bar'
 
-        callback = ->
+        callback = sinon.spy()
 
         boundedContext.command command, callback
-        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', command.id, 'doSomething', command.params, callback).to.be.true
+        expect(callback.calledWith sinon.match.instanceOf Error).to.be.true
 
 
     describe 'has a registered handler', ->
       it 'should execute the command handler', ->
         exampleApplicationService =
           commands:
-            'Aggregate:doSomething': 'accountDoSomething'
-          accountDoSomething: sandbox.stub()
+            'doSomething': 'doSomething'
+          doSomething: sandbox.stub()
 
         exampleBoundedContext = eventric.boundedContext()
         exampleBoundedContext.add 'application', exampleApplicationService
         exampleBoundedContext.initialize()
 
         command =
-          name: 'Aggregate:doSomething'
+          name: 'doSomething'
           params:
             foo: 'bar'
 
@@ -161,12 +161,12 @@ describe 'BoundedContext', ->
 
         exampleBoundedContext.command command, callback
 
-        expect(exampleApplicationService.accountDoSomething.calledWith command.params, callback).to.be.true
+        expect(exampleApplicationService.doSomething.calledWith command.params, callback).to.be.true
 
 
   describe '#query', ->
     describe 'has no registered handler', ->
-      it 'should execute the query directly on the correct read aggregate repository', ->
+      it 'should call the callback with a command not found error', ->
         exampleBoundedContext = eventric.boundedContext()
         class FooReadAggregateRepository
           find: sandbox.stub()
@@ -174,33 +174,15 @@ describe 'BoundedContext', ->
         exampleBoundedContext.initialize()
 
         query =
-          name: 'Aggregate:find'
-          id: 42
+          name: 'findSomething'
           params:
             foo: 'bar'
         callback = ->
 
-        exampleBoundedContext.query query, callback
-
-        expect(FooReadAggregateRepository::find.calledWith query.id, query.params, callback).to.be.true
-
-
-    describe 'has no registered handler for Aggregate:findById', ->
-      it 'should execute findById directly on the correct read aggregate repository without passing the params', ->
-        exampleBoundedContext = eventric.boundedContext()
-        class FooReadAggregateRepository
-          findById: sandbox.stub()
-        exampleBoundedContext.add 'repository', 'Aggregate', FooReadAggregateRepository
-        exampleBoundedContext.initialize()
-
-        query =
-          name: 'Aggregate:findById'
-          id: 42
-        callback = ->
+        callback = sinon.spy()
 
         exampleBoundedContext.query query, callback
-
-        expect(FooReadAggregateRepository::findById.calledWithExactly query.id, callback).to.be.true
+        expect(callback.calledWith sinon.match.instanceOf Error).to.be.true
 
 
     describe 'has a registered handler', ->
@@ -208,20 +190,21 @@ describe 'BoundedContext', ->
         exampleBoundedContext = eventric.boundedContext()
         exampleApplicationService =
           queries:
-            'customQuery': 'customQueryMethod'
-          customQueryMethod: sandbox.stub()
+            'findSomething': 'findSomething'
+          findSomething: sandbox.stub()
         exampleBoundedContext.add 'application', exampleApplicationService
         exampleBoundedContext.initialize()
 
         query =
-          name: 'customQuery'
+          name: 'findSomething'
           params:
+            id: 42
             foo: 'bar'
         callback = ->
 
         exampleBoundedContext.query query, callback
 
-        expect(exampleApplicationService.customQueryMethod.calledWith query.params, callback).to.be.true
+        expect(exampleApplicationService.findSomething.calledWith query.params, callback).to.be.true
 
 
   describe '#onDomainEvent', ->

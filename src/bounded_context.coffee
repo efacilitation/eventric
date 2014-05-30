@@ -98,30 +98,20 @@ class BoundedContext
     @_readAggregateRepositoriesInstances[repositoryName]
 
 
-  # TODO: emit error if command is not registered and not valid for default call
   command: (command, callback) ->
     if @_applicationServiceCommands[command.name]
       @_applicationServiceCommands[command.name] command.params, callback
     else
-      [aggregateName, methodName] = @_splitAggregateAndMethod command.name
-      @_commandService.commandAggregate aggregateName, command.id, methodName, command.params, callback
+      errorMessage = "Given command #{command.name} not registered on bounded context"
+      callback new Error errorMessage
 
 
-  # TODO: emit error if query is not registered and not valid for default call
   query: (query, callback) ->
     if @_applicationServiceQueries[query.name]
       @_applicationServiceQueries[query.name] query.params, callback
     else
-      [aggregateName, methodName] = @_splitAggregateAndMethod query.name
-      # TODO: Refactor the bounded context API to be consistent or remove default mapping of commands/queries
-      if methodName is 'findById'
-        @getReadAggregateRepository(aggregateName)[methodName] query.id, callback
-      else
-        @getReadAggregateRepository(aggregateName)[methodName] query.id, query.params, callback
-
-
-  _splitAggregateAndMethod: (input) ->
-    input.split ':'
+      errorMessage = "Given query #{query.name} not registered on bounded context"
+      callback new Error errorMessage
 
 
   onDomainEvent: (eventName, eventHandler) ->

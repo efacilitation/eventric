@@ -19,6 +19,7 @@ class AggregateRepository
       return callback null, null if domainEvents.length == 0
 
       # get the corresponding class
+
       AggregateClass = @getClass aggregateName
       if not AggregateClass
         err = new Error "Tried to command not registered Aggregate '#{aggregateName}'"
@@ -26,7 +27,7 @@ class AggregateRepository
         return
 
       # construct the Aggregate and set the id
-      aggregate = new AggregateClass
+      aggregate = new AggregateClass aggregateName
       aggregate.id = aggregateId
 
       # apply the aggregate changes inside the domainevents on the ReadAggregate

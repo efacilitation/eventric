@@ -5,7 +5,7 @@ describe 'AggregateRepository', ->
 
   describe '#findById', ->
 
-    Foo = null
+    Foo = {}
     aggregateRepository = null
     EventStoreStub = null
     beforeEach ->
@@ -13,8 +13,6 @@ describe 'AggregateRepository', ->
         find: ->
         save: ->
       EventStoreStub = sinon.createStubInstance EventStore
-
-      class Foo extends AggregateRoot
 
       aggregateRepository = new AggregateRepository EventStoreStub
       aggregateRepository.registerClass 'Foo', Foo

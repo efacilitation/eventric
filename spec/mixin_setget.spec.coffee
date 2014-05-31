@@ -4,7 +4,7 @@ describe 'MixinSetGet', ->
   exampleAggregate = null
   beforeEach ->
     class ExampleAggregate extends AggregateRoot
-    exampleAggregate = new ExampleAggregate
+    exampleAggregate = new AggregateRoot 'ExampleAggregate'
     exampleAggregate._set 'someProperty', 'someValue'
 
   describe '#_set', ->

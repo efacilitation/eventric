@@ -3,8 +3,6 @@ describe 'ReadAggregateRepositorySpec', ->
   ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
 
   class ReadFoo extends ReadAggregateRoot
-    @prop 'name'
-
 
   readAggregateRepository = null
   EventStoreStub = null

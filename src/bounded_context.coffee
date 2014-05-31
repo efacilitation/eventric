@@ -1,5 +1,7 @@
 eventric              = require 'eventric'
 
+_                     = eventric.require 'HelperUnderscore'
+AggregateRoot         = eventric.require 'AggregateRoot'
 AggregateRepository   = eventric.require 'AggregateRepository'
 CommandService        = eventric.require 'CommandService'
 DomainEventService    = eventric.require 'DomainEventService'
@@ -24,7 +26,9 @@ class BoundedContext
       @_commandService       = new CommandService @_domainEventService, @_aggregateRepository
 
       @_di =
-        domain: @_commandService
+        aggregate:
+          create: @_commandService.createAggregate
+          command: @_commandService.commandAggregate
         repository: => @getReadAggregateRepository.apply @, arguments
 
       @_initializeAggregates()
@@ -63,8 +67,11 @@ class BoundedContext
       fn.apply di, arguments
 
 
-  addAggregate: (aggregateName, aggregateClass) ->
-    @_aggregateRepository.registerClass aggregateName, aggregateClass
+  addAggregate: (aggregateName, aggregateObj) ->
+    #aggregate = new AggregateRoot aggregateName, aggregateObj
+    aggregate = AggregateRoot
+    _.extend aggregate, aggregateObj
+    @_aggregateRepository.registerClass aggregateName, aggregate
 
 
   _initializeEventStore: (next) ->

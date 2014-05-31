@@ -4,8 +4,7 @@ describe 'AggregateRoot', ->
   AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
   enderAggregate = null
   beforeEach ->
-    class EnderAggregate extends AggregateRoot
-    enderAggregate = new EnderAggregate
+    enderAggregate = new AggregateRoot 'EnderAggregate'
 
 
   describe '#create', ->
@@ -47,8 +46,7 @@ describe 'AggregateRoot', ->
 
   describe '#getSnapshot', ->
     it 'should return the current state as special "_snapshot"-DomainEvent', ->
-      class MyThingsEntity extends AggregateEntity
-      myThingsEntity = new MyThingsEntity name: 'NotWayne'
+      myThingsEntity = new AggregateEntity 'MyThingsEntity', name: 'NotWayne'
       myThingsEntity.id = 2
       myThingsEntity.name = 'Wayne'
 

@@ -1,25 +1,21 @@
 eventric = require 'eventric'
 
-AggregateRoot = eventric.require 'AggregateRoot'
-
 describe 'Example BoundedContext Feature', ->
-
-  eventStoreMock =
-    find: sandbox.stub().yields null, []
-    save: sandbox.stub().yields null
+  eventStoreMock = null
+  beforeEach ->
+    eventStoreMock =
+      find: sandbox.stub().yields null, []
+      save: sandbox.stub().yields null
 
   describe 'given we created some example bounded context', ->
     exampleContext = null
-
     beforeEach (done) ->
-      class Example extends AggregateRoot
-
       exampleContext = eventric.boundedContext()
       exampleContext.set 'store', eventStoreMock
       exampleContext.initialize ->
-        exampleContext.addAggregate 'Example', Example
+        exampleContext.addAggregate 'Example', {}
         exampleContext.addCommand 'createExample', ->
-          @domain.createAggregate 'Example', ->
+          @aggregate.create 'Example', ->
 
         done()
 

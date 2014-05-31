@@ -18,6 +18,8 @@ class BoundedContext
 
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
+  _domainEventHandlers: {}
+
 
   initialize: (callback) ->
     @_initializeEventStore =>
@@ -34,6 +36,7 @@ class BoundedContext
       @_initializeAggregates()
       @_initializeReadAggregateRepositories()
       @_initializeApplicationServices()
+      @_initializeDomainEventHandler()
 
       callback? null
 
@@ -62,16 +65,19 @@ class BoundedContext
 
 
   addCommand: (commandName, fn) ->
-    di = @_di
-    @_applicationServiceCommands[commandName] = ->
-      fn.apply di, arguments
+    @_applicationServiceCommands[commandName] = => fn.apply @_di, arguments
+
+
+  addQuery: (queryName, fn) ->
+    @_applicationServiceQueries[queryName] = => fn.apply @_di, arguments
 
 
   addAggregate: (aggregateName, aggregateObj) ->
-    #aggregate = new AggregateRoot aggregateName, aggregateObj
-    aggregate = AggregateRoot
-    _.extend aggregate, aggregateObj
-    @_aggregateRepository.registerClass aggregateName, aggregate
+    @aggregates[aggregateName] = aggregateObj
+
+
+  addDomainEventHandler: (eventName, fn) ->
+    @_domainEventHandlers[eventName] = => fn.apply @_di, arguments
 
 
   _initializeEventStore: (next) ->
@@ -114,6 +120,10 @@ class BoundedContext
             applicationService[queryMethodName].apply applicationService, arguments
 
       applicationService.initialize?()
+
+
+  _initializeDomainEventHandler: ->
+    @onDomainEvent domainEventName, fn for domainEventName, fn of @_domainEventHandlers
 
 
   getReadAggregateRepository: (repositoryName) ->

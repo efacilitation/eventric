@@ -12,11 +12,11 @@ describe 'Example BoundedContext Feature', ->
     beforeEach (done) ->
       exampleContext = eventric.boundedContext()
       exampleContext.set 'store', eventStoreMock
-      exampleContext.initialize ->
-        exampleContext.addAggregate 'Example', {}
-        exampleContext.addCommand 'createExample', ->
-          @aggregate.create 'Example', ->
+      exampleContext.addAggregate 'Example', {}
+      exampleContext.addCommand 'createExample', ->
+        @aggregate.create 'Example', ->
 
+      exampleContext.initialize ->
         done()
 
 

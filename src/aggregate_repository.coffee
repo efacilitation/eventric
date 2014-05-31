@@ -1,6 +1,7 @@
 eventric = require 'eventric'
 
 _                        = eventric.require 'HelperUnderscore'
+AggregateRoot            = eventric.require 'AggregateRoot'
 MixinRegisterAndGetClass = eventric.require 'MixinRegisterAndGetClass'
 
 
@@ -20,14 +21,15 @@ class AggregateRepository
 
       # get the corresponding class
 
-      AggregateClass = @getClass aggregateName
-      if not AggregateClass
+      aggregateObj = @getClass aggregateName
+      if not aggregateObj
         err = new Error "Tried to command not registered Aggregate '#{aggregateName}'"
         callback err, null
         return
 
       # construct the Aggregate and set the id
-      aggregate = new AggregateClass aggregateName
+      aggregate = new AggregateRoot aggregateName
+      _.extend aggregate, aggregateObj
       aggregate.id = aggregateId
 
       # apply the aggregate changes inside the domainevents on the ReadAggregate

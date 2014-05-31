@@ -5,6 +5,7 @@ CommandService        = eventric.require 'CommandService'
 DomainEventService    = eventric.require 'DomainEventService'
 
 class BoundedContext
+  _di: {}
   _params: {}
   aggregates: {}
 
@@ -21,6 +22,10 @@ class BoundedContext
       @_aggregateRepository  = new AggregateRepository @_eventStore
       @_domainEventService   = new DomainEventService @_eventStore
       @_commandService       = new CommandService @_domainEventService, @_aggregateRepository
+
+      @_di =
+        domain: @_commandService
+        repository: => @getReadAggregateRepository.apply @, arguments
 
       @_initializeAggregates()
       @_initializeReadAggregateRepositories()
@@ -46,10 +51,20 @@ class BoundedContext
         for name, obj of key
           @readAggregateRepositories[name] = obj
       when 'application'
-        @applicationServices.push key
+         @applicationServices.push key
       when 'applications'
         for obj in key
           @applicationServices.push obj
+
+
+  addCommand: (commandName, fn) ->
+    di = @_di
+    @_applicationServiceCommands[commandName] = ->
+      fn.apply di, arguments
+
+
+  addAggregate: (aggregateName, aggregateClass) ->
+    @_aggregateRepository.registerClass aggregateName, aggregateClass
 
 
   _initializeEventStore: (next) ->
@@ -98,7 +113,7 @@ class BoundedContext
     @_readAggregateRepositoriesInstances[repositoryName]
 
 
-  command: (command, callback) ->
+  command: (command, callback = ->) ->
     if @_applicationServiceCommands[command.name]
       @_applicationServiceCommands[command.name] command.params, callback
     else

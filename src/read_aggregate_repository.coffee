@@ -11,16 +11,15 @@ class ReadAggregateRepository
 
   constructor: (@_aggregateName, @_eventStore) ->
 
-  findById: ([readAggregateName]..., aggregateId, callback) =>
+  findById: (aggregateId, callback) =>
     return unless @_callbackIsAFunction callback
-    return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
     # create the ReadAggregate instance
-    ReadAggregateClass = @getClass readAggregateName
+    ReadAggregateClass = @getClass @_aggregateName
 
     # TODO: return if @_checkReadAggregateClassNotSet ReadAggregateClass, callback
     if not ReadAggregateClass
-      err = new Error "Tried 'findById' on not registered ReadAggregate '#{readAggregateName}'"
+      err = new Error "Tried 'findById' on not registered ReadAggregate for '#{@_aggregateName}'"
       return callback err, null
 
     # TODO: @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
@@ -39,12 +38,11 @@ class ReadAggregateRepository
       callback null, readAggregate
 
 
-  find: ([readAggregateName]..., query, callback) ->
+  find: (query, callback) ->
     return unless @_callbackIsAFunction callback
-    return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
     # get ReadAggregates matching the query
-    @findIds readAggregateName, query, (err, aggregateIds) =>
+    @findIds query, (err, aggregateIds) =>
       return callback err, null if err
 
       readAggregates = []
@@ -53,7 +51,7 @@ class ReadAggregateRepository
 
         ((callbackAsync) =>
           aggregateId = aggregateIds.shift()
-          @findById readAggregateName, aggregateId, (err, readAggregate) =>
+          @findById aggregateId, (err, readAggregate) =>
             return callbackAsync err if err
             return callbackAsync null if readAggregate.length == 0
             readAggregates.push readAggregate
@@ -66,18 +64,17 @@ class ReadAggregateRepository
         )
 
 
-  findOne: ([readAggregateName]..., query, callback) ->
+  findOne: (query, callback) ->
     return unless @_callbackIsAFunction callback
-    return unless readAggregateName = @_readAggregateNameNotSet readAggregateName, callback
 
     # TODO: returns only the first result, should actually do a limited query against the store
-    @find readAggregateName, query, (err, results) =>
+    @find query, (err, results) =>
       return callback err, null if err
       return callback null, false if results.length == 0
       callback null, results[0]
 
 
-  findIds: (readAggregateName, query, callback) =>
+  findIds: (query, callback) =>
     return unless @_callbackIsAFunction callback
 
     # ask the adapter to find the ids and return them
@@ -89,16 +86,6 @@ class ReadAggregateRepository
 
       callback null, aggregateIds
 
-  _readAggregateNameNotSet: (readAggregateName, callback) ->
-    if not readAggregateName
-      if not @_readAggregateName
-        err = new Error 'No readAggregateName supplied'
-        callback err, null
-        return false
-      else
-        readAggregateName = @_readAggregateName
-
-    return readAggregateName
 
   _callbackIsAFunction: (callback) ->
     if typeof callback == 'function'

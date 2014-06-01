@@ -7,14 +7,11 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
     describe 'when we ask the ReadExampleRepository to find the matching ReadAggregates', ->
 
       it 'then it should return the corresponding list of ReadExampleAggregates', (done) ->
-        # Example Classes
-        class ReadExample extends ReadAggregateRoot
-
         class ReadExampleRepository extends ReadAggregateRepository
 
           constructor: ->
             super
-            @registerClass 'ReadExample', ReadExample
+            @registerClass 'Example', ReadAggregateRoot
 
           findByDateRange: (start, end, callback) ->
             # criteria not actually used here, just to show how it could look like
@@ -24,7 +21,7 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
                 $gte: start
                 $lt: end
 
-            @find 'ReadExample', exampleQuery, (err, readAggregates) =>
+            @find exampleQuery, (err, readAggregates) =>
               callback null, readAggregates
 
         # create EventStoreStub and yield fake event
@@ -52,7 +49,7 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
         readAggregates = readExampleRepository.findByDateRange start, end, (err, readAggregates) ->
           # expectations
           expect(readAggregates.length).to.equal 1
-          expect(readAggregates[0]).to.be.an.instanceof ReadExample
+          expect(readAggregates[0]).to.be.an.instanceof ReadAggregateRoot
           expect(readAggregates[0].name).to.equal 'example'
 
           done()

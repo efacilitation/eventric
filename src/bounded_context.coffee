@@ -1,15 +1,18 @@
-eventric              = require 'eventric'
+eventric = require 'eventric'
 
-_                     = eventric.require 'HelperUnderscore'
-AggregateRoot         = eventric.require 'AggregateRoot'
-AggregateRepository   = eventric.require 'AggregateRepository'
-CommandService        = eventric.require 'CommandService'
-DomainEventService    = eventric.require 'DomainEventService'
+_                       = eventric.require 'HelperUnderscore'
+AggregateRoot           = eventric.require 'AggregateRoot'
+AggregateRepository     = eventric.require 'AggregateRepository'
+ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
+ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
+CommandService          = eventric.require 'CommandService'
+DomainEventService      = eventric.require 'DomainEventService'
 
 class BoundedContext
   _di: {}
   _params: {}
   aggregates: {}
+  readAggregates: {}
 
   readAggregateRepositories: {}
   _readAggregateRepositoriesInstances: {}
@@ -33,9 +36,9 @@ class BoundedContext
           command: @_commandService.commandAggregate
         repository: => @getReadAggregateRepository.apply @, arguments
 
-      @_initializeAggregates()
+
       @_initializeReadAggregateRepositories()
-      @_initializeApplicationServices()
+      @_initializeAggregates()
       @_initializeDomainEventHandler()
 
       callback? null
@@ -43,25 +46,6 @@ class BoundedContext
 
   set: (key, value) ->
     @_params[key] = value
-
-
-  add: (type, key, value) ->
-    switch type
-      when 'aggregate'
-        @aggregates[key] = value
-      when 'aggregates'
-        for name, obj of key
-          @aggregates[name] = obj
-      when 'repository'
-        @readAggregateRepositories[key] = value
-      when 'repositories'
-        for name, obj of key
-          @readAggregateRepositories[name] = obj
-      when 'application'
-         @applicationServices.push key
-      when 'applications'
-        for obj in key
-          @applicationServices.push obj
 
 
   addCommand: (commandName, fn) ->
@@ -74,6 +58,14 @@ class BoundedContext
 
   addAggregate: (aggregateName, aggregateObj) ->
     @aggregates[aggregateName] = aggregateObj
+
+
+  addReadAggregate: (aggregateName, readAggregateObj) ->
+    @readAggregates[aggregateNamegg] = readAggregateObj
+
+
+  addReadAggregateRepository: (aggregateName, readAggregateRepository) ->
+    @readAggregateRepositories[aggregateName] = readAggregateRepository
 
 
   addDomainEventHandler: (eventName, fn) ->
@@ -95,39 +87,29 @@ class BoundedContext
     for aggregateName, aggregateClass of @aggregates
       @_aggregateRepository.registerClass aggregateName, aggregateClass
 
+      # add default repository if not already defined
+      if !@_readAggregateRepositoriesInstances[aggregateName]
+        @_readAggregateRepositoriesInstances[aggregateName] = new ReadAggregateRepository aggregateName, @_eventStore
+
+      # add default read aggregate if not already defined
+      if !@readAggregates[aggregateName]
+        @readAggregates[aggregateName] = ReadAggregateRoot
+
+      # register read aggregate to repository
+      @_readAggregateRepositoriesInstances[aggregateName].registerClass aggregateName, @readAggregates[aggregateName]
+
 
   _initializeReadAggregateRepositories: ->
-    for repositoryName, ReadRepository of @readAggregateRepositories
-      @_readAggregateRepositoriesInstances[repositoryName] = new ReadRepository repositoryName, @_eventStore
-
-
-  _initializeApplicationServices: ->
-    for applicationService in @applicationServices
-      applicationService.commandService = @_commandService
-      applicationService.getReadAggregateRepository = => @getReadAggregateRepository.apply @, arguments
-      applicationService.onDomainEvent = => @onDomainEvent.apply @, arguments
-
-      for commandName, commandMethodName of applicationService.commands
-        # TODO: check duplicates, warn and do some logging
-        do (commandName, commandMethodName, applicationService) =>
-          @_applicationServiceCommands[commandName] = ->
-            applicationService[commandMethodName].apply applicationService, arguments
-
-      for queryName, queryMethodName of applicationService.queries
-        # TODO: check duplicates, warn and do some logging
-        do (queryName, queryMethodName, applicationService) =>
-          @_applicationServiceQueries[queryName] = ->
-            applicationService[queryMethodName].apply applicationService, arguments
-
-      applicationService.initialize?()
+    for aggregateName, ReadRepository of @readAggregateRepositories
+      @_readAggregateRepositoriesInstances[aggregateName] = new ReadRepository aggregateName, @_eventStore
 
 
   _initializeDomainEventHandler: ->
     @onDomainEvent domainEventName, fn for domainEventName, fn of @_domainEventHandlers
 
 
-  getReadAggregateRepository: (repositoryName) ->
-    @_readAggregateRepositoriesInstances[repositoryName]
+  getReadAggregateRepository: (aggregateName) ->
+    @_readAggregateRepositoriesInstances[aggregateName]
 
 
   command: (command, callback = ->) ->
@@ -138,7 +120,7 @@ class BoundedContext
       callback new Error errorMessage
 
 
-  query: (query, callback) ->
+  query: (query, callback = ->) ->
     if @_applicationServiceQueries[query.name]
       @_applicationServiceQueries[query.name] query.params, callback
     else

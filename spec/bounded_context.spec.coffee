@@ -22,6 +22,9 @@ describe 'BoundedContext', ->
   class ReadAggregateRepositoryMock
     registerReadAggregateObj: sandbox.stub()
 
+  HelperUnderscoreMock =
+    extend: sandbox.stub()
+
   beforeEach ->
     mongoDbEventStoreMock = new MongoDbEventStoreMock
     eventricMock =
@@ -31,6 +34,7 @@ describe 'BoundedContext', ->
     eventricMock.require.withArgs('AggregateRepository').returns AggregateRepositoryMock
     eventricMock.require.withArgs('ReadAggregateRoot').returns ReadAggregateRootMock
     eventricMock.require.withArgs('ReadAggregateRepository').returns ReadAggregateRepositoryMock
+    eventricMock.require.withArgs('HelperUnderscore').returns HelperUnderscoreMock
     mockery.registerMock 'eventric', eventricMock
     mockery.registerMock 'eventric-store-mongodb', mongoDbEventStoreMock
     aggregateRepositoryMock = sandbox.stub()
@@ -47,8 +51,8 @@ describe 'BoundedContext', ->
     it 'should register the configured aggregates at the aggregateRepository', ->
       boundedContext = eventric.boundedContext()
 
-      class FooAggregateMock
-      class BarAggregateMock
+      FooAggregateMock = {}
+      BarAggregateMock = {}
       boundedContext.addAggregate 'Foo', FooAggregateMock
       boundedContext.addAggregate 'Bar', BarAggregateMock
 
@@ -61,15 +65,15 @@ describe 'BoundedContext', ->
     it 'should instantiate and save the configured read aggregate repositories', ->
       boundedContext = eventric.boundedContext()
 
-      class FooReadAggregateRepository
-      class BarReadAggregateRepository
+      FooReadAggregateRepository = {}
+      BarReadAggregateRepository = {}
       boundedContext.addReadAggregateRepository 'Foo', FooReadAggregateRepository
       boundedContext.addReadAggregateRepository 'Bar', BarReadAggregateRepository
 
       boundedContext.initialize()
 
-      expect((boundedContext.getReadAggregateRepository 'Foo') instanceof FooReadAggregateRepository).to.be.true
-      expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.true
+      expect((boundedContext.getReadAggregateRepository 'Foo') instanceof ReadAggregateRepositoryMock).to.be.true
+      expect((boundedContext.getReadAggregateRepository 'Bar') instanceof ReadAggregateRepositoryMock).to.be.true
 
 
     describe 'should initialize aggregaterepository and domaineventservice', ->
@@ -133,9 +137,6 @@ describe 'BoundedContext', ->
     describe 'has no registered handler', ->
       it 'should call the callback with a command not found error', ->
         exampleBoundedContext = eventric.boundedContext()
-        class FooReadAggregateRepository
-          find: sandbox.stub()
-        exampleBoundedContext.addReadAggregateRepository 'Aggregate', FooReadAggregateRepository
         exampleBoundedContext.initialize()
 
         query =

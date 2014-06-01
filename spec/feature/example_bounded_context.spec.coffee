@@ -105,8 +105,7 @@ describe 'Example BoundedContext Feature', ->
             @foo
 
         exampleContext.addQuery 'getExample', (params, callback) ->
-          @repository('Example').findById 1, (err, readExample) ->
-            callback null, readExample
+          @repository('Example').findById 1, callback
 
         exampleContext.initialize ->
           done()
@@ -117,4 +116,34 @@ describe 'Example BoundedContext Feature', ->
           name: 'getExample'
           , (err, readExample) ->
             expect(readExample.getFoo()).to.equal 'bar'
+            done()
+
+
+    describe 'when we query the bounded context with an explicitly added read aggregate repository', ->
+      beforeEach (done) ->
+        eventStoreMock.find.yields null, [
+          aggregate:
+            id: 1
+            name: 'Example'
+            changed:
+              props:
+                foo: 'bar'
+        ]
+
+        exampleContext.addReadAggregateRepository 'Example',
+          findByExample: (callback) ->
+            @find {}, callback
+
+        exampleContext.addQuery 'getExample', (params, callback) ->
+          @repository('Example').findByExample callback
+
+        exampleContext.initialize ->
+          done()
+
+
+      it 'then it should return the correct read aggregate', (done) ->
+        exampleContext.query
+          name: 'getExample'
+          , (err, readExample) ->
+            expect(readExample[0].foo).to.equal 'bar'
             done()

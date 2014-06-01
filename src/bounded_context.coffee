@@ -100,8 +100,10 @@ class BoundedContext
 
 
   _initializeReadAggregateRepositories: ->
-    for aggregateName, ReadRepository of @readAggregateRepositories
-      @_readAggregateRepositoriesInstances[aggregateName] = new ReadRepository aggregateName, @_eventStore
+    for aggregateName, readRepositoryObj of @readAggregateRepositories
+      readRepository = new ReadAggregateRepository aggregateName, @_eventStore
+      _.extend readRepository, readRepositoryObj
+      @_readAggregateRepositoriesInstances[aggregateName] = readRepository
 
 
   _initializeDomainEventHandler: ->

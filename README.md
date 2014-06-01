@@ -3,18 +3,26 @@
 
 ![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
 
-## Introduction [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
+## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-**eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build web applications based on Domain-driven Design and Layered Architecture. It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) where you put a lot of effort in defining your data structure and so often end up with an [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
-
+Build web applications based on Domain-driven Design and Layered Architecture. Runs on NodeJS and modern Browsers. Written in CoffeeScript.
 
 Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
+
+
+### Why?
+
+It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) where you put a lot of effort in defining your data structure and so often end up with an [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
+
+### How?
+
+Basically you define `queries` and `commands` on `BoundedContexts`. The `commands` can result in series of `DomainEvents` consisting of properties that changed inside affected `Aggregates`. These `DomainEvents` represent the state of your domain model. `DomainEvents` get either persisted directly into the `EventStore` or send over a `RemoteService` first. The `RemoteService` can also be used to execute `queries` and `commands` remotely. This makes eventric.js really useful for distributed applications and sharing code between Server and Client.
 
 
 ## Philosophy
 
 * Emphasize [Domain-driven design](https://www.goodreads.com/book/show/179133.Domain_Driven_Design), [Event-driven architecture](https://www.goodreads.com/book/show/12369902-event-centric) and [Task-based UIs](http://cqrs.wordpress.com/documents/task-based-ui).
-* Put the the Domain Model in the very center of Layered Architecture ([Onion](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/) / [Hexagonal](http://alistair.cockburn.us/Hexagonal+architecture))
+* Put the the Domain Model in the very center of your Layered Architecture ([Onion](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/) / [Hexagonal](http://alistair.cockburn.us/Hexagonal+architecture))
 * Explicitly set boundaries for parts of your application ([BoundedContexts](https://en.wikipedia.org/wiki/Domain-driven_design#Bounded_context) / [MicroServices](http://martinfowler.com/articles/microservices.html))
 * Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx))
 * Capture all changes to your application state as a sequence of events ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html) / [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/))
@@ -22,9 +30,7 @@ Information regarding the API and more can be found in the [Wiki](https://github
 
 ## Quick Start
 
-Basically we define a behavioural API using `queries` and `commands` which result in series of `DomainEvents` consisting of properties that changed inside `Aggregates`. These `DomainEvents` define the state of our application. Since eventric.js runs with NodeJS as well as in the Browser, you can persist `DomainEvents` either directly into the `EventStore` or send them first over a `RemoteService`. The `RemoteService` can also be used to access your API remotely. This makes eventric.js really useful for distributed applications and sharing code between Server and Client.
-
-Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers and decided to give eventric.js a go, it got clear that we needed a `BoundedContext` named `Collaboration` as part of our application first.
+Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
 
 
 ### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)

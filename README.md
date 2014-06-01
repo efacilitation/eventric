@@ -24,7 +24,7 @@ Information regarding the API and more can be found in the [Wiki](https://github
 
 ## Quick Start
 
-After having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we needed a `BoundedContext` named `collaboration` as part of our application. It will provide the API to work with our `Todo` Aggregate at the DomainModel-Core.
+Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we needed a `BoundedContext` named `collaboration` as part of our application. It will provide the API to work with our `Todo` Aggregate at the DomainModel-Core.
 
 ### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)
 

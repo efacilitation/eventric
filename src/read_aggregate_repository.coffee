@@ -1,12 +1,10 @@
 eventric = require 'eventric'
 
-_     = eventric.require 'HelperUnderscore'
-async = eventric.require 'HelperAsync'
-
+_                 = eventric.require 'HelperUnderscore'
+async             = eventric.require 'HelperAsync'
+ReadAggregateRoot = eventric.require 'ReadAggregateRoot'
 
 class ReadAggregateRepository
-
-  _readAggregateClasses: {}
 
   constructor: (@_aggregateName, @_eventStore) ->
 
@@ -15,10 +13,10 @@ class ReadAggregateRepository
     return unless @_callbackIsAFunction callback
 
     # create the ReadAggregate instance
-    ReadAggregateClass = @getReadAggregateClass @_aggregateName
+    readAggregateObj = @getReadAggregateObj @_aggregateName
 
     # TODO: return if @_checkReadAggregateClassNotSet ReadAggregateClass, callback
-    if not ReadAggregateClass
+    if not readAggregateObj
       err = new Error "Tried 'findById' on not registered ReadAggregate for '#{@_aggregateName}'"
       return callback err, null
 
@@ -27,7 +25,8 @@ class ReadAggregateRepository
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
 
-      readAggregate = new ReadAggregateClass
+      readAggregate = new ReadAggregateRoot
+      _.extend readAggregate, readAggregateObj
 
       # apply the domainevents on the ReadAggregate
       for domainEvent in domainEvents when domainEvent.aggregate?.changed
@@ -95,13 +94,15 @@ class ReadAggregateRepository
       throw new Error 'No callback provided'
 
 
-  registerReadAggregateClass: (aggregateName, ReadAggregateClass) ->
-    @_readAggregateClasses[aggregateName] = ReadAggregateClass
+  _readAggregateObjs: {}
+
+  registerReadAggregateObj: (aggregateName, readAggregateObj) ->
+    @_readAggregateObjs[aggregateName] = readAggregateObj
 
 
-  getReadAggregateClass: (aggregateName) ->
-    return false unless aggregateName of @_readAggregateClasses
-    @_readAggregateClasses[aggregateName]
+  getReadAggregateObj: (aggregateName) ->
+    return false unless aggregateName of @_readAggregateObjs
+    @_readAggregateObjs[aggregateName]
 
 
 module.exports = ReadAggregateRepository

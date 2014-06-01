@@ -8,11 +8,6 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
 
       it 'then it should return the corresponding list of ReadExampleAggregates', (done) ->
         class ReadExampleRepository extends ReadAggregateRepository
-
-          constructor: ->
-            super
-            @registerReadAggregateClass 'Example', ReadAggregateRoot
-
           findByDateRange: (start, end, callback) ->
             # criteria not actually used here, just to show how it could look like
             exampleQuery =
@@ -39,6 +34,7 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
 
         # instantiate the ReadExampleRepository with the stubbed Adapter and the ReadExample Class
         readExampleRepository = new ReadExampleRepository 'Example', EventStoreStub
+        readExampleRepository.registerReadAggregateObj 'Example', ReadAggregateRoot
         readExampleRepository.findIds = sinon.stub().yields null, [42]
 
         # example start, end dates

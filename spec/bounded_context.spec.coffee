@@ -20,7 +20,7 @@ describe 'BoundedContext', ->
 
   class ReadAggregateRootMock
   class ReadAggregateRepositoryMock
-    registerReadAggregateClass: sandbox.stub()
+    registerReadAggregateObj: sandbox.stub()
 
   beforeEach ->
     mongoDbEventStoreMock = new MongoDbEventStoreMock

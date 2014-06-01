@@ -61,7 +61,7 @@ class BoundedContext
 
 
   addReadAggregate: (aggregateName, readAggregateObj) ->
-    @readAggregates[aggregateNamegg] = readAggregateObj
+    @readAggregates[aggregateName] = readAggregateObj
 
 
   addReadAggregateRepository: (aggregateName, readAggregateRepository) ->
@@ -96,7 +96,7 @@ class BoundedContext
         @readAggregates[aggregateName] = ReadAggregateRoot
 
       # register read aggregate to repository
-      @_readAggregateRepositoriesInstances[aggregateName].registerReadAggregateClass aggregateName, @readAggregates[aggregateName]
+      @_readAggregateRepositoriesInstances[aggregateName].registerReadAggregateObj aggregateName, @readAggregates[aggregateName]
 
 
   _initializeReadAggregateRepositories: ->

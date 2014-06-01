@@ -5,7 +5,7 @@
 
 ## Introduction [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-**eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build web applications with a proper [domain model](https://en.wikipedia.org/wiki/Domain_model) and [layered architecture](https://en.wikipedia.org/wiki/Multilayered_architecture). It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining how your data structure has to look like and so often end up with a [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
+**eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build web applications based on [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design). It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining how your data structure has to look like and so often end up with a [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
 
 
 Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).

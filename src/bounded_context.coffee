@@ -34,10 +34,10 @@ class BoundedContext
         aggregate:
           create: @_commandService.createAggregate
           command: @_commandService.commandAggregate
-        repository: => @getReadAggregateRepository.apply @, arguments
+        repository: => @getRepository.apply @, arguments
 
 
-      @_initializeReadAggregateRepositories()
+      @_initializeRepositories()
       @_initializeAggregates()
       @_initializeDomainEventHandler()
 
@@ -64,7 +64,7 @@ class BoundedContext
     @readAggregates[aggregateName] = readAggregateObj
 
 
-  addReadAggregateRepository: (aggregateName, readAggregateRepository) ->
+  addRepository: (aggregateName, readAggregateRepository) ->
     @readAggregateRepositories[aggregateName] = readAggregateRepository
 
 
@@ -99,7 +99,7 @@ class BoundedContext
       @_readAggregateRepositoriesInstances[aggregateName].registerReadAggregateObj aggregateName, @readAggregates[aggregateName]
 
 
-  _initializeReadAggregateRepositories: ->
+  _initializeRepositories: ->
     for aggregateName, readRepositoryObj of @readAggregateRepositories
       readRepository = new ReadAggregateRepository aggregateName, @_eventStore
       _.extend readRepository, readRepositoryObj
@@ -110,7 +110,7 @@ class BoundedContext
     @onDomainEvent domainEventName, fn for domainEventName, fn of @_domainEventHandlers
 
 
-  getReadAggregateRepository: (aggregateName) ->
+  getRepository: (aggregateName) ->
     @_readAggregateRepositoriesInstances[aggregateName]
 
 

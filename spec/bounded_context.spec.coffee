@@ -67,13 +67,13 @@ describe 'BoundedContext', ->
 
       FooReadAggregateRepository = {}
       BarReadAggregateRepository = {}
-      boundedContext.addReadAggregateRepository 'Foo', FooReadAggregateRepository
-      boundedContext.addReadAggregateRepository 'Bar', BarReadAggregateRepository
+      boundedContext.addRepository 'Foo', FooReadAggregateRepository
+      boundedContext.addRepository 'Bar', BarReadAggregateRepository
 
       boundedContext.initialize()
 
-      expect((boundedContext.getReadAggregateRepository 'Foo') instanceof ReadAggregateRepositoryMock).to.be.true
-      expect((boundedContext.getReadAggregateRepository 'Bar') instanceof ReadAggregateRepositoryMock).to.be.true
+      expect((boundedContext.getRepository 'Foo') instanceof ReadAggregateRepositoryMock).to.be.true
+      expect((boundedContext.getRepository 'Bar') instanceof ReadAggregateRepositoryMock).to.be.true
 
 
     describe 'should initialize aggregaterepository and domaineventservice', ->

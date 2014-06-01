@@ -130,7 +130,7 @@ describe 'Example BoundedContext Feature', ->
                 foo: 'bar'
         ]
 
-        exampleContext.addReadAggregateRepository 'Example',
+        exampleContext.addRepository 'Example',
           findByExample: (callback) ->
             @find {}, callback
 

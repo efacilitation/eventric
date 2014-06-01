@@ -6,6 +6,7 @@
     "cqrs",
     "cqs",
     "ddd",
+    "dddd",
     "domain-driven",
     "event-sourcing",
     "event-driven",
@@ -18,7 +19,7 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"

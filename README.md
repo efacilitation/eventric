@@ -5,9 +5,7 @@
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-Build web applications based on Domain-driven Design and Layered Architecture. Runs on NodeJS and modern Browsers. Written in CoffeeScript.
-
-Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
+Build web applications based on Domain-driven Design and Layered Architecture. Runs on NodeJS and modern Browsers. Written in CoffeeScript. Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
 
 ### Why?

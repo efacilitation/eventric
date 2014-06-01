@@ -22,7 +22,7 @@ Information regarding the API and more can be found in the [Wiki](https://github
 * Capture all changes to your application state as a sequence of events ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html) / [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/))
 
 
-## Quick Start (NodeJS)
+## Quick Start
 
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we needed a `BoundedContext` named `collaboration` as part of our application. It will provide the API to work with our `Todo` Aggregate.
 

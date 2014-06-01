@@ -7,9 +7,9 @@
 
 **eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build flexible, maintainable, long-lasting web applications. It aims to be an alternative to MVC+CRUD-style Frameworks where you put a lot of effort into defining how your data structure has to look like. With **eventric.js** you concentrate instead on the **behaviour** of your business and built your application on it.
 
-Basically you build a well defined, behavioural API using `commands` and `queries`. Executing a `command` will in turn act on a registered `Aggregate` (think of it as a advanced Model). This finally results in a so-called `DomainEvent`. This series of `DomainEvents` defines the state of your `Aggregate` and therefore of your application.
+Basically you define a behavioural API using `commands` and `queries`. Executing a `command` eventually commands a registered `Aggregate` (think of it as an advanced Model). This will result in a so-called `DomainEvent`. The series of `DomainEvents` defines the state of your `Aggregate` and therefore of your application.
 
-**eventric.js** will run on NodeJS as well as in the Browser. Depending on the scenario you can persist the `DomainEvents` directly into the eventric EventStore or send it over some `RemoteService` first. The `RemoteService` can also be used to access your API remotely. This makes **eventric.js** really useful for distributed applications.
+**eventric.js** will run on NodeJS as well as in the Browser. Depending on the scenario the `DomainEvents` get directly persisted into the eventric EventStore or send over a `RemoteService` first. The `RemoteService` can also be used to access your API remotely. This makes **eventric.js** really useful for distributed applications.
 
 Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 

@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "description": "Build web applications based on Domain-driven design",
+  "description": "Build web applications based on Domain-driven Design and Layered Architecture",
   "url": "http://eventricjs.org",
   "keywords": [
     "cqrs",
@@ -21,7 +21,7 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"

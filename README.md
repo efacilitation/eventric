@@ -9,7 +9,7 @@
 
 Basically you define a behavioural API using `commands` and `queries`. Executing a `command` eventually commands a registered `Aggregate` (think of it as an advanced Model). This will result in a so-called `DomainEvent`. The series of `DomainEvents` defines the state of your `Aggregate` and therefore of your application.
 
-**eventric.js** will run on NodeJS as well as in the Browser. Depending on the scenario the `DomainEvents` get directly persisted into the eventric EventStore or send over a `RemoteService` first. The `RemoteService` can also be used to access your API remotely. This makes **eventric.js** really useful for distributed applications.
+**eventric.js** runs with NodeJS as well as in the Browser. Depending on the scenario the `DomainEvents` get directly persisted into the `EventStore` or send over a `RemoteService` first. The `RemoteService` can also be used to access your API remotely. This makes **eventric.js** really useful for distributed applications and for sharing code between Server and Client.
 
 Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
@@ -24,7 +24,7 @@ Information regarding the API and more can be found in the [Wiki](https://github
 
 ## Quick Start
 
-Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we needed a `BoundedContext` named `collaboration` as part of our application. It will provide the API to work with our `Todo` Aggregate at the DomainModel-Core.
+Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we needed a `BoundedContext` named `collaboration` as part of our application. It will provide the API to work with our `Todo` Aggregate.
 
 ### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)
 

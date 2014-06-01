@@ -20,7 +20,7 @@ describe 'ReadAggregateRepositorySpec', ->
     ]
 
     readAggregateRepository = new ReadAggregateRepository 'Foo', EventStoreStub
-    readAggregateRepository.registerClass 'Foo', ReadAggregateRoot
+    readAggregateRepository.registerReadAggregateClass 'Foo', ReadAggregateRoot
 
 
   describe '#findById', ->

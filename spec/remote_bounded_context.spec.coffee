@@ -84,7 +84,7 @@ describe 'Remote Bounded Context', ->
 
       remoteServiceStub = sinon.createStubInstance RemoteService
       remoteBoundedContext = new RemoteBoundedContext remoteServiceStub
-      remoteBoundedContext.registerClass 'exampleContext', exampleContext
+      remoteBoundedContext.registerBoundedContextObj 'exampleContext', exampleContext
       remoteBoundedContext.handle rpc.payload, callback
 
       expect(exampleContext.command.calledWith command, callback).to.be.true

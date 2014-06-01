@@ -28,12 +28,12 @@ describe 'Create new Aggregate Scenario', ->
         # create the AggregateRepositoryStub
         aggregateRepository = sinon.createStubInstance AggregateRepository
         # simulate "register Class 'EnderAggregate', EnderAggregate"
-        aggregateRepository.getClass.returns EnderAggregate
+        aggregateRepository.getAggregateObj.returns EnderAggregate
         # simulate "nothing found"
         aggregateRepository.findById.yields null, null
 
         # register the aggregate class in the repository
-        aggregateRepository.registerClass 'EnderAggregate', EnderAggregate
+        aggregateRepository.registerAggregateObj 'EnderAggregate', EnderAggregate
 
         # create the CommandService
         commandService = new CommandService domainEventService, aggregateRepository

@@ -16,11 +16,11 @@ describe 'BoundedContext', ->
   class AggregateRepositoryMock
     constructor: ->
       aggregateRepositoryMock.apply this, arguments
-    registerClass: sandbox.stub()
+    registerAggregateObj: sandbox.stub()
 
   class ReadAggregateRootMock
   class ReadAggregateRepositoryMock
-    registerClass: sandbox.stub()
+    registerReadAggregateClass: sandbox.stub()
 
   beforeEach ->
     mongoDbEventStoreMock = new MongoDbEventStoreMock
@@ -54,8 +54,8 @@ describe 'BoundedContext', ->
 
       boundedContext.initialize()
 
-      expect(AggregateRepositoryMock::registerClass.calledWith 'Foo', FooAggregateMock).to.be.true
-      expect(AggregateRepositoryMock::registerClass.calledWith 'Bar', BarAggregateMock).to.be.true
+      expect(AggregateRepositoryMock::registerAggregateObj.calledWith 'Foo', FooAggregateMock).to.be.true
+      expect(AggregateRepositoryMock::registerAggregateObj.calledWith 'Bar', BarAggregateMock).to.be.true
 
 
     it 'should instantiate and save the configured read aggregate repositories', ->

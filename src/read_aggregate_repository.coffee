@@ -1,21 +1,21 @@
 eventric = require 'eventric'
 
-_                        = eventric.require 'HelperUnderscore'
-async                    = eventric.require 'HelperAsync'
-MixinRegisterAndGetClass = eventric.require 'MixinRegisterAndGetClass'
+_     = eventric.require 'HelperUnderscore'
+async = eventric.require 'HelperAsync'
 
 
 class ReadAggregateRepository
 
-  _.extend @prototype, MixinRegisterAndGetClass::
+  _readAggregateClasses: {}
 
   constructor: (@_aggregateName, @_eventStore) ->
+
 
   findById: (aggregateId, callback) =>
     return unless @_callbackIsAFunction callback
 
     # create the ReadAggregate instance
-    ReadAggregateClass = @getClass @_aggregateName
+    ReadAggregateClass = @getReadAggregateClass @_aggregateName
 
     # TODO: return if @_checkReadAggregateClassNotSet ReadAggregateClass, callback
     if not ReadAggregateClass
@@ -93,6 +93,15 @@ class ReadAggregateRepository
 
     else
       throw new Error 'No callback provided'
+
+
+  registerReadAggregateClass: (aggregateName, ReadAggregateClass) ->
+    @_readAggregateClasses[aggregateName] = ReadAggregateClass
+
+
+  getReadAggregateClass: (aggregateName) ->
+    return false unless aggregateName of @_readAggregateClasses
+    @_readAggregateClasses[aggregateName]
 
 
 module.exports = ReadAggregateRepository

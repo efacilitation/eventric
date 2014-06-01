@@ -30,7 +30,7 @@ class CommandService
 
 
   createAggregate: ([aggregateName, params]..., callback) ->
-    aggregateObj = @_aggregateRepository.getClass aggregateName
+    aggregateObj = @_aggregateRepository.getAggregateObj aggregateName
     if not aggregateObj
       err = new Error "Tried to create not registered Aggregate '#{aggregateName}'"
       callback err, null

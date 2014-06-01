@@ -24,13 +24,42 @@ describe 'Example BoundedContext Feature', ->
           done()
 
 
-      it 'then it should haved triggered an Aggregate:create DomainEvent', (done) ->
+      it 'then it should haved triggered the correct DomainEvent', (done) ->
         exampleContext.onDomainEvent 'Example:create', (domainEvent) ->
           expect(domainEvent.getName()).to.equal 'create'
           done()
 
         exampleContext.command
           name: 'createExample'
+
+
+    describe 'when we command the bounded context to command an aggregate', ->
+      beforeEach (done) ->
+        eventStoreMock.find.yields null, [
+          aggregate:
+            id: 1
+            name: 'Example'
+        ]
+
+        exampleContext.addAggregate 'Example',
+          doSomething: sinon.stub()
+
+        exampleContext.addCommand 'doSomething', (params, callback) ->
+          @aggregate.command 'Example', params.id, 'doSomething', callback
+
+        exampleContext.initialize ->
+          done()
+
+
+      it 'then it should have triggered the correct DomainEvent', (done) ->
+        exampleContext.onDomainEvent 'Example:doSomething', (domainEvent) ->
+          expect(domainEvent.getName()).to.equal 'doSomething'
+          done()
+
+        exampleContext.command
+          name: 'doSomething'
+          params:
+            id: 1
 
 
     describe 'when we query the bounded context', ->

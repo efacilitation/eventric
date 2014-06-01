@@ -15,7 +15,7 @@ describe 'AggregateRepository', ->
       EventStoreStub = sinon.createStubInstance EventStore
 
       aggregateRepository = new AggregateRepository EventStoreStub
-      aggregateRepository.registerClass 'Foo', Foo
+      aggregateRepository.registerAggregateObj 'Foo', Foo
 
 
     it 'should return a instantiated Aggregate', ->

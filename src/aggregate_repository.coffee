@@ -1,15 +1,14 @@
 eventric = require 'eventric'
 
-_                        = eventric.require 'HelperUnderscore'
-AggregateRoot            = eventric.require 'AggregateRoot'
-MixinRegisterAndGetClass = eventric.require 'MixinRegisterAndGetClass'
+_             = eventric.require 'HelperUnderscore'
+AggregateRoot = eventric.require 'AggregateRoot'
 
 
 class AggregateRepository
-
-  _.extend @prototype, MixinRegisterAndGetClass::
+  _aggregateObjs: {}
 
   constructor: (@_eventStore) ->
+
 
   findById: (aggregateName, aggregateId, callback) ->
     # find all domainEvents matching the given aggregateId
@@ -20,8 +19,7 @@ class AggregateRepository
       return callback null, null if domainEvents.length == 0
 
       # get the corresponding class
-
-      aggregateObj = @getClass aggregateName
+      aggregateObj = @getAggregateObj aggregateName
       if not aggregateObj
         err = new Error "Tried to command not registered Aggregate '#{aggregateName}'"
         callback err, null
@@ -39,6 +37,15 @@ class AggregateRepository
 
       # return the aggregate
       callback null, aggregate
+
+
+  registerAggregateObj: (aggregateName, obj) ->
+    @_aggregateObjs[aggregateName] = obj
+
+
+  getAggregateObj: (aggregateName) ->
+    return false unless aggregateName of @_aggregateObjs
+    @_aggregateObjs[aggregateName]
 
 
 module.exports = AggregateRepository

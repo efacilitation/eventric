@@ -11,7 +11,7 @@ describe 'Find ReadAggregates By Date Range Scenario', ->
 
           constructor: ->
             super
-            @registerClass 'Example', ReadAggregateRoot
+            @registerReadAggregateClass 'Example', ReadAggregateRoot
 
           findByDateRange: (start, end, callback) ->
             # criteria not actually used here, just to show how it could look like

@@ -5,11 +5,8 @@
 
 ## Introduction [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-**eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build flexible, maintainable, long-lasting web applications. It aims to be an alternative to MVC+CRUD-style Frameworks where you put a lot of effort into defining how your data structure has to look like. With **eventric.js** you concentrate instead on the **behaviour** of your business and built your application on it.
+**eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build web applications with a proper [domain model](https://en.wikipedia.org/wiki/Domain_model) and layered architecture. It aims to be an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining how your data structure has to look like and so often end up with a [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
 
-Basically you define a behavioural API using `commands` and `queries`. Executing a `command` eventually commands a registered `Aggregate` (think of it as an advanced Model). This will result in a so-called `DomainEvent` including the properties that changed inside the `Aggregate`. The series of `DomainEvents` defines the state of your `Aggregate` and therefore of your application.
-
-**eventric.js** runs with NodeJS as well as in the Browser. Depending on the scenario the `DomainEvents` get directly persisted into the `EventStore` or send over a `RemoteService` first. The `RemoteService` can also be used to access your API remotely. This makes **eventric.js** really useful for distributed applications and sharing code between Server and Client.
 
 Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
@@ -24,7 +21,10 @@ Information regarding the API and more can be found in the [Wiki](https://github
 
 ## Quick Start
 
-Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we needed a `BoundedContext` named `collaboration` as part of our application. It will provide the API to work with our `Todo` Aggregate.
+Basically we define a behavioural API using `queries` and `commands` which result in series of `DomainEvents` consisting of properties that changed inside `Aggregates`. These `DomainEvents` define the state of our application. Since eventric.js runs with NodeJS as well as in the Browser, you can persist `DomainEvents` either directly into the `EventStore` or send them first over a `RemoteService`. The `RemoteService` can also be used to access your API remotely. This makes eventric.js really useful for distributed applications and sharing code between Server and Client.
+
+Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers and decided to give eventric.js a go, it got clear that we needed a `BoundedContext` named `Collaboration` as part of our application first.
+
 
 ### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)
 

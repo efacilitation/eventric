@@ -18,7 +18,7 @@ class AggregateEntity
     @_domainEvents      = []
     @_entityClasses     = {}
     @_trackPropsChanged = true
-    @_defineProperties
+    @_defineProperties()
     @_observerOpen()
 
 

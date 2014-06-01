@@ -7,9 +7,9 @@
 
 **eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build flexible, maintainable, long-lasting web applications. It aims to be an alternative to MVC+CRUD-style Frameworks where you put a lot of effort into defining how your data structure has to look like. With **eventric.js** you concentrate instead on the **behaviour** of your business and built your application on it.
 
-Basically you define a behavioural API using `commands` and `queries`. Executing a `command` eventually commands a registered `Aggregate` (think of it as an advanced Model). This will result in a so-called `DomainEvent`. The series of `DomainEvents` defines the state of your `Aggregate` and therefore of your application.
+Basically you define a behavioural API using `commands` and `queries`. Executing a `command` eventually commands a registered `Aggregate` (think of it as an advanced Model). This will result in a so-called `DomainEvent` including the properties that changed inside the `Aggregate`. The series of `DomainEvents` defines the state of your `Aggregate` and therefore of your application.
 
-**eventric.js** runs with NodeJS as well as in the Browser. Depending on the scenario the `DomainEvents` get directly persisted into the `EventStore` or send over a `RemoteService` first. The `RemoteService` can also be used to access your API remotely. This makes **eventric.js** really useful for distributed applications and for sharing code between Server and Client.
+**eventric.js** runs with NodeJS as well as in the Browser. Depending on the scenario the `DomainEvents` get directly persisted into the `EventStore` or send over a `RemoteService` first. The `RemoteService` can also be used to access your API remotely. This makes **eventric.js** really useful for distributed applications and sharing code between Server and Client.
 
 Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
@@ -22,7 +22,7 @@ Information regarding the API and more can be found in the [Wiki](https://github
 * Capture all changes to your application state as a sequence of events ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html) / [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/))
 
 
-## Quick Start
+## Quick Start (NodeJS)
 
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we needed a `BoundedContext` named `collaboration` as part of our application. It will provide the API to work with our `Todo` Aggregate.
 

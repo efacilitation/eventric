@@ -5,7 +5,7 @@
 
 ## Introduction [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-**eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build web applications based on [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design). It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining how your data structure has to look like and so often end up with a [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
+**eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build web applications based on Domain-driven Design and Layered Architecture. It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining how your data structure has to look like and so often end up with a [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
 
 
 Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
@@ -14,6 +14,7 @@ Information regarding the API and more can be found in the [Wiki](https://github
 ## Philosophy
 
 * Emphasize [Domain-driven design](https://www.goodreads.com/book/show/179133.Domain_Driven_Design), [Event-driven architecture](https://www.goodreads.com/book/show/12369902-event-centric) and [Task-based UIs](http://cqrs.wordpress.com/documents/task-based-ui).
+* Put the the Domain Model in the very center of Layered Architecture ([Onion](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/)- / [Hexagonal](http://alistair.cockburn.us/Hexagonal+architecture)-Architecture)
 * Explicitly set boundaries for parts of your application ([BoundedContexts](https://en.wikipedia.org/wiki/Domain-driven_design#Bounded_context) / [MicroServices](http://martinfowler.com/articles/microservices.html))
 * Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx))
 * Capture all changes to your application state as a sequence of events ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html) / [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/))

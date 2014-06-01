@@ -7,7 +7,7 @@
 
 **eventric.js** is a JavaScript Framework (written in CoffeeScript) which helps developers to build flexible, maintainable, long-lasting web applications. It aims to be an alternative to MVC+CRUD-style Frameworks where you put a lot of effort into defining how your data structure has to look like. With **eventric.js** you concentrate instead on the **behaviour** of your business and built your application on it.
 
-Information regarding the Building Blocks, Best Practices, API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
+Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
 
 ## Quick Start

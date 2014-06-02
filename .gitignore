@@ -4,3 +4,7 @@
 /npm-debug.log
 /*.sublime-project
 /*.sublime-workspace
+
+.floo
+.flooignore
+.idea/

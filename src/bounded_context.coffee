@@ -52,8 +52,16 @@ class BoundedContext
     @_applicationServiceCommands[commandName] = => fn.apply @_di, arguments
 
 
+  addCommands: (commandObj) ->
+    @addCommand commandName, commandFunction for commandName, commandFunction of commandObj
+
+
   addQuery: (queryName, fn) ->
     @_applicationServiceQueries[queryName] = => fn.apply @_di, arguments
+
+
+  addQueries: (queryObj) ->
+    @addQuery queryName, queryFunction for queryName, queryFunction of queryObj
 
 
   addAggregate: (aggregateName, aggregateObj) ->

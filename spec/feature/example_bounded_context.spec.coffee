@@ -44,8 +44,9 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.addAggregate 'Example',
           doSomething: sinon.stub()
 
-        exampleContext.addCommand 'doSomething', (params, callback) ->
-          @aggregate.command 'Example', params.id, 'doSomething', callback
+        exampleContext.addCommands
+          doSomething: (params, callback) ->
+            @aggregate.command 'Example', params.id, 'doSomething', callback
 
         exampleContext.initialize ->
           done()
@@ -73,9 +74,10 @@ describe 'Example BoundedContext Feature', ->
                 foo: 'bar'
         ]
 
-        exampleContext.addQuery 'getExample', (params, callback) ->
-          @repository('Example').findById 1, (err, readExample) ->
-            callback null, readExample
+        exampleContext.addQueries
+          getExample: (params, callback) ->
+            @repository('Example').findById 1, (err, readExample) ->
+              callback null, readExample
 
         exampleContext.initialize ->
           done()

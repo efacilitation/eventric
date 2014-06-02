@@ -1,0 +1,44 @@
+{
+  "name": "eventric",
+  "version": "0.0.31",
+  "homepage": "https://github.com/efacilitation/eventric",
+  "authors": [
+    "efa GmbH <team@efa-gmbh.com>"
+  ],
+  "description": "Build web applications based on Domain-driven Design and Layered Architecture",
+  "main": "build/release/eventric.js",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "cqrs",
+    "cqs",
+    "ddd",
+    "dddd",
+    "domain",
+    "driven",
+    "domain",
+    "model",
+    "events",
+    "event",
+    "sourcing",
+    "event",
+    "driven",
+    "es",
+    "ead",
+    "boundedcontext",
+    "microservice",
+    "shared",
+    "client",
+    "server"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

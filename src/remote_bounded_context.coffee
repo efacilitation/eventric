@@ -1,11 +1,10 @@
 eventric = require 'eventric'
 
-_                        = eventric.require 'HelperUnderscore'
-MixinRegisterAndGetClass = eventric.require 'MixinRegisterAndGetClass'
+_  = eventric.require 'HelperUnderscore'
 
 class RemoteBoundedContext
 
-  _.extend @prototype, MixinRegisterAndGetClass::
+  _boundedContextObjs: {}
 
   constructor: (@_remoteService) ->
 
@@ -33,7 +32,7 @@ class RemoteBoundedContext
 
   # TODO: split into server class
   handle: (payload, callback) ->
-    boundedContext = @getClass payload.boundedContextName
+    boundedContext = @getBoundedContextObj payload.boundedContextName
     if not boundedContext
       err = new Error "Tried to handle RPC class with not registered boundedContext #{payload.boundedContextName}"
       return callback err, null
@@ -43,6 +42,15 @@ class RemoteBoundedContext
       return callback err, null
 
     boundedContext[payload.method] payload.params, callback
+
+
+  registerBoundedContextObj: (boundedContextName, boundedContextObj) ->
+    @_boundedContextObjs[boundedContextName] = boundedContextObj
+
+
+  getBoundedContextObj: (boundedContextName) ->
+    return false unless boundedContextName of @_boundedContextObjs
+    @_boundedContextObjs[boundedContextName]
 
 
 module.exports = RemoteBoundedContext

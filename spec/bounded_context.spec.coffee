@@ -16,8 +16,14 @@ describe 'BoundedContext', ->
   class AggregateRepositoryMock
     constructor: ->
       aggregateRepositoryMock.apply this, arguments
-    registerClass: sandbox.stub()
+    registerAggregateObj: sandbox.stub()
 
+  class ReadAggregateRootMock
+  class ReadAggregateRepositoryMock
+    registerReadAggregateObj: sandbox.stub()
+
+  HelperUnderscoreMock =
+    extend: sandbox.stub()
 
   beforeEach ->
     mongoDbEventStoreMock = new MongoDbEventStoreMock
@@ -26,6 +32,9 @@ describe 'BoundedContext', ->
     eventricMock.require.withArgs('CommandService').returns CommandServiceMock
     eventricMock.require.withArgs('DomainEventService').returns DomainEventServiceMock
     eventricMock.require.withArgs('AggregateRepository').returns AggregateRepositoryMock
+    eventricMock.require.withArgs('ReadAggregateRoot').returns ReadAggregateRootMock
+    eventricMock.require.withArgs('ReadAggregateRepository').returns ReadAggregateRepositoryMock
+    eventricMock.require.withArgs('HelperUnderscore').returns HelperUnderscoreMock
     mockery.registerMock 'eventric', eventricMock
     mockery.registerMock 'eventric-store-mongodb', mongoDbEventStoreMock
     aggregateRepositoryMock = sandbox.stub()
@@ -42,31 +51,29 @@ describe 'BoundedContext', ->
     it 'should register the configured aggregates at the aggregateRepository', ->
       boundedContext = eventric.boundedContext()
 
-      class FooAggregateMock
-      class BarAggregateMock
-      boundedContext.add 'aggregate', 'Foo', FooAggregateMock
-      boundedContext.add 'aggregates',
-        'Bar': BarAggregateMock
+      FooAggregateMock = {}
+      BarAggregateMock = {}
+      boundedContext.addAggregate 'Foo', FooAggregateMock
+      boundedContext.addAggregate 'Bar', BarAggregateMock
 
       boundedContext.initialize()
 
-      expect(AggregateRepositoryMock::registerClass.calledWith 'Foo', FooAggregateMock).to.be.true
-      expect(AggregateRepositoryMock::registerClass.calledWith 'Bar', BarAggregateMock).to.be.true
+      expect(AggregateRepositoryMock::registerAggregateObj.calledWith 'Foo', FooAggregateMock).to.be.true
+      expect(AggregateRepositoryMock::registerAggregateObj.calledWith 'Bar', BarAggregateMock).to.be.true
 
 
     it 'should instantiate and save the configured read aggregate repositories', ->
       boundedContext = eventric.boundedContext()
 
-      class FooReadAggregateRepository
-      class BarReadAggregateRepository
-      boundedContext.add 'repository', 'Foo', FooReadAggregateRepository
-      boundedContext.add 'repositories',
-        'Bar': BarReadAggregateRepository
+      FooReadAggregateRepository = {}
+      BarReadAggregateRepository = {}
+      boundedContext.addRepository 'Foo', FooReadAggregateRepository
+      boundedContext.addRepository 'Bar', BarReadAggregateRepository
 
       boundedContext.initialize()
 
-      expect((boundedContext.getReadAggregateRepository 'Foo') instanceof FooReadAggregateRepository).to.be.true
-      expect((boundedContext.getReadAggregateRepository 'Bar') instanceof BarReadAggregateRepository).to.be.true
+      expect((boundedContext.getRepository 'Foo') instanceof ReadAggregateRepositoryMock).to.be.true
+      expect((boundedContext.getRepository 'Bar') instanceof ReadAggregateRepositoryMock).to.be.true
 
 
     describe 'should initialize aggregaterepository and domaineventservice', ->
@@ -89,71 +96,33 @@ describe 'BoundedContext', ->
         expect(domainEventServiceMock.calledWith customEventStoreMock).to.be.true
 
 
-    describe 'processing application services', ->
-      exampleApplicationService = null
-      exampleBoundedContext = null
-
-      beforeEach ->
-        exampleApplicationService = {}
-        exampleBoundedContext = eventric.boundedContext()
-        exampleBoundedContext.add 'application', exampleApplicationService
-
-
-      it 'should call initialize on the application service if available', ->
-        exampleApplicationService.initialize = sinon.spy()
-        exampleBoundedContext.initialize()
-        expect(exampleApplicationService.initialize.calledOnce).to.be.true
-
-
-      describe 'injections', ->
-
-        beforeEach ->
-          exampleBoundedContext.initialize()
-
-
-        it 'should inject the command service into the application services ', ->
-          expect(exampleApplicationService.commandService instanceof CommandServiceMock).to.be.true
-
-
-        it 'should inject the getReadAggregateRepository function into the application services', ->
-          expect(exampleApplicationService.getReadAggregateRepository).to.be.a 'function'
-
-
-        it 'should inject the onDomainEvent function into the application service', ->
-          expect(exampleApplicationService.onDomainEvent).to.be.a 'function'
-
-
   describe '#command', ->
     describe 'given the command has no registered handler', ->
-      it 'should call the command service with the correct parameters', ->
+      it 'should call the callback with a command not found error', ->
         boundedContext = eventric.boundedContext()
         boundedContext.initialize()
 
         command =
-          name: 'Aggregate:doSomething'
-          id: 42
+          name: 'doSomething'
           params:
+            id: 42
             foo: 'bar'
 
-        callback = ->
+        callback = sinon.spy()
 
         boundedContext.command command, callback
-        expect(CommandServiceMock::commandAggregate.calledWith 'Aggregate', command.id, 'doSomething', command.params, callback).to.be.true
+        expect(callback.calledWith sinon.match.instanceOf Error).to.be.true
 
 
     describe 'has a registered handler', ->
       it 'should execute the command handler', ->
-        exampleApplicationService =
-          commands:
-            'Aggregate:doSomething': 'accountDoSomething'
-          accountDoSomething: sandbox.stub()
-
+        commandStub = sandbox.stub()
         exampleBoundedContext = eventric.boundedContext()
-        exampleBoundedContext.add 'application', exampleApplicationService
+        exampleBoundedContext.addCommand 'doSomething', commandStub
         exampleBoundedContext.initialize()
 
         command =
-          name: 'Aggregate:doSomething'
+          name: 'doSomething'
           params:
             foo: 'bar'
 
@@ -161,67 +130,43 @@ describe 'BoundedContext', ->
 
         exampleBoundedContext.command command, callback
 
-        expect(exampleApplicationService.accountDoSomething.calledWith command.params, callback).to.be.true
+        expect(commandStub.calledWith command.params, callback).to.be.true
 
 
   describe '#query', ->
     describe 'has no registered handler', ->
-      it 'should execute the query directly on the correct read aggregate repository', ->
+      it 'should call the callback with a command not found error', ->
         exampleBoundedContext = eventric.boundedContext()
-        class FooReadAggregateRepository
-          find: sandbox.stub()
-        exampleBoundedContext.add 'repository', 'Aggregate', FooReadAggregateRepository
         exampleBoundedContext.initialize()
 
         query =
-          name: 'Aggregate:find'
-          id: 42
+          name: 'findSomething'
           params:
             foo: 'bar'
-        callback = ->
+
+        callback = sinon.spy()
 
         exampleBoundedContext.query query, callback
-
-        expect(FooReadAggregateRepository::find.calledWith query.id, query.params, callback).to.be.true
-
-
-    describe 'has no registered handler for Aggregate:findById', ->
-      it 'should execute findById directly on the correct read aggregate repository without passing the params', ->
-        exampleBoundedContext = eventric.boundedContext()
-        class FooReadAggregateRepository
-          findById: sandbox.stub()
-        exampleBoundedContext.add 'repository', 'Aggregate', FooReadAggregateRepository
-        exampleBoundedContext.initialize()
-
-        query =
-          name: 'Aggregate:findById'
-          id: 42
-        callback = ->
-
-        exampleBoundedContext.query query, callback
-
-        expect(FooReadAggregateRepository::findById.calledWithExactly query.id, callback).to.be.true
+        expect(callback.calledWith sinon.match.instanceOf Error).to.be.true
 
 
     describe 'has a registered handler', ->
       it 'should execute the query handler', ->
         exampleBoundedContext = eventric.boundedContext()
-        exampleApplicationService =
-          queries:
-            'customQuery': 'customQueryMethod'
-          customQueryMethod: sandbox.stub()
-        exampleBoundedContext.add 'application', exampleApplicationService
+        queryStub = sandbox.stub()
+        exampleBoundedContext.addQuery 'findSomething', queryStub
         exampleBoundedContext.initialize()
 
         query =
-          name: 'customQuery'
+          name: 'findSomething'
           params:
+            id: 42
             foo: 'bar'
         callback = ->
 
         exampleBoundedContext.query query, callback
 
-        expect(exampleApplicationService.customQueryMethod.calledWith query.params, callback).to.be.true
+        expect(queryStub.calledWith query.params, callback).to.be.true
 
 
   describe '#onDomainEvent', ->

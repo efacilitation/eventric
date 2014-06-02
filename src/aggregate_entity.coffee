@@ -11,17 +11,14 @@ class AggregateEntity
 
   _.extend @prototype, MixinSetGet::
 
-  constructor: (@_props = {}) ->
-    for key, value of @_props
-      Object.defineProperty @, key,
-        get: -> @_props[key]
-        set: (newValue) -> @_set key, newValue
-
+  constructor: (name, @_props = {}) ->
+    @_entityName        = name
     @_isNew             = false
     @_propsChanged      = {}
     @_domainEvents      = []
     @_entityClasses     = {}
     @_trackPropsChanged = true
+    @_defineProperties()
     @_observerOpen()
 
 
@@ -29,6 +26,13 @@ class AggregateEntity
     @id = @_generateUid()
     @_isNew = true
     @_observerDiscard()
+
+
+  _defineProperties: ->
+    for key, value of @_props
+      Object.defineProperty @, key,
+        get: -> @_props[key]
+        set: (newValue) -> @_set key, newValue
 
 
   _observerOpen: ->
@@ -59,7 +63,7 @@ class AggregateEntity
 
   getMetaData: ->
     id: @id
-    name: @constructor.name
+    name: @_entityName
 
 
   getChanges: ->

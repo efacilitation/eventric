@@ -1,6 +1,8 @@
 eventric = require 'eventric'
 
+_                  = eventric.require 'HelperUnderscore'
 async              = eventric.require 'HelperAsync'
+AggregateRoot      = eventric.require 'AggregateRoot'
 DomainEventService = eventric.require 'DomainEventService'
 
 class CommandService
@@ -28,14 +30,15 @@ class CommandService
 
 
   createAggregate: ([aggregateName, params]..., callback) ->
-    AggregateClass = @_aggregateRepository.getClass aggregateName
-    if not AggregateClass
+    aggregateObj = @_aggregateRepository.getAggregateObj aggregateName
+    if not aggregateObj
       err = new Error "Tried to create not registered Aggregate '#{aggregateName}'"
       callback err, null
       return
 
     # create Aggregate
-    aggregate = new AggregateClass
+    aggregate = new AggregateRoot aggregateName
+    _.extend aggregate, aggregateObj
     aggregate.create()
 
     # set given params

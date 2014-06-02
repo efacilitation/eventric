@@ -20,7 +20,6 @@ moduleDefinition =
   RemoteCommandService: './remote_command_service'
   RemoteRepositoryService: './remote_repository_service'
 
-  MixinRegisterAndGetClass: './mixin_registerandgetclass'
   MixinSetGet: './mixin_setget'
   MixinEvents: './mixin_events'
 

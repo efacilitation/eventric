@@ -9,7 +9,7 @@ describe 'AggregateRepository', ->
       myFunc: ->
     beforeEach ->
       AggregateRoot = eventric.require 'AggregateRoot'
-      sandbox.stub AggregateRoot::, 'applyChanges'
+      sandbox.stub AggregateRoot::
 
       AggregateRepository = eventric.require 'AggregateRepository'
       class EventStore

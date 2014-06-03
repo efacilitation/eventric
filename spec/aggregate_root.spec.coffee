@@ -7,9 +7,9 @@ describe 'AggregateRoot', ->
     enderAggregate = new AggregateRoot 'EnderAggregate'
 
 
-  describe '#create', ->
+  describe '#initialize', ->
     it 'should generate an id', ->
-      enderAggregate.create()
+      enderAggregate.initialize()
       expect(enderAggregate.id).to.be.string
 
 

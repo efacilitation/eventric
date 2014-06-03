@@ -29,7 +29,7 @@ class CommandService
       @[originalFunctionName] = _proxy originalFunctionName, originalFunction
 
 
-  createAggregate: ([aggregateName, params]..., callback) ->
+  createAggregate: ([aggregateName, props]..., callback) ->
     Aggregate = @_aggregateRepository.getAggregateClass aggregateName
     if not Aggregate
       err = new Error "Tried to create not registered Aggregate '#{aggregateName}'"
@@ -39,10 +39,12 @@ class CommandService
     # create Aggregate
     aggregate = new AggregateRoot aggregateName
     _.extend aggregate, new Aggregate
-    aggregate.create()
+    aggregate.initialize()
 
-    # set given params
-    aggregate[key] = value for key, value of params
+    if typeof aggregate.create == 'function'
+      aggregate.create props
+    else
+      aggregate.applyProps props
 
     @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
       return callback err, null if err

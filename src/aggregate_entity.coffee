@@ -22,7 +22,7 @@ class AggregateEntity
     @_observerOpen()
 
 
-  create: ->
+  initialize: ->
     @id = @_generateUid()
     @_isNew = true
     @_observerDiscard()
@@ -177,6 +177,10 @@ class AggregateEntity
 
       if entity.changed
         entityInstance.applyChanges entity.changed
+
+
+  applyProps: (props) ->
+    @[key] = value for key, value of props
 
 
   getEntityClass: (className) ->

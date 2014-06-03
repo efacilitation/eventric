@@ -5,20 +5,21 @@ describe 'CommandService', ->
   CommandService           = eventric.require 'CommandService'
 
   aggregateStubId = 1
-  class ExampleAggregate
-    doSomething: sandbox.stub()
-    id: aggregateStubId
+  exampleAggregate = null
   aggregateRepositoryStub = null
   domainEventService = null
   CommandService = null
   beforeEach ->
-
+    exampleAggregate =
+      doSomething: sandbox.stub()
+      create: sandbox.stub()
+      id: aggregateStubId
 
     # stub the repository
     aggregateRepositoryStub = sinon.createStubInstance AggregateRepository
 
-    # getAggregateObj returns a Stub which returns the ExampleAggregateStub on instantiation
-    aggregateRepositoryStub.getAggregateClass.returns ExampleAggregate
+    # getAggregateClass returns a Stub which returns the ExampleAggregateStub on instantiation
+    aggregateRepositoryStub.getAggregateClass.returns sinon.stub().returns exampleAggregate
 
     # stub the DomainEventService
     domainEventService = sinon.createStubInstance DomainEventService
@@ -27,6 +28,8 @@ describe 'CommandService', ->
 
 
   describe '#createAggregate', ->
+    initialProps =
+      some: 'thing'
 
     commandService = null
     beforeEach ->
@@ -45,6 +48,21 @@ describe 'CommandService', ->
       commandService.createAggregate 'ExampleAggregate', (err, aggregateId) ->
         expect(aggregateId).to.equal aggregateStubId
         done()
+
+
+    describe 'given a create method is present on the aggregate', ->
+      it 'should call the create method on the aggregate with the initial parameters', (done) ->
+        commandService.createAggregate 'ExampleAggregate', initialProps, ->
+          expect(exampleAggregate.create).to.have.been.calledWith initialProps
+          done()
+
+
+    describe 'given no create method is present on the aggregate', ->
+      it 'should apply the initial paramters directly on the aggregate', (done) ->
+        delete exampleAggregate.create
+        commandService.createAggregate 'ExampleAggregate', initialProps, (err) ->
+          expect(AggregateRoot::applyProps).to.have.been.calledWith initialProps
+          done()
 
 
   describe '#commandAggregate', ->

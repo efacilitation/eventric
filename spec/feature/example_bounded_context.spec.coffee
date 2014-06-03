@@ -26,7 +26,7 @@ describe 'Example BoundedContext Feature', ->
           done()
 
 
-      it.only 'then it should haved triggered the correct DomainEvent', (done) ->
+      it 'then it should haved triggered the correct DomainEvent', (done) ->
         exampleContext.onDomainEvent 'Example:create', (domainEvent) ->
           expect(domainEvent.getName()).to.equal 'create'
           expect(domainEvent.getAggregateChanges().props).to.deep.equal props

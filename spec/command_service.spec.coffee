@@ -1,29 +1,29 @@
 describe 'CommandService', ->
-  AggregateRoot           = eventric.require 'AggregateRoot'
   AggregateRepository     = eventric.require 'AggregateRepository'
-  ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
   DomainEventService      = eventric.require 'DomainEventService'
-  CommandService          = eventric.require 'CommandService'
+  AggregateRoot           = eventric.require 'AggregateRoot'
+  CommandService           = eventric.require 'CommandService'
 
   aggregateStubId = 1
-  exampleAggregateStub = null
+  class ExampleAggregate
+    doSomething: sandbox.stub()
+    id: aggregateStubId
   aggregateRepositoryStub = null
   domainEventService = null
+  CommandService = null
   beforeEach ->
-    # build ExampleAggregateStub
-    exampleAggregateStub = sinon.createStubInstance AggregateRoot
-    exampleAggregateStub.doSomething = sandbox.stub()
-    exampleAggregateStub.id = aggregateStubId
+
 
     # stub the repository
     aggregateRepositoryStub = sinon.createStubInstance AggregateRepository
 
     # getAggregateObj returns a Stub which returns the ExampleAggregateStub on instantiation
-    aggregateRepositoryStub.getAggregateObj.returns exampleAggregateStub
+    aggregateRepositoryStub.getAggregateClass.returns ExampleAggregate
 
     # stub the DomainEventService
     domainEventService = sinon.createStubInstance DomainEventService
     domainEventService.saveAndTrigger.yields null
+
 
 
   describe '#createAggregate', ->
@@ -33,7 +33,11 @@ describe 'CommandService', ->
       # findById should find nothing
       aggregateRepositoryStub.findById.yields null, null
 
+      AggregateRoot = eventric.require 'AggregateRoot'
+      sandbox.stub AggregateRoot::
+
       # instantiate the CommandService with the ReadAggregateRepository stub
+      CommandService = eventric.require 'CommandService'
       commandService = new CommandService domainEventService, aggregateRepositoryStub
 
 
@@ -44,13 +48,22 @@ describe 'CommandService', ->
 
 
   describe '#commandAggregate', ->
+    exampleAggregateStub = null
     commandService = null
+
     beforeEach ->
+      # build ExampleAggregateStub
+      exampleAggregateStub = sinon.createStubInstance AggregateRoot
+      exampleAggregateStub.doSomething = sandbox.stub()
+      exampleAggregateStub.id = aggregateStubId
+
+
       # findById should find something
       aggregateRepositoryStub.findById.yields null, exampleAggregateStub
 
       # instantiate the command service
       commandService = new CommandService domainEventService, aggregateRepositoryStub
+
 
     it 'should call the command on the aggregate', (done) ->
       commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->

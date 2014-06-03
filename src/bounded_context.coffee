@@ -93,7 +93,7 @@ class BoundedContext
 
   _initializeAggregates: ->
     for aggregateName, aggregateClass of @aggregates
-      @_aggregateRepository.registerAggregateObj aggregateName, aggregateClass
+      @_aggregateRepository.registerAggregateClass aggregateName, aggregateClass
 
       # add default repository if not already defined
       if !@_readAggregateRepositoriesInstances[aggregateName]

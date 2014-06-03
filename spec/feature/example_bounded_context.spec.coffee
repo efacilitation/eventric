@@ -102,7 +102,7 @@ describe 'Example BoundedContext Feature', ->
                 foo: 'bar'
         ]
 
-        exampleContext.addReadAggregate 'Example',
+        exampleContext.addReadAggregate 'Example', class Example
           getFoo: ->
             @foo
 

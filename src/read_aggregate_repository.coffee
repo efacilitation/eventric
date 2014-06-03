@@ -12,13 +12,7 @@ class ReadAggregateRepository
   findById: (aggregateId, callback) =>
     return unless @_callbackIsAFunction callback
 
-    # create the ReadAggregate instance
-    readAggregateObj = @getReadAggregateObj @_aggregateName
-
-    # TODO: return if @_checkReadAggregateClassNotSet ReadAggregateClass, callback
-    if not readAggregateObj
-      err = new Error "Tried 'findById' on not registered ReadAggregate for '#{@_aggregateName}'"
-      return callback err, null
+    ReadAggregate = @getReadAggregateClass @_aggregateName
 
     # TODO: @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
     @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
@@ -26,12 +20,13 @@ class ReadAggregateRepository
       return callback null, [] if domainEvents.length == 0
 
       readAggregate = new ReadAggregateRoot
-      _.extend readAggregate, readAggregateObj
+      _.extend readAggregate, new ReadAggregate if ReadAggregate
 
       # apply the domainevents on the ReadAggregate
       for domainEvent in domainEvents when domainEvent.aggregate?.changed
         readAggregate.applyChanges domainEvent.aggregate.changed
-        readAggregate.id = aggregateId
+
+      readAggregate.id = aggregateId
 
       # return the readAggregate
       callback null, readAggregate
@@ -94,15 +89,15 @@ class ReadAggregateRepository
       throw new Error 'No callback provided'
 
 
-  _readAggregateObjs: {}
+  _readAggregateClasses: {}
 
-  registerReadAggregateObj: (aggregateName, readAggregateObj) ->
-    @_readAggregateObjs[aggregateName] = readAggregateObj
+  registerReadAggregateClass: (aggregateName, readAggregateClass) ->
+    @_readAggregateClasses[aggregateName] = readAggregateClass
 
 
-  getReadAggregateObj: (aggregateName) ->
-    return false unless aggregateName of @_readAggregateObjs
-    @_readAggregateObjs[aggregateName]
+  getReadAggregateClass: (aggregateName) ->
+    return false unless aggregateName of @_readAggregateClasses
+    @_readAggregateClasses[aggregateName]
 
 
 module.exports = ReadAggregateRepository

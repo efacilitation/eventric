@@ -99,12 +99,9 @@ class BoundedContext
       if !@_readAggregateRepositoriesInstances[aggregateName]
         @_readAggregateRepositoriesInstances[aggregateName] = new ReadAggregateRepository aggregateName, @_eventStore
 
-      # add default read aggregate if not already defined
-      if !@readAggregates[aggregateName]
-        @readAggregates[aggregateName] = ReadAggregateRoot
-
       # register read aggregate to repository
-      @_readAggregateRepositoriesInstances[aggregateName].registerReadAggregateObj aggregateName, @readAggregates[aggregateName]
+      if @readAggregates[aggregateName]
+        @_readAggregateRepositoriesInstances[aggregateName].registerReadAggregateClass aggregateName, @readAggregates[aggregateName]
 
 
   _initializeRepositories: ->

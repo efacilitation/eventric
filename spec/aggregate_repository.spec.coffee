@@ -49,7 +49,7 @@ describe 'AggregateRepository', ->
 
       it 'should return a instantiated Aggregate with all DomainEvents applied', (done) ->
         aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
-          expect(AggregateRoot::applyChanges.calledWith name: 'John').to.be.ok
+          expect(AggregateRoot::applyChanges).to.have.been.calledWith name: 'John'
           done()
 
 

@@ -9,7 +9,7 @@ eventric.require 'HelperObserve'
 
 class AggregateEntity
 
-  _.extend @prototype, MixinSetGet::
+  _.extend @::, MixinSetGet::
 
   constructor: (name, @_props = {}) ->
     @_entityName        = name

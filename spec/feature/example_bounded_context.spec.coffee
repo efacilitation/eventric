@@ -12,7 +12,7 @@ describe 'Example BoundedContext Feature', ->
     beforeEach ->
       exampleContext = eventric.boundedContext()
       exampleContext.set 'store', eventStoreMock
-      exampleContext.addAggregate 'Example', {}
+      exampleContext.addAggregate 'Example', class Example
 
 
     describe 'when we command the bounded context to create an aggregate', ->
@@ -41,7 +41,7 @@ describe 'Example BoundedContext Feature', ->
             name: 'Example'
         ]
 
-        exampleContext.addAggregate 'Example',
+        exampleContext.addAggregate 'Example', class Example
           doSomething: sinon.stub()
 
         exampleContext.addCommands

@@ -16,17 +16,20 @@ describe 'Example BoundedContext Feature', ->
 
 
     describe 'when we command the bounded context to create an aggregate', ->
+      props =
+        some: 'props'
       beforeEach (done) ->
         exampleContext.addCommand 'createExample', ->
-          @aggregate.create 'Example', ->
+          @aggregate.create 'Example', props, ->
 
         exampleContext.initialize ->
           done()
 
 
-      it 'then it should haved triggered the correct DomainEvent', (done) ->
+      it.only 'then it should haved triggered the correct DomainEvent', (done) ->
         exampleContext.onDomainEvent 'Example:create', (domainEvent) ->
           expect(domainEvent.getName()).to.equal 'create'
+          expect(domainEvent.getAggregateChanges().props).to.deep.equal props
           done()
 
         exampleContext.command

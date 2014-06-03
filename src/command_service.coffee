@@ -37,8 +37,8 @@ class CommandService
       return
 
     # create Aggregate
-    aggregate = new Aggregate
-    _.extend aggregate, new AggregateRoot aggregateName
+    aggregate = new AggregateRoot aggregateName
+    _.extend aggregate, new Aggregate
     aggregate.create()
 
     # set given params

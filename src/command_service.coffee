@@ -42,7 +42,15 @@ class CommandService
     aggregate.initialize()
 
     if typeof aggregate.create == 'function'
-      aggregate.create props
+      # TODO: Should be ok as long as aggregates arent async
+      errorCallbackCalled = false
+      errorCallback = (err) =>
+        errorCallbackCalled = true
+        callback err
+
+      aggregate.create props, errorCallback
+
+      return if errorCallbackCalled
     else
       aggregate.applyProps props
 
@@ -77,7 +85,7 @@ class CommandService
       if not (params instanceof Array)
         params = [params]
 
-      # Should be ok because aggregates shouldn't be async!
+      # TODO: Should be ok as long as aggregates arent async
       errorCallbackCalled = false
       errorCallback = (err) =>
         errorCallbackCalled = true

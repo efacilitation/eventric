@@ -64,12 +64,12 @@ class BoundedContext
     @addQuery queryName, queryFunction for queryName, queryFunction of queryObj
 
 
-  addAggregate: (aggregateName, aggregateObj) ->
-    @aggregates[aggregateName] = aggregateObj
+  addAggregate: (aggregateName, Aggregate) ->
+    @aggregates[aggregateName] = Aggregate
 
 
-  addReadAggregate: (aggregateName, readAggregateObj) ->
-    @readAggregates[aggregateName] = readAggregateObj
+  addReadAggregate: (aggregateName, ReadAggregate) ->
+    @readAggregates[aggregateName] = ReadAggregate
 
 
   addRepository: (aggregateName, readAggregateRepository) ->

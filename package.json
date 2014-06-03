@@ -55,7 +55,8 @@
     "mockery": "*",
     "mocha": "*",
     "run-sequence": "*",
-    "sinon": "*"
+    "sinon": "*",
+    "sinon-chai": "*"
   },
   "dependencies": {},
   "licenses": [

@@ -11,6 +11,9 @@ if !root._spec_setup
   root.expect   = chai.expect
   root.sandbox  = sinon.sandbox.create()
 
+  sinonChai = require 'sinon-chai'
+  chai.use sinonChai
+
 
 before ->
   mockery.enable useCleanCache: true

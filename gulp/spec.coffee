@@ -32,6 +32,7 @@ module.exports = (gulp) ->
       'node_modules/async/lib/async.js'
       'node_modules/mockery/mockery.js'
       'node_modules/sinon/lib/**/*.js'
+      'node_modules/sinon-chai/lib/sinon-chai.js'
     ])
       .pipe(commonjs(
         pathModifier: (path) ->

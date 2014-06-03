@@ -1,6 +1,6 @@
 describe 'AggregateRepository', ->
 
-  describe.only '#findById', ->
+  describe '#findById', ->
 
     AggregateRoot = null
     aggregateRepository = null

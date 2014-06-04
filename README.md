@@ -50,8 +50,8 @@ collaborationContext = eventric.boundedContext();
 Now that we created the `collaborationContext` let's add our `Todo` Aggregate, consisting of a simple `changeDescription` method.
 
 ```javascript
-collaborationContext.addAggregate('Todo', {
-  changeDescription: function(description) {
+collaborationContext.addAggregate('Todo', function(){
+  this.changeDescription = function(description) {
     this.description = description;
   }
 });

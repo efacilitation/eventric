@@ -15,7 +15,6 @@ moduleDefinition =
   RemoteService: './remote_service'
   RemoteBoundedContext: './remote_bounded_context'
 
-  MixinSetGet: './mixin_setget'
   MixinEvents: './mixin_events'
 
   HelperUnderscore: './helper/underscore'

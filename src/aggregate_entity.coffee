@@ -1,14 +1,11 @@
 eventric = require 'eventric'
 
 _               = eventric.require 'HelperUnderscore'
-MixinSetGet     = eventric.require 'MixinSetGet'
 AggregateEntity = eventric.require 'AggregateEntity'
 
 eventric.require 'HelperObserve'
 
 class AggregateEntity
-
-  _.extend @::, MixinSetGet::
 
   constructor: (name, @_props = {}) ->
     @_entityName        = name
@@ -108,6 +105,24 @@ class AggregateEntity
 
   registerEntityClass: (className, Class) ->
     @_entityClasses[className] = Class
+
+
+  _set: (key, value) ->
+    @_props ?= {}
+    @_propsChanged ?= {}
+
+    if @_shouldTrackChangePropertiesFor key, value
+     @_propsChanged[key] = value
+
+    @_props[key] = value
+
+
+  _get: (key) ->
+    @_props[key]
+
+
+  _shouldTrackChangePropertiesFor: (key, value) ->
+    @_trackPropsChanged and key != 'id'
 
 
 module.exports = AggregateEntity

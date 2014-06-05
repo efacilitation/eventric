@@ -1,7 +1,6 @@
 eventric = require 'eventric'
 
 _               = eventric.require 'HelperUnderscore'
-MixinSetGet     = eventric.require 'MixinSetGet'
 DomainEvent     = eventric.require 'DomainEvent'
 AggregateEntity = eventric.require 'AggregateEntity'
 

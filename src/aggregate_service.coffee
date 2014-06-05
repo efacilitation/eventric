@@ -2,7 +2,7 @@ eventric = require 'eventric'
 
 _                  = eventric.require 'HelperUnderscore'
 async              = eventric.require 'HelperAsync'
-AggregateRoot      = eventric.require 'AggregateRoot'
+Aggregate          = eventric.require 'Aggregate'
 DomainEventService = eventric.require 'DomainEventService'
 
 class CommandService
@@ -37,7 +37,7 @@ class CommandService
       return
 
     # create Aggregate
-    aggregate = new AggregateRoot aggregateName
+    aggregate = new Aggregate aggregateName
     _.extend aggregate, new aggregateDefinition.root
     aggregate.initialize()
 

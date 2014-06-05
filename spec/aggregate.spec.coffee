@@ -1,9 +1,9 @@
-describe 'AggregateRoot', ->
-  AggregateRoot   = eventric.require 'AggregateRoot'
+describe 'Aggregate', ->
+  Aggregate   = eventric.require 'Aggregate'
   AggregateEntity = eventric.require 'AggregateEntity'
   enderAggregate  = null
   beforeEach ->
-    enderAggregate = new AggregateRoot 'EnderAggregate'
+    enderAggregate = new Aggregate 'EnderAggregate'
 
 
   describe '#initialize', ->

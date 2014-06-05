@@ -1,7 +1,7 @@
 eventric = require 'eventric'
 
-_             = eventric.require 'HelperUnderscore'
-AggregateRoot = eventric.require 'AggregateRoot'
+_         = eventric.require 'HelperUnderscore'
+Aggregate = eventric.require 'Aggregate'
 
 
 class AggregateRepository
@@ -27,7 +27,7 @@ class AggregateRepository
 
       # construct the Aggregate and set the id
       aggregate = new aggregateDefinition.root
-      _.extend aggregate, new AggregateRoot aggregateName
+      _.extend aggregate, new Aggregate aggregateName
       aggregate.id = aggregateId
 
       # apply the aggregate changes inside the domainevents on the ReadAggregate

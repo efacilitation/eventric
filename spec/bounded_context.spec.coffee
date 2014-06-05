@@ -19,7 +19,7 @@ describe 'BoundedContext', ->
       aggregateRepositoryMock.apply this, arguments
     registerAggregateDefinition: sandbox.stub()
 
-  class ReadAggregateRootMock
+  class ReadAggregateMock
   class ReadAggregateRepositoryMock
     registerReadAggregateObj: sandbox.stub()
 
@@ -33,7 +33,7 @@ describe 'BoundedContext', ->
     eventricMock.require.withArgs('DomainEventService').returns DomainEventServiceMock
     eventricMock.require.withArgs('AggregateService').returns AggregateServiceMock
     eventricMock.require.withArgs('AggregateRepository').returns AggregateRepositoryMock
-    eventricMock.require.withArgs('ReadAggregateRoot').returns ReadAggregateRootMock
+    eventricMock.require.withArgs('ReadAggregate').returns ReadAggregateMock
     eventricMock.require.withArgs('ReadAggregateRepository').returns ReadAggregateRepositoryMock
     eventricMock.require.withArgs('HelperUnderscore').returns HelperUnderscoreMock
     mockery.registerMock 'eventric', eventricMock

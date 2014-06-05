@@ -2,7 +2,7 @@ eventric = require 'eventric'
 
 _                 = eventric.require 'HelperUnderscore'
 async             = eventric.require 'HelperAsync'
-ReadAggregateRoot = eventric.require 'ReadAggregateRoot'
+ReadAggregate     = eventric.require 'ReadAggregate'
 
 class ReadAggregateRepository
 
@@ -12,15 +12,15 @@ class ReadAggregateRepository
   findById: (aggregateId, callback) =>
     return unless @_callbackIsAFunction callback
 
-    ReadAggregate = @getReadAggregateClass @_aggregateName
+    ReadAggregateRoot = @getReadAggregateClass @_aggregateName
 
     # TODO: @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
     @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
 
-      readAggregate = new ReadAggregateRoot
-      _.extend readAggregate, new ReadAggregate if ReadAggregate
+      readAggregate = new ReadAggregate
+      _.extend readAggregate, new ReadAggregateRoot if ReadAggregateRoot
 
       # apply the domainevents on the ReadAggregate
       for domainEvent in domainEvents when domainEvent.aggregate?.changed

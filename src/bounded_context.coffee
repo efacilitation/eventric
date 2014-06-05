@@ -2,9 +2,7 @@ eventric = require 'eventric'
 
 _                       = eventric.require 'HelperUnderscore'
 AggregateService        = eventric.require 'AggregateService'
-AggregateRoot           = eventric.require 'AggregateRoot'
 AggregateRepository     = eventric.require 'AggregateRepository'
-ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
 ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
 DomainEventService      = eventric.require 'DomainEventService'
 

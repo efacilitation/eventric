@@ -2,14 +2,14 @@ describe 'AggregateRepository', ->
 
   describe '#findById', ->
 
-    AggregateRoot = null
+    Aggregate = null
     aggregateRepository = null
     eventStoreStub = null
     class Foo
       myFunc: ->
     beforeEach ->
-      AggregateRoot = eventric.require 'AggregateRoot'
-      sandbox.stub AggregateRoot::
+      Aggregate = eventric.require 'Aggregate'
+      sandbox.stub Aggregate::
 
       AggregateRepository = eventric.require 'AggregateRepository'
       class EventStore
@@ -49,7 +49,7 @@ describe 'AggregateRepository', ->
 
       it 'should return a instantiated Aggregate with all DomainEvents applied', (done) ->
         aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
-          expect(AggregateRoot::applyChanges).to.have.been.calledWith name: 'John'
+          expect(Aggregate::applyChanges).to.have.been.calledWith name: 'John'
           done()
 
 

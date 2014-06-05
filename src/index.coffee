@@ -2,11 +2,11 @@ moduleDefinition =
   AggregateRepository: './aggregate_repository'
   ReadAggregateRepository: './read_aggregate_repository'
 
-  AggregateService: './aggregate_service'
-  AggregateRoot: './aggregate_root'
+  Aggregate: './aggregate'
   AggregateEntity: './aggregate_entity'
+  AggregateService: './aggregate_service'
 
-  ReadAggregateRoot: './read_aggregate_root'
+  ReadAggregate: './read_aggregate'
   ReadAggregateEntity: './read_aggregate_entity'
 
   DomainEvent: './domain_event'

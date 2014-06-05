@@ -4,7 +4,7 @@ _               = eventric.require 'HelperUnderscore'
 DomainEvent     = eventric.require 'DomainEvent'
 AggregateEntity = eventric.require 'AggregateEntity'
 
-class AggregateRoot extends AggregateEntity
+class Aggregate extends AggregateEntity
 
   constructor: ->
     @_domainEvents = []
@@ -32,4 +32,4 @@ class AggregateRoot extends AggregateEntity
     @_domainEvents
 
 
-module.exports = AggregateRoot
+module.exports = Aggregate

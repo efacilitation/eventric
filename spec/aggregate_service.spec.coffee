@@ -1,7 +1,7 @@
 describe 'AggregateService', ->
   AggregateRepository     = eventric.require 'AggregateRepository'
   DomainEventService      = eventric.require 'DomainEventService'
-  AggregateRoot           = eventric.require 'AggregateRoot'
+  Aggregate               = eventric.require 'Aggregate'
   AggregateService        = eventric.require 'AggregateService'
 
   aggregateStubId = 1
@@ -36,8 +36,8 @@ describe 'AggregateService', ->
       # findById should find nothing
       aggregateRepositoryStub.findById.yields null, null
 
-      AggregateRoot = eventric.require 'AggregateRoot'
-      sandbox.stub AggregateRoot::
+      Aggregate = eventric.require 'Aggregate'
+      sandbox.stub Aggregate::
 
       # instantiate the AggregateService with the ReadAggregateRepository stub
       AggregateService = eventric.require 'AggregateService'
@@ -61,7 +61,7 @@ describe 'AggregateService', ->
       it 'should apply the initial paramters directly on the aggregate', (done) ->
         delete exampleAggregate.create
         aggregateService.create 'ExampleAggregate', initialProps, (err) ->
-          expect(AggregateRoot::applyProps).to.have.been.calledWith initialProps
+          expect(Aggregate::applyProps).to.have.been.calledWith initialProps
           done()
 
 
@@ -71,7 +71,7 @@ describe 'AggregateService', ->
 
     beforeEach ->
       # build ExampleAggregateStub
-      exampleAggregateStub = sinon.createStubInstance AggregateRoot
+      exampleAggregateStub = sinon.createStubInstance Aggregate
       exampleAggregateStub.doSomething = sandbox.stub()
       exampleAggregateStub.id = aggregateStubId
 

@@ -4,7 +4,6 @@ moduleDefinition =
 
   AggregateRoot: './aggregate_root'
   AggregateEntity: './aggregate_entity'
-  AggregateEntityCollection: './aggregate_entity_collection'
 
   ReadAggregateRoot: './read_aggregate_root'
   ReadAggregateEntity: './read_aggregate_entity'

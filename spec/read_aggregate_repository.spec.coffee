@@ -15,8 +15,7 @@ describe 'ReadAggregateRepositorySpec', ->
         id: 23
         name: 'Foo'
         changed:
-          props:
-            name: 'John'
+          name: 'John'
     ]
 
     readAggregateRepository = new ReadAggregateRepository 'Foo', EventStoreStub

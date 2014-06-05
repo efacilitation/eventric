@@ -10,35 +10,14 @@ describe 'DomainEvent', ->
         id: 42
         name: 'SomeAggregate'
         changed:
-          props:
-            name: 'John'
-          entities:
-            some: 'thing'
-          collections:
-            another: 'thing'
+          name: 'John'
 
     domainEvent = new DomainEvent domainEventData
 
 
   describe '#getAggregateChanges', ->
-    describe 'given no parameter', ->
-      it 'should return the whole changed object', ->
-        expect(domainEvent.getAggregateChanges()).to.deep.equal domainEventData.aggregate.changed
-
-
-    describe 'given props as parameter', ->
-      it 'should return the changed props', ->
-        expect(domainEvent.getAggregateChanges 'props').to.deep.equal domainEventData.aggregate.changed.props
-
-
-    describe 'given entities as parameter', ->
-      it 'should return the changed entities', ->
-        expect(domainEvent.getAggregateChanges 'entities').to.deep.equal domainEventData.aggregate.changed.entities
-
-
-    describe 'given collections as parameter', ->
-      it 'should return the changed collections', ->
-        expect(domainEvent.getAggregateChanges 'collections').to.deep.equal domainEventData.aggregate.changed.collections
+    it 'should return the changes', ->
+      expect(domainEvent.getAggregateChanges()).to.deep.equal domainEventData.aggregate.changed
 
 
   describe '#getTimestamp', ->

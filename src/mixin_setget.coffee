@@ -1,7 +1,5 @@
 eventric = require 'eventric'
 
-AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
-
 class MixinSetGet
 
   _set: (key, value) ->
@@ -19,7 +17,7 @@ class MixinSetGet
 
 
   _shouldTrackChangePropertiesFor: (key, value) ->
-    @_trackPropsChanged and value not instanceof AggregateEntityCollection and key != 'id'
+    @_trackPropsChanged and key != 'id'
 
 
 module.exports = MixinSetGet

@@ -1,9 +1,8 @@
-eventric                  = require 'eventric'
+eventric = require 'eventric'
 
-_                         = eventric.require 'HelperUnderscore'
-MixinSetGet               = eventric.require 'MixinSetGet'
-AggregateEntity           = eventric.require 'AggregateEntity'
-AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
+_               = eventric.require 'HelperUnderscore'
+MixinSetGet     = eventric.require 'MixinSetGet'
+AggregateEntity = eventric.require 'AggregateEntity'
 
 eventric.require 'HelperObserve'
 
@@ -69,114 +68,34 @@ class AggregateEntity
   getChanges: ->
     @_observer.deliver()
 
-    changes =
-      props: @_changesOnProperties()
-
-      # TODO one-to-one entity relation
-      entities: {}
-
-      # one-to-many entity relation
-      collections: @_changesOnCollections()
-
-    if @_changesAreNotEmpty changes
-      changes
-
-    else
-      # return empty object if nothing changed
-      {}
-
-
-  _changesOnProperties: () ->
     changes = {}
     if Object.keys(@_propsChanged).length > 0
       changes = @_propsChanged
+
     changes
-
-
-  _changesOnCollections: () ->
-    changes = {}
-    for propkey, propvalue of @_props
-      if propvalue instanceof AggregateEntityCollection
-        collectionChanges = @_changesOnCollection propkey, propvalue
-        if collectionChanges.length > 0
-          changes[propkey] = collectionChanges
-    changes
-
-
-  _changesOnCollection: (collectionName, collection) ->
-    changes = []
-    for entity in collection.entities
-      entityChanges = entity.getChanges()
-      entityChanged = @_changesAreNotEmpty entityChanges
-      if entityChanged || entity._isNew
-        entity = entity.getMetaData()
-        entity.changed = entityChanges if entityChanged
-        changes.push entity
-    changes
-
-
-  _changesAreNotEmpty: (changes) ->
-    for key, value of changes
-      if Object.keys(value).length > 0
-        return true
-
-    return false
 
 
   clearChanges: ->
     @_observerClose()
     @_propsChanged = {}
-
-    for propKey, propVal of @_props when propVal instanceof AggregateEntityCollection
-      @_clearCollectionChanges propVal
-
+    # TODO: clear changes of nested entities
     @_observerOpen()
-
-  _clearCollectionChanges: (collection) ->
-    entity.clearChanges() for entity in collection.entities
 
 
   applyChanges: (changes, params={}) ->
     @_observerClose()
     oldTrackPropsChanged = @_trackPropsChanged
     @_trackPropsChanged = false
-    @_applyChangesToProps changes.props
-    @_applyChangesToCollections changes.collections
+    @_applyChanges changes
     @_trackPropsChanged = oldTrackPropsChanged
 
     @_observerOpen()
 
 
-  _applyChangesToProps: (propChanges) ->
+  _applyChanges: (propChanges) ->
 
     for propName, propValue of propChanges
       @[propName] = propValue
-
-
-  _applyChangesToCollections: (collectionChanges) ->
-    for collectionName, collection of collectionChanges
-      if !@[collectionName]
-        @[collectionName] = new AggregateEntityCollection
-
-      @_applyChangesToCollection collectionName, collection
-
-
-  _applyChangesToCollection: (collectionName, collection) ->
-    for entity in collection
-      entityInstance = @[collectionName]?.get entity.id
-      if !entityInstance
-        if EntityClass = @getEntityClass entity.name
-          entityInstance = new EntityClass
-        else
-          # TODO this should trigger a warning somehow..
-          entityInstance = new AggregateEntity
-
-        entityInstance.id = entity.id
-        # this will actually add a reference, so we can applyChanges afterwards safely
-        @[collectionName].add entityInstance
-
-      if entity.changed
-        entityInstance.applyChanges entity.changed
 
 
   applyProps: (props) ->

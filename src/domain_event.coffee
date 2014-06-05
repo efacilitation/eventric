@@ -5,11 +5,8 @@ class DomainEvent
     @aggregate = params.aggregate
 
 
-  getAggregateChanges: (type) ->
-    switch type
-      when 'props', 'entities', 'collections'
-        @aggregate.changed[type]
-      else @aggregate.changed
+  getAggregateChanges: ->
+    @aggregate.changed
 
 
   getAggregateName: ->

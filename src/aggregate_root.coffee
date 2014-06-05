@@ -1,10 +1,9 @@
 eventric = require 'eventric'
 
-_                         = eventric.require 'HelperUnderscore'
-AggregateEntity           = eventric.require 'AggregateEntity'
-AggregateEntityCollection = eventric.require 'AggregateEntityCollection'
-MixinSetGet               = eventric.require 'MixinSetGet'
-DomainEvent               = eventric.require 'DomainEvent'
+_               = eventric.require 'HelperUnderscore'
+MixinSetGet     = eventric.require 'MixinSetGet'
+DomainEvent     = eventric.require 'DomainEvent'
+AggregateEntity = eventric.require 'AggregateEntity'
 
 class AggregateRoot extends AggregateEntity
 
@@ -32,26 +31,6 @@ class AggregateRoot extends AggregateEntity
 
   getDomainEvents: ->
     @_domainEvents
-
-
-  getSnapshot: ->
-    eventParams =
-      name: '_snapshot'
-      aggregate: @getMetaData()
-
-    eventParams.aggregate.changed = @getChanges()
-
-    domainEvent = new DomainEvent eventParams
-    domainEvent
-
-
-  registerEntityCollection: (collectionName, entityName, entityClass) ->
-    @[collectionName] = new AggregateEntityCollection
-    @registerEntityClass entityName, entityClass
-
-
-  addEntityToCollection: (entity, collectionName) ->
-    @[collectionName].add entity
 
 
 module.exports = AggregateRoot

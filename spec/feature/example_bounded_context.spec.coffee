@@ -29,7 +29,7 @@ describe 'Example BoundedContext Feature', ->
       it 'then it should haved triggered the correct DomainEvent', (done) ->
         exampleContext.onDomainEvent 'Example:create', (domainEvent) ->
           expect(domainEvent.getName()).to.equal 'create'
-          expect(domainEvent.getAggregateChanges().props).to.deep.equal props
+          expect(domainEvent.getAggregateChanges()).to.deep.equal props
           done()
 
         exampleContext.command
@@ -96,8 +96,7 @@ describe 'Example BoundedContext Feature', ->
             id: 1
             name: 'Example'
             changed:
-              props:
-                foo: 'bar'
+              foo: 'bar'
         ]
 
         exampleContext.addQueries
@@ -124,8 +123,7 @@ describe 'Example BoundedContext Feature', ->
             id: 1
             name: 'Example'
             changed:
-              props:
-                foo: 'bar'
+              foo: 'bar'
         ]
 
         exampleContext.addReadAggregate 'Example', class Example
@@ -154,8 +152,7 @@ describe 'Example BoundedContext Feature', ->
             id: 1
             name: 'Example'
             changed:
-              props:
-                foo: 'bar'
+              foo: 'bar'
         ]
 
         exampleContext.addRepository 'Example',

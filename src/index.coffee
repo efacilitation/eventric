@@ -15,10 +15,9 @@ moduleDefinition =
   RemoteService: './remote_service'
   RemoteBoundedContext: './remote_bounded_context'
 
-  MixinEvents: './mixin_events'
-
-  HelperUnderscore: './helper/underscore'
   HelperAsync: './helper/async'
+  HelperEvents: './helper/events'
+  HelperUnderscore: './helper/underscore'
   HelperObserve: './helper/observe'
 
   BoundedContext: './bounded_context'

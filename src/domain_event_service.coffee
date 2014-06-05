@@ -1,12 +1,12 @@
 eventric = require 'eventric'
 
-_           = eventric.require 'HelperUnderscore'
 async       = eventric.require 'HelperAsync'
-MixinEvents = eventric.require 'MixinEvents'
+MixinEvents = eventric.require 'HelperEvents'
+_           = eventric.require 'HelperUnderscore'
 
 class DomainEventService
 
-  _.extend @prototype, MixinEvents
+  _.extend @prototype, HelperEvents
 
   constructor: (@_eventStore) ->
 

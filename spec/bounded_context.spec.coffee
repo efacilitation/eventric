@@ -2,8 +2,9 @@ describe 'BoundedContext', ->
   mongoDbEventStoreMock = null
   class MongoDbEventStoreMock
     initialize: sandbox.stub().yields null
-  class CommandServiceMock
-    commandAggregate: sandbox.stub()
+  class AggregateServiceMock
+    command: sandbox.stub()
+    create: sandbox.stub()
 
   domainEventServiceMock = null
   class DomainEventServiceMock
@@ -29,8 +30,8 @@ describe 'BoundedContext', ->
     mongoDbEventStoreMock = new MongoDbEventStoreMock
     eventricMock =
       require: sandbox.stub()
-    eventricMock.require.withArgs('CommandService').returns CommandServiceMock
     eventricMock.require.withArgs('DomainEventService').returns DomainEventServiceMock
+    eventricMock.require.withArgs('AggregateService').returns AggregateServiceMock
     eventricMock.require.withArgs('AggregateRepository').returns AggregateRepositoryMock
     eventricMock.require.withArgs('ReadAggregateRoot').returns ReadAggregateRootMock
     eventricMock.require.withArgs('ReadAggregateRepository').returns ReadAggregateRepositoryMock

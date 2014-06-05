@@ -1,11 +1,11 @@
 eventric = require 'eventric'
 
 _                       = eventric.require 'HelperUnderscore'
+AggregateService        = eventric.require 'AggregateService'
 AggregateRoot           = eventric.require 'AggregateRoot'
 AggregateRepository     = eventric.require 'AggregateRepository'
 ReadAggregateRoot       = eventric.require 'ReadAggregateRoot'
 ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
-CommandService          = eventric.require 'CommandService'
 DomainEventService      = eventric.require 'DomainEventService'
 
 class BoundedContext
@@ -30,12 +30,10 @@ class BoundedContext
     @_initializeEventStore =>
       @_aggregateRepository  = new AggregateRepository @_eventStore
       @_domainEventService   = new DomainEventService @_eventStore
-      @_commandService       = new CommandService @_domainEventService, @_aggregateRepository
+      @_aggregateService     = new AggregateService @_domainEventService, @_aggregateRepository
 
       @_di =
-        aggregate:
-          create: @_commandService.createAggregate
-          command: @_commandService.commandAggregate
+        aggregate: @_aggregateService
         repository: => @getRepository.apply @, arguments
         adapter: => @getAdapter.apply @, arguments
 

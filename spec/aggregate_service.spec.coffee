@@ -1,14 +1,14 @@
-describe 'CommandService', ->
+describe 'AggregateService', ->
   AggregateRepository     = eventric.require 'AggregateRepository'
   DomainEventService      = eventric.require 'DomainEventService'
   AggregateRoot           = eventric.require 'AggregateRoot'
-  CommandService           = eventric.require 'CommandService'
+  AggregateService        = eventric.require 'AggregateService'
 
   aggregateStubId = 1
   exampleAggregate = null
   aggregateRepositoryStub = null
   domainEventService = null
-  CommandService = null
+  AggregateService = null
   beforeEach ->
     exampleAggregate =
       doSomething: sandbox.stub()
@@ -27,11 +27,11 @@ describe 'CommandService', ->
 
 
 
-  describe '#createAggregate', ->
+  describe '#create', ->
     initialProps =
       some: 'thing'
 
-    commandService = null
+    aggregateService = null
     beforeEach ->
       # findById should find nothing
       aggregateRepositoryStub.findById.yields null, null
@@ -39,20 +39,20 @@ describe 'CommandService', ->
       AggregateRoot = eventric.require 'AggregateRoot'
       sandbox.stub AggregateRoot::
 
-      # instantiate the CommandService with the ReadAggregateRepository stub
-      CommandService = eventric.require 'CommandService'
-      commandService = new CommandService domainEventService, aggregateRepositoryStub
+      # instantiate the AggregateService with the ReadAggregateRepository stub
+      AggregateService = eventric.require 'AggregateService'
+      aggregateService = new AggregateService domainEventService, aggregateRepositoryStub
 
 
     it 'should return the aggregateId', (done) ->
-      commandService.createAggregate 'ExampleAggregate', (err, aggregateId) ->
+      aggregateService.create 'ExampleAggregate', (err, aggregateId) ->
         expect(aggregateId).to.equal aggregateStubId
         done()
 
 
     describe 'given a create method is present on the aggregate', ->
       it 'should call the create method on the aggregate with the initial parameters', (done) ->
-        commandService.createAggregate 'ExampleAggregate', initialProps, ->
+        aggregateService.create 'ExampleAggregate', initialProps, ->
           expect(exampleAggregate.create).to.have.been.calledWith initialProps
           done()
 
@@ -60,14 +60,14 @@ describe 'CommandService', ->
     describe 'given no create method is present on the aggregate', ->
       it 'should apply the initial paramters directly on the aggregate', (done) ->
         delete exampleAggregate.create
-        commandService.createAggregate 'ExampleAggregate', initialProps, (err) ->
+        aggregateService.create 'ExampleAggregate', initialProps, (err) ->
           expect(AggregateRoot::applyProps).to.have.been.calledWith initialProps
           done()
 
 
-  describe '#commandAggregate', ->
+  describe '#command', ->
     exampleAggregateStub = null
-    commandService = null
+    aggregateService = null
 
     beforeEach ->
       # build ExampleAggregateStub
@@ -80,43 +80,43 @@ describe 'CommandService', ->
       aggregateRepositoryStub.findById.yields null, exampleAggregateStub
 
       # instantiate the command service
-      commandService = new CommandService domainEventService, aggregateRepositoryStub
+      aggregateService = new AggregateService domainEventService, aggregateRepositoryStub
 
 
     it 'should call the command on the aggregate', (done) ->
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
         expect(exampleAggregateStub.doSomething.calledOnce).to.be.true
         done()
 
 
     it 'should call the command on the aggregate with the given argument and an error callback', (done) ->
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', 'foo',  (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', 'foo',  (err, aggregateId) ->
         expect(exampleAggregateStub.doSomething.calledWith 'foo', sinon.match.func).to.be.true
         done()
 
 
     it 'should call the command on the aggregate with the given arguments and an error callback', (done) ->
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'],  (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'],  (err, aggregateId) ->
         expect(exampleAggregateStub.doSomething.calledWith 'foo', 'bar', sinon.match.func).to.be.true
         done()
 
 
     it 'should call the callback with an error if there was an error at the aggregate', (done) ->
       exampleAggregateStub.doSomething.yields 'AGGREGATE_ERROR'
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
         expect(err).to.equal 'AGGREGATE_ERROR'
         done()
 
 
     it 'should not call the generateDomainEvent method of the given aggregate if there was an error at the aggregate', (done) ->
       exampleAggregateStub.doSomething.yields 'AGGREGATE_ERROR'
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
         expect(exampleAggregateStub.generateDomainEvent.notCalled).to.be.true
         done()
 
 
     it 'should call the generateDomainEvent method of the given aggregate', (done) ->
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
         expect(exampleAggregateStub.generateDomainEvent.calledWith 'doSomething').to.be.true
         done()
 
@@ -125,18 +125,18 @@ describe 'CommandService', ->
       events = {}
       exampleAggregateStub.getDomainEvents.returns events
 
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
         expect(domainEventService.saveAndTrigger.withArgs(events).calledOnce).to.be.true
         done()
 
 
     it 'should call the clearChanges method of the given aggregate', (done) ->
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
         expect(exampleAggregateStub.clearChanges.calledOnce).to.be.true
         done()
 
 
     it 'should return the aggregateId', (done) ->
-      commandService.commandAggregate 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
         expect(aggregateId).to.equal 1
         done()

@@ -2,22 +2,18 @@ moduleDefinition =
   AggregateRepository: './aggregate_repository'
   ReadAggregateRepository: './read_aggregate_repository'
 
+  AggregateService: './aggregate_service'
   AggregateRoot: './aggregate_root'
   AggregateEntity: './aggregate_entity'
 
   ReadAggregateRoot: './read_aggregate_root'
   ReadAggregateEntity: './read_aggregate_entity'
 
-  ReadMix: './read_mix'
-  ReadMixRepository: './read_mix_repository'
-
-  CommandService: './command_service'
+  DomainEvent: './domain_event'
   DomainEventService: './domain_event_service'
 
   RemoteService: './remote_service'
   RemoteBoundedContext: './remote_bounded_context'
-  RemoteCommandService: './remote_command_service'
-  RemoteRepositoryService: './remote_repository_service'
 
   MixinSetGet: './mixin_setget'
   MixinEvents: './mixin_events'
@@ -27,9 +23,6 @@ moduleDefinition =
   HelperObserve: './helper/observe'
 
   BoundedContext: './bounded_context'
-  BoundedContextService: './bounded_context_service'
-
-  DomainEvent: './domain_event'
 
 
 _require = (required) ->

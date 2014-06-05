@@ -29,7 +29,7 @@ class CommandService
       @[originalFunctionName] = _proxy originalFunctionName, originalFunction
 
 
-  createAggregate: ([aggregateName, props]..., callback) ->
+  create: ([aggregateName, props]..., callback) ->
     aggregateDefinition = @_aggregateRepository.getAggregateDefinition aggregateName
     if not aggregateDefinition
       err = new Error "Tried to create not registered Aggregate '#{aggregateName}'"
@@ -66,7 +66,7 @@ class CommandService
       @_generateSaveAndTriggerDomainEvent 'create', aggregate, callback
 
 
-  commandAggregate: ([aggregateName, aggregateId, commandName, params]..., callback) ->
+  command: ([aggregateName, aggregateId, commandName, params]..., callback) ->
     # get the aggregate from the AggregateRepository
     @_aggregateRepository.findById aggregateName, aggregateId, (err, aggregate) =>
       return callback err, null if err

@@ -76,6 +76,18 @@ describe 'BoundedContext', ->
       expect((boundedContext.getRepository 'Bar') instanceof ReadAggregateRepositoryMock).to.be.true
 
 
+    it 'should instantiate, initialize and save the configured adapters', ->
+      boundedContext = eventric.boundedContext()
+      class SomeAdapter
+        initialize: sandbox.stub()
+      sinon.spy SomeAdapter
+      boundedContext.addAdapter 'someAdapter', SomeAdapter
+      boundedContext.initialize()
+
+      expect(SomeAdapter::initialize).to.have.been.calledOnce
+      expect(boundedContext.getAdapter 'someAdapter').to.be.an.instanceof SomeAdapter
+
+
     describe 'should initialize aggregaterepository and domaineventservice', ->
       it 'with the mongodb event store per default', ->
         boundedContext = eventric.boundedContext()

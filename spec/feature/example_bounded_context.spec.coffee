@@ -66,6 +66,29 @@ describe 'Example BoundedContext Feature', ->
             id: 1
 
 
+    describe 'when we use a command which calls a previously added adapter function', (done) ->
+      ExampleAdapter = null
+      beforeEach (done) ->
+        class ExampleAdapter
+          someAdapterFunction: sandbox.stub()
+        exampleContext.addAdapter 'exampleAdapter', ExampleAdapter
+
+        exampleContext.addCommand 'doSomething', (params, callback) ->
+          @adapter('exampleAdapter').someAdapterFunction()
+          callback()
+
+        exampleContext.initialize ->
+          done()
+
+
+      it 'then it should have called the adapter function', (done) ->
+        exampleContext.command
+          name: 'doSomething'
+        , ->
+          expect(ExampleAdapter::someAdapterFunction).to.have.been.calledOnce
+          done()
+
+
     describe 'when we query the bounded context without an explicitly added read aggregate', ->
       beforeEach (done) ->
         eventStoreMock.find.yields null, [

@@ -13,6 +13,7 @@ class BoundedContext
   _params: {}
   aggregates: {}
   readAggregates: {}
+  adapters: {}
 
   readAggregateRepositories: {}
   _readAggregateRepositoriesInstances: {}
@@ -22,6 +23,7 @@ class BoundedContext
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
   _domainEventHandlers: {}
+  _adapterInstances: {}
 
 
   initialize: (callback) ->
@@ -35,11 +37,12 @@ class BoundedContext
           create: @_commandService.createAggregate
           command: @_commandService.commandAggregate
         repository: => @getRepository.apply @, arguments
-
+        adapter: => @getAdapter.apply @, arguments
 
       @_initializeRepositories()
       @_initializeAggregates()
-      @_initializeDomainEventHandler()
+      @_initializeDomainEventHandlers()
+      @_initializeAdapters()
 
       callback? null
 
@@ -76,8 +79,16 @@ class BoundedContext
     @readAggregateRepositories[aggregateName] = readAggregateRepository
 
 
-  addDomainEventHandler: (eventName, fn) ->
-    @_domainEventHandlers[eventName] = => fn.apply @_di, arguments
+  addDomainEventHandler: (eventName, handlerFn) ->
+    @_domainEventHandlers[eventName] = => handlerFn.apply @_di, arguments
+
+
+  addAdapter: (adapterName, adapterClass) ->
+    @adapters[adapterName] = adapterClass
+
+
+  addAdapters: (adapterObj) ->
+    @addAdapter adapterName, fn for adapterName, fn of adapterObj
 
 
   _initializeEventStore: (next) ->
@@ -111,12 +122,23 @@ class BoundedContext
       @_readAggregateRepositoriesInstances[aggregateName] = readRepository
 
 
-  _initializeDomainEventHandler: ->
+  _initializeDomainEventHandlers: ->
     @onDomainEvent domainEventName, fn for domainEventName, fn of @_domainEventHandlers
+
+
+  _initializeAdapters: ->
+    for adapterName, adapterClass of @adapters
+      adapter = new adapterClass
+      adapter.initialize?()
+      @_adapterInstances[adapterName] = adapter
 
 
   getRepository: (aggregateName) ->
     @_readAggregateRepositoriesInstances[aggregateName]
+
+
+  getAdapter: (adapterName) ->
+    @_adapterInstances[adapterName]
 
 
   command: (command, callback = ->) ->

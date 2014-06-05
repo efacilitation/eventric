@@ -17,7 +17,7 @@ describe 'AggregateRepository', ->
         save: ->
       eventStoreStub = sinon.createStubInstance EventStore
       aggregateRepository = new AggregateRepository eventStoreStub
-      aggregateRepository.registerAggregateClass 'Foo', Foo
+      aggregateRepository.registerAggregateDefinition 'Foo', root: Foo
 
 
     it 'should ask the EventStore for DomainEvents matching the AggregateId', ->

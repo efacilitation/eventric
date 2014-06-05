@@ -5,7 +5,7 @@ AggregateRoot = eventric.require 'AggregateRoot'
 
 
 class AggregateRepository
-  _aggregateClasses: {}
+  _aggregateDefinitions: {}
 
   constructor: (@_eventStore) ->
 
@@ -19,14 +19,14 @@ class AggregateRepository
       return callback null, null if domainEvents.length == 0
 
       # get the corresponding class
-      Aggregate = @getAggregateClass aggregateName
-      if not Aggregate
+      aggregateDefinition = @getAggregateDefinition aggregateName
+      if not aggregateDefinition
         err = new Error "Tried to command not registered Aggregate '#{aggregateName}'"
         callback err, null
         return
 
       # construct the Aggregate and set the id
-      aggregate = new Aggregate
+      aggregate = new aggregateDefinition.root
       _.extend aggregate, new AggregateRoot aggregateName
       aggregate.id = aggregateId
 
@@ -39,13 +39,13 @@ class AggregateRepository
       callback null, aggregate
 
 
-  registerAggregateClass: (aggregateName, Aggregate) ->
-    @_aggregateClasses[aggregateName] = Aggregate
+  registerAggregateDefinition: (aggregateName, aggregateDefinition) ->
+    @_aggregateDefinitions[aggregateName] = aggregateDefinition
 
 
-  getAggregateClass: (aggregateName) ->
-    return false unless aggregateName of @_aggregateClasses
-    @_aggregateClasses[aggregateName]
+  getAggregateDefinition: (aggregateName) ->
+    return false unless aggregateName of @_aggregateDefinitions
+    @_aggregateDefinitions[aggregateName]
 
 
 module.exports = AggregateRepository

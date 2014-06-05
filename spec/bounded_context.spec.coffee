@@ -16,7 +16,7 @@ describe 'BoundedContext', ->
   class AggregateRepositoryMock
     constructor: ->
       aggregateRepositoryMock.apply this, arguments
-    registerAggregateClass: sandbox.stub()
+    registerAggregateDefinition: sandbox.stub()
 
   class ReadAggregateRootMock
   class ReadAggregateRepositoryMock
@@ -51,15 +51,15 @@ describe 'BoundedContext', ->
     it 'should register the configured aggregates at the aggregateRepository', ->
       boundedContext = eventric.boundedContext()
 
-      FooAggregateMock = {}
-      BarAggregateMock = {}
+      FooAggregateMock = root: {}
+      BarAggregateMock = root: {}
       boundedContext.addAggregate 'Foo', FooAggregateMock
       boundedContext.addAggregate 'Bar', BarAggregateMock
 
       boundedContext.initialize()
 
-      expect(AggregateRepositoryMock::registerAggregateClass.calledWith 'Foo', FooAggregateMock).to.be.true
-      expect(AggregateRepositoryMock::registerAggregateClass.calledWith 'Bar', BarAggregateMock).to.be.true
+      expect(AggregateRepositoryMock::registerAggregateDefinition.calledWith 'Foo', FooAggregateMock).to.be.true
+      expect(AggregateRepositoryMock::registerAggregateDefinition.calledWith 'Bar', BarAggregateMock).to.be.true
 
 
     it 'should instantiate and save the configured read aggregate repositories', ->

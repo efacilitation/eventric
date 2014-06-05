@@ -30,15 +30,15 @@ class CommandService
 
 
   createAggregate: ([aggregateName, props]..., callback) ->
-    Aggregate = @_aggregateRepository.getAggregateClass aggregateName
-    if not Aggregate
+    aggregateDefinition = @_aggregateRepository.getAggregateDefinition aggregateName
+    if not aggregateDefinition
       err = new Error "Tried to create not registered Aggregate '#{aggregateName}'"
       callback err, null
       return
 
     # create Aggregate
     aggregate = new AggregateRoot aggregateName
-    _.extend aggregate, new Aggregate
+    _.extend aggregate, new aggregateDefinition.root
     aggregate.initialize()
 
     if typeof aggregate.create == 'function'

@@ -18,8 +18,8 @@ describe 'CommandService', ->
     # stub the repository
     aggregateRepositoryStub = sinon.createStubInstance AggregateRepository
 
-    # getAggregateClass returns a Stub which returns the ExampleAggregateStub on instantiation
-    aggregateRepositoryStub.getAggregateClass.returns sinon.stub().returns exampleAggregate
+    # getAggregateDefinition returns a Stub which returns the ExampleAggregateStub on instantiation
+    aggregateRepositoryStub.getAggregateDefinition.returns root: sinon.stub().returns exampleAggregate
 
     # stub the DomainEventService
     domainEventService = sinon.createStubInstance DomainEventService

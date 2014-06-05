@@ -12,7 +12,7 @@ describe 'Example BoundedContext Feature', ->
     beforeEach ->
       exampleContext = eventric.boundedContext()
       exampleContext.set 'store', eventStoreMock
-      exampleContext.addAggregate 'Example', class Example
+      exampleContext.addAggregate 'Example', root: class Example
 
 
     describe 'when we command the bounded context to create an aggregate', ->
@@ -36,7 +36,7 @@ describe 'Example BoundedContext Feature', ->
           name: 'createExample'
 
 
-    describe 'when we command the bounded context to command an aggregate', ->
+    describe.skip 'when we command the bounded context to command an aggregate', ->
       beforeEach (done) ->
         eventStoreMock.find.yields null, [
           aggregate:
@@ -44,24 +44,42 @@ describe 'Example BoundedContext Feature', ->
             name: 'Example'
         ]
 
-        exampleContext.addAggregate 'Example', class Example
-          doSomething: sinon.stub()
+        class ExampleEntity
+          someEntityFunction: ->
+            @entityProp = 'bar'
+
+        class ExampleRoot
+          create: ->
+            @entities = []
+          someRootFunction: (someId) ->
+            @someId = someId
+            @rootProp = 'foo'
+            entity = new ExampleEntity
+            @entities.push entity
+
+        exampleAggregate =
+          root: ExampleRoot
+          entities:
+            'ExampleEntity': ExampleEntity
+
+        exampleContext.addAggregate 'Example', exampleAggregate
 
         exampleContext.addCommands
-          doSomething: (params, callback) ->
-            @aggregate.command 'Example', params.id, 'doSomething', callback
+          someBoundedContextFunction: (params, callback) ->
+            @aggregate.command 'Example', params.id, 'someRootFunction', callback
 
         exampleContext.initialize ->
           done()
 
 
       it 'then it should have triggered the correct DomainEvent', (done) ->
-        exampleContext.onDomainEvent 'Example:doSomething', (domainEvent) ->
-          expect(domainEvent.getName()).to.equal 'doSomething'
+        exampleContext.onDomainEvent 'Example:someRootFunction', (domainEvent) ->
+          console.log domainEvent
+          expect(domainEvent.getName()).to.equal 'someRootFunction'
           done()
 
         exampleContext.command
-          name: 'doSomething'
+          name: 'someBoundedContextFunction'
           params:
             id: 1
 

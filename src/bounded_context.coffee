@@ -67,8 +67,8 @@ class BoundedContext
     @addQuery queryName, queryFunction for queryName, queryFunction of queryObj
 
 
-  addAggregate: (aggregateName, Aggregate) ->
-    @aggregates[aggregateName] = Aggregate
+  addAggregate: (aggregateName, aggregateDefinitionObj) ->
+    @aggregates[aggregateName] = aggregateDefinitionObj
 
 
   addReadAggregate: (aggregateName, ReadAggregate) ->
@@ -104,8 +104,8 @@ class BoundedContext
 
 
   _initializeAggregates: ->
-    for aggregateName, aggregateClass of @aggregates
-      @_aggregateRepository.registerAggregateClass aggregateName, aggregateClass
+    for aggregateName, aggregateDefinition of @aggregates
+      @_aggregateRepository.registerAggregateDefinition aggregateName, aggregateDefinition
 
       # add default repository if not already defined
       if !@_readAggregateRepositoriesInstances[aggregateName]

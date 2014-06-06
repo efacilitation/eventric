@@ -2,14 +2,16 @@ describe 'AggregateRepository', ->
 
   describe '#findById', ->
 
-    Aggregate = null
+    AggregateStub = null
     aggregateRepository = null
     eventStoreStub = null
-    class Foo
-      myFunc: ->
     beforeEach ->
-      Aggregate = eventric.require 'Aggregate'
-      sandbox.stub Aggregate::
+      class AggregateStub
+        applyChanges: sandbox.stub()
+      eventricMock =
+        require: sandbox.stub()
+      eventricMock.require.withArgs('Aggregate').returns AggregateStub
+      mockery.registerMock 'eventric', eventricMock
 
       AggregateRepository = eventric.require 'AggregateRepository'
       class EventStore
@@ -17,7 +19,7 @@ describe 'AggregateRepository', ->
         save: ->
       eventStoreStub = sinon.createStubInstance EventStore
       aggregateRepository = new AggregateRepository eventStoreStub
-      aggregateRepository.registerAggregateDefinition 'Foo', root: Foo
+      aggregateRepository.registerAggregateDefinition 'Foo', root: AggregateStub
 
 
     it 'should ask the EventStore for DomainEvents matching the AggregateId', ->
@@ -37,7 +39,7 @@ describe 'AggregateRepository', ->
 
       it 'should return a instantiated Aggregate', (done) ->
         aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
-          expect(aggregate).to.be.an.instanceof Foo
+          expect(aggregate).to.be.an.instanceof AggregateStub
           done()
 
 
@@ -49,7 +51,7 @@ describe 'AggregateRepository', ->
 
       it 'should return a instantiated Aggregate with all DomainEvents applied', (done) ->
         aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
-          expect(Aggregate::applyChanges).to.have.been.calledWith name: 'John'
+          expect(AggregateStub::applyChanges).to.have.been.calledWith name: 'John'
           done()
 
 

@@ -1,11 +1,10 @@
 eventric = require 'eventric'
 
-_                  = eventric.require 'HelperUnderscore'
-async              = eventric.require 'HelperAsync'
-Aggregate          = eventric.require 'Aggregate'
-DomainEventService = eventric.require 'DomainEventService'
+_         = eventric.require 'HelperUnderscore'
+async     = eventric.require 'HelperAsync'
+Aggregate = eventric.require 'Aggregate'
 
-class CommandService
+class AggregateService
 
   constructor: (@_domainEventService, @_aggregateRepository) ->
     # proxy & queue public api
@@ -37,22 +36,7 @@ class CommandService
       return
 
     # create Aggregate
-    aggregate = new Aggregate aggregateName
-    _.extend aggregate, new aggregateDefinition.root
-    aggregate.initialize()
-
-    if typeof aggregate.create == 'function'
-      # TODO: Should be ok as long as aggregates arent async
-      errorCallbackCalled = false
-      errorCallback = (err) =>
-        errorCallbackCalled = true
-        callback err
-
-      aggregate.create props, errorCallback
-
-      return if errorCallbackCalled
-    else
-      aggregate.applyProps props
+    aggregate = new Aggregate aggregateName, aggregateDefinition, props
 
     @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
       return callback err, null if err
@@ -76,8 +60,8 @@ class CommandService
         callback err, null
         return
 
-      if commandName not of aggregate
-        err = new Error "Given commandName '#{commandName}' not found as method in the #{aggregateName} Aggregate"
+      if commandName not of aggregate.root
+        err = new Error "Given commandName '#{commandName}' not found as method in the #{aggregateName} Aggregate Root"
         callback err, null
         return
 
@@ -92,7 +76,7 @@ class CommandService
         callback err
 
       # EXECUTING
-      aggregate[commandName] params..., errorCallback
+      aggregate.root[commandName] params..., errorCallback
 
       return if errorCallbackCalled
 
@@ -114,4 +98,4 @@ class CommandService
       callback? null, aggregate.id
 
 
-module.exports = CommandService
+module.exports = AggregateService

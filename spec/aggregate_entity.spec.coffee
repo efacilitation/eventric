@@ -1,6 +1,12 @@
 describe 'AggregateEntity', ->
   AggregateEntity = eventric.require 'AggregateEntity'
 
+  describe.skip '#initialize', ->
+    it 'should generate an id', ->
+      enderAggregate.initialize()
+      expect(enderAggregate.id).to.be.string
+
+
   describe '#getMetaData', ->
     it 'should return an object including the MetaData of the Entity', ->
       myEntity = new AggregateEntity 'MyEntity'

@@ -36,7 +36,7 @@ describe 'Example BoundedContext Feature', ->
           name: 'createExample'
 
 
-    describe.skip 'when we command the bounded context to command an aggregate', ->
+    describe 'when we command the bounded context to command an aggregate', ->
       beforeEach (done) ->
         eventStoreMock.find.yields null, [
           aggregate:
@@ -51,10 +51,11 @@ describe 'Example BoundedContext Feature', ->
         class ExampleRoot
           create: ->
             @entities = []
-          someRootFunction: (someId) ->
-            @someId = someId
+          someRootFunction: (params) ->
+            @someId = params.someId
             @rootProp = 'foo'
             entity = new ExampleEntity
+            entity.someEntityFunction()
             @entities.push entity
 
         exampleAggregate =
@@ -66,7 +67,7 @@ describe 'Example BoundedContext Feature', ->
 
         exampleContext.addCommands
           someBoundedContextFunction: (params, callback) ->
-            @aggregate.command 'Example', params.id, 'someRootFunction', callback
+            @aggregate.command 'Example', params.id, 'someRootFunction', someId: 1, callback
 
         exampleContext.initialize ->
           done()
@@ -74,7 +75,8 @@ describe 'Example BoundedContext Feature', ->
 
       it 'then it should have triggered the correct DomainEvent', (done) ->
         exampleContext.onDomainEvent 'Example:someRootFunction', (domainEvent) ->
-          console.log domainEvent
+          changes = domainEvent.getAggregateChanges()
+          expect(changes.entities[0].entityProp).to.equal 'bar'
           expect(domainEvent.getName()).to.equal 'someRootFunction'
           done()
 

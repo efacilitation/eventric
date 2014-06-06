@@ -26,8 +26,7 @@ class AggregateRepository
         return
 
       # construct the Aggregate and set the id
-      aggregate = new aggregateDefinition.root
-      _.extend aggregate, new Aggregate aggregateName
+      aggregate = new Aggregate aggregateName, aggregateDefinition
       aggregate.id = aggregateId
 
       # apply the aggregate changes inside the domainevents on the ReadAggregate

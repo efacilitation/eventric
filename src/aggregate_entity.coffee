@@ -19,8 +19,6 @@ class AggregateEntity
 
 
   initialize: ->
-    @id = @_generateUid()
-    @_isNew = true
     @_observerDiscard()
 
 

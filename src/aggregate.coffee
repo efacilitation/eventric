@@ -4,11 +4,29 @@ _               = eventric.require 'HelperUnderscore'
 DomainEvent     = eventric.require 'DomainEvent'
 AggregateEntity = eventric.require 'AggregateEntity'
 
-class Aggregate extends AggregateEntity
+class Aggregate
 
-  constructor: ->
+  constructor: (name, definition, props) ->
     @_domainEvents = []
-    super
+
+    @root = new AggregateEntity name
+    _.extend @root, new definition.root
+
+    @id = @root._generateUid()
+
+    if typeof @root.create == 'function'
+      # TODO: Should be ok as long as aggregates arent async
+      errorCallbackCalled = false
+      errorCallback = (err) =>
+        errorCallbackCalled = true
+        callback err
+
+      @root.create props, errorCallback
+
+      return if errorCallbackCalled
+    else
+      @root.applyProps props
+
 
 
   generateDomainEvent: (eventName, params={}) ->
@@ -17,10 +35,10 @@ class Aggregate extends AggregateEntity
 
     eventParams =
       name: eventName
-      aggregate: @getMetaData()
+      aggregate: @root.getMetaData()
 
     if params.includeAggregateChanges
-      changes = @getChanges()
+      changes = @root.getChanges()
       if Object.keys(changes).length > 0
         eventParams.aggregate.changed = changes
 
@@ -30,6 +48,10 @@ class Aggregate extends AggregateEntity
 
   getDomainEvents: ->
     @_domainEvents
+
+
+  clearChanges: ->
+    @root.clearChanges()
 
 
 module.exports = Aggregate

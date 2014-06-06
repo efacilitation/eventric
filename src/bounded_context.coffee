@@ -80,7 +80,8 @@ class BoundedContext
 
 
   addDomainEventHandler: (eventName, handlerFn) ->
-    @_domainEventHandlers[eventName] = => handlerFn.apply @_di, arguments
+    @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
+    @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
 
 
   addAdapter: (adapterName, adapterClass) ->
@@ -123,7 +124,9 @@ class BoundedContext
 
 
   _initializeDomainEventHandlers: ->
-    @onDomainEvent domainEventName, fn for domainEventName, fn of @_domainEventHandlers
+    for domainEventName, fnArray of @_domainEventHandlers
+      for fn in fnArray
+        @onDomainEvent domainEventName, fn
 
 
   _initializeAdapters: ->

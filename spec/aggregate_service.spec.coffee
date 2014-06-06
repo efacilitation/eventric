@@ -18,7 +18,7 @@ describe 'AggregateService', ->
       generateDomainEvent: sandbox.stub()
       getDomainEvents: sandbox.stub()
       clearChanges: sandbox.stub()
-      root: exampleAggregateRoot
+      _root: exampleAggregateRoot
     exampleAggregateStub = new ExampleAggregateStub
 
     exampleAggregateRootDefinition =
@@ -77,19 +77,19 @@ describe 'AggregateService', ->
 
     it 'should call the command on the aggregate', (done) ->
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
-        expect(exampleAggregateStub.root.doSomething.calledOnce).to.be.true
+        expect(exampleAggregateStub._root.doSomething.calledOnce).to.be.true
         done()
 
 
     it 'should call the command on the aggregate with the given argument and an error callback', (done) ->
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', 'foo',  (err, aggregateId) ->
-        expect(exampleAggregateStub.root.doSomething.calledWith 'foo', sinon.match.func).to.be.true
+        expect(exampleAggregateStub._root.doSomething.calledWith 'foo', sinon.match.func).to.be.true
         done()
 
 
     it 'should call the command on the aggregate with the given arguments and an error callback', (done) ->
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'],  (err, aggregateId) ->
-        expect(exampleAggregateStub.root.doSomething.calledWith 'foo', 'bar', sinon.match.func).to.be.true
+        expect(exampleAggregateStub._root.doSomething.calledWith 'foo', 'bar', sinon.match.func).to.be.true
         done()
 
 

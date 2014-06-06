@@ -132,7 +132,7 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.query
           name: 'getExample'
           , (err, readExample) ->
-            expect(readExample.foo).to.equal 'bar'
+            expect(readExample.toJSON().foo).to.equal 'bar'
             done()
 
 
@@ -161,7 +161,7 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.query
           name: 'getExample'
           , (err, readExample) ->
-            expect(readExample.getFoo()).to.equal 'bar'
+            expect(readExample._root.getFoo()).to.equal 'bar'
             done()
 
 
@@ -190,5 +190,5 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.query
           name: 'getExample'
           , (err, readExample) ->
-            expect(readExample[0].foo).to.equal 'bar'
+            expect(readExample[0].toJSON().foo).to.equal 'bar'
             done()

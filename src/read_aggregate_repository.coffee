@@ -12,15 +12,16 @@ class ReadAggregateRepository
   findById: (aggregateId, callback) =>
     return unless @_callbackIsAFunction callback
 
-    ReadAggregateRoot = @getReadAggregateClass @_aggregateName
-
     # TODO: @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
     @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
 
-      readAggregate = new ReadAggregate
-      _.extend readAggregate, new ReadAggregateRoot if ReadAggregateRoot
+      ReadAggregateRoot = @getReadAggregateClass @_aggregateName
+      if not ReadAggregateRoot
+        ReadAggregateRoot = ->
+
+      readAggregate = new ReadAggregate @_aggregateName, root: ReadAggregateRoot
 
       # apply the domainevents on the ReadAggregate
       for domainEvent in domainEvents when domainEvent.aggregate?.changed

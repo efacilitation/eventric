@@ -1,23 +1,36 @@
-describe 'ReadAggregateRepositorySpec', ->
-  ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
-  ReadAggregate           = eventric.require 'ReadAggregate'
-
+describe  'ReadAggregateRepositorySpec', ->
   readAggregateRepository = null
+  eventData = null
   EventStoreStub = null
+  ReadAggregateStub = null
   beforeEach ->
     class EventStore
       find: ->
       save: ->
     EventStoreStub = sinon.createStubInstance EventStore
-    EventStoreStub.find.yields null, [
+    eventData =
       name: 'create'
       aggregate:
         id: 23
         name: 'Foo'
         changed:
           name: 'John'
+    EventStoreStub.find.yields null, [
+      eventData
     ]
 
+    class ReadAggregateStub
+      applyChanges: sandbox.stub()
+      toJSON: sandbox.stub()
+    eventricMock =
+      require: sandbox.stub()
+    eventricMock.require.withArgs('HelperAsync').returns eventric.require 'HelperAsync'
+    eventricMock.require.withArgs('HelperUnderscore').returns eventric.require 'HelperUnderscore'
+    eventricMock.require.withArgs('ReadAggregate').returns ReadAggregateStub
+
+    mockery.registerMock 'eventric', eventricMock
+
+    ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
     readAggregateRepository = new ReadAggregateRepository 'Foo', EventStoreStub
     readAggregateRepository.registerReadAggregateClass 'Foo', class Foo
 
@@ -26,7 +39,7 @@ describe 'ReadAggregateRepositorySpec', ->
 
     it 'should return an instantiated ReadAggregate', (done) ->
       readAggregateRepository.findById 23, (err, readAggregate) ->
-        expect(readAggregate).to.be.an.instanceof ReadAggregate
+        expect(readAggregate).to.be.an.instanceof ReadAggregateStub
         done()
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', (done) ->
@@ -34,9 +47,9 @@ describe 'ReadAggregateRepositorySpec', ->
         expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.true
         done()
 
-    it 'should return an instantiated ReadAggregate containing the applied DomainEvents', (done) ->
+    it 'should call applyChanges on the instantiated ReadAggregate', (done) ->
       readAggregateRepository.findById 23, (err, readAggregate) ->
-        expect(readAggregate.name).to.equal 'John'
+        expect(ReadAggregateStub::applyChanges).to.have.been.calledWith eventData.aggregate.changed
         done()
 
 
@@ -51,7 +64,7 @@ describe 'ReadAggregateRepositorySpec', ->
       findIdsStub  = sandbox.stub readAggregateRepository, 'findIds'
       findIdsStub.yields null, [42, 23]
       findByIdStub = sandbox.stub readAggregateRepository, 'findById'
-      findByIdStub.yields null, new ReadAggregate
+      findByIdStub.yields null, new ReadAggregateStub
 
 
     it 'should call findIds to get all aggregateIds matching the query', (done) ->
@@ -68,8 +81,8 @@ describe 'ReadAggregateRepositorySpec', ->
     it 'should return ReadAggregate instances matching the given query', (done) ->
       readAggregateRepository.find query, (err, readAggregates) ->
         expect(readAggregates.length).to.equal 2
-        expect(readAggregates[0]).to.be.an.instanceof ReadAggregate
-        expect(readAggregates[1]).to.be.an.instanceof ReadAggregate
+        expect(readAggregates[0]).to.be.an.instanceof ReadAggregateStub
+        expect(readAggregates[1]).to.be.an.instanceof ReadAggregateStub
         done()
 
   describe '#findOne', ->

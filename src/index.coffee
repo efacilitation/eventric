@@ -3,7 +3,6 @@ moduleDefinition =
   ReadAggregateRepository: './read_aggregate_repository'
 
   Aggregate: './aggregate'
-  AggregateEntity: './aggregate_entity'
   AggregateService: './aggregate_service'
 
   ReadAggregate: './read_aggregate'

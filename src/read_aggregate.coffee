@@ -1,8 +1,8 @@
-eventric            = require 'eventric'
+eventric = require 'eventric'
 
-_                   = eventric.require 'HelperUnderscore'
-ReadAggregateEntity = eventric.require 'ReadAggregateEntity'
+_         = eventric.require 'HelperUnderscore'
+Aggregate = eventric.require 'Aggregate'
 
-class ReadAggregate extends ReadAggregateEntity
+class ReadAggregate extends Aggregate
 
 module.exports = ReadAggregate

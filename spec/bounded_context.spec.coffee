@@ -139,11 +139,8 @@ describe 'BoundedContext', ->
           params:
             foo: 'bar'
 
-        callback = ->
-
-        exampleBoundedContext.command command, callback
-
-        expect(commandStub.calledWith command.params, callback).to.be.true
+        exampleBoundedContext.command command, ->
+        expect(commandStub.calledWith command.params, sinon.match.func).to.be.true
 
 
   describe '#query', ->
@@ -175,11 +172,10 @@ describe 'BoundedContext', ->
           params:
             id: 42
             foo: 'bar'
-        callback = ->
 
-        exampleBoundedContext.query query, callback
+        exampleBoundedContext.query query, ->
 
-        expect(queryStub.calledWith query.params, callback).to.be.true
+        expect(queryStub.calledWith query.params, sinon.match.func).to.be.true
 
 
   describe '#onDomainEvent', ->

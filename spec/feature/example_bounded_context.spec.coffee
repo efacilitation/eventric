@@ -131,9 +131,10 @@ describe 'Example BoundedContext Feature', ->
       it 'then it should return some default read aggregate', (done) ->
         exampleContext.query
           name: 'getExample'
-          , (err, readExample) ->
-            expect(readExample.toJSON().foo).to.equal 'bar'
-            done()
+        .then (readExample) ->
+          expect(readExample.toJSON().foo).to.equal 'bar'
+          done()
+
 
 
     describe 'when we query the bounded context with an explicitly added read aggregate', ->

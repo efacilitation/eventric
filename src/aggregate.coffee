@@ -3,8 +3,6 @@ eventric = require 'eventric'
 _               = eventric.require 'HelperUnderscore'
 DomainEvent     = eventric.require 'DomainEvent'
 
-eventric.require 'HelperObserve'
-
 class Aggregate
 
   constructor: (name, definition, props) ->

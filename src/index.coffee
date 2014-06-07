@@ -1,3 +1,7 @@
+# polyfills
+require './helper/promise'
+require './helper/observe'
+
 moduleDefinition =
   AggregateRepository: './aggregate_repository'
   ReadAggregateRepository: './read_aggregate_repository'
@@ -17,7 +21,6 @@ moduleDefinition =
   HelperAsync: './helper/async'
   HelperEvents: './helper/events'
   HelperUnderscore: './helper/underscore'
-  HelperObserve: './helper/observe'
 
   BoundedContext: './bounded_context'
 

@@ -6,6 +6,7 @@ AggregateRepository     = eventric.require 'AggregateRepository'
 ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
 DomainEventService      = eventric.require 'DomainEventService'
 
+
 class BoundedContext
   _di: {}
   _params: {}
@@ -140,20 +141,29 @@ class BoundedContext
     @_adapterInstances[adapterName]
 
 
-  command: (command, callback = ->) ->
-    if @_applicationServiceCommands[command.name]
-      @_applicationServiceCommands[command.name] command.params, callback
-    else
-      errorMessage = "Given command #{command.name} not registered on bounded context"
-      callback new Error errorMessage
+  command: (command, callback) ->
+    new Promise (resolve, reject) =>
+      if @_applicationServiceCommands[command.name]
+        @_applicationServiceCommands[command.name] command.params, (err, result) =>
+          resolve result
+          callback? err, result
+      else
+        err = new Error "Given command #{command.name} not registered on bounded context"
+        reject err
+        callback? err, null
 
 
   query: (query, callback = ->) ->
-    if @_applicationServiceQueries[query.name]
-      @_applicationServiceQueries[query.name] query.params, callback
-    else
-      errorMessage = "Given query #{query.name} not registered on bounded context"
-      callback new Error errorMessage
+    new Promise (resolve, reject) =>
+      if @_applicationServiceQueries[query.name]
+        @_applicationServiceQueries[query.name] query.params, (err, result) =>
+          resolve result
+          callback? err, result
+      else
+        errorMessage = "Given query #{query.name} not registered on bounded context"
+        error = new Error errorMessage
+        reject error
+        callback? error, null
 
 
   onDomainEvent: (eventName, eventHandler) ->

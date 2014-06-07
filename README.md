@@ -47,14 +47,17 @@ collaborationContext = eventric.boundedContext();
 
 ### [Adding Aggregate](https://github.com/efacilitation/eventric/wiki/BoundedContext#addaggregate)
 
-Now that we created the `collaborationContext` let's add our `Todo` Aggregate, consisting of a simple `changeDescription` method.
+Now that we created the `collaborationContext` let's add our `Todo` Aggregate, consisting of a simple `changeDescription` method inside the AggregateRoot.
 
 ```javascript
-collaborationContext.addAggregate('Todo', function(){
-  this.changeDescription = function(description) {
-    this.description = description;
+collaborationContext.addAggregate('Todo', {
+  root: function() {
+    this.changeDescription = function(description) {
+      this.description = description;
+    }
   }
 });
+
 ```
 > Hint: values assigned to `this.` are automatically part of the generated `DomainEvent`
 
@@ -95,34 +98,30 @@ Initialize the `collaborationContext`, create a `Todo`, change the description o
 
 ```javascript
 collaborationContext.initialize(function() {
+  var todoId = null;
   collaborationContext.command({
     name: 'createTodo'
-  },
-  function(err, todoId) {
-    collaborationContext.command({
+  }).then(function(todoId) {
+    return collaborationContext.command({
       name: 'changeTodoDescription',
       params: {
         id: todoId,
         description: 'Do something'
       }
-    },
-    function(err, status) {
-      collaborationContext.query({
-        name: 'getTodoById',
-        params: {
-          id: todoId
-        }
-      },
-      function(err, readTodo) {
-          console.log(readTodo.description);
-      })
-    });
-  });
+    })
+  }).then(function(todoId) {
+    return collaborationContext.query({
+      name: 'getTodoById',
+      params: {
+        id: todoId
+      }
+    })
+  }).then(function(readTodo) {
+    console.log(readTodo.toJSON().description)
+  })
 
 });
 ```
-> `eventric` will implement [promises](https://github.com/kriskowal/q) to avoid such a "[Pyramid of Doom](http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/)" in the future.
-
 This will output `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing.
 
 Congratulations, you have successfully applied DDD (tactical+technical) and CQRS! :)

@@ -67,7 +67,7 @@ describe 'Aggregate', ->
 
   describe '#command', ->
     it 'should call an aggregate method based on the given commandName together with the arguments', ->
-      someProperties = [
+      someParameters = [
         'something'
       ]
 
@@ -77,8 +77,31 @@ describe 'Aggregate', ->
 
       command =
         name: 'someMethod'
-        props: someProperties
+        params: someParameters
       myAggregate.command command
 
 
-      expect(Foo::someMethod).to.have.been.calledWith command.props...
+      expect(Foo::someMethod).to.have.been.calledWith command.params...
+
+
+    it 'should callback with error if the command does not exist in the root', (done) ->
+      myAggregate = new Aggregate 'MyAggregate', root: class Foo
+
+      myAggregate.command
+        name: 'someMethod'
+        params: []
+      , (error) ->
+        expect(error).to.be.an.instanceof Error
+        done()
+
+
+    it 'should handle non array params automatically', ->
+      class Foo
+        someMethod: sandbox.stub()
+      myAggregate = new Aggregate 'MyAggregate', root: Foo
+
+      myAggregate.command
+        name: 'someMethod'
+        params: 'foo'
+
+      expect(Foo::someMethod).to.have.been.calledWith 'foo'

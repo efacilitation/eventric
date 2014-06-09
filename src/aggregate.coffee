@@ -138,8 +138,17 @@ class Aggregate
     _.clone @_props
 
 
-  command: (command) ->
-    @_root[command.name] command.props...
+  command: (command, errorCallback) ->
+    if command.name not of @_root
+      err = new Error "Given commandName '#{command.name}' not found as method in the #{@_entityName} Aggregate Root"
+      errorCallback err
+      return
+
+    # make sure we have a params array
+    if not (command.params instanceof Array)
+      command.params = [command.params]
+
+    @_root[command.name] command.params..., errorCallback
 
 
 module.exports = Aggregate

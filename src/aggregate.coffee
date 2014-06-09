@@ -6,7 +6,7 @@ DomainEvent     = eventric.require 'DomainEvent'
 class Aggregate
 
   constructor: (name, definition, props) ->
-    @_entityName        = name
+    @_name              = name
     @_props             = {}
     @_propsChanged      = {}
     @_domainEvents      = []
@@ -63,7 +63,9 @@ class Aggregate
   generateDomainEvent: (eventName, params={}) ->
     eventParams =
       name: eventName
-      aggregate: @_getMetaData()
+      aggregate:
+        id: @id
+        name: @_name
 
     changes = @_getChanges()
     if Object.keys(changes).length > 0
@@ -75,11 +77,6 @@ class Aggregate
 
     domainEvent = new DomainEvent eventParams
     @_domainEvents.push domainEvent
-
-
-  _getMetaData: ->
-    id: @id
-    name: @_entityName
 
 
   _getChanges: ->
@@ -170,7 +167,7 @@ class Aggregate
 
   command: (command, errorCallback) ->
     if command.name not of @_root
-      err = new Error "Given commandName '#{command.name}' not found as method in the #{@_entityName} Aggregate Root"
+      err = new Error "Given commandName '#{command.name}' not found as method in the #{@_name} Aggregate Root"
       errorCallback err
       return
 

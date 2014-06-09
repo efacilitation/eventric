@@ -35,22 +35,12 @@ class Aggregate
       @applyProps props
 
 
-
-  generateDomainEvent: (eventName, params={}) ->
-    eventParams =
-      name: eventName
-      aggregate: @getMetaData()
-
-    changes = @getChanges()
-    if Object.keys(changes).length > 0
-      eventParams.aggregate.changed = changes
-
-    domainEvent = new DomainEvent eventParams
-    @_domainEvents.push domainEvent
-
-
-  getDomainEvents: ->
-    @_domainEvents
+  _generateUid: (separator) ->
+    # http://stackoverflow.com/a/12223573
+    S4 = ->
+      (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
+    delim = separator or "-"
+    S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
 
 
   _defineProperties: ->
@@ -74,20 +64,25 @@ class Aggregate
     @_observer.close()
 
 
-  _generateUid: (separator) ->
-    # http://stackoverflow.com/a/12223573
-    S4 = ->
-      (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
-    delim = separator or "-"
-    S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
+  generateDomainEvent: (eventName, params={}) ->
+    eventParams =
+      name: eventName
+      aggregate: @_getMetaData()
+
+    changes = @_getChanges()
+    if Object.keys(changes).length > 0
+      eventParams.aggregate.changed = changes
+
+    domainEvent = new DomainEvent eventParams
+    @_domainEvents.push domainEvent
 
 
-  getMetaData: ->
+  _getMetaData: ->
     id: @id
     name: @_entityName
 
 
-  getChanges: ->
+  _getChanges: ->
     @_observer.deliver()
 
     changes = {}
@@ -97,11 +92,8 @@ class Aggregate
     changes
 
 
-  clearChanges: ->
-    @_observerClose()
-    @_propsChanged = {}
-    # TODO: clear changes of nested entities
-    @_observerOpen()
+  getDomainEvents: ->
+    @_domainEvents
 
 
   applyChanges: (changes, params={}) ->
@@ -120,16 +112,15 @@ class Aggregate
       @_set propName, propValue
 
 
+  clearChanges: ->
+    @_observerClose()
+    @_propsChanged = {}
+    # TODO: clear changes of nested entities
+    @_observerOpen()
+
+
   applyProps: (props) ->
     @_root[key] = value for key, value of props
-
-
-  getEntityClass: (className) ->
-    EntityClass = @_entityClasses[className] ? false
-
-
-  registerEntityClass: (className, Class) ->
-    @_entityClasses[className] = Class
 
 
   _set: (key, value) ->

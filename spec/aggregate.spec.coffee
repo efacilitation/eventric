@@ -1,89 +1,72 @@
 describe 'Aggregate', ->
   Aggregate   = eventric.require 'Aggregate'
-  enderAggregate  = null
+  myAggregate  = null
   beforeEach ->
-    class EnderAggregateRootStub
+    class MyAggregateStub
     aggregateDefinition =
-      root: EnderAggregateRootStub
-    enderAggregate = new Aggregate 'EnderAggregate', aggregateDefinition
+      root: MyAggregateStub
+    myAggregate = new Aggregate 'MyAggregate', aggregateDefinition
 
 
   describe '#generateDomainEvent', ->
     eventName = null
     beforeEach ->
-      enderAggregate.applyProps
-        name: 'John'
+      myAggregate.applyProps
+        some:
+          ones:
+            name: 'John'
       eventName = 'somethingHappend'
 
 
     it 'should create a DomainEvent including changes', ->
-      enderAggregate.generateDomainEvent eventName
-      expect(enderAggregate.getDomainEvents()[0].getName()).to.equal eventName
-      expect(enderAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal
-        name: 'John'
+      myAggregate.generateDomainEvent eventName
+      expect(myAggregate.getDomainEvents()[0].getName()).to.equal eventName
+      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal
+        some:
+          ones:
+            name: 'John'
+
+
+    it 'should include the change even if the value was already present', ->
+      myAggregate = new Aggregate 'MyAggregate', root: class Foo, name: 'Willy'
+      myAggregate.applyProps
+        name: 'Willy'
+
+      myAggregate.generateDomainEvent()
+      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal
+        name: 'Willy'
 
 
   describe '#getDomainEvents', ->
     it 'should return the accumulated domainEvents', ->
-      enderAggregate._domainEvents = ['someEvent']
-      domainEvents = enderAggregate.getDomainEvents()
+      myAggregate._domainEvents = ['someEvent']
+      domainEvents = myAggregate.getDomainEvents()
       expect(domainEvents.length).to.equal 1
-
-
-  describe '#getMetaData', ->
-    it 'should return an object including the MetaData of the Entity', ->
-      myEntity = new Aggregate 'MyEntity', root: class Foo
-      myEntity.id = 1
-
-      expect(myEntity.getMetaData()).to.deep.equal
-        id: 1
-        name: 'MyEntity'
-
-
-  describe '#getChanges', ->
-    it 'should return changes to nested properties from the given entity', ->
-      myEntity = new Aggregate 'myEntity', root: class Foo, name: 'Willy'
-      myEntity.applyProps
-        some:
-          thing:
-            name: 'John'
-
-      expect(myEntity.getChanges()).to.deep.equal
-        some:
-          thing:
-            name: 'John'
-
-
-    it 'should return a change to a property even if its the same value', ->
-      myEntity = new Aggregate 'myEntity', root: class Foo, name: 'Willy'
-      myEntity.applyProps
-        name: 'Willy'
-
-      expect(myEntity.getChanges()).to.deep.equal
-        name: 'Willy'
-
-
-  describe '#clearChanges', ->
-    it 'should clear all changes', ->
-      a1 = new Aggregate 'A1', root: class Foo
-      a1.id = 1
-      a1.applyProps
-        name: 'John'
-      a1.clearChanges()
-      expect(a1.getChanges()).to.deep.equal {}
 
 
   describe '#applyChanges', ->
     it 'should apply given changes to properties and not track the changes', ->
-      myEntity = new Aggregate 'MyEntity', root: class Foo
+      myAggregate = new Aggregate 'MyEntity', root: class Foo
 
       props =
         name: 'ChangedJohn'
         nested:
           structure: 'foo'
-      myEntity.applyChanges props
+      myAggregate.applyChanges props
 
-      json = myEntity.toJSON()
+      json = myAggregate.toJSON()
       expect(json.name).to.equal 'ChangedJohn'
       expect(json.nested.structure).to.equal 'foo'
-      expect(myEntity.getChanges()).to.deep.equal {}
+      myAggregate.generateDomainEvent()
+      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.be.undefined
+
+
+  describe '#clearChanges', ->
+    it 'should clear all changes', ->
+      myAggregate = new Aggregate 'A1', root: class Foo
+      myAggregate.id = 1
+      myAggregate.applyProps
+        name: 'John'
+      myAggregate.clearChanges()
+      myAggregate.generateDomainEvent()
+      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.be.undefined

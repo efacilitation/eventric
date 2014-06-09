@@ -37,17 +37,13 @@ class Aggregate
 
 
   generateDomainEvent: (eventName, params={}) ->
-
-    params.includeAggregateChanges = true unless params.includeAggregateChanges is false
-
     eventParams =
       name: eventName
       aggregate: @getMetaData()
 
-    if params.includeAggregateChanges
-      changes = @getChanges()
-      if Object.keys(changes).length > 0
-        eventParams.aggregate.changed = changes
+    changes = @getChanges()
+    if Object.keys(changes).length > 0
+      eventParams.aggregate.changed = changes
 
     domainEvent = new DomainEvent eventParams
     @_domainEvents.push domainEvent
@@ -55,10 +51,6 @@ class Aggregate
 
   getDomainEvents: ->
     @_domainEvents
-
-
-  initialize: ->
-    @_observerDiscard()
 
 
   _defineProperties: ->
@@ -76,10 +68,6 @@ class Aggregate
 
       Object.keys(changed).forEach (property) =>
         @_set property, changed[property]
-
-
-  _observerDiscard: ->
-    @_observer.discardChanges()
 
 
   _observerClose: ->

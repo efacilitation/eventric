@@ -23,13 +23,6 @@ describe 'Aggregate', ->
         name: 'John'
 
 
-    describe 'given param includeAggregateChanges is set to false', ->
-      it 'then it should NOT include and clear the  changes', ->
-        enderAggregate.generateDomainEvent eventName, {includeAggregateChanges: false}
-        expect(enderAggregate.getDomainEvents()[0].name).to.equal eventName
-        expect(enderAggregate.getDomainEvents()[0].aggregate.changed).to.equal undefined
-
-
   describe '#getDomainEvents', ->
     it 'should return the accumulated domainEvents', ->
       enderAggregate._domainEvents = ['someEvent']

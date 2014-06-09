@@ -1,4 +1,5 @@
 describe 'AggregateRepository', ->
+  DomainEvent = eventric.require 'DomainEvent'
 
   describe '#findById', ->
 
@@ -7,10 +8,11 @@ describe 'AggregateRepository', ->
     eventStoreStub = null
     beforeEach ->
       class AggregateStub
-        applyChanges: sandbox.stub()
+        applyDomainEvents: sandbox.stub()
       eventricMock =
         require: sandbox.stub()
       eventricMock.require.withArgs('Aggregate').returns AggregateStub
+      eventricMock.require.withArgs('DomainEvent').returns eventric.require('DomainEvent')
       mockery.registerMock 'eventric', eventricMock
 
       AggregateRepository = eventric.require 'AggregateRepository'
@@ -28,7 +30,6 @@ describe 'AggregateRepository', ->
 
 
     describe 'given an array of domainEvents from the eventStore', ->
-
       beforeEach ->
         eventStoreStub.find.yields null, [
           aggregate:
@@ -49,9 +50,9 @@ describe 'AggregateRepository', ->
           done()
 
 
-      it 'should return a instantiated Aggregate with all DomainEvents applied', (done) ->
+      it 'should call applyDomainEvents on the aggregate', (done) ->
         aggregateRepository.findById 'Foo', 42, (err, aggregate) ->
-          expect(AggregateStub::applyChanges).to.have.been.calledWith name: 'John'
+          expect(AggregateStub::applyDomainEvents).to.have.been.calledOnce
           done()
 
 

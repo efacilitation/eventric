@@ -1,6 +1,7 @@
 describe  'ReadAggregateRepositorySpec', ->
+  DomainEvent = eventric.require 'DomainEvent'
   readAggregateRepository = null
-  eventData = null
+  domainEvent = null
   EventStoreStub = null
   ReadAggregateStub = null
   beforeEach ->
@@ -8,7 +9,7 @@ describe  'ReadAggregateRepositorySpec', ->
       find: ->
       save: ->
     EventStoreStub = sinon.createStubInstance EventStore
-    eventData =
+    domainEvent = new DomainEvent
       name: 'create'
       aggregate:
         id: 23
@@ -16,11 +17,11 @@ describe  'ReadAggregateRepositorySpec', ->
         changed:
           name: 'John'
     EventStoreStub.find.yields null, [
-      eventData
+      domainEvent
     ]
 
     class ReadAggregateStub
-      applyChanges: sandbox.stub()
+      applyDomainEvents: sandbox.stub()
       toJSON: sandbox.stub()
     eventricMock =
       require: sandbox.stub()
@@ -47,9 +48,9 @@ describe  'ReadAggregateRepositorySpec', ->
         expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.true
         done()
 
-    it 'should call applyChanges on the instantiated ReadAggregate', (done) ->
+    it 'should call applyDomainEvents on the instantiated ReadAggregate', (done) ->
       readAggregateRepository.findById 23, (err, readAggregate) ->
-        expect(ReadAggregateStub::applyChanges).to.have.been.calledWith eventData.aggregate.changed
+        expect(ReadAggregateStub::applyDomainEvents).to.have.been.calledWith [domainEvent]
         done()
 
 

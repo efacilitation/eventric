@@ -1,8 +1,8 @@
 eventric = require 'eventric'
 
-_         = eventric.require 'HelperUnderscore'
-Aggregate = eventric.require 'Aggregate'
-
+_           = eventric.require 'HelperUnderscore'
+Aggregate   = eventric.require 'Aggregate'
+DomainEvent = eventric.require 'DomainEvent'
 
 class AggregateRepository
   _aggregateDefinitions: {}
@@ -12,11 +12,11 @@ class AggregateRepository
 
   findById: (aggregateName, aggregateId, callback) ->
     # find all domainEvents matching the given aggregateId
-    @_eventStore.find aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
+    @_eventStore.find aggregateName, { 'aggregate.id': aggregateId }, (err, events) =>
       return callback err, null if err
 
       # nothing found, return null
-      return callback null, null if domainEvents.length == 0
+      return callback null, null if events.length == 0
 
       # get the corresponding class
       aggregateDefinition = @getAggregateDefinition aggregateName
@@ -29,10 +29,13 @@ class AggregateRepository
       aggregate = new Aggregate aggregateName, aggregateDefinition
       aggregate.id = aggregateId
 
-      # apply the aggregate changes inside the domainevents on the ReadAggregate
-      for domainEvent in domainEvents
-        if domainEvent.aggregate.changed
-          aggregate.applyChanges domainEvent.aggregate.changed
+      # TODO: this should be part of the event store itself?
+      domainEvents = []
+      for event in events
+        domainEvents.push new DomainEvent event
+
+      # apply the domain events on the aggregate
+      aggregate.applyDomainEvents domainEvents
 
       # return the aggregate
       callback null, aggregate

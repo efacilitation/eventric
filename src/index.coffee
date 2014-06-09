@@ -21,6 +21,7 @@ moduleDefinition =
   HelperAsync: './helper/async'
   HelperEvents: './helper/events'
   HelperUnderscore: './helper/underscore'
+  HelperClone: './helper/clone'
 
   BoundedContext: './bounded_context'
 

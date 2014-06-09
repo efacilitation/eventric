@@ -15,6 +15,7 @@ describe 'AggregateService', ->
 
     class ExampleAggregateStub
       id: aggregateStubId
+      create: sandbox.stub()
       generateDomainEvent: sandbox.stub()
       getDomainEvents: sandbox.stub()
       clearChanges: sandbox.stub()
@@ -125,12 +126,6 @@ describe 'AggregateService', ->
 
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
         expect(domainEventService.saveAndTrigger.withArgs(events).calledOnce).to.be.true
-        done()
-
-
-    it 'should call the clearChanges method of the given aggregate', (done) ->
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
-        expect(exampleAggregateStub.clearChanges.calledOnce).to.be.true
         done()
 
 

@@ -36,7 +36,8 @@ class AggregateService
       return
 
     # create Aggregate
-    aggregate = new Aggregate aggregateName, aggregateDefinition, props
+    aggregate = new Aggregate aggregateName, aggregateDefinition
+    aggregate.create props
 
     @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
       return callback err, null if err
@@ -88,8 +89,6 @@ class AggregateService
     domainEvents = aggregate.getDomainEvents()
     @_domainEventService.saveAndTrigger domainEvents, (err) =>
       return callback err, null if err
-
-      aggregate.clearChanges()
 
       # return the aggregateId
       callback? null, aggregate.id

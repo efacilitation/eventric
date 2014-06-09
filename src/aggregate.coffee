@@ -1,28 +1,25 @@
 eventric = require 'eventric'
 
 _               = eventric.require 'HelperUnderscore'
+Clone           = eventric.require 'HelperClone'
 DomainEvent     = eventric.require 'DomainEvent'
 
 class Aggregate
 
-  constructor: (name, definition, props) ->
+  constructor: (name, definition) ->
     @_name              = name
     @_props             = {}
     @_propsChanged      = {}
     @_domainEvents      = []
     @_trackPropsChanged = true
+    @_definition        = definition
+    @_root              = new @_definition.root
 
-    @id = @_generateUid()
-
-    @_createRoot definition.root, props
-
-    if definition.entities
-      @_entitiesDefinition = definition.entities
-
-
-  _createRoot: (root, props) ->
-    @_root = new root
     @_observerOpen()
+
+
+  create: (props) ->
+    @id = @_generateUid()
 
     if typeof @_root.create == 'function'
       # TODO: Should be ok as long as aggregates arent async
@@ -50,10 +47,10 @@ class Aggregate
     @_observer = new ObjectObserver @_root
     @_observer.open (added, removed, changed, getOldValueFn) =>
       Object.keys(added).forEach (property) =>
-        @_set property, added[property]
+        @_propsChanged[property] = added[property]
 
       Object.keys(changed).forEach (property) =>
-        @_set property, changed[property]
+        @_propsChanged[property] = changed[property]
 
 
   _observerClose: ->
@@ -92,7 +89,7 @@ class Aggregate
   _getEntityMap: ->
     entityMap = {}
 
-    for entityName, entityClass of @_entitiesDefinition
+    for entityName, entityClass of @_definition.entities
       entityMap[entityName] = []
       @_getPathsToEntityClass entityClass, @_root, entityMap[entityName]
 
@@ -107,7 +104,7 @@ class Aggregate
       path = []
 
     _.each obj, (val, key) =>
-      eachPath = _.clone path
+      eachPath = Clone path
       eachPath.push key
       if _.isObject val
         @_getPathsToEntityClass entityClass, val, map, eachPath
@@ -119,50 +116,20 @@ class Aggregate
     @_domainEvents
 
 
-  applyChanges: (changes, params={}) ->
+  applyDomainEvents: (domainEvents) ->
     @_observerClose()
-    oldTrackPropsChanged = @_trackPropsChanged
-    @_trackPropsChanged = false
-    @_defineProperties changes
-    @_applyChanges changes
-    @_trackPropsChanged = oldTrackPropsChanged
-
+    @_applyDomainEvent domainEvent for domainEvent in domainEvents
     @_observerOpen()
 
 
-  _defineProperties: (props) ->
-    for key, value of props
-      Object.defineProperty @_root, key,
-        get: => @_props[key]
-        set: (newValue) => @_set key, newValue
-
-
-  _applyChanges: (propChanges) ->
-    for propName, propValue of propChanges
-      @_root[propName] = propValue
-      @_set propName, propValue
-
-
-  clearChanges: ->
-    @_observerClose()
-    @_propsChanged = {}
-    # TODO: clear changes of nested entities
-    @_observerOpen()
-
-
-  _set: (key, value) ->
-    if @_trackPropsChanged and key != 'id'
-     @_propsChanged[key] = value
-
-    @_props[key] = value
-
-
-  _get: (key) ->
-    @_props[key]
+  _applyDomainEvent: (domainEvent) ->
+    if domainEvent.aggregate.changed
+      for propName, propValue of domainEvent.aggregate.changed
+        @_root[propName] = propValue
 
 
   toJSON: ->
-    _.clone @_props
+    Clone @_root
 
 
   command: (command, errorCallback) ->

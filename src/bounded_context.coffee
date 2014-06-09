@@ -153,7 +153,7 @@ class BoundedContext
         callback? err, null
 
 
-  query: (query, callback = ->) ->
+  query: (query, callback) ->
     new Promise (resolve, reject) =>
       if @_applicationServiceQueries[query.name]
         @_applicationServiceQueries[query.name] query.params, (err, result) =>

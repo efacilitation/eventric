@@ -24,8 +24,7 @@ class ReadAggregateRepository
       readAggregate = new ReadAggregate @_aggregateName, root: ReadAggregateRoot
 
       # apply the domainevents on the ReadAggregate
-      for domainEvent in domainEvents when domainEvent.aggregate?.changed
-        readAggregate.applyChanges domainEvent.aggregate.changed
+      readAggregate.applyDomainEvents domainEvents
 
       readAggregate.id = aggregateId
 

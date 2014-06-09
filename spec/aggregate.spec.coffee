@@ -1,21 +1,14 @@
 describe 'Aggregate', ->
   Aggregate   = eventric.require 'Aggregate'
   myAggregate  = null
-  beforeEach ->
-    class MyAggregateStub
-    aggregateDefinition =
-      root: MyAggregateStub
-    myAggregate = new Aggregate 'MyAggregate', aggregateDefinition
-
 
   describe '#generateDomainEvent', ->
     eventName = null
     beforeEach ->
-      myAggregate.applyProps
+      myAggregate = new Aggregate 'MyAggregate', root: class Foo,
         some:
           ones:
             name: 'John'
-      eventName = 'somethingHappend'
 
 
     it 'should create a DomainEvent including changes', ->
@@ -38,10 +31,12 @@ describe 'Aggregate', ->
 
 
   describe '#getDomainEvents', ->
-    it 'should return the accumulated domainEvents', ->
-      myAggregate._domainEvents = ['someEvent']
+    it 'should return the generated domainEvents', ->
+      myAggregate = new Aggregate 'MyAggregate', root: class Foo
+      myAggregate.generateDomainEvent 'someEvent'
+      myAggregate.generateDomainEvent 'anotherEvent'
       domainEvents = myAggregate.getDomainEvents()
-      expect(domainEvents.length).to.equal 1
+      expect(domainEvents.length).to.equal 2
 
 
   describe '#applyChanges', ->
@@ -57,16 +52,15 @@ describe 'Aggregate', ->
       json = myAggregate.toJSON()
       expect(json.name).to.equal 'ChangedJohn'
       expect(json.nested.structure).to.equal 'foo'
-      myAggregate.generateDomainEvent()
+      myAggregate.generateDomainEvent 'someEvent'
       expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.be.undefined
 
 
   describe '#clearChanges', ->
     it 'should clear all changes', ->
-      myAggregate = new Aggregate 'A1', root: class Foo
+      myAggregate = new Aggregate 'A1', root: class Foo, name: 'John'
       myAggregate.id = 1
-      myAggregate.applyProps
-        name: 'John'
+
       myAggregate.clearChanges()
-      myAggregate.generateDomainEvent()
+      myAggregate.generateDomainEvent 'someEvent'
       expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.be.undefined

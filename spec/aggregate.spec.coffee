@@ -1,25 +1,27 @@
 describe 'Aggregate', ->
-  Aggregate   = eventric.require 'Aggregate'
+  Aggregate = eventric.require 'Aggregate'
 
   describe '#generateDomainEvent', ->
     it 'should create a DomainEvent including changes', ->
-      myAggregate = new Aggregate 'MyAggregate', root: class Foo,
+      someProps =
         some:
           ones:
             name: 'John'
+      myAggregate = new Aggregate 'MyAggregate', root: class Foo, someProps
+
       myAggregate.generateDomainEvent 'someEvent'
       expect(myAggregate.getDomainEvents()[0].getName()).to.equal 'someEvent'
-      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal
-        some:
-          ones:
-            name: 'John'
+      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal someProps
 
 
-    it 'should include the change even if the value was already present', ->
+    it 'should include the change even if the value was already applied', ->
       class Foo
         changeName: (name) ->
           @name = 'Willy'
-      myAggregate = new Aggregate 'MyAggregate', root: Foo, name: 'Willy'
+      myAggregate = new Aggregate 'MyAggregate', root: Foo
+
+      myAggregate.applyChanges
+        name: 'Willy'
 
       myAggregate.command
         name: 'changeName'

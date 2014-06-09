@@ -11,7 +11,6 @@ class Aggregate
     @_domainEvents      = []
     @_entityClasses     = {}
     @_trackPropsChanged = true
-    @_defineProperties()
 
     @id = @_generateUid()
 
@@ -42,13 +41,6 @@ class Aggregate
       (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
     delim = separator or "-"
     S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
-
-
-  _defineProperties: ->
-    for key, value of @_props
-      Object.defineProperty @, key,
-        get: -> @_props[key]
-        set: (newValue) -> @_set key, newValue
 
 
   _observerOpen: ->
@@ -101,10 +93,18 @@ class Aggregate
     @_observerClose()
     oldTrackPropsChanged = @_trackPropsChanged
     @_trackPropsChanged = false
+    @_defineProperties changes
     @_applyChanges changes
     @_trackPropsChanged = oldTrackPropsChanged
 
     @_observerOpen()
+
+
+  _defineProperties: (props) ->
+    for key, value of props
+      Object.defineProperty @_root, key,
+        get: => @_props[key]
+        set: (newValue) => @_set key, newValue
 
 
   _applyChanges: (propChanges) ->

@@ -8,12 +8,10 @@ class Aggregate
 
   constructor: (name, definition) ->
     @_name              = name
-    @_props             = {}
-    @_propsChanged      = {}
-    @_domainEvents      = []
-    @_trackPropsChanged = true
     @_definition        = definition
     @_root              = new @_definition.root
+    @_propsChanged      = {}
+    @_domainEvents      = []
 
     @_observerOpen()
 
@@ -58,15 +56,16 @@ class Aggregate
 
 
   generateDomainEvent: (eventName, params={}) ->
+    @_observer.deliver()
+
     eventParams =
       name: eventName
       aggregate:
         id: @id
         name: @_name
 
-    changes = @_getChanges()
-    if Object.keys(changes).length > 0
-      eventParams.aggregate.changed = changes
+    if Object.keys(@_propsChanged).length > 0
+      eventParams.aggregate.changed = @_propsChanged
 
     entityMap = @_getEntityMap()
     if Object.keys(entityMap).length > 0
@@ -74,16 +73,6 @@ class Aggregate
 
     domainEvent = new DomainEvent eventParams
     @_domainEvents.push domainEvent
-
-
-  _getChanges: ->
-    @_observer.deliver()
-
-    changes = {}
-    if Object.keys(@_propsChanged).length > 0
-      changes = @_propsChanged
-
-    changes
 
 
   _getEntityMap: ->

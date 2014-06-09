@@ -145,6 +145,7 @@ class Aggregate
       return
 
     # make sure we have a params array
+    command.params = [] if !command.params
     if not (command.params instanceof Array)
       command.params = [command.params]
 

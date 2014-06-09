@@ -60,23 +60,20 @@ class AggregateService
         callback err, null
         return
 
-      if commandName not of aggregate._root
-        err = new Error "Given commandName '#{commandName}' not found as method in the #{aggregateName} Aggregate Root"
-        callback err, null
-        return
-
-      # make sure we have a params array
-      if not (params instanceof Array)
-        params = [params]
-
       # TODO: Should be ok as long as aggregates arent async
       errorCallbackCalled = false
       errorCallback = (err) =>
         errorCallbackCalled = true
         callback err
 
+      if !params
+        params = []
+
       # EXECUTING
-      aggregate._root[commandName] params..., errorCallback
+      aggregate.command
+        name: commandName
+        params: params
+      , errorCallback
 
       return if errorCallbackCalled
 

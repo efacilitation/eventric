@@ -18,7 +18,7 @@ describe 'AggregateService', ->
       generateDomainEvent: sandbox.stub()
       getDomainEvents: sandbox.stub()
       clearChanges: sandbox.stub()
-      _root: exampleAggregateRoot
+      command: sandbox.stub()
     exampleAggregateStub = new ExampleAggregateStub
 
     exampleAggregateRootDefinition =
@@ -75,33 +75,39 @@ describe 'AggregateService', ->
       aggregateService = new AggregateService domainEventService, aggregateRepositoryStub
 
 
-    it 'should call the command on the aggregate', (done) ->
+    it 'should call the command on the aggregate with empty array of params', (done) ->
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
-        expect(exampleAggregateStub._root.doSomething.calledOnce).to.be.true
+        expect(exampleAggregateStub.command).to.have.been.calledWith
+          name: 'doSomething'
+          params: []
         done()
 
 
     it 'should call the command on the aggregate with the given argument and an error callback', (done) ->
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', 'foo',  (err, aggregateId) ->
-        expect(exampleAggregateStub._root.doSomething.calledWith 'foo', sinon.match.func).to.be.true
+      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo'],  (err, aggregateId) ->
+        expect(exampleAggregateStub.command).to.have.been.calledWith
+          name: 'doSomething'
+          params: ['foo']
         done()
 
 
     it 'should call the command on the aggregate with the given arguments and an error callback', (done) ->
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'],  (err, aggregateId) ->
-        expect(exampleAggregateStub._root.doSomething.calledWith 'foo', 'bar', sinon.match.func).to.be.true
+        expect(exampleAggregateStub.command).to.have.been.calledWith
+          name: 'doSomething'
+          params: ['foo', 'bar']
         done()
 
 
     it 'should call the callback with an error if there was an error at the aggregate', (done) ->
-      exampleAggregateRoot.doSomething.yields 'AGGREGATE_ERROR'
+      exampleAggregateStub.command.yields 'AGGREGATE_ERROR'
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
         expect(err).to.equal 'AGGREGATE_ERROR'
         done()
 
 
     it 'should not call the generateDomainEvent method of the given aggregate if there was an error at the aggregate', (done) ->
-      exampleAggregateRoot.doSomething.yields 'AGGREGATE_ERROR'
+      exampleAggregateStub.command.yields 'AGGREGATE_ERROR'
       aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
         expect(exampleAggregateStub.generateDomainEvent.notCalled).to.be.true
         done()

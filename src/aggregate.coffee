@@ -136,7 +136,7 @@ class Aggregate
     @_props ?= {}
     @_propsChanged ?= {}
 
-    if @_shouldTrackChangePropertiesFor key, value
+    if @_trackPropsChanged and key != 'id'
      @_propsChanged[key] = value
 
     @_props[key] = value
@@ -144,10 +144,6 @@ class Aggregate
 
   _get: (key) ->
     @_props[key]
-
-
-  _shouldTrackChangePropertiesFor: (key, value) ->
-    @_trackPropsChanged and key != 'id'
 
 
   toJSON: ->

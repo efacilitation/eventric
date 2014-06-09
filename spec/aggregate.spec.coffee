@@ -41,7 +41,7 @@ describe 'Aggregate', ->
 
   describe '#applyChanges', ->
     it 'should apply given changes to properties and not track the changes', ->
-      myAggregate = new Aggregate 'MyEntity', root: class Foo
+      myAggregate = new Aggregate 'MyAggregate', root: class Foo
 
       props =
         name: 'ChangedJohn'
@@ -58,9 +58,28 @@ describe 'Aggregate', ->
 
   describe '#clearChanges', ->
     it 'should clear all changes', ->
-      myAggregate = new Aggregate 'A1', root: class Foo, name: 'John'
+      myAggregate = new Aggregate 'MyAggregate', root: class Foo, name: 'John'
       myAggregate.id = 1
 
       myAggregate.clearChanges()
       myAggregate.generateDomainEvent 'someEvent'
       expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.be.undefined
+
+
+  describe '#command', ->
+    it 'should call an aggregate method based on the given commandName together with the arguments', ->
+      someProperties = [
+        'something'
+      ]
+
+      class Foo
+        someMethod: sandbox.stub()
+      myAggregate = new Aggregate 'MyAggregate', root: Foo
+
+      command =
+        name: 'someMethod'
+        props: someProperties
+      myAggregate.command command
+
+
+      expect(Foo::someMethod).to.have.been.calledWith command.props...

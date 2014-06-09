@@ -7,18 +7,19 @@ class Aggregate
 
   constructor: (name, definition, props) ->
     @_entityName        = name
-    @_isNew             = false
     @_propsChanged      = {}
     @_domainEvents      = []
     @_entityClasses     = {}
     @_trackPropsChanged = true
     @_defineProperties()
-    @_domainEvents = []
-
-    @_root = new definition.root
 
     @id = @_generateUid()
 
+    @_createRoot definition.root, props
+
+
+  _createRoot: (root, props) ->
+    @_root = new root
     @_observerOpen()
 
     if typeof @_root.create == 'function'
@@ -32,7 +33,7 @@ class Aggregate
 
       return if errorCallbackCalled
     else
-      @applyProps props
+      @_root[key] = value for key, value of props
 
 
   _generateUid: (separator) ->
@@ -119,10 +120,6 @@ class Aggregate
     @_observerOpen()
 
 
-  applyProps: (props) ->
-    @_root[key] = value for key, value of props
-
-
   _set: (key, value) ->
     @_props ?= {}
     @_propsChanged ?= {}
@@ -139,6 +136,10 @@ class Aggregate
 
   toJSON: ->
     _.clone @_props
+
+
+  command: (command) ->
+    @_root[command.name] command.props...
 
 
 module.exports = Aggregate

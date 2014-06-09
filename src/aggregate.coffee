@@ -7,14 +7,17 @@ class Aggregate
 
   constructor: (name, definition, props) ->
     @_entityName        = name
+    @_props             = {}
     @_propsChanged      = {}
     @_domainEvents      = []
-    @_entityClasses     = {}
     @_trackPropsChanged = true
 
     @id = @_generateUid()
 
     @_createRoot definition.root, props
+
+    if definition.entities
+      @_entitiesDefinition = definition.entities
 
 
   _createRoot: (root, props) ->
@@ -66,6 +69,10 @@ class Aggregate
     if Object.keys(changes).length > 0
       eventParams.aggregate.changed = changes
 
+    entityMap = @_getEntityMap()
+    if Object.keys(entityMap).length > 0
+      eventParams.aggregate.entityMap = entityMap
+
     domainEvent = new DomainEvent eventParams
     @_domainEvents.push domainEvent
 
@@ -83,6 +90,32 @@ class Aggregate
       changes = @_propsChanged
 
     changes
+
+
+  _getEntityMap: ->
+    entityMap = {}
+
+    for entityName, entityClass of @_entitiesDefinition
+      entityMap[entityName] = []
+      @_getPathsToEntityClass entityClass, @_root, entityMap[entityName]
+
+    entityMap
+
+
+  _getPathsToEntityClass: (entityClass, obj, map, path = []) ->
+    if obj instanceof entityClass
+      map.push path
+
+    if Object.keys(obj).length == 0
+      path = []
+
+    _.each obj, (val, key) =>
+      eachPath = _.clone path
+      eachPath.push key
+      if _.isObject val
+        @_getPathsToEntityClass entityClass, val, map, eachPath
+
+    path
 
 
   getDomainEvents: ->
@@ -121,9 +154,6 @@ class Aggregate
 
 
   _set: (key, value) ->
-    @_props ?= {}
-    @_propsChanged ?= {}
-
     if @_trackPropsChanged and key != 'id'
      @_propsChanged[key] = value
 

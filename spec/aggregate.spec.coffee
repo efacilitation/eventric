@@ -31,6 +31,37 @@ describe 'Aggregate', ->
         name: 'Willy'
 
 
+    it 'should add the correct entity class map to the domain event', ->
+      class MooEntity
+      class BarEntity
+      class Foo
+        createEntities: ->
+          @bar = new BarEntity
+          @moo = [
+            new MooEntity
+            'someOtherValue'
+            new BarEntity
+          ]
+      aggregateDefinition =
+        root: Foo
+        entities:
+          'Bar': BarEntity
+          'Moo': MooEntity
+      myAggregate = new Aggregate 'MyAggregate', aggregateDefinition, foo: 'bar'
+      myAggregate.command
+        name: 'createEntities'
+
+      myAggregate.generateDomainEvent 'someEvent'
+      expect(myAggregate.getDomainEvents()[0].aggregate.entityMap).to.deep.equal
+        'Bar': [
+          ['bar']
+          ['moo', 2]
+        ]
+        'Moo': [
+          ['moo', 0]
+        ]
+
+
   describe '#getDomainEvents', ->
     it 'should return the generated domainEvents', ->
       myAggregate = new Aggregate 'MyAggregate', root: class Foo

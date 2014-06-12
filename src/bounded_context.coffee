@@ -1,47 +1,61 @@
 eventric = require 'eventric'
 
-_                       = eventric.require 'HelperUnderscore'
-AggregateService        = eventric.require 'AggregateService'
-AggregateRepository     = eventric.require 'AggregateRepository'
-ReadAggregateRepository = eventric.require 'ReadAggregateRepository'
-DomainEventService      = eventric.require 'DomainEventService'
+_                  = eventric.require 'HelperUnderscore'
+AggregateService   = eventric.require 'AggregateService'
+Repository         = eventric.require 'Repository'
+DomainEventService = eventric.require 'DomainEventService'
 
 
 class BoundedContext
   _di: {}
   _params: {}
-  aggregates: {}
-  readAggregates: {}
-  adapters: {}
-
-  readAggregateRepositories: {}
-  _readAggregateRepositoriesInstances: {}
-
-  applicationServices: []
-
+  _aggregateDefinitions: {}
+  _readAggregateDefinitions: {}
+  _repositories: {}
+  _repositoryInstances: {}
+  _adapters: {}
+  _adapterInstances: {}
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
   _domainEventHandlers: {}
-  _adapterInstances: {}
 
 
   initialize: (callback) ->
     @_initializeEventStore =>
-      @_aggregateRepository  = new AggregateRepository @_eventStore
-      @_domainEventService   = new DomainEventService @_eventStore
-      @_aggregateService     = new AggregateService @_domainEventService, @_aggregateRepository
+      @_domainEventService = new DomainEventService @_eventStore
+      @_aggregateService   = new AggregateService @_eventStore, @_domainEventService
 
       @_di =
         aggregate: @_aggregateService
         repository: => @getRepository.apply @, arguments
         adapter: => @getAdapter.apply @, arguments
 
-      @_initializeRepositories()
-      @_initializeAggregates()
+      @_initializeAggregateService()
       @_initializeDomainEventHandlers()
-      @_initializeAdapters()
 
       callback? null
+
+
+  _initializeEventStore: (next) ->
+    if @_params.store
+      @_eventStore = @_params.store
+      next()
+    else
+      # TODO: refactor to use a pseudo-store (which just logs that it wont save anything)
+      @_eventStore = require 'eventric-store-mongodb'
+      @_eventStore.initialize (err) =>
+        next()
+
+
+  _initializeAggregateService: () ->
+    for aggregateName, aggregateDefinition of @_aggregateDefinitions
+      @_aggregateService.registerAggregateDefinition aggregateName, aggregateDefinition
+
+
+  _initializeDomainEventHandlers: ->
+    for domainEventName, fnArray of @_domainEventHandlers
+      for fn in fnArray
+        @_domainEventService.on domainEventName, fn
 
 
   set: (key, value) ->
@@ -65,15 +79,15 @@ class BoundedContext
 
 
   addAggregate: (aggregateName, aggregateDefinitionObj) ->
-    @aggregates[aggregateName] = aggregateDefinitionObj
+    @_aggregateDefinitions[aggregateName] = aggregateDefinitionObj
 
 
   addReadAggregate: (aggregateName, ReadAggregate) ->
-    @readAggregates[aggregateName] = ReadAggregate
+    @_readAggregateDefinitions[aggregateName] = ReadAggregate
 
 
-  addRepository: (aggregateName, readAggregateRepository) ->
-    @readAggregateRepositories[aggregateName] = readAggregateRepository
+  addRepository: (aggregateName, repository) ->
+    @_repositories[aggregateName] = repository
 
 
   addDomainEventHandler: (eventName, handlerFn) ->
@@ -82,63 +96,54 @@ class BoundedContext
 
 
   addAdapter: (adapterName, adapterClass) ->
-    @adapters[adapterName] = adapterClass
+    @_adapters[adapterName] = adapterClass
 
 
   addAdapters: (adapterObj) ->
     @addAdapter adapterName, fn for adapterName, fn of adapterObj
 
 
-  _initializeEventStore: (next) ->
-    if @_params.store
-      @_eventStore = @_params.store
-      next()
-    else
-      # TODO: refactor to use a pseudo-store (which just logs that it wont save anything)
-      @_eventStore = require 'eventric-store-mongodb'
-      @_eventStore.initialize (err) =>
-        next()
-
-
-  _initializeAggregates: ->
-    for aggregateName, aggregateDefinition of @aggregates
-      @_aggregateRepository.registerAggregateDefinition aggregateName, aggregateDefinition
-
-      # add default repository if not already defined
-      if !@_readAggregateRepositoriesInstances[aggregateName]
-        @_readAggregateRepositoriesInstances[aggregateName] = new ReadAggregateRepository aggregateName, @_eventStore
-
-      # register read aggregate to repository
-      if @readAggregates[aggregateName]
-        @_readAggregateRepositoriesInstances[aggregateName].registerReadAggregateClass aggregateName, @readAggregates[aggregateName]
-
-
-  _initializeRepositories: ->
-    for aggregateName, readRepositoryObj of @readAggregateRepositories
-      readRepository = new ReadAggregateRepository aggregateName, @_eventStore
-      _.extend readRepository, readRepositoryObj
-      @_readAggregateRepositoriesInstances[aggregateName] = readRepository
-
-
-  _initializeDomainEventHandlers: ->
-    for domainEventName, fnArray of @_domainEventHandlers
-      for fn in fnArray
-        @onDomainEvent domainEventName, fn
-
-
-  _initializeAdapters: ->
-    for adapterName, adapterClass of @adapters
-      adapter = new adapterClass
-      adapter.initialize?()
-      @_adapterInstances[adapterName] = adapter
-
-
   getRepository: (aggregateName) ->
-    @_readAggregateRepositoriesInstances[aggregateName]
+    # return cache if available
+    return @_repositoryInstances[aggregateName] if @_repositoryInstances[aggregateName]
+
+    # define name, event store and that we only want to return readaggregates
+    repositoryParams =
+      aggregateName: aggregateName
+      eventStore: @_eventStore
+      readAggregate: true
+
+    # check if we have a special read aggregate definition
+    if @_readAggregateDefinitions[aggregateName]
+      repositoryParams.aggregateDefinition = @_readAggregateDefinitions[aggregateName]
+
+    # build repository
+    repository = new Repository repositoryParams
+
+    # extend repository with custom repository if available
+    if @_repositories[aggregateName]
+      _.extend repository, @_repositories[aggregateName]
+
+    # cache
+    @_repositoryInstances[aggregateName] = repository
+
+    # return
+    repository
 
 
   getAdapter: (adapterName) ->
-    @_adapterInstances[adapterName]
+    # return cache if available
+    return @_adapterInstances[adapterName] if @_adapterInstances[adapterName]
+
+    # build adapter
+    adapter = new @_adapters[adapterName]
+    adapter.initialize?()
+
+    # cache
+    @_adapterInstances[adapterName] = adapter
+
+    # return
+    adapter
 
 
   command: (command, callback) ->
@@ -164,10 +169,6 @@ class BoundedContext
         error = new Error errorMessage
         reject error
         callback? error, null
-
-
-  onDomainEvent: (eventName, eventHandler) ->
-    @_domainEventService.on eventName, eventHandler
 
 
 module.exports = BoundedContext

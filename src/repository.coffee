@@ -1,60 +1,55 @@
 eventric = require 'eventric'
 
-_                 = eventric.require 'HelperUnderscore'
-async             = eventric.require 'HelperAsync'
-ReadAggregate     = eventric.require 'ReadAggregate'
+_         = eventric.require 'HelperUnderscore'
+async     = eventric.require 'HelperAsync'
+Aggregate = eventric.require 'Aggregate'
 
-class ReadAggregateRepository
+class Repository
 
-  constructor: (@_aggregateName, @_eventStore) ->
+  constructor: (params) ->
+    @_aggregateName = params.aggregateName
+    @_aggregateDefinition = params.aggregateDefinition ? false
+    @_eventStore = params.eventStore
+    @_readAggregate = params.readAggregate ? false
 
 
   findById: (aggregateId, callback) =>
     return unless @_callbackIsAFunction callback
-
     # TODO: @_findDomainEventsForAggregateId aggregateId, callback, (err, domainEvents) =>
     @_eventStore.find @_aggregateName, { 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
 
-      ReadAggregateRoot = @getReadAggregateClass @_aggregateName
-      if not ReadAggregateRoot
-        ReadAggregateRoot = ->
+      aggregate = new Aggregate @_aggregateName, @_aggregateDefinition
+      aggregate.applyDomainEvents domainEvents
 
-      readAggregate = new ReadAggregate @_aggregateName, root: ReadAggregateRoot
+      if @_readAggregate
+        aggregate = aggregate.toJSON()
 
-      # apply the domainevents on the ReadAggregate
-      readAggregate.applyDomainEvents domainEvents
-
-      readAggregate.id = aggregateId
-
-      # return the readAggregate
-      callback null, readAggregate
+      callback null, aggregate
 
 
   find: (query, callback) ->
     return unless @_callbackIsAFunction callback
 
-    # get ReadAggregates matching the query
     @findIds query, (err, aggregateIds) =>
       return callback err, null if err
 
-      readAggregates = []
-      # execute findById for every aggregateId found
+      aggregates = []
       async.whilst (=> aggregateIds.length > 0),
 
         ((callbackAsync) =>
           aggregateId = aggregateIds.shift()
-          @findById aggregateId, (err, readAggregate) =>
+          @findById aggregateId, (err, aggregate) =>
             return callbackAsync err if err
-            return callbackAsync null if readAggregate.length == 0
-            readAggregates.push readAggregate
+            return callbackAsync null if aggregate.length == 0
+            aggregates.push aggregate
             callbackAsync null
         ),
 
         ((err) =>
           return callback err, null if err
-          callback null, readAggregates
+          callback null, aggregates
         )
 
 
@@ -89,15 +84,4 @@ class ReadAggregateRepository
       throw new Error 'No callback provided'
 
 
-  _readAggregateClasses: {}
-
-  registerReadAggregateClass: (aggregateName, readAggregateClass) ->
-    @_readAggregateClasses[aggregateName] = readAggregateClass
-
-
-  getReadAggregateClass: (aggregateName) ->
-    return false unless aggregateName of @_readAggregateClasses
-    @_readAggregateClasses[aggregateName]
-
-
-module.exports = ReadAggregateRepository
+module.exports = Repository

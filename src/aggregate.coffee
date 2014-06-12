@@ -12,7 +12,12 @@ class Aggregate
     @_domainEvents = []
     @_definition   = definition
     @_oldRoot      = {}
-    @_root         = new @_definition.root
+
+    if !@_definition
+      @_root = {}
+    else
+      # TODO: check for valid definition
+      @_root = new @_definition.root
 
 
   create: (props) ->

@@ -13,15 +13,12 @@ describe 'BoundedContext', ->
     saveAndTrigger: sandbox.stub()
     on: sandbox.stub()
 
-  aggregateRepositoryMock = null
-  class AggregateRepositoryMock
+  aggregateServiceMock = null
+  class AggregateServiceMock
     constructor: ->
-      aggregateRepositoryMock.apply this, arguments
-    registerAggregateDefinition: sandbox.stub()
+      aggregateServiceMock.apply this, arguments
 
-  class ReadAggregateMock
-  class ReadAggregateRepositoryMock
-    registerReadAggregateObj: sandbox.stub()
+  class RepositoryMock
 
   HelperUnderscoreMock =
     extend: sandbox.stub()
@@ -32,13 +29,11 @@ describe 'BoundedContext', ->
       require: sandbox.stub()
     eventricMock.require.withArgs('DomainEventService').returns DomainEventServiceMock
     eventricMock.require.withArgs('AggregateService').returns AggregateServiceMock
-    eventricMock.require.withArgs('AggregateRepository').returns AggregateRepositoryMock
-    eventricMock.require.withArgs('ReadAggregate').returns ReadAggregateMock
-    eventricMock.require.withArgs('ReadAggregateRepository').returns ReadAggregateRepositoryMock
+    eventricMock.require.withArgs('Repository').returns RepositoryMock
     eventricMock.require.withArgs('HelperUnderscore').returns HelperUnderscoreMock
     mockery.registerMock 'eventric', eventricMock
     mockery.registerMock 'eventric-store-mongodb', mongoDbEventStoreMock
-    aggregateRepositoryMock = sandbox.stub()
+    aggregateServiceMock = sandbox.stub()
     domainEventServiceMock = sandbox.stub()
 
 
@@ -49,52 +44,12 @@ describe 'BoundedContext', ->
       expect(mongoDbEventStoreMock.initialize.calledOnce).to.be.true
 
 
-    it 'should register the configured aggregates at the aggregateRepository', ->
-      boundedContext = eventric.boundedContext()
-
-      FooAggregateMock = root: {}
-      BarAggregateMock = root: {}
-      boundedContext.addAggregate 'Foo', FooAggregateMock
-      boundedContext.addAggregate 'Bar', BarAggregateMock
-
-      boundedContext.initialize()
-
-      expect(AggregateRepositoryMock::registerAggregateDefinition.calledWith 'Foo', FooAggregateMock).to.be.true
-      expect(AggregateRepositoryMock::registerAggregateDefinition.calledWith 'Bar', BarAggregateMock).to.be.true
-
-
-    it 'should instantiate and save the configured read aggregate repositories', ->
-      boundedContext = eventric.boundedContext()
-
-      FooReadAggregateRepository = {}
-      BarReadAggregateRepository = {}
-      boundedContext.addRepository 'Foo', FooReadAggregateRepository
-      boundedContext.addRepository 'Bar', BarReadAggregateRepository
-
-      boundedContext.initialize()
-
-      expect((boundedContext.getRepository 'Foo') instanceof ReadAggregateRepositoryMock).to.be.true
-      expect((boundedContext.getRepository 'Bar') instanceof ReadAggregateRepositoryMock).to.be.true
-
-
-    it 'should instantiate, initialize and save the configured adapters', ->
-      boundedContext = eventric.boundedContext()
-      class SomeAdapter
-        initialize: sandbox.stub()
-      sinon.spy SomeAdapter
-      boundedContext.addAdapter 'someAdapter', SomeAdapter
-      boundedContext.initialize()
-
-      expect(SomeAdapter::initialize).to.have.been.calledOnce
-      expect(boundedContext.getAdapter 'someAdapter').to.be.an.instanceof SomeAdapter
-
-
-    describe 'should initialize aggregaterepository and domaineventservice', ->
+    describe 'should initialize aggregateservice and domaineventservice', ->
       it 'with the mongodb event store per default', ->
         boundedContext = eventric.boundedContext()
         boundedContext.initialize()
 
-        expect(aggregateRepositoryMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
+        expect(aggregateServiceMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
         expect(domainEventServiceMock.calledWith sinon.match.instanceOf MongoDbEventStoreMock).to.be.true
 
 
@@ -105,7 +60,7 @@ describe 'BoundedContext', ->
         boundedContext.set 'store', customEventStoreMock
         boundedContext.initialize()
 
-        expect(aggregateRepositoryMock.calledWith customEventStoreMock).to.be.true
+        expect(aggregateServiceMock.calledWith customEventStoreMock).to.be.true
         expect(domainEventServiceMock.calledWith customEventStoreMock).to.be.true
 
 
@@ -176,15 +131,3 @@ describe 'BoundedContext', ->
         exampleBoundedContext.query query, ->
 
         expect(queryStub.calledWith query.params, sinon.match.func).to.be.true
-
-
-  describe '#onDomainEvent', ->
-    it 'should delegate the handler registration to the domain event service', ->
-      exampleBoundedContext = eventric.boundedContext()
-      exampleBoundedContext.initialize()
-
-      eventName = 'Aggregate:method'
-      eventHandler = ->
-      exampleBoundedContext.onDomainEvent eventName, eventHandler
-
-      expect(DomainEventServiceMock::on.calledWith eventName, eventHandler).to.be.true

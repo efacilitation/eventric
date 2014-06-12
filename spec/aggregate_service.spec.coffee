@@ -1,35 +1,25 @@
 describe 'AggregateService', ->
-  AggregateRepository = eventric.require 'AggregateRepository'
-  DomainEventService  = eventric.require 'DomainEventService'
+  DomainEventService = eventric.require 'DomainEventService'
 
   aggregateStubId = 1
   exampleAggregateRoot = null
-  aggregateRepositoryStub = null
+  repositoryStub = null
   domainEventService = null
   exampleAggregateStub = null
   AggregateService = null
+  eventStoreStub = null
   beforeEach ->
-    exampleAggregateRoot =
-      doSomething: sandbox.stub()
-      create: sandbox.stub()
-
+    eventStoreStub = {}
     class ExampleAggregateStub
       id: aggregateStubId
       create: sandbox.stub()
       generateDomainEvent: sandbox.stub()
       getDomainEvents: sandbox.stub()
-      clearChanges: sandbox.stub()
       command: sandbox.stub()
     exampleAggregateStub = new ExampleAggregateStub
 
-    exampleAggregateRootDefinition =
-      root: sandbox.stub().returns exampleAggregateRoot
-
-    # stub the repository
-    aggregateRepositoryStub = sinon.createStubInstance AggregateRepository
-
-    # getAggregateDefinition returns a Stub which returns the exampleAggregateStub on instantiation
-    aggregateRepositoryStub.getAggregateDefinition.returns exampleAggregateRootDefinition
+    repositoryStub =
+      findById: sandbox.stub()
 
     # stub the DomainEventService
     domainEventService = sinon.createStubInstance DomainEventService
@@ -38,6 +28,7 @@ describe 'AggregateService', ->
     eventricMock =
       require: sandbox.stub()
     eventricMock.require.withArgs('Aggregate').returns ExampleAggregateStub
+    eventricMock.require.withArgs('Repository').returns -> repositoryStub
     eventricMock.require.withArgs('HelperUnderscore').returns eventric.require 'HelperUnderscore'
     eventricMock.require.withArgs('HelperAsync').returns eventric.require 'HelperAsync'
     mockery.registerMock 'eventric', eventricMock
@@ -52,10 +43,11 @@ describe 'AggregateService', ->
     aggregateService = null
     beforeEach ->
       # findById should find nothing
-      aggregateRepositoryStub.findById.yields null, null
+      repositoryStub.findById.yields null, null
 
       # instantiate the AggregateService with the ReadAggregateRepository stub
-      aggregateService = new AggregateService domainEventService, aggregateRepositoryStub
+      aggregateService = new AggregateService eventStoreStub, domainEventService
+      aggregateService.registerAggregateDefinition 'ExampleAggregate', {}
 
 
     it 'should return the aggregateId', (done) ->
@@ -70,10 +62,11 @@ describe 'AggregateService', ->
 
     beforeEach ->
       # findById should find something
-      aggregateRepositoryStub.findById.yields null, exampleAggregateStub
+      repositoryStub.findById.yields null, exampleAggregateStub
 
       # instantiate the command service
-      aggregateService = new AggregateService domainEventService, aggregateRepositoryStub
+      aggregateService = new AggregateService eventStoreStub, domainEventService
+      aggregateService.registerAggregateDefinition 'ExampleAggregate', {}
 
 
     it 'should call the command on the aggregate with empty array of params', (done) ->

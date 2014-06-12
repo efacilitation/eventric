@@ -2,9 +2,6 @@
 require './helper/promise'
 
 moduleDefinition =
-  AggregateRepository: './aggregate_repository'
-  ReadAggregateRepository: './read_aggregate_repository'
-
   Aggregate: './aggregate'
   AggregateService: './aggregate_service'
 
@@ -16,6 +13,8 @@ moduleDefinition =
 
   RemoteService: './remote_service'
   RemoteBoundedContext: './remote_bounded_context'
+
+  Repository: './repository'
 
   HelperAsync: './helper/async'
   HelperEvents: './helper/events'

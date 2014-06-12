@@ -1,12 +1,14 @@
 eventric = require 'eventric'
 
-_         = eventric.require 'HelperUnderscore'
-async     = eventric.require 'HelperAsync'
-Aggregate = eventric.require 'Aggregate'
+_          = eventric.require 'HelperUnderscore'
+async      = eventric.require 'HelperAsync'
+Repository = eventric.require 'Repository'
+Aggregate  = eventric.require 'Aggregate'
 
 class AggregateService
+  _aggregateDefinitions: {}
 
-  constructor: (@_domainEventService, @_aggregateRepository) ->
+  constructor: (@_eventStore, @_domainEventService) ->
     # proxy & queue public api
     _queue = async.queue (payload, next) =>
       payload.originalFunction.call @, payload.arguments..., next
@@ -21,17 +23,15 @@ class AggregateService
       , originalCallback
 
     for originalFunctionName, originalFunction of @
-      if typeof originalFunction isnt 'function' or originalFunctionName is 'constructor' or (originalFunctionName.indexOf '_') is 0
-        # only check non-constructor functions for now
-        continue
-
-      @[originalFunctionName] = _proxy originalFunctionName, originalFunction
+      # proxy only command and create
+      if originalFunctionName is 'command' or originalFunctionName is 'create'
+        @[originalFunctionName] = _proxy originalFunctionName, originalFunction
 
 
   create: ([aggregateName, props]..., callback) ->
-    aggregateDefinition = @_aggregateRepository.getAggregateDefinition aggregateName
+    aggregateDefinition = @getAggregateDefinition aggregateName
     if not aggregateDefinition
-      err = new Error "Tried to create not registered Aggregate '#{aggregateName}'"
+      err = new Error "Tried to create not registered AggregateDefinition '#{aggregateName}'"
       callback err, null
       return
 
@@ -39,21 +39,23 @@ class AggregateService
     aggregate = new Aggregate aggregateName, aggregateDefinition
     aggregate.create props
 
-    @_aggregateRepository.findById aggregateName, aggregate.id, (err, aggregateCheck) =>
-      return callback err, null if err
-
-      # if for some reason we try to create an already existing aggregateId, skip now
-      if aggregateCheck
-        err = new Error "Tried to create already existing aggregateId #{aggregate.id}"
-        callback err, null
-        return
-
-      @_generateSaveAndTriggerDomainEvent 'create', aggregate, callback
+    @_generateSaveAndTriggerDomainEvent 'create', aggregate, callback
 
 
   command: ([aggregateName, aggregateId, commandName, params]..., callback) ->
+    aggregateDefinition = @getAggregateDefinition aggregateName
+    if not aggregateDefinition
+      err = new Error "Tried to command not registered AggregateDefinition '#{aggregateName}'"
+      callback err, null
+      return
+
+    repository = new Repository
+      aggregateName: aggregateName
+      aggregateDefinition: aggregateDefinition
+      eventStore: @_eventStore
+
     # get the aggregate from the AggregateRepository
-    @_aggregateRepository.findById aggregateName, aggregateId, (err, aggregate) =>
+    repository.findById aggregateId, (err, aggregate) =>
       return callback err, null if err
 
       if not aggregate
@@ -92,6 +94,14 @@ class AggregateService
 
       # return the aggregateId
       callback? null, aggregate.id
+
+
+  registerAggregateDefinition: (aggregateName, aggregateDefinition) ->
+    @_aggregateDefinitions[aggregateName] = aggregateDefinition
+
+
+  getAggregateDefinition: (aggregateName) ->
+    @_aggregateDefinitions[aggregateName]
 
 
 module.exports = AggregateService

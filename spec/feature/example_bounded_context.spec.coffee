@@ -18,26 +18,24 @@ describe 'Example BoundedContext Feature', ->
     describe 'when we command the bounded context to create an aggregate', ->
       props =
         some: 'props'
-      beforeEach (done) ->
+      beforeEach ->
         exampleContext.addCommand 'createExample', ->
           @aggregate.create 'Example', props, ->
 
-        exampleContext.initialize ->
-          done()
-
 
       it 'then it should haved triggered the correct DomainEvent', (done) ->
-        exampleContext.onDomainEvent 'Example:create', (domainEvent) ->
+        exampleContext.addDomainEventHandler 'Example:create', (domainEvent) ->
           expect(domainEvent.getName()).to.equal 'create'
           expect(domainEvent.getAggregateChanges()).to.deep.equal props
           done()
 
-        exampleContext.command
-          name: 'createExample'
+        exampleContext.initialize ->
+          exampleContext.command
+            name: 'createExample'
 
 
     describe 'when we command the bounded context to command an aggregate', ->
-      beforeEach (done) ->
+      beforeEach ->
         eventStoreMock.find.yields null, [
           aggregate:
             id: 1
@@ -77,21 +75,19 @@ describe 'Example BoundedContext Feature', ->
           someBoundedContextFunction: (params, callback) ->
             @aggregate.command 'Example', params.id, 'someRootFunction', 1, callback
 
-        exampleContext.initialize ->
-          done()
-
 
       it 'then it should have triggered the correct DomainEvent', (done) ->
-        exampleContext.onDomainEvent 'Example:someRootFunction', (domainEvent) ->
+        exampleContext.addDomainEventHandler 'Example:someRootFunction', (domainEvent) ->
           changes = domainEvent.getAggregateChanges()
           expect(changes.entities[2].entityProp).to.equal 'bar'
           expect(domainEvent.getName()).to.equal 'someRootFunction'
           done()
 
-        exampleContext.command
-          name: 'someBoundedContextFunction'
-          params:
-            id: 1
+        exampleContext.initialize ->
+          exampleContext.command
+            name: 'someBoundedContextFunction'
+            params:
+              id: 1
 
 
     describe 'when we use a command which calls a previously added adapter function', (done) ->
@@ -150,7 +146,7 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.query
           name: 'getExample'
         .then (readExample) ->
-          expect(readExample.toJSON().foo).to.equal 'bar'
+          expect(readExample.foo).to.equal 'bar'
           done()
 
 
@@ -175,7 +171,7 @@ describe 'Example BoundedContext Feature', ->
             ]
         ]
 
-        exampleContext.addReadAggregate 'Example', class Example
+        exampleContext.addReadAggregate 'Example', root: class Example
           getFoo: ->
             @foo
 
@@ -190,7 +186,7 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.query
           name: 'getExample'
           , (err, readExample) ->
-            expect(readExample._root.getFoo()).to.equal 'bar'
+            expect(readExample.getFoo()).to.equal 'bar'
             done()
 
 
@@ -229,5 +225,5 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.query
           name: 'getExample'
           , (err, readExample) ->
-            expect(readExample[0].toJSON().foo).to.equal 'bar'
+            expect(readExample[0].foo).to.equal 'bar'
             done()

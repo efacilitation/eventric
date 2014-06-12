@@ -25,6 +25,10 @@ ObjectDiff =
       if valueType == 'object' && Array.isArray val
         valueType = 'array'
 
+      if valueType == 'function'
+        # we ignore functions
+        return true
+
       eachPath.push
         key: key
         valueType: valueType
@@ -58,6 +62,10 @@ ObjectDiff =
       valueType = typeof val
       if valueType == 'object' && Array.isArray val
         valueType = 'array'
+
+      if valueType == 'function'
+        # we ignore functions
+        return true
 
       eachPath.push
         key: key

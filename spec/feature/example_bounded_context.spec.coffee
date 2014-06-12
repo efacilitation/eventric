@@ -42,8 +42,18 @@ describe 'Example BoundedContext Feature', ->
           aggregate:
             id: 1
             name: 'Example'
-            changed:
-              entities: []
+            diff: [
+              {
+                type: 'added'
+                path: [
+                  {
+                    key: 'entities'
+                    valueType: 'array'
+                  }
+                ]
+                value: []
+              }
+            ]
         ]
 
         class ExampleEntity
@@ -56,7 +66,7 @@ describe 'Example BoundedContext Feature', ->
             @rootProp = 'foo'
             entity = new ExampleEntity
             entity.someEntityFunction()
-            @entities.push entity
+            @entities[2] = entity
 
         exampleContext.addAggregate 'Example',
           root: ExampleRoot
@@ -71,10 +81,10 @@ describe 'Example BoundedContext Feature', ->
           done()
 
 
-      it.skip 'then it should have triggered the correct DomainEvent', (done) ->
+      it 'then it should have triggered the correct DomainEvent', (done) ->
         exampleContext.onDomainEvent 'Example:someRootFunction', (domainEvent) ->
           changes = domainEvent.getAggregateChanges()
-          expect(changes.entities[0].entityProp).to.equal 'bar'
+          expect(changes.entities[2].entityProp).to.equal 'bar'
           expect(domainEvent.getName()).to.equal 'someRootFunction'
           done()
 
@@ -113,8 +123,18 @@ describe 'Example BoundedContext Feature', ->
           aggregate:
             id: 1
             name: 'Example'
-            changed:
-              foo: 'bar'
+            diff: [
+              {
+                type: 'added'
+                path: [
+                  {
+                    key: 'foo'
+                    valueType: 'string'
+                  }
+                ]
+                value: 'bar'
+              }
+            ]
         ]
 
         exampleContext.addQueries
@@ -141,8 +161,18 @@ describe 'Example BoundedContext Feature', ->
           aggregate:
             id: 1
             name: 'Example'
-            changed:
-              foo: 'bar'
+            diff: [
+              {
+                type: 'added'
+                path: [
+                  {
+                    key: 'foo'
+                    valueType: 'string'
+                  }
+                ]
+                value: 'bar'
+              }
+            ]
         ]
 
         exampleContext.addReadAggregate 'Example', class Example
@@ -170,8 +200,18 @@ describe 'Example BoundedContext Feature', ->
           aggregate:
             id: 1
             name: 'Example'
-            changed:
-              foo: 'bar'
+            diff: [
+              {
+                type: 'added'
+                path: [
+                  {
+                    key: 'foo'
+                    valueType: 'string'
+                  }
+                ]
+                value: 'bar'
+              }
+            ]
         ]
 
         exampleContext.addRepository 'Example',

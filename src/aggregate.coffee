@@ -3,14 +3,15 @@ eventric = require 'eventric'
 _               = eventric.require 'HelperUnderscore'
 Clone           = eventric.require 'HelperClone'
 DomainEvent     = eventric.require 'DomainEvent'
+ObjectDiff      = eventric.require 'HelperObjectDiff'
 
 class Aggregate
 
   constructor: (name, definition) ->
     @_name         = name
-    @_propsChanged = {}
     @_domainEvents = []
     @_definition   = definition
+    @_oldRoot      = {}
     @_root         = new @_definition.root
 
 
@@ -46,8 +47,9 @@ class Aggregate
         id: @id
         name: @_name
 
-    if Object.keys(@_propsChanged).length > 0
-      eventParams.aggregate.changed = @_propsChanged
+    diff = ObjectDiff.getDifferences @_oldRoot, @_root
+    eventParams.aggregate.diff = diff
+    eventParams.aggregate.changed = ObjectDiff.applyDifferences {}, diff
 
     entityMap = @_getEntityMap()
     if Object.keys(entityMap).length > 0
@@ -89,12 +91,12 @@ class Aggregate
 
   applyDomainEvents: (domainEvents) ->
     @_applyDomainEvent domainEvent for domainEvent in domainEvents
+    @_oldRoot = Clone @_root
 
 
   _applyDomainEvent: (domainEvent) ->
-    if domainEvent.aggregate.changed
-      for propName, propValue of domainEvent.aggregate.changed
-        @_root[propName] = propValue
+    if domainEvent.aggregate.diff
+      ObjectDiff.applyDifferences @_root, domainEvent.aggregate.diff
 
 
   toJSON: ->

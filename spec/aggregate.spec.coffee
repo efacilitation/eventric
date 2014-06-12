@@ -84,17 +84,36 @@ describe 'Aggregate', ->
       domainEvent = new DomainEvent
         name: 'someEvent'
         aggregate:
-          changed:
-            name: 'ChangedJohn'
-            nested:
-              structure: 'foo'
+          diff: [
+            {
+              type: 'added'
+              path: [
+                {
+                  key: 'name'
+                  valueType: 'string'
+                }
+              ]
+              value: 'ChangedJohn'
+            }
+            {
+              type: 'added'
+              path: [
+                {
+                  key: 'nested'
+                  valueType: 'object'
+                }
+              ]
+              value:
+                structure: 'foo'
+            }
+          ]
       myAggregate.applyDomainEvents [domainEvent]
 
       json = myAggregate.toJSON()
       expect(json.name).to.equal 'ChangedJohn'
       expect(json.nested.structure).to.equal 'foo'
       myAggregate.generateDomainEvent 'someEvent'
-      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.be.undefined
+      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal {}
 
 
   describe '#command', ->

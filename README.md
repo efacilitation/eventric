@@ -117,7 +117,7 @@ collaborationContext.initialize(function() {
       }
     })
   }).then(function(readTodo) {
-    console.log(readTodo.toJSON().description)
+    console.log(readTodo.description)
   })
 
 });

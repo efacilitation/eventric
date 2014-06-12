@@ -1,6 +1,5 @@
-# polyfills
+# polyfill promises
 require './helper/promise'
-require './helper/observe'
 
 moduleDefinition =
   AggregateRepository: './aggregate_repository'
@@ -22,6 +21,7 @@ moduleDefinition =
   HelperEvents: './helper/events'
   HelperUnderscore: './helper/underscore'
   HelperClone: './helper/clone'
+  HelperObjectDiff: './helper/objectdiff'
 
   BoundedContext: './bounded_context'
 

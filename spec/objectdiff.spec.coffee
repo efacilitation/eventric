@@ -8,7 +8,7 @@ test = (oldObject, newObject) ->
   expect(newObject).to.deep.equal appliedObj
 
 
-describe.only 'Object Differences', ->
+describe 'Object Differences', ->
   oldObject = null
   newObject = null
 

@@ -7,13 +7,11 @@ DomainEvent     = eventric.require 'DomainEvent'
 class Aggregate
 
   constructor: (name, definition) ->
-    @_name              = name
-    @_definition        = definition
-    @_root              = new @_definition.root
-    @_propsChanged      = {}
-    @_domainEvents      = []
-
-    @_observerOpen()
+    @_name         = name
+    @_propsChanged = {}
+    @_domainEvents = []
+    @_definition   = definition
+    @_root         = new @_definition.root
 
 
   create: (props) ->
@@ -41,23 +39,7 @@ class Aggregate
     S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
 
 
-  _observerOpen: ->
-    @_observer = new ObjectObserver @_root
-    @_observer.open (added, removed, changed, getOldValueFn) =>
-      Object.keys(added).forEach (property) =>
-        @_propsChanged[property] = added[property]
-
-      Object.keys(changed).forEach (property) =>
-        @_propsChanged[property] = changed[property]
-
-
-  _observerClose: ->
-    @_observer.close()
-
-
   generateDomainEvent: (eventName, params={}) ->
-    @_observer.deliver()
-
     eventParams =
       name: eventName
       aggregate:
@@ -106,9 +88,7 @@ class Aggregate
 
 
   applyDomainEvents: (domainEvents) ->
-    @_observerClose()
     @_applyDomainEvent domainEvent for domainEvent in domainEvents
-    @_observerOpen()
 
 
   _applyDomainEvent: (domainEvent) ->

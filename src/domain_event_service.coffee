@@ -1,8 +1,8 @@
 eventric = require 'eventric'
 
-async       = eventric.require 'HelperAsync'
-MixinEvents = eventric.require 'HelperEvents'
-_           = eventric.require 'HelperUnderscore'
+async        = eventric.require 'HelperAsync'
+HelperEvents = eventric.require 'HelperEvents'
+_            = eventric.require 'HelperUnderscore'
 
 class DomainEventService
 

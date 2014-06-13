@@ -52,7 +52,7 @@ class Aggregate
         id: @id
         name: @_name
 
-    diff = ObjectDiff.getDifferences @_oldRoot, @_root
+    diff = ObjectDiff.calculateDifferences @_oldRoot, @_root
     eventParams.aggregate.diff = diff
     eventParams.aggregate.changed = ObjectDiff.applyDifferences {}, diff
 

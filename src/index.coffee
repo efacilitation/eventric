@@ -20,7 +20,7 @@ moduleDefinition =
   HelperEvents: './helper/events'
   HelperUnderscore: './helper/underscore'
   HelperClone: './helper/clone'
-  HelperObjectDiff: './helper/objectdiff'
+  HelperObjectDiff: './helper/diff2'
 
   BoundedContext: './bounded_context'
 

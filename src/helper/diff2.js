@@ -24,7 +24,7 @@ Diff = (function() {
         key: key,
         valueType: newValueType
       };
-      path = path.concat([pathElement]);
+      path = [].concat(path, [pathElement]);
     }
     if (!oldValue) {
       return [this._createDifference(Diff.DIFFERENCE_TYPES.ADDED, path, newValue)];
@@ -92,7 +92,9 @@ Diff = (function() {
     return {}.toString.call(input) === "[object Array]";
   };
 
-  Diff.prototype.applyDifferences = function(object, differences) {
+  Diff.prototype.applyDifferences = function(object, originalDifferences) {
+    var differences;
+    differences = this._clone(originalDifferences);
     differences.forEach((function(_this) {
       return function(difference) {
         var lastKey, lastReference;
@@ -124,6 +126,22 @@ Diff = (function() {
     if (type === 'array') {
       return [];
     }
+  };
+
+  Diff.prototype._clone = function(input) {
+    var output;
+    output = null;
+    if (typeof input === 'object') {
+      output = this._createFromType(this._getType(input));
+      Object.keys(input).forEach((function(_this) {
+        return function(key) {
+          return output[key] = _this._clone(input[key]);
+        };
+      })(this));
+    } else {
+      output = input;
+    }
+    return output;
   };
 
   return Diff;

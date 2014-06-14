@@ -62,6 +62,13 @@ class BoundedContext
     @_params[key] = value
 
 
+  addApplicationService: (serviceObj) ->
+    for type, typeObj of serviceObj
+      switch type
+        when 'commands' then @addCommands serviceObj[type]
+        when 'queries' then @addQueries serviceObj[type]
+
+
   addCommand: (commandName, fn) ->
     @_applicationServiceCommands[commandName] = => fn.apply @_di, arguments
 

@@ -97,9 +97,11 @@ describe 'Example BoundedContext Feature', ->
           someAdapterFunction: sandbox.stub()
         exampleContext.addAdapter 'exampleAdapter', ExampleAdapter
 
-        exampleContext.addCommand 'doSomething', (params, callback) ->
-          @adapter('exampleAdapter').someAdapterFunction()
-          callback()
+        exampleContext.addApplicationService
+          commands:
+            doSomething: (params, callback) ->
+              @adapter('exampleAdapter').someAdapterFunction()
+              callback()
 
         exampleContext.initialize ->
           done()
@@ -175,8 +177,10 @@ describe 'Example BoundedContext Feature', ->
           getFoo: ->
             @foo
 
-        exampleContext.addQuery 'getExample', (params, callback) ->
-          @repository('Example').findById 1, callback
+        exampleContext.addApplicationService
+          queries:
+            getExample: (params, callback) ->
+              @repository('Example').findById 1, callback
 
         exampleContext.initialize ->
           done()

@@ -8,7 +8,7 @@ class DomainEventService
 
   _.extend @prototype, HelperEvents
 
-  constructor: (@_eventStore) ->
+  initialize: (@_eventStore) ->
 
   saveAndTrigger: (domainEvents, callback) ->
     # TODO: this should be an transaction to guarantee the consistency of the aggregate

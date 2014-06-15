@@ -46,7 +46,8 @@ describe 'AggregateService', ->
       repositoryStub.findById.yields null, null
 
       # instantiate the AggregateService with the ReadAggregateRepository stub
-      aggregateService = new AggregateService eventStoreStub, domainEventService
+      aggregateService = new AggregateService
+      aggregateService.initialize eventStoreStub, domainEventService
       aggregateService.registerAggregateDefinition 'ExampleAggregate', {}
 
 
@@ -65,7 +66,8 @@ describe 'AggregateService', ->
       repositoryStub.findById.yields null, exampleAggregateStub
 
       # instantiate the command service
-      aggregateService = new AggregateService eventStoreStub, domainEventService
+      aggregateService = new AggregateService
+      aggregateService.initialize eventStoreStub, domainEventService
       aggregateService.registerAggregateDefinition 'ExampleAggregate', {}
 
 

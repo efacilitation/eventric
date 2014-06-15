@@ -10,7 +10,8 @@ describe 'DomainEventService', ->
       save: ->
     eventStore = sinon.createStubInstance EventStore
     eventStore.save.yields null
-    domainEventService = new DomainEventService eventStore
+    domainEventService = new DomainEventService
+    domainEventService.initialize eventStore
 
 
   describe '#saveAndTrigger', ->

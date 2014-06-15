@@ -20,42 +20,17 @@ class BoundedContext
   _domainEventHandlers: {}
 
 
-  initialize: (callback) ->
-    @_initializeEventStore =>
-      @_domainEventService = new DomainEventService @_eventStore
-      @_aggregateService   = new AggregateService @_eventStore, @_domainEventService
+  initialize: (@_name, @_eventStore) ->
+    @_domainEventService = new DomainEventService
+    @_domainEventService.initialize @_eventStore
 
-      @_di =
-        aggregate: @_aggregateService
-        repository: => @getRepository.apply @, arguments
-        adapter: => @getAdapter.apply @, arguments
+    @_aggregateService = new AggregateService
+    @_aggregateService.initialize @_eventStore, @_domainEventService
 
-      @_initializeAggregateService()
-      @_initializeDomainEventHandlers()
-
-      callback? null
-
-
-  _initializeEventStore: (next) ->
-    if @_params.store
-      @_eventStore = @_params.store
-      next()
-    else
-      # TODO: refactor to use a pseudo-store (which just logs that it wont save anything)
-      @_eventStore = require 'eventric-store-mongodb'
-      @_eventStore.initialize (err) =>
-        next()
-
-
-  _initializeAggregateService: () ->
-    for aggregateName, aggregateDefinition of @_aggregateDefinitions
-      @_aggregateService.registerAggregateDefinition aggregateName, aggregateDefinition
-
-
-  _initializeDomainEventHandlers: ->
-    for domainEventName, fnArray of @_domainEventHandlers
-      for fn in fnArray
-        @_domainEventService.on domainEventName, fn
+    @_di =
+      aggregate: @_aggregateService
+      repository: => @getRepository.apply @, arguments
+      adapter: => @getAdapter.apply @, arguments
 
 
   set: (key, value) ->
@@ -86,7 +61,7 @@ class BoundedContext
 
 
   addAggregate: (aggregateName, aggregateDefinitionObj) ->
-    @_aggregateDefinitions[aggregateName] = aggregateDefinitionObj
+    @_aggregateService.registerAggregateDefinition aggregateName, aggregateDefinitionObj
 
 
   addReadAggregate: (aggregateName, ReadAggregate) ->
@@ -98,8 +73,7 @@ class BoundedContext
 
 
   addDomainEventHandler: (eventName, handlerFn) ->
-    @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
-    @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
+    @_domainEventService.on eventName, handlerFn
 
 
   addAdapter: (adapterName, adapterClass) ->
@@ -114,6 +88,7 @@ class BoundedContext
     # return cache if available
     return @_repositoryInstances[aggregateName] if @_repositoryInstances[aggregateName]
 
+    # TODO: constructing while get may a violation of SRP?
     # define name, event store and that we only want to return readaggregates
     repositoryParams =
       aggregateName: aggregateName

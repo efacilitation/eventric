@@ -8,7 +8,7 @@ Aggregate  = eventric.require 'Aggregate'
 class AggregateService
   _aggregateDefinitions: {}
 
-  constructor: (@_eventStore, @_domainEventService) ->
+  initialize: (@_eventStore, @_domainEventService) ->
     # proxy & queue public api
     _queue = async.queue (payload, next) =>
       payload.originalFunction.call @, payload.arguments..., next

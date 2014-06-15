@@ -10,10 +10,10 @@ describe 'Aggregate', ->
             name: 'John'
       myAggregate = new Aggregate 'MyAggregate', root: class Foo
       myAggregate.create someProps
-
-      myAggregate.generateDomainEvent 'someEvent'
-      expect(myAggregate.getDomainEvents()[0].getName()).to.equal 'someEvent'
-      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal someProps
+      .then =>
+        myAggregate.generateDomainEvent 'someEvent'
+        expect(myAggregate.getDomainEvents()[0].getName()).to.equal 'someEvent'
+        expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal someProps
 
 
     it.skip 'should include the change even if the value was already applied', ->
@@ -32,9 +32,10 @@ describe 'Aggregate', ->
       myAggregate.command
         name: 'changeName'
         props: ['Willy']
-      myAggregate.generateDomainEvent()
-      expect(myAggregate.getDomainEvents()[0].getAggregateChanges().name).to.deep.equal
-        name: 'Willy'
+      .then =>
+        myAggregate.generateDomainEvent()
+        expect(myAggregate.getDomainEvents()[0].getAggregateChanges().name).to.deep.equal
+          name: 'Willy'
 
 
     it 'should add the correct entity class map to the domain event', ->
@@ -56,16 +57,16 @@ describe 'Aggregate', ->
       myAggregate = new Aggregate 'MyAggregate', aggregateDefinition, foo: 'bar'
       myAggregate.command
         name: 'createEntities'
-
-      myAggregate.generateDomainEvent 'someEvent'
-      expect(myAggregate.getDomainEvents()[0].aggregate.entityMap).to.deep.equal
-        'Bar': [
-          ['bar']
-          ['moo', 2]
-        ]
-        'Moo': [
-          ['moo', 0]
-        ]
+      .then =>
+        myAggregate.generateDomainEvent 'someEvent'
+        expect(myAggregate.getDomainEvents()[0].aggregate.entityMap).to.deep.equal
+          'Bar': [
+            ['bar']
+            ['moo', 2]
+          ]
+          'Moo': [
+            ['moo', 0]
+          ]
 
 
   describe '#getDomainEvents', ->
@@ -130,9 +131,8 @@ describe 'Aggregate', ->
         name: 'someMethod'
         params: someParameters
       myAggregate.command command
-
-
-      expect(Foo::someMethod).to.have.been.calledWith command.params...
+      .then =>
+        expect(Foo::someMethod).to.have.been.calledWith command.params...
 
 
     it 'should callback with error if the command does not exist in the root', (done) ->
@@ -141,7 +141,7 @@ describe 'Aggregate', ->
       myAggregate.command
         name: 'someMethod'
         params: []
-      , (error) ->
+      .catch (error) =>
         expect(error).to.be.an.instanceof Error
         done()
 
@@ -154,5 +154,5 @@ describe 'Aggregate', ->
       myAggregate.command
         name: 'someMethod'
         params: 'foo'
-
-      expect(Foo::someMethod).to.have.been.calledWith 'foo'
+      .then =>
+        expect(Foo::someMethod).to.have.been.calledWith 'foo'

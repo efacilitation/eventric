@@ -22,7 +22,9 @@ describe 'Example BoundedContext Feature', ->
         some: 'props'
       beforeEach ->
         exampleContext.addCommand 'createExample', ->
-          @aggregate.create 'Example', props, ->
+          @aggregate.create
+            name: 'Example'
+            props: props
 
 
       it 'then it should haved triggered the correct DomainEvent', (done) ->
@@ -73,8 +75,12 @@ describe 'Example BoundedContext Feature', ->
             'ExampleEntity': ExampleEntity
 
         exampleContext.addCommands
-          someBoundedContextFunction: (params, callback) ->
-            @aggregate.command 'Example', params.id, 'someRootFunction', 1, callback
+          someBoundedContextFunction: (params) ->
+            @aggregate.command
+              id: params.id
+              name: 'Example'
+              methodName: 'someRootFunction'
+              methodParams: [1]
 
 
       it 'then it should have triggered the correct DomainEvent', (done) ->

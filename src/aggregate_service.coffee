@@ -10,17 +10,18 @@ class AggregateService
 
   initialize: (@_eventStore, @_domainEventService) ->
     # proxy & queue public api
-    _queue = async.queue (payload, next) =>
-      payload.originalFunction.call @, payload.arguments..., next
+    _queue = async.queue (payload) =>
+      payload.originalFunction.call @, payload.arguments..., payload.resolve, payload.reject
     , 1
 
     _proxy = (_originalFunctionName, _originalFunction) -> ->
-      originalCallback = arguments[arguments.length - 1]
-      delete arguments[arguments.length - 1]
-      _queue.push
-        originalFunction: _originalFunction
-        arguments: arguments
-      , originalCallback
+      originalArguments = arguments
+      new Promise (resolve, reject) ->
+        _queue.push
+          originalFunction: _originalFunction
+          arguments: originalArguments
+          resolve: resolve
+          reject: reject
 
     for originalFunctionName, originalFunction of @
       # proxy only command and create
@@ -28,26 +29,36 @@ class AggregateService
         @[originalFunctionName] = _proxy originalFunctionName, originalFunction
 
 
-  create: ([aggregateName, props]..., callback) ->
+  create: (params, resolve, reject) ->
+    aggregateName  = params.name
+    aggregateProps = params.props
+
     aggregateDefinition = @getAggregateDefinition aggregateName
     if not aggregateDefinition
       err = new Error "Tried to create not registered AggregateDefinition '#{aggregateName}'"
-      callback err, null
-      return
+      return reject err
 
     # create Aggregate
     aggregate = new Aggregate aggregateName, aggregateDefinition
-    aggregate.create props
+    aggregate.create aggregateProps
 
-    @_generateSaveAndTriggerDomainEvent 'create', aggregate, callback
+    .then =>
+      @_generateSaveAndTriggerDomainEvent aggregate, 'create', resolve, reject
+
+    .catch (err) =>
+      reject err
 
 
-  command: ([aggregateName, aggregateId, commandName, params]..., callback) ->
+  command: (params, resolve, reject) ->
+    aggregateId   = params.id
+    aggregateName = params.name
+    methodName    = params.methodName
+    methodParams  = params.methodParams
+
     aggregateDefinition = @getAggregateDefinition aggregateName
     if not aggregateDefinition
       err = new Error "Tried to command not registered AggregateDefinition '#{aggregateName}'"
-      callback err, null
-      return
+      return reject err
 
     repository = new Repository
       aggregateName: aggregateName
@@ -56,44 +67,38 @@ class AggregateService
 
     # get the aggregate from the AggregateRepository
     repository.findById aggregateId, (err, aggregate) =>
-      return callback err, null if err
+      return reject err if err
 
       if not aggregate
         err = new Error "No #{aggregateName} Aggregate with given aggregateId #{aggregateId} found"
-        callback err, null
-        return
+        return reject err
 
-      # TODO: Should be ok as long as aggregates arent async
-      errorCallbackCalled = false
-      errorCallback = (err) =>
-        errorCallbackCalled = true
-        callback err
-
-      if !params
-        params = []
+      if !methodParams
+        methodParams = []
 
       # EXECUTING
       aggregate.command
-        name: commandName
-        params: params
-      , errorCallback
+        name: methodName
+        params: methodParams
 
-      return if errorCallbackCalled
+      .then =>
+        @_generateSaveAndTriggerDomainEvent aggregate, methodName, resolve, reject
 
-      @_generateSaveAndTriggerDomainEvent commandName, aggregate, callback
+      .catch (err) =>
+        reject err
 
 
-  _generateSaveAndTriggerDomainEvent: (commandName, aggregate, callback) ->
+  _generateSaveAndTriggerDomainEvent: (aggregate, methodName, resolve, reject) ->
     # generate the DomainEvent
-    aggregate.generateDomainEvent commandName
+    aggregate.generateDomainEvent methodName
 
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
     @_domainEventService.saveAndTrigger domainEvents, (err) =>
-      return callback err, null if err
+      return reject err if err
 
       # return the aggregateId
-      callback? null, aggregate.id
+      resolve aggregate.id
 
 
   registerAggregateDefinition: (aggregateName, aggregateDefinition) ->

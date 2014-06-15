@@ -8,14 +8,27 @@ describe 'AggregateService', ->
   exampleAggregateStub = null
   AggregateService = null
   eventStoreStub = null
+  thenStub = null
+  catchStub = null
   beforeEach ->
     eventStoreStub = {}
+    # TODO: stub promises in a more sane fashion
+    catchStub = sandbox.stub()
+    thenStub = sandbox.stub()
     class ExampleAggregateStub
       id: aggregateStubId
-      create: sandbox.stub()
+      create: sandbox.stub().returns
+        then: thenStub.returns
+          catch: catchStub
+        catch: catchStub.returns
+          then: thenStub
+      command: sandbox.stub().returns
+        then: thenStub.returns
+          catch: catchStub
+        catch: catchStub.returns
+          then: thenStub
       generateDomainEvent: sandbox.stub()
       getDomainEvents: sandbox.stub()
-      command: sandbox.stub()
     exampleAggregateStub = new ExampleAggregateStub
 
     repositoryStub =
@@ -52,13 +65,15 @@ describe 'AggregateService', ->
 
 
     it 'should return the aggregateId', (done) ->
-      aggregateService.create 'ExampleAggregate', (err, aggregateId) ->
+      thenStub.yields null
+      aggregateService.create
+        name: 'ExampleAggregate'
+      .then (aggregateId) ->
         expect(aggregateId).to.equal aggregateStubId
         done()
 
 
   describe '#command', ->
-    exampleAggregateStub = null
     aggregateService = null
 
     beforeEach ->
@@ -72,7 +87,12 @@ describe 'AggregateService', ->
 
 
     it 'should call the command on the aggregate with empty array of params', (done) ->
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      thenStub.yields null
+      aggregateService.command
+        id: 1
+        name: 'ExampleAggregate'
+        methodName: 'doSomething'
+      .then ->
         expect(exampleAggregateStub.command).to.have.been.calledWith
           name: 'doSomething'
           params: []
@@ -80,7 +100,13 @@ describe 'AggregateService', ->
 
 
     it 'should call the command on the aggregate with the given argument and an error callback', (done) ->
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo'],  (err, aggregateId) ->
+      thenStub.yields null
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+        methodParams: ['foo']
+      .then ->
         expect(exampleAggregateStub.command).to.have.been.calledWith
           name: 'doSomething'
           params: ['foo']
@@ -88,29 +114,50 @@ describe 'AggregateService', ->
 
 
     it 'should call the command on the aggregate with the given arguments and an error callback', (done) ->
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'],  (err, aggregateId) ->
+      thenStub.yields null
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+        methodParams: ['foo', 'bar']
+      .then ->
         expect(exampleAggregateStub.command).to.have.been.calledWith
           name: 'doSomething'
           params: ['foo', 'bar']
         done()
 
 
-    it 'should call the callback with an error if there was an error at the aggregate', (done) ->
-      exampleAggregateStub.command.yields 'AGGREGATE_ERROR'
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
+    it 'should reject with an error if there was an error at the aggregate', (done) ->
+      catchStub.yields 'AGGREGATE_ERROR'
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+        methodParams: ['foo', 'bar']
+      .catch (err) ->
         expect(err).to.equal 'AGGREGATE_ERROR'
         done()
 
 
     it 'should not call the generateDomainEvent method of the given aggregate if there was an error at the aggregate', (done) ->
-      exampleAggregateStub.command.yields 'AGGREGATE_ERROR'
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', ['foo', 'bar'], (err, aggregateId) ->
+      catchStub.yields 'AGGREGATE_ERROR'
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+        methodParams: ['foo', 'bar']
+      .catch ->
         expect(exampleAggregateStub.generateDomainEvent.notCalled).to.be.true
         done()
 
 
     it 'should call the generateDomainEvent method of the given aggregate', (done) ->
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      thenStub.yields null
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+      .then ->
         expect(exampleAggregateStub.generateDomainEvent.calledWith 'doSomething').to.be.true
         done()
 
@@ -118,13 +165,22 @@ describe 'AggregateService', ->
     it 'should call saveAndTrigger on DomainEventService with the generated DomainEvents', (done) ->
       events = {}
       exampleAggregateStub.getDomainEvents.returns events
-
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      thenStub.yields null
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+      .then ->
         expect(domainEventService.saveAndTrigger.withArgs(events).calledOnce).to.be.true
         done()
 
 
     it 'should return the aggregateId', (done) ->
-      aggregateService.command 'ExampleAggregate', 1, 'doSomething', (err, aggregateId) ->
+      thenStub.yields null
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+      .then (aggregateId) ->
         expect(aggregateId).to.equal 1
         done()

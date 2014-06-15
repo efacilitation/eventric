@@ -21,20 +21,49 @@ class Aggregate
 
 
   create: (props) ->
-    @id = @_generateUid()
+    new Promise (resolve, reject) =>
+      @id = @_generateUid()
 
-    if typeof @_root.create == 'function'
-      # TODO: Should be ok as long as aggregates arent async
-      errorCallbackCalled = false
-      errorCallback = (err) =>
-        errorCallbackCalled = true
-        callback err
+      if typeof @_root.create == 'function'
+        try
+          check = @_root.create props
+          if check instanceof Promise
+            check.then =>
+              resolve()
+            check.catch (err) =>
+              reject err
+          else
+            resolve()
+        catch e
+          reject e
 
-      @_root.create props, errorCallback
+      else
+        @_root[key] = value for key, value of props
+        resolve()
 
-      return if errorCallbackCalled
-    else
-      @_root[key] = value for key, value of props
+
+  command: (command) ->
+    new Promise (resolve, reject) =>
+      if command.name not of @_root
+        err = new Error "Given commandName '#{command.name}' not found as method in the #{@_name} Aggregate Root"
+        return reject err
+
+      # make sure we have a params array
+      command.params = [] if !command.params
+      if not (command.params instanceof Array)
+        command.params = [command.params]
+
+      try
+        check = @_root[command.name] command.params...
+        if check instanceof Promise
+          check.then =>
+            resolve()
+          check.catch (err) =>
+            reject err
+        else
+          resolve()
+      catch err
+        reject err
 
 
   _generateUid: (separator) ->
@@ -106,20 +135,6 @@ class Aggregate
 
   toJSON: ->
     Clone @_root
-
-
-  command: (command, errorCallback) ->
-    if command.name not of @_root
-      err = new Error "Given commandName '#{command.name}' not found as method in the #{@_name} Aggregate Root"
-      errorCallback err
-      return
-
-    # make sure we have a params array
-    command.params = [] if !command.params
-    if not (command.params instanceof Array)
-      command.params = [command.params]
-
-    @_root[command.name] command.params..., errorCallback
 
 
 module.exports = Aggregate

@@ -12,33 +12,47 @@ describe 'Index', ->
     mongoDbEventStoreMock = new MongoDbEventStoreMock
     mockery.registerMock 'eventric-store-mongodb', mongoDbEventStoreMock
 
-    mockery.registerMock './bounded_context', BoundedContextStub
+    sandbox.stub eventric, 'require', -> BoundedContextStub
 
 
   describe '#boundedContext', ->
 
-    it 'should return a promise', ->
-      someContext = eventric.boundedContext()
-      expect(someContext).to.be.an.instanceof Promise
+    describe 'given no name', ->
+      it 'should return an error', ->
+        someContext = eventric.boundedContext()
+        expect(someContext).to.be.an.instanceof Error
 
 
-    it 'should reject if no name was given', (done) ->
-      eventric.boundedContext().catch (error) ->
-        expect(error).to.be.an.instanceof Error
-        done()
+    describe 'given no store', ->
+      it 'should return an error', ->
+        someContext = eventric.boundedContext
+          name: 'someContext'
+        expect(someContext).to.be.an.instanceof Error
 
 
-    it 'should resolve if a name and store was given', (done) ->
-      eventric.boundedContext
-        name: 'someContext'
-        store: {}
-      .then (someContext) ->
-        expect(someContext).to.be.an.instanceof Object
-        done()
+    describe 'given a name and a store', ->
+      storeStub = null
+      someContext = null
+      beforeEach ->
+        storeStub = sandbox.stub()
+        someContext = eventric.boundedContext
+          name: 'someContext'
+          store: storeStub
 
 
-    it 'should initialize the mongodb event store per default if no store was given', ->
-      eventric.boundedContext
-        name: 'someContext'
-      .then ->
-        expect(mongoDbEventStoreMock.initialize.calledOnce).to.be.true
+      it 'should call initialize on the BoundedContext with the name and store', ->
+        expect(BoundedContextStub::initialize).to.have.been.calledWith 'someContext', storeStub
+
+
+      it 'should return the BoundedContext', ->
+        expect(someContext).to.be.an.instanceof BoundedContextStub
+
+
+    describe 'given a name and a global store', ->
+      it 'should call initialize on the BoundedContext with the name and global store', ->
+        globalStoreStub = sandbox.stub()
+        eventric.set 'store', globalStoreStub
+        someContext = eventric.boundedContext
+          name: 'someContext'
+
+        expect(BoundedContextStub::initialize).to.have.been.calledWith 'someContext', globalStoreStub

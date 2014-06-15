@@ -2,6 +2,8 @@
 require './helper/promise'
 
 moduleDefinition =
+  BoundedContext: './bounded_context'
+
   Aggregate: './aggregate'
   AggregateService: './aggregate_service'
 
@@ -22,8 +24,6 @@ moduleDefinition =
   HelperClone: './helper/clone'
   HelperObjectDiff: './helper/diff2'
 
-  BoundedContext: './bounded_context'
-
 
 module.exports =
   _params: {}
@@ -43,29 +43,21 @@ module.exports =
     @_params[key] = value
 
 
-  boundedContext: (params) ->
-    new Promise (resolve, reject) =>
-      if !params.name
-        error = new Error 'BoundedContexts must have a name'
-        reject error
+  boundedContext: (params = {}) ->
+    if !params.name
+      return new Error 'BoundedContexts must have a name'
 
-      store = params.store ? null
-      if !params.store
-        store = @_params.store ? null
+    if params.store
+      store = params.store
+    else if @_params.store
+      store = @_params.store
+    else
+      return new Error 'Missing Store'
 
-      BoundedContext = @require 'BoundedContext'
-      if !store
-        # TODO: for now we require and initialize 'event-store-mongodb'by default, should reject maybe?
-        store = require 'eventric-store-mongodb'
-        store.initialize =>
-          boundedContext = new BoundedContext
-          boundedContext.initialize params.name, store
-          resolve boundedContext
-
-      else
-        boundedContext = new BoundedContext
-        boundedContext.initialize params.name, store
-        resolve boundedContext
+    BoundedContext = @require 'BoundedContext'
+    boundedContext = new BoundedContext
+    boundedContext.initialize params.name, store
+    boundedContext
 
 
   addDomainEventHandler: (boundedContextName, eventName, eventHandler) ->

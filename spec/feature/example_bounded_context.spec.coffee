@@ -10,12 +10,11 @@ describe 'Example BoundedContext Feature', ->
   describe 'given we created some example bounded context', ->
     exampleContext = null
     beforeEach ->
-      eventric.boundedContext
+      exampleContext = eventric.boundedContext
         name: 'exampleContext'
         store: eventStoreMock
-      .then (_exampleContext) ->
-        exampleContext = _exampleContext
-        exampleContext.addAggregate 'Example', root: class Example
+
+      exampleContext.addAggregate 'Example', root: class Example
 
 
     describe 'when we command the bounded context to create an aggregate', ->

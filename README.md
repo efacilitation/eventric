@@ -53,6 +53,7 @@ eventricMongoDbStore = require('eventric-store-mongodb');
 eventricMongoDbStore.initialize(function() {
   eventric.set 'store', eventricMongoDbStore
 })
+```
 
 
 ### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)

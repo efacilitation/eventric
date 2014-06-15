@@ -31,10 +31,12 @@ class BoundedContext
       aggregate: @_aggregateService
       repository: => @getRepository.apply @, arguments
       adapter: => @getAdapter.apply @, arguments
+    @
 
 
   set: (key, value) ->
     @_params[key] = value
+    @
 
 
   addApplicationService: (serviceObj) ->
@@ -42,46 +44,57 @@ class BoundedContext
       switch type
         when 'commands' then @addCommands serviceObj[type]
         when 'queries' then @addQueries serviceObj[type]
+    @
 
 
   addCommand: (commandName, fn) ->
     @_applicationServiceCommands[commandName] = => fn.apply @_di, arguments
+    @
 
 
   addCommands: (commandObj) ->
     @addCommand commandName, commandFunction for commandName, commandFunction of commandObj
+    @
 
 
   addQuery: (queryName, fn) ->
     @_applicationServiceQueries[queryName] = => fn.apply @_di, arguments
+    @
 
 
   addQueries: (queryObj) ->
     @addQuery queryName, queryFunction for queryName, queryFunction of queryObj
+    @
 
 
   addAggregate: (aggregateName, aggregateDefinitionObj) ->
     @_aggregateService.registerAggregateDefinition aggregateName, aggregateDefinitionObj
+    @
 
 
   addReadAggregate: (aggregateName, ReadAggregate) ->
     @_readAggregateDefinitions[aggregateName] = ReadAggregate
+    @
 
 
   addRepository: (aggregateName, repository) ->
     @_repositories[aggregateName] = repository
+    @
 
 
   addDomainEventHandler: (eventName, handlerFn) ->
     @_domainEventService.on eventName, handlerFn
+    @
 
 
   addAdapter: (adapterName, adapterClass) ->
     @_adapters[adapterName] = adapterClass
+    @
 
 
   addAdapters: (adapterObj) ->
     @addAdapter adapterName, fn for adapterName, fn of adapterObj
+    @
 
 
   getRepository: (aggregateName) ->

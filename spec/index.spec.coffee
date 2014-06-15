@@ -7,6 +7,7 @@ describe 'Index', ->
 
   class BoundedContextStub
     initialize: sandbox.stub()
+    addDomainEventHandler: sandbox.stub()
 
   beforeEach ->
     mongoDbEventStoreMock = new MongoDbEventStoreMock

@@ -83,7 +83,9 @@ To actually work with the `BoundedContext` from the outside world we need `comma
 
 ```javascript
 collaborationContext.addCommand('createTodo', function(params, callback) {
-  this.aggregate.create('Todo', callback);
+  this.aggregate.create('Todo').then(function(aggregateId){
+    callback(null, aggregateId);
+  })
 });
 ```
 > Hint: `this.aggregate` is dependency injected
@@ -92,7 +94,14 @@ It would be nice if we could change the description of the `Todo`, so let's add 
 
 ```javascript
 collaborationContext.addCommand('changeTodoDescription', function(params, callback) {
-  this.aggregate.command('Todo', params.id, 'changeDescription', params.description, callback);
+  this.aggregate.command({
+    name: 'Todo',
+    id: params.id,
+    methodName: 'changeDescription'
+    methodParams: params.description
+  }).then(function() {
+    callback(null, null);
+  })
 });
 ```
 > Hint: If successful this will trigger a *Todo:changeDescription* `DomainEvent`

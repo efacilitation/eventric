@@ -28,7 +28,7 @@ Basically you define `queries` and `commands` on `BoundedContexts`. The `command
 * Capture all changes to your application state as a sequence of events ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html) / [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/))
 
 
-## Quick Start
+## Getting started
 
 For this example we use `MongoDB`. So a prerequisite is to install it locally. If its up and running we need the `eventric` and `eventric-store-mongodb` npm packages.
 

@@ -57,13 +57,26 @@ module.exports =
     BoundedContext = @require 'BoundedContext'
     boundedContext = new BoundedContext
     boundedContext.initialize params.name, store
+
+    boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
+      if !@_domainEventHandlers[params.name]
+        return
+
+      eventName = domainEvent.getAggregateName() + ':' + domainEvent.getName()
+      if !@_domainEventHandlers[params.name][eventName]
+        return
+
+      for eventHandler in @_domainEventHandlers[params.name][eventName]
+        eventHandler domainEvent
+
     boundedContext
 
 
   addDomainEventHandler: (boundedContextName, eventName, eventHandler) ->
     if !@_domainEventHandlers[boundedContextName]
-      @_domainEventHandlers[boundedContextName] = []
+      @_domainEventHandlers[boundedContextName] = {}
 
-    @_domainEventHandlers[boundedContextName].push
-      name: eventName
-      handler: eventHandler
+    if !@_domainEventHandlers[boundedContextName][eventName]
+      @_domainEventHandlers[boundedContextName][eventName] = []
+
+    @_domainEventHandlers[boundedContextName][eventName].push eventHandler

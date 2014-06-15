@@ -33,20 +33,37 @@ Basically you define `queries` and `commands` on `BoundedContexts`. The `command
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
 
 
-### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)
+### Setup Eventric
 
-> Hint: You should `npm install eventric` and `npm install eventric-store-mongodb` first.
+For this example we use `MongoDB`. So a prerequisite is to install it locally. If its up and running we need the `eventric` and `eventric-store-mongodb` npm packages.
 
-Let's get right into it and create our `BoundedContext`
+
+```
+npm install eventric
+npm install eventric-store-mongodb
+```
+
+
+Initialize the Store and configure eventric to use it.
 
 ```javascript
 eventric = require('eventric');
 
-eventric.boundedContext({name: 'collaboration'}
-).then(function(collaborationContext) {
-  // context relevant code
+eventricMongoDbStore = require('eventric-store-mongodb');
+eventricMongoDbStore.initialize(function() {
+  eventric.set 'store', eventricMongoDbStore
 })
+
+
+### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)
+
+
+Create the first `BoundedContext`
+
+```javascript
+collaborationContext = eventric.boundedContext({name: 'collaboration'})
 ```
+
 
 ### [Adding Aggregate](https://github.com/efacilitation/eventric/wiki/BoundedContext#addaggregate)
 
@@ -63,6 +80,7 @@ collaborationContext.addAggregate('Todo', {
 
 ```
 > Hint: values assigned to `this.` are automatically part of the generated `DomainEvent`
+
 
 ### [Adding Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#addcommand)
 
@@ -84,6 +102,7 @@ collaborationContext.addCommand('changeTodoDescription', function(params, callba
 ```
 > Hint: If successful this will trigger a *Todo:changeDescription* `DomainEvent`
 
+
 ### [Adding Query](https://github.com/efacilitation/eventric/wiki/BoundedContext#addquery)
 
 And last but not least we want the ability to `query` for a `Todo` by its id.
@@ -94,6 +113,7 @@ collaborationContext.addQuery('getTodoById', function(params, callback) {
 });
 ```
 > Hint: `this.repository` is dependency injected
+
 
 ### Executing [Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#command) and [Queries](https://github.com/efacilitation/eventric/wiki/BoundedContext#query)
 

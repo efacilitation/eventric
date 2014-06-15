@@ -75,12 +75,14 @@ describe 'Example BoundedContext Feature', ->
             'ExampleEntity': ExampleEntity
 
         exampleContext.addCommands
-          someBoundedContextFunction: (params) ->
+          someBoundedContextFunction: (params, callback) ->
             @aggregate.command
               id: params.id
               name: 'Example'
               methodName: 'someRootFunction'
               methodParams: [1]
+            .then =>
+              callback null
 
 
       it 'then it should have triggered the correct DomainEvent', (done) ->

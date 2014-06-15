@@ -26,7 +26,9 @@ Diff = (function() {
       };
       path = [].concat(path, [pathElement]);
     }
-    if (!oldValue) {
+    if (typeof oldValue === 'function' || typeof newValue === 'function') {
+      return [];
+    } else if (!oldValue) {
       return [this._createDifference(Diff.DIFFERENCE_TYPES.ADDED, path, newValue)];
     } else if (!newValue) {
       return [this._createDifference(Diff.DIFFERENCE_TYPES.DELETED, path)];

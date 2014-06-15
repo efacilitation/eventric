@@ -30,11 +30,6 @@ Basically you define `queries` and `commands` on `BoundedContexts`. The `command
 
 ## Quick Start
 
-Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
-
-
-### Setup Eventric
-
 For this example we use `MongoDB`. So a prerequisite is to install it locally. If its up and running we need the `eventric` and `eventric-store-mongodb` npm packages.
 
 
@@ -58,8 +53,7 @@ eventricMongoDbStore.initialize(function() {
 
 ### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)
 
-
-Create the first `BoundedContext`
+Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
 
 ```javascript
 collaborationContext = eventric.boundedContext({name: 'collaboration'})

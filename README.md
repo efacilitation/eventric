@@ -42,7 +42,10 @@ Let's get right into it and create our `BoundedContext`
 ```javascript
 eventric = require('eventric');
 
-collaborationContext = eventric.boundedContext();
+eventric.boundedContext({name: 'collaboration'}
+).then(function(collaborationContext) {
+  // context relevant code
+})
 ```
 
 ### [Adding Aggregate](https://github.com/efacilitation/eventric/wiki/BoundedContext#addaggregate)

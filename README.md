@@ -46,8 +46,8 @@ eventric = require('eventric');
 
 eventricMongoDbStore = require('eventric-store-mongodb');
 eventricMongoDbStore.initialize(function() {
-  eventric.set 'store', eventricMongoDbStore
-})
+  eventric.set('store', eventricMongoDbStore);
+});
 ```
 
 
@@ -83,7 +83,9 @@ To actually work with the `BoundedContext` from the outside world we need `comma
 
 ```javascript
 collaborationContext.addCommand('createTodo', function(params, callback) {
-  this.aggregate.create('Todo').then(function(aggregateId){
+  this.aggregate.create({
+    name: 'Todo'
+  }).then(function(aggregateId){
     callback(null, aggregateId);
   })
 });
@@ -97,11 +99,11 @@ collaborationContext.addCommand('changeTodoDescription', function(params, callba
   this.aggregate.command({
     name: 'Todo',
     id: params.id,
-    methodName: 'changeDescription'
-    methodParams: params.description
+    methodName: 'changeDescription',
+    methodParams: [params.description]
   }).then(function() {
     callback(null, null);
-  })
+  });
 });
 ```
 > Hint: If successful this will trigger a *Todo:changeDescription* `DomainEvent`
@@ -124,29 +126,26 @@ collaborationContext.addQuery('getTodoById', function(params, callback) {
 Initialize the `collaborationContext`, create a `Todo`, change the description of it and finally query the description again.
 
 ```javascript
-collaborationContext.initialize(function() {
-  var todoId = null;
-  collaborationContext.command({
-    name: 'createTodo'
-  }).then(function(todoId) {
-    return collaborationContext.command({
-      name: 'changeTodoDescription',
-      params: {
-        id: todoId,
-        description: 'Do something'
-      }
-    })
-  }).then(function(todoId) {
-    return collaborationContext.query({
-      name: 'getTodoById',
-      params: {
-        id: todoId
-      }
-    })
-  }).then(function(readTodo) {
-    console.log(readTodo.description)
+var todoId = null;
+collaborationContext.command({
+  name: 'createTodo'
+}).then(function(todoId) {
+  return collaborationContext.command({
+    name: 'changeTodoDescription',
+    params: {
+      id: todoId,
+      description: 'Do something'
+    }
   })
-
+}).then(function() {
+  return collaborationContext.query({
+    name: 'getTodoById',
+    params: {
+      id: todoId
+    }
+  })
+}).then(function(readTodo) {
+  console.log(readTodo.description)
 });
 ```
 This will output `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing.

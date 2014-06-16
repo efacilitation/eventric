@@ -22,6 +22,7 @@ class Repository
 
       aggregate = new Aggregate @_aggregateName, @_aggregateDefinition
       aggregate.applyDomainEvents domainEvents
+      aggregate.id = aggregateId
 
       if @_readAggregate
         aggregate = aggregate.toJSON()

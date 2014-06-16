@@ -129,7 +129,8 @@ Initialize the `collaborationContext`, create a `Todo`, change the description o
 var todoId = null;
 collaborationContext.command({
   name: 'createTodo'
-}).then(function(todoId) {
+}).then(function(_todoId) {
+  todoId = _todoId
   return collaborationContext.command({
     name: 'changeTodoDescription',
     params: {

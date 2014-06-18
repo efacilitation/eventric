@@ -19,19 +19,44 @@ class BoundedContext
   _applicationServiceQueries: {}
   _domainEventHandlers: {}
 
+  initialize: () ->
+    @_initializeEventStore()
 
-  initialize: (@_name, @_eventStore) ->
     @_domainEventService = new DomainEventService
     @_domainEventService.initialize @_eventStore
+    @_initializeDomainEventHandlers()
 
     @_aggregateService = new AggregateService
     @_aggregateService.initialize @_eventStore, @_domainEventService
+    @_initializeAggregateService()
 
     @_di =
       aggregate: @_aggregateService
       repository: => @getRepository.apply @, arguments
       adapter: => @getAdapter.apply @, arguments
     @
+
+
+  _initializeEventStore: ->
+    if @_params.store
+      @_eventStore = @_params.store
+    else
+      globalStore = eventric.get 'store'
+      if globalStore
+        @_eventStore = globalStore
+      else
+        throw new Error 'Missing Event Store for Bounded Context'
+
+
+  _initializeDomainEventHandlers: ->
+    for domainEventName, fnArray of @_domainEventHandlers
+      for fn in fnArray
+        @_domainEventService.on domainEventName, fn
+
+
+  _initializeAggregateService: () ->
+    for aggregateName, aggregateDefinition of @_aggregateDefinitions
+      @_aggregateService.registerAggregateDefinition aggregateName, aggregateDefinition
 
 
   set: (key, value) ->
@@ -68,7 +93,7 @@ class BoundedContext
 
 
   addAggregate: (aggregateName, aggregateDefinitionObj) ->
-    @_aggregateService.registerAggregateDefinition aggregateName, aggregateDefinitionObj
+    @_aggregateDefinitions[aggregateName] = aggregateDefinitionObj
     @
 
 
@@ -83,7 +108,8 @@ class BoundedContext
 
 
   addDomainEventHandler: (eventName, handlerFn) ->
-    @_domainEventService.on eventName, handlerFn
+    @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
+    @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
     @
 
 

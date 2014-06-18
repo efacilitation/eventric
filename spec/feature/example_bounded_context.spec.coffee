@@ -7,13 +7,11 @@ describe 'Example BoundedContext Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created some example bounded context', ->
+  describe 'given we created and initialized some example bounded context', ->
     exampleContext = null
     beforeEach ->
-      exampleContext = eventric.boundedContext
-        name: 'exampleContext'
-        store: eventStoreMock
-
+      exampleContext = eventric.boundedContext 'exampleContext'
+      exampleContext.set 'store', eventStoreMock
       exampleContext.addAggregate 'Example', root: class Example
 
 
@@ -33,6 +31,7 @@ describe 'Example BoundedContext Feature', ->
           expect(domainEvent.getAggregateChanges()).to.deep.equal props
           done()
 
+        exampleContext.initialize()
         exampleContext.command
           name: 'createExample'
 
@@ -92,6 +91,7 @@ describe 'Example BoundedContext Feature', ->
           expect(domainEvent.getName()).to.equal 'someRootFunction'
           done()
 
+        exampleContext.initialize()
         exampleContext.command
           name: 'someBoundedContextFunction'
           params:
@@ -113,6 +113,7 @@ describe 'Example BoundedContext Feature', ->
 
 
       it 'then it should have called the adapter function', (done) ->
+        exampleContext.initialize()
         exampleContext.command
           name: 'doSomething'
         , ->
@@ -147,6 +148,7 @@ describe 'Example BoundedContext Feature', ->
 
 
       it 'then it should return some default read aggregate', (done) ->
+        exampleContext.initialize()
         exampleContext.query
           name: 'getExample'
         .then (readExample) ->
@@ -186,6 +188,7 @@ describe 'Example BoundedContext Feature', ->
 
 
       it 'then it should return the correct read aggregate', (done) ->
+        exampleContext.initialize()
         exampleContext.query
           name: 'getExample'
           , (err, readExample) ->
@@ -222,6 +225,7 @@ describe 'Example BoundedContext Feature', ->
 
 
       it 'then it should return the correct read aggregate', (done) ->
+        exampleContext.initialize()
         exampleContext.query
           name: 'getExample'
           , (err, readExample) ->

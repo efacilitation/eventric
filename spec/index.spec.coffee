@@ -1,59 +1,50 @@
 eventric = require 'eventric'
 
 describe 'Index', ->
-  mongoDbEventStoreMock = null
-  class MongoDbEventStoreMock
-    initialize: sandbox.stub().yields null
 
-  class BoundedContextStub
-    initialize: sandbox.stub()
-    addDomainEventHandler: sandbox.stub()
+  boundedContextInstance = null
+  BoundedContextStub = null
 
   beforeEach ->
-    mongoDbEventStoreMock = new MongoDbEventStoreMock
-    mockery.registerMock 'eventric-store-mongodb', mongoDbEventStoreMock
+    boundedContextInstance =
+      addDomainEventHandler: sandbox.stub()
+    BoundedContextStub = sandbox.stub().returns boundedContextInstance
 
     sandbox.stub eventric, 'require', -> BoundedContextStub
 
 
   describe '#boundedContext', ->
 
-    describe 'given no name', ->
-      it 'should return an error', ->
-        someContext = eventric.boundedContext()
-        expect(someContext).to.be.an.instanceof Error
+    it 'should throw an error if no name given for the bounded context', ->
+      expect(-> new eventric.boundedContext).to.throw Error
 
 
-    describe 'given no store', ->
-      it 'should return an error', ->
-        someContext = eventric.boundedContext
-          name: 'someContext'
-        expect(someContext).to.be.an.instanceof Error
+    it 'should create a bounded context instance', ->
+      someContext = eventric.boundedContext 'someContext'
+      expect(BoundedContextStub).to.have.been.calledWithNew
 
 
-    describe 'given a name and a store', ->
-      storeStub = null
-      someContext = null
-      beforeEach ->
-        storeStub = sandbox.stub()
-        someContext = eventric.boundedContext
-          name: 'someContext'
-          store: storeStub
+    it 'should register global domain event handlers on the bounded context', ->
+      someContext = eventric.boundedContext 'someContext'
+      expect(boundedContextInstance.addDomainEventHandler).to.have.been.calledWith 'DomainEvent'
 
 
-      it 'should call initialize on the BoundedContext with the name and store', ->
-        expect(BoundedContextStub::initialize).to.have.been.calledWith 'someContext', storeStub
+  describe '#set/#get', ->
+
+    it 'should save given key/value pairs', ->
+      key = Math.random()
+      value = Math.random()
+      eventric.set key, value
+      expect(eventric.get key).to.equal value
 
 
-      it 'should return the BoundedContext', ->
-        expect(someContext).to.be.an.instanceof BoundedContextStub
+    it 'should return undefined for a not set key', ->
+      key = Math.random()
+      expect(eventric.get key).to.not.exist
 
 
-    describe 'given a name and a global store', ->
-      it 'should call initialize on the BoundedContext with the name and global store', ->
-        globalStoreStub = sandbox.stub()
-        eventric.set 'store', globalStoreStub
-        someContext = eventric.boundedContext
-          name: 'someContext'
-
-        expect(BoundedContextStub::initialize).to.have.been.calledWith 'someContext', globalStoreStub
+    it 'should overwrite already defined values', ->
+      key = Math.random()
+      eventric.set key, '1'
+      eventric.set key, '2'
+      expect(eventric.get key).to.equal '2'

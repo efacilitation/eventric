@@ -43,30 +43,26 @@ module.exports =
     @_params[key] = value
 
 
-  boundedContext: (params = {}) ->
-    if !params.name
-      return new Error 'BoundedContexts must have a name'
+  get: (key) ->
+    @_params[key]
 
-    if params.store
-      store = params.store
-    else if @_params.store
-      store = @_params.store
-    else
-      return new Error 'Missing Store'
 
+  # TODO: Do we really need this name? A bounded context itself does not need one.
+  boundedContext: (name) ->
+    if !name
+      throw new Error 'BoundedContexts must have a name'
     BoundedContext = @require 'BoundedContext'
     boundedContext = new BoundedContext
-    boundedContext.initialize params.name, store
 
     boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
-      if !@_domainEventHandlers[params.name]
+      if !@_domainEventHandlers[name]
         return
 
       eventName = domainEvent.getAggregateName() + ':' + domainEvent.getName()
-      if !@_domainEventHandlers[params.name][eventName]
+      if !@_domainEventHandlers[name][eventName]
         return
 
-      for eventHandler in @_domainEventHandlers[params.name][eventName]
+      for eventHandler in @_domainEventHandlers[name][eventName]
         eventHandler domainEvent
 
     boundedContext

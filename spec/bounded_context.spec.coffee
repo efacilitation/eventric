@@ -9,18 +9,21 @@ describe 'BoundedContext', ->
   storeStub = null
   domainEventServiceStub = null
   aggregateServiceStub = null
+  eventricMock = null
 
   beforeEach ->
     storeStub = sandbox.stub()
 
     domainEventServiceStub =
       initialize: sandbox.stub()
+      on: sandbox.stub()
 
     aggregateServiceStub =
       initialize: sandbox.stub()
 
     eventricMock =
       require: sandbox.stub()
+      get: sandbox.stub()
     eventricMock.require.withArgs('DomainEventService').returns sandbox.stub().returns domainEventServiceStub
     eventricMock.require.withArgs('AggregateService').returns sandbox.stub().returns aggregateServiceStub
     eventricMock.require.withArgs('Repository').returns RepositoryMock
@@ -30,19 +33,34 @@ describe 'BoundedContext', ->
     BoundedContext = eventric.require 'BoundedContext'
 
 
-  it 'should initialize aggregateservice and domaineventservice with the given event store', ->
-    someContext = new BoundedContext
-    someContext.initialize 'someContext', storeStub
-
+  it 'should initialize aggregateservice and domaineventservice with the custom event store if configured', ->
+    boundedContext = new BoundedContext
+    boundedContext.set 'store', storeStub
+    boundedContext.initialize()
     expect(aggregateServiceStub.initialize.calledWith storeStub).to.be.true
     expect(domainEventServiceStub.initialize.calledWith storeStub).to.be.true
+
+
+  it 'should initialize aggregateservice and domaineventservice with the global event store if configured', ->
+    globalStoreStub = sandbox.stub()
+    eventricMock.get.withArgs('store').returns globalStoreStub
+    boundedContext = new BoundedContext
+    boundedContext.initialize()
+    expect(aggregateServiceStub.initialize.calledWith globalStoreStub).to.be.true
+    expect(domainEventServiceStub.initialize.calledWith globalStoreStub).to.be.true
+
+
+  it 'should throw an error if neither a global nor a custom event store was configured', ->
+    boundedContext = new BoundedContext
+    expect(boundedContext.initialize).to.throw Error
 
 
   describe '#command', ->
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', ->
         someContext = new BoundedContext
-        someContext.initialize 'someContext', storeStub
+        someContext.set 'store', storeStub
+        someContext.initialize()
 
         command =
           name: 'doSomething'
@@ -60,7 +78,8 @@ describe 'BoundedContext', ->
       it 'should execute the command handler', ->
         commandStub = sandbox.stub()
         someContext = new BoundedContext
-        someContext.initialize 'someContext', storeStub
+        someContext.set 'store', storeStub
+        someContext.initialize()
         someContext.addCommand 'doSomething', commandStub
 
         command =
@@ -76,7 +95,8 @@ describe 'BoundedContext', ->
     describe 'has no registered handler', ->
       it 'should call the callback with a command not found error', ->
         someContext = new BoundedContext
-        someContext.initialize 'someContext', storeStub
+        someContext.set 'store', storeStub
+        someContext.initialize()
 
         query =
           name: 'findSomething'
@@ -92,7 +112,8 @@ describe 'BoundedContext', ->
     describe 'has a registered handler', ->
       it 'should execute the query handler', ->
         someContext = new BoundedContext
-        someContext.initialize 'someContext', storeStub
+        someContext.set 'store', storeStub
+        someContext.initialize()
         queryStub = sandbox.stub()
         someContext.addQuery 'findSomething', queryStub
 

@@ -127,6 +127,7 @@ class BoundedContext
 
   addViews: (viewsObj) ->
     @addView viewName, ViewClass for viewName, ViewClass of viewsObj
+    @
 
 
   getView: (viewName) ->

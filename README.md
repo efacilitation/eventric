@@ -147,7 +147,7 @@ collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEve
 ```
 
 
-### Executing [Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#command) and [Queries](https://github.com/efacilitation/eventric/wiki/BoundedContext#query)
+### Executing [Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#command)
 
 Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 

@@ -19,6 +19,7 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
 
 * DDD BuildingBlocks
   * BoundedContext
+  * DomainEvents
   * Aggregate
 
 * CQRS
@@ -28,6 +29,7 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
 
 * EventSourcing
   * Automated saving and applying of DomainEvents
+  * Multiple Store Adapters
 
 
 ## Philosophy

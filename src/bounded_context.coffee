@@ -31,9 +31,9 @@ class BoundedContext
     @_initializeAggregateService()
 
     @_di =
-      aggregate: @_aggregateService
-      repository: => @getRepository.apply @, arguments
-      adapter: => @getAdapter.apply @, arguments
+      $aggregate: @_aggregateService
+      $repository: => @getRepository.apply @, arguments
+      $adapter: => @getAdapter.apply @, arguments
     @
 
 

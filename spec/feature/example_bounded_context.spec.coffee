@@ -18,7 +18,7 @@ describe 'Example BoundedContext Feature', ->
     describe 'when we command the bounded context to create an aggregate', ->
       beforeEach ->
         exampleContext.addCommand 'createExample', ->
-          @aggregate.create
+          @$aggregate.create
             name: 'Example'
 
 
@@ -76,7 +76,7 @@ describe 'Example BoundedContext Feature', ->
 
         exampleContext.addCommands
           someBoundedContextFunction: (params, callback) ->
-            @aggregate.command
+            @$aggregate.command
               id: params.id
               name: 'Example'
               methodName: 'doSomething'
@@ -108,7 +108,7 @@ describe 'Example BoundedContext Feature', ->
         exampleContext.addApplicationService
           commands:
             doSomething: (params, callback) ->
-              @adapter('exampleAdapter').someAdapterFunction()
+              @$adapter('exampleAdapter').someAdapterFunction()
               callback()
 
 

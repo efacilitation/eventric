@@ -19,13 +19,12 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
 
 * DDD BuildingBlocks
   * BoundedContext
-  * DomainEvents
+  * DomainEvent
   * Aggregate
 
 * CQRS
-  * Easily define ReadModels and ProcessManagers
+  * Persistent ReadModels and ProcessManagers
   * Support for Occasionally Connected Applications
-  * Conflict Detection and Support for Merging
 
 * EventSourcing
   * Automated saving and applying of DomainEvents
@@ -43,7 +42,7 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
 
 ## A Note on DDD
 
-Please keep in mind that eventric.js supplies you only with structure that has a common-sense in the DDD/CQRS community. But you really should get to know the tactical side of DDD as well, which is at least as important (and fun!) as the technical BuildingBlocks! When you dive into the DDD topic you will quickly learn that the BoundedContext is mostly refered to as a tactical pattern. We decided to make it a technical pattern too because we think that it will help grasp the concept.
+Please keep in mind that eventric.js supplies you only with a structure that has common-sense in the DDD+CQRS community. But you really should get to know the tactical side of DDD as well, which is at least as important (and fun!) as the technical BuildingBlocks. When you dive into the topic you will quickly learn that the BoundedContext is mostly refered to as a tactical pattern. We decided to make it a technical pattern too because we think that it will help grasp the concept.
 
 
 ## Getting started
@@ -74,47 +73,58 @@ eventricMongoDbStore.initialize(function() {
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
 
 ```javascript
-collaborationContext = eventric.boundedContext({name: 'collaboration'})
+collaboration = eventric.boundedContext({name: 'collaboration'})
+```
+
+### [Define the Event]()
+
+Inside of our `Collaboration` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add one called `TodoDescriptionChanged`.
+
+```javascript
+collaboration.addDomainEvent('TodoDescriptionChanged', function(params) {
+  this.description = params.description;
+})
 ```
 
 
-### [Adding Aggregate](https://github.com/efacilitation/eventric/wiki/BoundedContext#addaggregate)
+### [Adding an Aggregate](https://github.com/efacilitation/eventric/wiki/BoundedContext#addaggregate)
 
-Now that we created the `collaborationContext` let's add our `Todo` Aggregate, consisting of a simple `changeDescription` method inside the AggregateRoot.
+Now we need an Aggregate which actually raises this DomainEvent and is able to handle it. Lets add it.
 
 ```javascript
-collaborationContext.addAggregate('Todo', {
-  root: function() {
-    this.changeDescription = function(description) {
-      this.description = description;
-    }
+collaboration.addAggregate('Todo', function() {
+  this.changeDescription = function(description) {
+    this.$raiseDomainEvent('TodoDescriptionChanged', {description: description})
+  }
+  this.handleTodoDescriptionChanged = function(domainEvent) {
+    this.description = domainEvent.payload.description;
   }
 });
 
 ```
-> Hint: values assigned to `this.` are automatically part of the generated `DomainEvent`
+> Hint: `this.$raiseDomainEvent` is dependency injected
 
 
 ### [Adding Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#addcommand)
 
-To actually work with the `BoundedContext` from the outside world we need `commands` and `queries`. Let's start by adding a simple `command` that will create an instance of our `Todo` Aggregate.
+To actually work with the `BoundedContext` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
 
 ```javascript
-collaborationContext.addCommand('createTodo', function(params, callback) {
-  this.aggregate.create({
+collaboration.addCommandHandler('createTodo', function(params, callback) {
+  this.$aggregate.create({
     name: 'Todo'
   }).then(function(aggregateId){
     callback(null, aggregateId);
   })
 });
 ```
-> Hint: `this.aggregate` is dependency injected
+> Hint: `this.$aggregate` is dependency injected
 
-It would be nice if we could change the description of the `Todo`, so let's add this `command` too.
+It would be nice if we could change the description of the `Todo`, so let's add this `CommandHandler` too.
 
 ```javascript
-collaborationContext.addCommand('changeTodoDescription', function(params, callback) {
-  this.aggregate.command({
+collaboration.addCommandHandler('changeTodoDescription', function(params, callback) {
+  this.$aggregate.command({
     name: 'Todo',
     id: params.id,
     methodName: 'changeDescription',
@@ -124,52 +134,45 @@ collaborationContext.addCommand('changeTodoDescription', function(params, callba
   });
 });
 ```
-> Hint: If successful this will trigger a *Todo:changeDescription* `DomainEvent`
 
 
-### [Adding Query](https://github.com/efacilitation/eventric/wiki/BoundedContext#addquery)
+### [Adding a DomainEventHandler](https://github.com/efacilitation/eventric/wiki/BoundedContext#adddomaineventhandler)
 
-And last but not least we want the ability to `query` for a `Todo` by its id.
+And last but not least we want to console.log when the description of the `Todo` changes.
 
 ```javascript
-collaborationContext.addQuery('getTodoById', function(params, callback) {
-  this.repository('Todo').findById(params.id, callback);
+collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEvent) {
+  console.log(domainEvent.payload.description);
 });
 ```
-> Hint: `this.repository` is dependency injected
 
 
 ### Executing [Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#command) and [Queries](https://github.com/efacilitation/eventric/wiki/BoundedContext#query)
 
-Initialize the `collaborationContext`, create a `Todo`, change the description of it and finally query the description again.
+Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 
 ```javascript
 var todoId = null;
-collaborationContext.command({
-  name: 'createTodo'
-}).then(function(_todoId) {
-  todoId = _todoId
-  return collaborationContext.command({
-    name: 'changeTodoDescription',
-    params: {
-      id: todoId,
-      description: 'Do something'
-    }
-  })
-}).then(function() {
-  return collaborationContext.query({
-    name: 'getTodoById',
-    params: {
-      id: todoId
-    }
-  })
-}).then(function(readTodo) {
-  console.log(readTodo.description)
+collaboration.initialize(function() {
+
+  collaboration.command({
+    name: 'createTodo'
+  }).then(function(_todoId) {
+    todoId = _todoId
+    return collaboration.command({
+      name: 'changeTodoDescription',
+      params: {
+        id: todoId,
+        description: 'Do something'
+      }
+    })
+  });
+
 });
 ```
-This will output `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing.
+After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing.
 
-Congratulations, you have successfully applied DDD (tactical+technical) and CQRS! :)
+Congratulations, you have successfully applied DDD and CQRS! :)
 
 
 ## Running Tests

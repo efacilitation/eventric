@@ -41,7 +41,7 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
 
 ## A Note on DDD
 
-Please keep in mind that eventric.js supplies you with a code structure that has a common-sense in the DDD/CQRS community - but you really should get to know the tactical side of DDD as well, which is at least so important as the technical BuildingBlocks! When you dive into the DDD topic you will quickly learn, that the BoundedContext is mostly refered to as a tactical pattern. We decided to make it a technical pattern too, so it's easier to grasp the overall concept of the ContextMap and integration of BoundedContexts.
+Please keep in mind that eventric.js supplies you only with structure that has a common-sense in the DDD/CQRS community. But you really should get to know the tactical side of DDD as well, which is at least as important (and fun!) as the technical BuildingBlocks! When you dive into the DDD topic you will quickly learn that the BoundedContext is mostly refered to as a tactical pattern. We decided to make it a technical pattern too because we think that it will help grasp the concept.
 
 
 ## Getting started

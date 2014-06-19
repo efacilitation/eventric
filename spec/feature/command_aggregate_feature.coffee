@@ -1,6 +1,7 @@
 eventric = require 'eventric'
 
-describe 'Example BoundedContext Feature', ->
+describe 'Command Aggregate Feature', ->
+
   eventStoreMock = null
   beforeEach ->
     eventStoreMock =
@@ -13,23 +14,6 @@ describe 'Example BoundedContext Feature', ->
       exampleContext = eventric.boundedContext 'exampleContext'
       exampleContext.set 'store', eventStoreMock
       exampleContext.addAggregate 'Example', class Example
-
-
-    describe 'when we command the bounded context to create an aggregate', ->
-      beforeEach ->
-        exampleContext.addCommand 'createExample', ->
-          @$aggregate.create
-            name: 'Example'
-
-
-      it 'then it should haved triggered the correct DomainEvent', (done) ->
-        exampleContext.addDomainEventHandler 'ExampleCreated', (domainEvent) ->
-          expect(domainEvent.name).to.equal 'ExampleCreated'
-          done()
-
-        exampleContext.initialize()
-        exampleContext.command
-          name: 'createExample'
 
 
     describe 'when we command the bounded context to command an aggregate', ->
@@ -96,26 +80,3 @@ describe 'Example BoundedContext Feature', ->
           name: 'someBoundedContextFunction'
           params:
             id: 1
-
-
-    describe 'when we use a command which calls a previously added adapter function', ->
-      ExampleAdapter = null
-      beforeEach ->
-        class ExampleAdapter
-          someAdapterFunction: sandbox.stub()
-        exampleContext.addAdapter 'exampleAdapter', ExampleAdapter
-
-        exampleContext.addApplicationService
-          commands:
-            doSomething: (params, callback) ->
-              @$adapter('exampleAdapter').someAdapterFunction()
-              callback()
-
-
-      it 'then it should have called the adapter function', (done) ->
-        exampleContext.initialize()
-        exampleContext.command
-          name: 'doSomething'
-        , ->
-          expect(ExampleAdapter::someAdapterFunction).to.have.been.calledOnce
-          done()

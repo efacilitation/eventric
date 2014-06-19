@@ -2,6 +2,23 @@ describe 'Aggregate', ->
   Aggregate   = eventric.require 'Aggregate'
   DomainEvent = eventric.require 'DomainEvent'
 
+  describe '#storeAndApply', ->
+    it.only 'should call a handle method on the aggregate based on the DomainEvent Name', ->
+      class SomethingHappened
+        constructor: (params) ->
+      exampleContext =
+        getDomainEventClass: sandbox.stub().returns SomethingHappened
+
+      class ExampleRoot
+        handleSomethingHappened: sandbox.stub()
+
+      myAggregate = new Aggregate exampleContext, 'MyAggregate', root: ExampleRoot
+      myAggregate.storeAndApply 'SomethingHappened', some: 'properties'
+
+      applyCall = ExampleRoot::handleSomethingHappened.getCall 0
+      expect(applyCall.args[0]).to.be.an.instanceof SomethingHappened
+
+
   describe '#generateDomainEvent', ->
     it 'should create a DomainEvent including changes', ->
       someProps =
@@ -156,3 +173,5 @@ describe 'Aggregate', ->
         params: 'foo'
       .then =>
         expect(Foo::someMethod).to.have.been.calledWith 'foo'
+
+

@@ -7,17 +7,33 @@ ObjectDiff      = eventric.require 'HelperObjectDiff'
 
 class Aggregate
 
-  constructor: (name, definition) ->
-    @_name         = name
-    @_domainEvents = []
-    @_definition   = definition
-    @_oldRoot      = {}
+  constructor: (boundedContext, name, definition) ->
+    @_name           = name
+    @_domainEvents   = []
+    @_definition     = definition
+    @_boundedContext = boundedContext
+    @_oldRoot        = {}
 
     if !@_definition
       @_root = {}
     else
       # TODO: check for valid definition
       @_root = new @_definition.root
+
+
+  storeAndApply: (domainEventName, domainEventParams) ->
+    if !@_root["handle#{domainEventName}"]
+      throw new Error "Tried to storeAndApply the DomainEvent #{domainEventName} without a matching handle method"
+
+    DomainEventClass = @_boundedContext.getDomainEventClass domainEventName
+    if !DomainEventClass
+      throw new Error "Tried to storeAndApply on not added DomainEventClass #{domainEventName}"
+
+    domainEvent = new DomainEventClass domainEventParams
+    @_domainEvents.push domainEvent
+
+    @_root["handle#{domainEventName}"] domainEvent
+    # TODO: do a rollback if something goes wrong inside the handle function
 
 
   create: (props) ->
@@ -52,6 +68,8 @@ class Aggregate
       command.params = [] if !command.params
       if not (command.params instanceof Array)
         command.params = [command.params]
+
+
 
       try
         check = @_root[command.name] command.params...

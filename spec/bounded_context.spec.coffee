@@ -80,7 +80,7 @@ describe 'BoundedContext', ->
         someContext = new BoundedContext
         someContext.set 'store', storeStub
         someContext.initialize()
-        someContext.addCommand 'doSomething', commandStub
+        someContext.addCommandHandler 'doSomething', commandStub
 
         command =
           name: 'doSomething'

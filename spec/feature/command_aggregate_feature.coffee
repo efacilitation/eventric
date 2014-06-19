@@ -58,7 +58,7 @@ describe 'Command Aggregate Feature', ->
 
         exampleContext.addAggregate 'Example', ExampleRoot
 
-        exampleContext.addCommands
+        exampleContext.addCommandHandlers
           someBoundedContextFunction: (params, callback) ->
             @$aggregate.command
               id: params.id

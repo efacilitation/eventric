@@ -15,7 +15,7 @@ describe 'Create Aggregate Feature', ->
 
     describe 'when we command the bounded context to create an aggregate', ->
       beforeEach ->
-        exampleContext.addCommand 'createExample', ->
+        exampleContext.addCommandHandler 'createExample', ->
           @$aggregate.create
             name: 'Example'
 

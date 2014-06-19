@@ -21,7 +21,7 @@ describe 'Adapter Feature', ->
           someAdapterFunction: sandbox.stub()
         exampleContext.addAdapter 'exampleAdapter', ExampleAdapter
 
-        exampleContext.addCommand 'doSomething', (params, callback) ->
+        exampleContext.addCommandHandler 'doSomething', (params, callback) ->
               @$adapter('exampleAdapter').someAdapterFunction()
               callback()
 

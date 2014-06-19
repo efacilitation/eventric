@@ -11,7 +11,7 @@ class BoundedContext
   _aggregateRootClasses: {}
   _adapters: {}
   _adapterInstances: {}
-  _applicationServiceCommands: {}
+  _commandHandlers: {}
   _domainEventClasses: {}
   _domainEventHandlers: {}
   _readModelClasses: {}
@@ -70,13 +70,13 @@ class BoundedContext
     @
 
 
-  addCommand: (commandName, fn) ->
-    @_applicationServiceCommands[commandName] = => fn.apply @_di, arguments
+  addCommandHandler: (commandHandlerName, commandHandlerFn) ->
+    @_commandHandlers[commandHandlerName] = => commandHandlerFn.apply @_di, arguments
     @
 
 
-  addCommands: (commandObj) ->
-    @addCommand commandName, commandFunction for commandName, commandFunction of commandObj
+  addCommandHandlers: (commandObj) ->
+    @addCommandHandler commandHandlerName, commandFunction for commandHandlerName, commandFunction of commandObj
     @
 
 
@@ -138,8 +138,8 @@ class BoundedContext
 
   command: (command, callback) ->
     new Promise (resolve, reject) =>
-      if @_applicationServiceCommands[command.name]
-        @_applicationServiceCommands[command.name] command.params, (err, result) =>
+      if @_commandHandlers[command.name]
+        @_commandHandlers[command.name] command.params, (err, result) =>
           resolve result
           callback? err, result
       else

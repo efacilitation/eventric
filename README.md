@@ -102,10 +102,10 @@ collaboration.addAggregate('Todo', function() {
 });
 
 ```
-> Hint: `this.$raiseDomainEvent` is dependency injected
+> Hint: `this.$raiseDomainEvent` is dependency injected and the handle method is called by naming convention after raising.
 
 
-### [Adding Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#addcommand)
+### [Adding CommandHandlers](https://github.com/efacilitation/eventric/wiki/BoundedContext#addcommand)
 
 To actually work with the `BoundedContext` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
 
@@ -157,8 +157,7 @@ collaboration.initialize(function() {
 
   collaboration.command({
     name: 'createTodo'
-  }).then(function(_todoId) {
-    todoId = _todoId
+  }).then(function(todoId) {
     return collaboration.command({
       name: 'changeTodoDescription',
       params: {

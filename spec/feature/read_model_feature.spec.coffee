@@ -1,6 +1,6 @@
 eventric = require 'eventric'
 
-describe 'Command Aggregate Feature', ->
+describe.skip 'Read Module Feature', ->
 
   eventStoreMock = null
   beforeEach ->
@@ -8,7 +8,7 @@ describe 'Command Aggregate Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created and initialized some example bounded context including a view', ->
+  describe 'given we created and initialized some example bounded context including a read model', ->
     exampleContext = null
     beforeEach ->
       exampleContext = eventric.boundedContext 'exampleContext'
@@ -19,7 +19,7 @@ describe 'Command Aggregate Feature', ->
 
       exampleContext.addDomainEvent 'SomethingHappened', SomethingHappened
 
-      class ExampleView
+      class ExampleReadModel
         subscribeToDomainEvents: [
           'SomethingHappened'
         ]
@@ -28,10 +28,10 @@ describe 'Command Aggregate Feature', ->
           @totallyDenormalized = domainEvent.payload.someProperty
 
 
-      exampleContext.addView 'ExampleView', ExampleView
+      exampleContext.addReadModel 'ExampleReadModel', ExampleReadModel
 
 
-    describe 'when DomainEvents got raised which the View subscribed to', ->
+    describe 'when DomainEvents got raised which the ReadModel subscribed to', ->
       beforeEach ->
         eventStoreMock.find.yields [
           name: 'SomethingHappened'
@@ -39,6 +39,6 @@ describe 'Command Aggregate Feature', ->
             someProperty: 'foo'
         ]
 
-      it.only 'then the View should be in the correct state when getting it', ->
-        exampleView = exampleContext.getView 'ExampleView'
-        expect(exampleView.totallyDenormalized).to.equal 'foo'
+      it 'then the ReadModel should be in the correct state when getting it', ->
+        exampleReadModel = exampleContext.getReadModel 'ExampleReadModel'
+        expect(exampleReadModel.totallyDenormalized).to.equal 'foo'

@@ -15,7 +15,7 @@ class BoundedContext
   _applicationServiceQueries: {}
   _domainEventClasses: {}
   _domainEventHandlers: {}
-  _viewClasses: {}
+  _readModelClasses: {}
 
   initialize: ->
     @_initializeEventStore()
@@ -120,19 +120,19 @@ class BoundedContext
     @
 
 
-  addView: (viewName, ViewClass) ->
-    @_viewClasses[viewName] = ViewClass
+  addReadModel: (readModelName, ReadModelClass) ->
+    @_readModelClasses[readModelName] = ReadModelClass
     @
 
 
-  addViews: (viewsObj) ->
-    @addView viewName, ViewClass for viewName, ViewClass of viewsObj
+  addReadModels: (viewsObj) ->
+    @addReadModel readModelName, ReadModelClass for readModelName, ReadModelClass of viewsObj
     @
 
 
-  getView: (viewName) ->
-    ViewClass = @_viewClasses[viewName]
-    view = new ViewClass
+  getView: (readModelName) ->
+    ReadModelClass = @_readModelClasses[readModelName]
+    view = new ReadModelClass
     # TODO: apply correct domainevents to view
 
 

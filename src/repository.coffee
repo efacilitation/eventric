@@ -29,30 +29,6 @@ class Repository
       callback null, aggregate
 
 
-  find: (query, callback) ->
-    return unless @_callbackIsAFunction callback
-
-    @findIds query, (err, aggregateIds) =>
-      return callback err, null if err
-
-      aggregates = []
-      async.whilst (=> aggregateIds.length > 0),
-
-        ((callbackAsync) =>
-          aggregateId = aggregateIds.shift()
-          @findById aggregateId, (err, aggregate) =>
-            return callbackAsync err if err
-            return callbackAsync null if aggregate.length == 0
-            aggregates.push aggregate
-            callbackAsync null
-        ),
-
-        ((err) =>
-          return callback err, null if err
-          callback null, aggregates
-        )
-
-
   _callbackIsAFunction: (callback) ->
     if typeof callback == 'function'
       return true

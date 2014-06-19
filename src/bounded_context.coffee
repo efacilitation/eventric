@@ -2,7 +2,6 @@ eventric = require 'eventric'
 
 _                  = eventric.require 'HelperUnderscore'
 AggregateService   = eventric.require 'AggregateService'
-Repository         = eventric.require 'Repository'
 DomainEventService = eventric.require 'DomainEventService'
 
 
@@ -10,14 +9,13 @@ class BoundedContext
   _di: {}
   _params: {}
   _aggregateRootClasses: {}
-  _repositories: {}
-  _repositoryInstances: {}
   _adapters: {}
   _adapterInstances: {}
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
   _domainEventClasses: {}
   _domainEventHandlers: {}
+  _viewClasses: {}
 
   initialize: ->
     @_initializeEventStore()
@@ -32,7 +30,6 @@ class BoundedContext
 
     @_di =
       $aggregate: @_aggregateService
-      $repository: => @getRepository.apply @, arguments
       $adapter: => @getAdapter.apply @, arguments
     @
 
@@ -107,11 +104,6 @@ class BoundedContext
     @
 
 
-  addRepository: (aggregateName, repository) ->
-    @_repositories[aggregateName] = repository
-    @
-
-
   addDomainEventHandler: (eventName, handlerFn) ->
     @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
     @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
@@ -128,29 +120,19 @@ class BoundedContext
     @
 
 
-  getRepository: (aggregateName) ->
-    # return cache if available
-    return @_repositoryInstances[aggregateName] if @_repositoryInstances[aggregateName]
+  addView: (viewName, ViewClass) ->
+    @_viewClasses[viewName] = ViewClass
+    @
 
-    # TODO: constructing while get may a violation of SRP?
-    # define name and event store
-    repositoryParams =
-      aggregateName: aggregateName
-      AggregateRoot: @_aggregateRootClasses[aggregateName]
-      eventStore: @_eventStore
 
-    # build repository
-    repository = new Repository repositoryParams
+  addViews: (viewsObj) ->
+    @addView viewName, ViewClass for viewName, ViewClass of viewsObj
 
-    # extend repository with custom repository if available
-    if @_repositories[aggregateName]
-      _.extend repository, @_repositories[aggregateName]
 
-    # cache
-    @_repositoryInstances[aggregateName] = repository
-
-    # return
-    repository
+  getView: (viewName) ->
+    ViewClass = @_viewClasses[viewName]
+    view = new ViewClass
+    # TODO: apply correct domainevents to view
 
 
   getAdapter: (adapterName) ->

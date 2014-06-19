@@ -8,7 +8,7 @@ describe 'Command Aggregate Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created and initialized some example bounded context', ->
+  describe 'given we created and initialized some example bounded context including an aggregate', ->
     exampleContext = null
     beforeEach ->
       exampleContext = eventric.boundedContext 'exampleContext'

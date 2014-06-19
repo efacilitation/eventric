@@ -53,29 +53,6 @@ class Repository
         )
 
 
-  findOne: (query, callback) ->
-    return unless @_callbackIsAFunction callback
-
-    # TODO: returns only the first result, should actually do a limited query against the store
-    @find query, (err, results) =>
-      return callback err, null if err
-      return callback null, false if results.length == 0
-      callback null, results[0]
-
-
-  findIds: (query, callback) =>
-    return unless @_callbackIsAFunction callback
-
-    # ask the adapter to find the ids and return them
-    @_eventStore.find @_aggregateName, query, { 'aggregate.id': 1 }, (err, results) =>
-      return callback err, null if err
-
-      aggregateIds = []
-      aggregateIds.push result.aggregate.id for result in results when result.aggregate.id not in aggregateIds
-
-      callback null, aggregateIds
-
-
   _callbackIsAFunction: (callback) ->
     if typeof callback == 'function'
       return true

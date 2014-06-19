@@ -6,9 +6,9 @@ Repository = eventric.require 'Repository'
 Aggregate  = eventric.require 'Aggregate'
 
 class AggregateService
-  _aggregateDefinitions: {}
+  _AggregateRootClasses: {}
 
-  initialize: (@_eventStore, @_domainEventService) ->
+  initialize: (@_eventStore, @_domainEventService, @_boundedContext ) ->
     # proxy & queue public api
     _queue = async.queue (payload, callback) =>
       payload.originalFunction.call @, payload.arguments...
@@ -42,17 +42,17 @@ class AggregateService
       aggregateName  = params.name
       aggregateProps = params.props
 
-      aggregateDefinition = @getAggregateDefinition aggregateName
-      if not aggregateDefinition
+      AggregateRoot = @getAggregateRoot aggregateName
+      if not AggregateRoot
         err = new Error "Tried to create not registered AggregateDefinition '#{aggregateName}'"
         return reject err
 
       # create Aggregate
-      aggregate = new Aggregate aggregateName, aggregateDefinition
+      aggregate = new Aggregate @_boundedContext, aggregateName, AggregateRoot
       aggregate.create aggregateProps
 
       .then =>
-        @_generateSaveAndTriggerDomainEvent aggregate, 'create', resolve, reject
+        @_saveAndTriggerDomainEvents aggregate, resolve, reject
 
       .catch (err) =>
         reject err
@@ -65,14 +65,15 @@ class AggregateService
       methodName    = params.methodName
       methodParams  = params.methodParams
 
-      aggregateDefinition = @getAggregateDefinition aggregateName
-      if not aggregateDefinition
-        err = new Error "Tried to command not registered AggregateDefinition '#{aggregateName}'"
+      AggregateRoot = @getAggregateRoot aggregateName
+      if not AggregateRoot
+        err = new Error "Tried to command not registered AggregateRoot '#{aggregateName}'"
         return reject err
 
       repository = new Repository
         aggregateName: aggregateName
-        aggregateDefinition: aggregateDefinition
+        AggregateRoot: AggregateRoot
+        boundedContext: @_boundedContext
         eventStore: @_eventStore
 
       # get the aggregate from the AggregateRepository
@@ -92,16 +93,13 @@ class AggregateService
           params: methodParams
 
         .then =>
-          @_generateSaveAndTriggerDomainEvent aggregate, methodName, resolve, reject
+          @_saveAndTriggerDomainEvents aggregate, resolve, reject
 
         .catch (err) =>
           reject err
 
 
-  _generateSaveAndTriggerDomainEvent: (aggregate, methodName, resolve, reject) ->
-    # generate the DomainEvent
-    aggregate.generateDomainEvent methodName
-
+  _saveAndTriggerDomainEvents: (aggregate, resolve, reject) ->
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
     @_domainEventService.saveAndTrigger domainEvents, (err) =>
@@ -111,12 +109,12 @@ class AggregateService
       resolve aggregate.id
 
 
-  registerAggregateDefinition: (aggregateName, aggregateDefinition) ->
-    @_aggregateDefinitions[aggregateName] = aggregateDefinition
+  registerAggregateRoot: (aggregateName, AggregateRoot) ->
+    @_AggregateRootClasses[aggregateName] = AggregateRoot
 
 
-  getAggregateDefinition: (aggregateName) ->
-    @_aggregateDefinitions[aggregateName]
+  getAggregateRoot: (aggregateName) ->
+    @_AggregateRootClasses[aggregateName]
 
 
 module.exports = AggregateService

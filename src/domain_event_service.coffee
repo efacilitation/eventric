@@ -18,16 +18,14 @@ class DomainEventService
       @_eventStore.save domainEvent, (err) =>
         return next err if err
 
-        eventName     = domainEvent.getName()
-        aggregateId   = domainEvent.getAggregateId()
-        aggregateName = domainEvent.getAggregateName()
+        eventName     = domainEvent.name
+        aggregateId   = domainEvent.aggregate.id
+        aggregateName = domainEvent.aggregate.name
 
         # now trigger the DomainEvent in multiple fashions
         @trigger 'DomainEvent', domainEvent
         @trigger aggregateName, domainEvent
-        @trigger "#{aggregateName}:#{eventName}", domainEvent
-        @trigger "#{aggregateName}/#{aggregateId}", domainEvent
-        @trigger "#{aggregateName}:#{eventName}/#{aggregateId}", domainEvent
+        @trigger eventName, domainEvent
 
         next null
     , (err) =>

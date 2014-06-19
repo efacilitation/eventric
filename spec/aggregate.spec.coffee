@@ -2,136 +2,43 @@ describe 'Aggregate', ->
   Aggregate   = eventric.require 'Aggregate'
   DomainEvent = eventric.require 'DomainEvent'
 
-  describe '#storeAndApply', ->
-    it.only 'should call a handle method on the aggregate based on the DomainEvent Name', ->
+  it 'should inject the $raiseDomainEvent method into the aggregate root', ->
+    exampleRoot = {}
+    myAggregate = new Aggregate {}, 'MyAggregate', sandbox.stub().returns exampleRoot
+
+    expect(exampleRoot.$raiseDomainEvent).to.be.ok
+
+
+  describe '#raiseDomainEvent', ->
+    it 'should call a handle method on the aggregate based on the DomainEvent Name', ->
       class SomethingHappened
-        constructor: (params) ->
+        constructor: sandbox.stub()
       exampleContext =
-        getDomainEventClass: sandbox.stub().returns SomethingHappened
+        getDomainEvent: sandbox.stub().returns SomethingHappened
 
       class ExampleRoot
         handleSomethingHappened: sandbox.stub()
 
-      myAggregate = new Aggregate exampleContext, 'MyAggregate', root: ExampleRoot
-      myAggregate.storeAndApply 'SomethingHappened', some: 'properties'
+      myAggregate = new Aggregate exampleContext, 'MyAggregate', ExampleRoot
+      myAggregate.raiseDomainEvent 'SomethingHappened', some: 'properties'
 
       applyCall = ExampleRoot::handleSomethingHappened.getCall 0
-      expect(applyCall.args[0]).to.be.an.instanceof SomethingHappened
-
-
-  describe '#generateDomainEvent', ->
-    it 'should create a DomainEvent including changes', ->
-      someProps =
-        some:
-          ones:
-            name: 'John'
-      myAggregate = new Aggregate 'MyAggregate', root: class Foo
-      myAggregate.create someProps
-      .then =>
-        myAggregate.generateDomainEvent 'someEvent'
-        expect(myAggregate.getDomainEvents()[0].getName()).to.equal 'someEvent'
-        expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal someProps
-
-
-    it.skip 'should include the change even if the value was already applied', ->
-      class Foo
-        changeName: (name) ->
-          @name = 'Willy'
-      myAggregate = new Aggregate 'MyAggregate', root: Foo
-
-      domainEvent = new DomainEvent
-        name: 'someEvent'
-        aggregate:
-          changed:
-            name: 'Willy'
-      myAggregate.applyDomainEvents [domainEvent]
-
-      myAggregate.command
-        name: 'changeName'
-        props: ['Willy']
-      .then =>
-        myAggregate.generateDomainEvent()
-        expect(myAggregate.getDomainEvents()[0].getAggregateChanges().name).to.deep.equal
-          name: 'Willy'
-
-
-    it 'should add the correct entity class map to the domain event', ->
-      class MooEntity
-      class BarEntity
-      class Foo
-        createEntities: ->
-          @bar = new BarEntity
-          @moo = [
-            new MooEntity
-            'someOtherValue'
-            new BarEntity
-          ]
-      aggregateDefinition =
-        root: Foo
-        entities:
-          'Bar': BarEntity
-          'Moo': MooEntity
-      myAggregate = new Aggregate 'MyAggregate', aggregateDefinition, foo: 'bar'
-      myAggregate.command
-        name: 'createEntities'
-      .then =>
-        myAggregate.generateDomainEvent 'someEvent'
-        expect(myAggregate.getDomainEvents()[0].aggregate.entityMap).to.deep.equal
-          'Bar': [
-            ['bar']
-            ['moo', 2]
-          ]
-          'Moo': [
-            ['moo', 0]
-          ]
-
-
-  describe '#getDomainEvents', ->
-    it 'should return the generated domainEvents', ->
-      myAggregate = new Aggregate 'MyAggregate', root: class Foo
-      myAggregate.generateDomainEvent 'someEvent'
-      myAggregate.generateDomainEvent 'anotherEvent'
-      domainEvents = myAggregate.getDomainEvents()
-      expect(domainEvents.length).to.equal 2
+      expect(applyCall.args[0]).to.be.an.instanceof DomainEvent
+      expect(applyCall.args[0].payload).to.be.an.instanceof SomethingHappened
 
 
   describe '#applyDomainEvents', ->
-    it 'should apply given changes from domain events to properties', ->
-      myAggregate = new Aggregate 'MyAggregate', root: class Foo
+    it 'should call the handle function of the given DomainEvent', ->
+      class ExampleRoot
+        handleSomethingHappened: sandbox.stub()
 
       domainEvent = new DomainEvent
-        name: 'someEvent'
-        aggregate:
-          diff: [
-            {
-              type: 'added'
-              path: [
-                {
-                  key: 'name'
-                  valueType: 'string'
-                }
-              ]
-              value: 'ChangedJohn'
-            }
-            {
-              type: 'added'
-              path: [
-                {
-                  key: 'nested'
-                  valueType: 'object'
-                }
-              ]
-              value:
-                structure: 'foo'
-            }
-          ]
+        name: 'SomethingHappened'
+
+      myAggregate = new Aggregate {}, 'MyAggregate', ExampleRoot
       myAggregate.applyDomainEvents [domainEvent]
 
-      json = myAggregate.toJSON()
-      expect(json.name).to.equal 'ChangedJohn'
-      expect(json.nested.structure).to.equal 'foo'
-      myAggregate.generateDomainEvent 'someEvent'
-      expect(myAggregate.getDomainEvents()[0].getAggregateChanges()).to.deep.equal {}
+      expect(ExampleRoot::handleSomethingHappened).to.have.been.calledWith sinon.match.instanceOf DomainEvent
 
 
   describe '#command', ->
@@ -142,7 +49,7 @@ describe 'Aggregate', ->
 
       class Foo
         someMethod: sandbox.stub()
-      myAggregate = new Aggregate 'MyAggregate', root: Foo
+      myAggregate = new Aggregate {}, 'MyAggregate', Foo
 
       command =
         name: 'someMethod'
@@ -153,7 +60,8 @@ describe 'Aggregate', ->
 
 
     it 'should callback with error if the command does not exist in the root', (done) ->
-      myAggregate = new Aggregate 'MyAggregate', root: class Foo
+      class Foo
+      myAggregate = new Aggregate {}, 'MyAggregate', Foo
 
       myAggregate.command
         name: 'someMethod'
@@ -166,12 +74,10 @@ describe 'Aggregate', ->
     it 'should handle non array params automatically', ->
       class Foo
         someMethod: sandbox.stub()
-      myAggregate = new Aggregate 'MyAggregate', root: Foo
+      myAggregate = new Aggregate {}, 'MyAggregate', Foo
 
       myAggregate.command
         name: 'someMethod'
         params: 'foo'
       .then =>
         expect(Foo::someMethod).to.have.been.calledWith 'foo'
-
-

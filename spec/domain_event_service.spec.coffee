@@ -19,13 +19,10 @@ describe 'DomainEventService', ->
     domainEvent = null
     beforeEach ->
       domainEvent = new DomainEvent
-        name: 'testMethod'
+        name: 'SomethingHappened'
         aggregate:
           id: 1
           name: 'Example'
-          changed:
-            props:
-              name: 'John'
 
 
     it 'should tell the EventStore to save the DomainEvent', (done) ->
@@ -38,7 +35,5 @@ describe 'DomainEventService', ->
       domainEventService.saveAndTrigger [domainEvent], (err) ->
         expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.true
         expect(triggerSpy.calledWith 'Example', domainEvent).to.be.true
-        expect(triggerSpy.calledWith 'Example/1', domainEvent).to.be.true
-        expect(triggerSpy.calledWith 'Example:testMethod', domainEvent).to.be.true
-        expect(triggerSpy.calledWith 'Example:testMethod/1', domainEvent).to.be.true
+        expect(triggerSpy.calledWith 'SomethingHappened', domainEvent).to.be.true
         done()

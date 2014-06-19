@@ -9,17 +9,17 @@ DomainEventService = eventric.require 'DomainEventService'
 class BoundedContext
   _di: {}
   _params: {}
-  _aggregateDefinitions: {}
-  _readAggregateDefinitions: {}
+  _aggregateRootClasses: {}
   _repositories: {}
   _repositoryInstances: {}
   _adapters: {}
   _adapterInstances: {}
   _applicationServiceCommands: {}
   _applicationServiceQueries: {}
+  _domainEventClasses: {}
   _domainEventHandlers: {}
 
-  initialize: () ->
+  initialize: ->
     @_initializeEventStore()
 
     @_domainEventService = new DomainEventService
@@ -27,7 +27,7 @@ class BoundedContext
     @_initializeDomainEventHandlers()
 
     @_aggregateService = new AggregateService
-    @_aggregateService.initialize @_eventStore, @_domainEventService
+    @_aggregateService.initialize @_eventStore, @_domainEventService, @
     @_initializeAggregateService()
 
     @_di =
@@ -55,12 +55,22 @@ class BoundedContext
 
 
   _initializeAggregateService: () ->
-    for aggregateName, aggregateDefinition of @_aggregateDefinitions
-      @_aggregateService.registerAggregateDefinition aggregateName, aggregateDefinition
+    for aggregateName, aggregateDefinition of @_aggregateRootClasses
+      @_aggregateService.registerAggregateRoot aggregateName, aggregateDefinition
 
 
   set: (key, value) ->
     @_params[key] = value
+    @
+
+
+  addDomainEvent: (domainEventName, DomainEventClass) ->
+    @_domainEventClasses[domainEventName] = DomainEventClass
+    @
+
+
+  addDomainEvents: (domainEventClassesObj) ->
+    @addDomainEvent domainEventName, DomainEventClass for domainEventName, DomainEventClass of domainEventClassesObj
     @
 
 
@@ -92,13 +102,8 @@ class BoundedContext
     @
 
 
-  addAggregate: (aggregateName, aggregateDefinitionObj) ->
-    @_aggregateDefinitions[aggregateName] = aggregateDefinitionObj
-    @
-
-
-  addReadAggregate: (aggregateName, ReadAggregate) ->
-    @_readAggregateDefinitions[aggregateName] = ReadAggregate
+  addAggregate: (aggregateName, AggregateRootClass) ->
+    @_aggregateRootClasses[aggregateName] = AggregateRootClass
     @
 
 
@@ -128,15 +133,11 @@ class BoundedContext
     return @_repositoryInstances[aggregateName] if @_repositoryInstances[aggregateName]
 
     # TODO: constructing while get may a violation of SRP?
-    # define name, event store and that we only want to return readaggregates
+    # define name and event store
     repositoryParams =
       aggregateName: aggregateName
+      AggregateRoot: @_aggregateRootClasses[aggregateName]
       eventStore: @_eventStore
-      readAggregate: true
-
-    # check if we have a special read aggregate definition
-    if @_readAggregateDefinitions[aggregateName]
-      repositoryParams.aggregateDefinition = @_readAggregateDefinitions[aggregateName]
 
     # build repository
     repository = new Repository repositoryParams
@@ -165,6 +166,10 @@ class BoundedContext
 
     # return
     adapter
+
+
+  getDomainEvent: (domainEventName) ->
+    @_domainEventClasses[domainEventName]
 
 
   command: (command, callback) ->

@@ -22,7 +22,6 @@ moduleDefinition =
   HelperEvents: './helper/events'
   HelperUnderscore: './helper/underscore'
   HelperClone: './helper/clone'
-  HelperObjectDiff: './helper/diff2'
 
 
 module.exports =

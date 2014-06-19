@@ -10,7 +10,9 @@ describe 'AggregateService', ->
   eventStoreStub = null
   thenStub = null
   catchStub = null
+  boundedContextStub = null
   beforeEach ->
+    boundedContextStub = {}
     eventStoreStub = {}
     # TODO: stub promises in a more sane fashion
     catchStub = sandbox.stub()
@@ -60,8 +62,8 @@ describe 'AggregateService', ->
 
       # instantiate the AggregateService with the ReadAggregateRepository stub
       aggregateService = new AggregateService
-      aggregateService.initialize eventStoreStub, domainEventService
-      aggregateService.registerAggregateDefinition 'ExampleAggregate', {}
+      aggregateService.initialize eventStoreStub, domainEventService, boundedContextStub
+      aggregateService.registerAggregateRoot 'ExampleAggregate', {}
 
 
     it 'should return the aggregateId', (done) ->
@@ -82,8 +84,8 @@ describe 'AggregateService', ->
 
       # instantiate the command service
       aggregateService = new AggregateService
-      aggregateService.initialize eventStoreStub, domainEventService
-      aggregateService.registerAggregateDefinition 'ExampleAggregate', {}
+      aggregateService.initialize eventStoreStub, domainEventService, boundedContextStub
+      aggregateService.registerAggregateRoot 'ExampleAggregate', {}
 
 
     it 'should call the command on the aggregate with empty array of params', (done) ->
@@ -136,29 +138,6 @@ describe 'AggregateService', ->
         methodParams: ['foo', 'bar']
       .catch (err) ->
         expect(err).to.equal 'AGGREGATE_ERROR'
-        done()
-
-
-    it 'should not call the generateDomainEvent method of the given aggregate if there was an error at the aggregate', (done) ->
-      catchStub.yields 'AGGREGATE_ERROR'
-      aggregateService.command
-        name: 'ExampleAggregate'
-        id: 1
-        methodName: 'doSomething'
-        methodParams: ['foo', 'bar']
-      .catch ->
-        expect(exampleAggregateStub.generateDomainEvent.notCalled).to.be.true
-        done()
-
-
-    it 'should call the generateDomainEvent method of the given aggregate', (done) ->
-      thenStub.yields null
-      aggregateService.command
-        name: 'ExampleAggregate'
-        id: 1
-        methodName: 'doSomething'
-      .then ->
-        expect(exampleAggregateStub.generateDomainEvent.calledWith 'doSomething').to.be.true
         done()
 
 

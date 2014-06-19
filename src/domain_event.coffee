@@ -1,28 +1,10 @@
 class DomainEvent
   constructor: (params) ->
-    @name = params.name
-    @timestamp = new Date().getTime()
+    @id        = params.id
+    @name      = params.name
+    @payload   = params.payload
     @aggregate = params.aggregate
-
-
-  getAggregateChanges: ->
-    @aggregate.changed
-
-
-  getAggregateName: ->
-    @aggregate.name
-
-
-  getAggregateId: ->
-    @aggregate.id
-
-
-  getTimestamp: ->
-    @timestamp
-
-
-  getName: ->
-    @name
+    @timestamp = new Date().getTime()
 
 
 module.exports = DomainEvent

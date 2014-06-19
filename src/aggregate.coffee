@@ -3,37 +3,60 @@ eventric = require 'eventric'
 _               = eventric.require 'HelperUnderscore'
 Clone           = eventric.require 'HelperClone'
 DomainEvent     = eventric.require 'DomainEvent'
-ObjectDiff      = eventric.require 'HelperObjectDiff'
 
 class Aggregate
 
-  constructor: (boundedContext, name, definition) ->
-    @_name           = name
-    @_domainEvents   = []
-    @_definition     = definition
-    @_boundedContext = boundedContext
-    @_oldRoot        = {}
+  constructor: (@_boundedContext, @_name, Root) ->
+    @_domainEvents = []
 
-    if !@_definition
+    if !Root
       @_root = {}
     else
-      # TODO: check for valid definition
-      @_root = new @_definition.root
+      @_root = new Root
+
+    @_root.$raiseDomainEvent = @raiseDomainEvent
 
 
-  storeAndApply: (domainEventName, domainEventParams) ->
-    if !@_root["handle#{domainEventName}"]
-      throw new Error "Tried to storeAndApply the DomainEvent #{domainEventName} without a matching handle method"
-
-    DomainEventClass = @_boundedContext.getDomainEventClass domainEventName
+  raiseDomainEvent: (domainEventName, domainEventPayload) =>
+    DomainEventClass = @_boundedContext.getDomainEvent domainEventName
     if !DomainEventClass
-      throw new Error "Tried to storeAndApply on not added DomainEventClass #{domainEventName}"
+      throw new Error "Tried to raiseDomainEvent '#{domainEventName}' which is not defined"
 
-    domainEvent = new DomainEventClass domainEventParams
+    domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @_domainEvents.push domainEvent
 
-    @_root["handle#{domainEventName}"] domainEvent
+    @_handleDomainEvent domainEventName, domainEvent
     # TODO: do a rollback if something goes wrong inside the handle function
+
+
+  _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
+    new DomainEvent
+      id: @_generateUid()
+      name: domainEventName
+      aggregate:
+        id: @id
+        name: @_name
+      payload: new DomainEventClass domainEventPayload
+
+
+  _handleDomainEvent: (domainEventName, domainEvent) ->
+    if !@_root["handle#{domainEventName}"]
+      console.log "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
+
+    else
+      @_root["handle#{domainEventName}"] domainEvent
+
+
+  getDomainEvents: ->
+    @_domainEvents
+
+
+  applyDomainEvents: (domainEvents) ->
+    @_applyDomainEvent domainEvent for domainEvent in domainEvents
+
+
+  _applyDomainEvent: (domainEvent) ->
+    @_handleDomainEvent domainEvent.name, domainEvent
 
 
   create: (props) ->
@@ -54,6 +77,12 @@ class Aggregate
           reject e
 
       else
+        # automatically generate domainevent
+
+        CreatedClass = class Created
+        domainEvent = @_createDomainEvent "#{@_name}Created", CreatedClass
+        @_domainEvents.push domainEvent
+
         @_root[key] = value for key, value of props
         resolve()
 
@@ -68,8 +97,6 @@ class Aggregate
       command.params = [] if !command.params
       if not (command.params instanceof Array)
         command.params = [command.params]
-
-
 
       try
         check = @_root[command.name] command.params...
@@ -90,65 +117,6 @@ class Aggregate
       (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
     delim = separator or "-"
     S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
-
-
-  generateDomainEvent: (eventName, params={}) ->
-    eventParams =
-      name: eventName
-      aggregate:
-        id: @id
-        name: @_name
-
-    diff = ObjectDiff.calculateDifferences @_oldRoot, @_root
-    eventParams.aggregate.diff = diff
-    eventParams.aggregate.changed = ObjectDiff.applyDifferences {}, diff
-
-    entityMap = @_getEntityMap()
-    if Object.keys(entityMap).length > 0
-      eventParams.aggregate.entityMap = entityMap
-
-    domainEvent = new DomainEvent eventParams
-    @_domainEvents.push domainEvent
-
-
-  _getEntityMap: ->
-    entityMap = {}
-
-    for entityName, entityClass of @_definition.entities
-      entityMap[entityName] = []
-      @_getPathsToEntityClass entityClass, @_root, entityMap[entityName]
-
-    entityMap
-
-
-  _getPathsToEntityClass: (entityClass, obj, map, path = []) ->
-    if obj instanceof entityClass
-      map.push path
-
-    if Object.keys(obj).length == 0
-      path = []
-
-    _.each obj, (val, key) =>
-      eachPath = Clone path
-      eachPath.push key
-      if _.isObject val
-        @_getPathsToEntityClass entityClass, val, map, eachPath
-
-    path
-
-
-  getDomainEvents: ->
-    @_domainEvents
-
-
-  applyDomainEvents: (domainEvents) ->
-    @_applyDomainEvent domainEvent for domainEvent in domainEvents
-    @_oldRoot = Clone @_root
-
-
-  _applyDomainEvent: (domainEvent) ->
-    if domainEvent.aggregate.diff
-      ObjectDiff.applyDifferences @_root, domainEvent.aggregate.diff
 
 
   toJSON: ->

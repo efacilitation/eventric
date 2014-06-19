@@ -12,7 +12,6 @@ class BoundedContext
   _adapters: {}
   _adapterInstances: {}
   _applicationServiceCommands: {}
-  _applicationServiceQueries: {}
   _domainEventClasses: {}
   _domainEventHandlers: {}
   _readModelClasses: {}
@@ -71,14 +70,6 @@ class BoundedContext
     @
 
 
-  addApplicationService: (serviceObj) ->
-    for type, typeObj of serviceObj
-      switch type
-        when 'commands' then @addCommands serviceObj[type]
-        when 'queries' then @addQueries serviceObj[type]
-    @
-
-
   addCommand: (commandName, fn) ->
     @_applicationServiceCommands[commandName] = => fn.apply @_di, arguments
     @
@@ -86,16 +77,6 @@ class BoundedContext
 
   addCommands: (commandObj) ->
     @addCommand commandName, commandFunction for commandName, commandFunction of commandObj
-    @
-
-
-  addQuery: (queryName, fn) ->
-    @_applicationServiceQueries[queryName] = => fn.apply @_di, arguments
-    @
-
-
-  addQueries: (queryObj) ->
-    @addQuery queryName, queryFunction for queryName, queryFunction of queryObj
     @
 
 
@@ -165,19 +146,6 @@ class BoundedContext
         err = new Error "Given command #{command.name} not registered on bounded context"
         reject err
         callback? err, null
-
-
-  query: (query, callback) ->
-    new Promise (resolve, reject) =>
-      if @_applicationServiceQueries[query.name]
-        @_applicationServiceQueries[query.name] query.params, (err, result) =>
-          resolve result
-          callback? err, result
-      else
-        errorMessage = "Given query #{query.name} not registered on bounded context"
-        error = new Error errorMessage
-        reject error
-        callback? error, null
 
 
 module.exports = BoundedContext

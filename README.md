@@ -5,24 +5,29 @@
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-Build web applications based on Domain-driven Design
+Build JavaScript applications based on Domain-driven Design.
 
 Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Server and Client. Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
 
 ### Why?
 
-It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining your data structure and so often end up with an [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html) on *larger* projects.
+It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining your data structure and so often end up with an [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html) on larger projects.
 
 
 ## Features
 
-* DDD, CQRS, EventSourcing
-* BoundedContext as a BuildingBlock
-* Automated saving of DomainEvents
-* Easily define ReadModels and ProcessManagers
-* Support for Occasionally Connected Applications
-* Conflict Detection and Support for Merging
+* DDD BuildingBlocks
+  * BoundedContext
+  * Aggregate
+
+* CQRS
+  * Easily define ReadModels and ProcessManagers
+  * Support for Occasionally Connected Applications
+  * Conflict Detection and Support for Merging
+
+* EventSourcing
+  * Automated saving and applying of DomainEvents
 
 
 ## Philosophy
@@ -32,6 +37,11 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
 * Explicitly set boundaries for parts of your application ([BoundedContexts](https://en.wikipedia.org/wiki/Domain-driven_design#Bounded_context) / [MicroServices](http://martinfowler.com/articles/microservices.html))
 * Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx))
 * Capture all changes to your application state as a sequence of events ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html) / [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/))
+
+
+## A Note on DDD
+
+Please keep in mind that eventric.js supplies you with a code structure that has a common-sense in the DDD/CQRS community - but you really should get to know the tactical side of DDD as well, which is at least so important as the technical BuildingBlocks! When you dive into the DDD topic you will quickly learn, that the BoundedContext is mostly refered to as a tactical pattern. We decided to make it a technical pattern too, so it's easier to grasp the overall concept of the ContextMap and integration of BoundedContexts.
 
 
 ## Getting started

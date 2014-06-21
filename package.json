@@ -35,6 +35,7 @@
     "chai": "*",
     "coffee-script": "*",
     "commonjs-require": "*",
+    "growler": "*",
     "gulp": "*",
     "gulp-clean": "*",
     "gulp-util": "*",
@@ -46,6 +47,7 @@
     "gulp-newer": "*",
     "gulp-wrap-commonjs": "*",
     "gulp-uglify": "*",
+    "gulp-bump": "*",
     "karma": "*",
     "karma-coffee-preprocessor": "*",
     "karma-phantomjs-launcher": "*",
@@ -56,8 +58,7 @@
     "mocha": "*",
     "run-sequence": "*",
     "sinon": "*",
-    "sinon-chai": "*",
-    "gulp-bump": "^0.1.8"
+    "sinon-chai": "*"
   },
   "dependencies": {},
   "licenses": [

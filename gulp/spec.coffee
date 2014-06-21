@@ -6,12 +6,19 @@ concat      = require 'gulp-concat'
 runSequence = require 'run-sequence'
 fs          = require 'fs'
 
+growl = require './helper/growl'
+growl.initialize()
+
 module.exports = (gulp) ->
-  gulp.task 'spec', (next) ->
-    runSequence 'spec:server', 'spec:client', next
+  lastSpecError = false
+  gulp.task 'spec', (next) =>
+    growl.specsRun()
+    runSequence 'spec:server', 'spec:client', ->
+      growl.specsEnd()
+      next()
 
 
-  gulp.task 'spec:server', ->
+  gulp.task 'spec:server', =>
     if !fs.existsSync 'node_modules/eventric'
       fs.symlinkSync '../src', 'node_modules/eventric', 'dir'
 
@@ -19,7 +26,8 @@ module.exports = (gulp) ->
       'spec/helper/setup.coffee'
       'spec/**/*.coffee'
       ])
-      .pipe(mocha(reporter: 'spec'))
+      .pipe mocha(reporter: 'spec')
+        .on('error', growl.specsError)
 
 
   gulp.task 'spec:client', (next) ->

@@ -5,7 +5,7 @@
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-Build JavaScript applications based on Domain-driven Design.
+Build JavaScript applications based on Events and Domain-driven Design.
 
 Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Server and Client. Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
@@ -185,7 +185,7 @@ gulp spec
 You can watch for file-changes with
 
 ```shell
-NODE_ENV=workstation gulp watch
+gulp watch
 ```
 
 

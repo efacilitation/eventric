@@ -3,7 +3,7 @@ gutil = require 'gulp-util'
 
 gulp.on 'err', (e) ->
 gulp.on 'task_err', (e) ->
-  if process.env.NODE_ENV isnt 'workstation'
+  if process.env.CI
     gutil.log e
     process.exit 1
 

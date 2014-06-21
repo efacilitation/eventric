@@ -16,6 +16,9 @@ class BoundedContext
   _domainEventHandlers: {}
   _readModelClasses: {}
 
+  constructor: (@name) ->
+
+
   initialize: ->
     @_initializeEventStore()
 
@@ -50,9 +53,9 @@ class BoundedContext
         @_domainEventService.on domainEventName, fn
 
 
-  _initializeAggregateService: () ->
-    for aggregateName, aggregateDefinition of @_aggregateRootClasses
-      @_aggregateService.registerAggregateRoot aggregateName, aggregateDefinition
+  _initializeAggregateService: ->
+    for aggregateName, AggregateRoot of @_aggregateRootClasses
+      @_aggregateService.registerAggregateRoot aggregateName, AggregateRoot
 
 
   set: (key, value) ->
@@ -111,10 +114,24 @@ class BoundedContext
     @
 
 
-  getView: (readModelName) ->
+  getReadModel: (readModelName) ->
     ReadModelClass = @_readModelClasses[readModelName]
-    view = new ReadModelClass
-    # TODO: apply correct domainevents to view
+    readModel = new ReadModelClass
+
+    @_eventStore.find @name, name: $in: readModel.subscribeToDomainEvents
+    , (domainEvents) =>
+      for domainEvent in domainEvents
+        @_applyDomainEventToReadModel domainEvent, readModel
+
+    readModel
+
+
+  _applyDomainEventToReadModel: (domainEvent, readModel) ->
+    if !readModel["handle#{domainEvent.name}"]
+      console.log "Tried to apply DomainEvent '#{domainEvent.name}' to ReadModel without a matching handle method"
+
+    else
+      readModel["handle#{domainEvent.name}"] domainEvent
 
 
   getAdapter: (adapterName) ->

@@ -51,7 +51,7 @@ module.exports =
     if !name
       throw new Error 'BoundedContexts must have a name'
     BoundedContext = @require 'BoundedContext'
-    boundedContext = new BoundedContext
+    boundedContext = new BoundedContext name
 
     boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
       if !@_domainEventHandlers[name]

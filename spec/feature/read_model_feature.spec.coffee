@@ -1,6 +1,6 @@
 eventric = require 'eventric'
 
-describe.skip 'Read Module Feature', ->
+describe 'Read Module Feature', ->
 
   eventStoreMock = null
   beforeEach ->
@@ -27,8 +27,10 @@ describe.skip 'Read Module Feature', ->
         handleSomethingHappened: (domainEvent) ->
           @totallyDenormalized = domainEvent.payload.someProperty
 
-
+      exampleContext.addAggregate 'Example', class Example
       exampleContext.addReadModel 'ExampleReadModel', ExampleReadModel
+
+      exampleContext.initialize()
 
 
     describe 'when DomainEvents got raised which the ReadModel subscribed to', ->

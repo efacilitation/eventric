@@ -36,6 +36,7 @@ class Aggregate
       aggregate:
         id: @id
         name: @_name
+        context: @_boundedContext.name
       payload: new DomainEventClass domainEventPayload
 
 

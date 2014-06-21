@@ -11,7 +11,7 @@ class DomainEventService
   initialize: (@_eventStore) ->
 
   saveAndTrigger: (domainEvents, callback) ->
-    # TODO: this should be an transaction to guarantee the consistency of the aggregate
+    # TODO: this should be an transaction to guarantee consistency
 
     async.eachSeries domainEvents, (domainEvent, next) =>
       # store the DomainEvent

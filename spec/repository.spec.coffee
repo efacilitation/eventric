@@ -33,10 +33,14 @@ describe  'Repository', ->
 
     mockery.registerMock 'eventric', eventricMock
 
+    boundedContextStub =
+      name: 'someContext'
+
     Repository = eventric.require 'Repository'
     repository = new Repository
       aggregateName: 'Foo'
-      eventStore: EventStoreStub
+      boundedContext: boundedContextStub
+      store: EventStoreStub
 
 
   describe '#findById', ->
@@ -49,7 +53,7 @@ describe  'Repository', ->
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', (done) ->
       repository.findById 23, ->
-        expect(EventStoreStub.find.calledWith('Foo', {'aggregate.id': 23})).to.be.true
+        expect(EventStoreStub.find.calledWith('someContext', {'aggregate.name': 'Foo', 'aggregate.id': 23})).to.be.true
         done()
 
 

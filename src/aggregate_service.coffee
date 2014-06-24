@@ -8,7 +8,7 @@ Aggregate  = eventric.require 'Aggregate'
 class AggregateService
   _AggregateRootClasses: {}
 
-  initialize: (@_eventStore, @_domainEventService, @_boundedContext ) ->
+  initialize: (@_store, @_domainEventService, @_boundedContext ) ->
     # proxy & queue public api
     _queue = async.queue (payload, callback) =>
       payload.originalFunction.call @, payload.arguments...
@@ -74,7 +74,7 @@ class AggregateService
         aggregateName: aggregateName
         AggregateRoot: AggregateRoot
         boundedContext: @_boundedContext
-        eventStore: @_eventStore
+        store: @_store
 
       # get the aggregate from the AggregateRepository
       repository.findById aggregateId, (err, aggregate) =>

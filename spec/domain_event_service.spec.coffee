@@ -2,16 +2,19 @@ describe 'DomainEventService', ->
   DomainEvent        = eventric.require 'DomainEvent'
   DomainEventService = eventric.require 'DomainEventService'
 
-  eventStore = null
+  store = null
   domainEventService = null
   beforeEach ->
-    class EventStore
+    boundedContextStub =
+      name: 'someContext'
+
+    class Store
       find: ->
       save: ->
-    eventStore = sinon.createStubInstance EventStore
-    eventStore.save.yields null
+    store = sinon.createStubInstance Store
+    store.save.yields null
     domainEventService = new DomainEventService
-    domainEventService.initialize eventStore
+    domainEventService.initialize store, boundedContextStub
 
 
   describe '#saveAndTrigger', ->
@@ -25,9 +28,9 @@ describe 'DomainEventService', ->
           name: 'Example'
 
 
-    it 'should tell the EventStore to save the DomainEvent', (done) ->
+    it 'should tell the Store to save the DomainEvent', (done) ->
       domainEventService.saveAndTrigger [domainEvent], (err) ->
-        expect(eventStore.save.calledOnce).to.be.true
+        expect(store.save).to.have.been.calledWith 'events.someContext', domainEvent
         done()
 
     it 'should trigger the given DomainEvent', (done) ->

@@ -8,14 +8,15 @@ class DomainEventService
 
   _.extend @prototype, HelperEvents
 
-  initialize: (@_eventStore) ->
+  initialize: (@_store, @_boundedContext) ->
 
   saveAndTrigger: (domainEvents, callback) ->
     # TODO: this should be an transaction to guarantee consistency
 
     async.eachSeries domainEvents, (domainEvent, next) =>
       # store the DomainEvent
-      @_eventStore.save domainEvent, (err) =>
+      collectionName = "events.#{@_boundedContext.name}"
+      @_store.save collectionName, domainEvent, (err) =>
         return next err if err
 
         eventName     = domainEvent.name

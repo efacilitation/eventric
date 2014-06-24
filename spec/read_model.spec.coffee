@@ -1,0 +1,3 @@
+describe 'ReadModel', ->
+
+  it 'foo', ->

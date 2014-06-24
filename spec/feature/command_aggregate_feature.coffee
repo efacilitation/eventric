@@ -42,7 +42,7 @@ describe 'Command Aggregate Feature', ->
             entity = new ExampleEntity
             entity.someEntityFunction()
 
-            @$raiseDomainEvent 'SomethingHappened',
+            @$emitDomainEvent 'SomethingHappened',
               someId: someId
               rootProp: 'foo'
               entity: entity

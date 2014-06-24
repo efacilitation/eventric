@@ -20,14 +20,14 @@ class BoundedContext
 
 
   initialize: ->
-    @_initializeEventStore()
+    @_initializeStore()
 
     @_domainEventService = new DomainEventService
-    @_domainEventService.initialize @_eventStore
+    @_domainEventService.initialize @_store, @
     @_initializeDomainEventHandlers()
 
     @_aggregateService = new AggregateService
-    @_aggregateService.initialize @_eventStore, @_domainEventService, @
+    @_aggregateService.initialize @_store, @_domainEventService, @
     @_initializeAggregateService()
 
     @_di =
@@ -36,13 +36,13 @@ class BoundedContext
     @
 
 
-  _initializeEventStore: ->
+  _initializeStore: ->
     if @_params.store
-      @_eventStore = @_params.store
+      @_store = @_params.store
     else
       globalStore = eventric.get 'store'
       if globalStore
-        @_eventStore = globalStore
+        @_store = globalStore
       else
         throw new Error 'Missing Event Store for Bounded Context'
 
@@ -118,7 +118,7 @@ class BoundedContext
     ReadModelClass = @_readModelClasses[readModelName]
     readModel = new ReadModelClass
 
-    @_eventStore.find @name, name: $in: readModel.subscribeToDomainEvents
+    @_store.find @name, name: $in: readModel.subscribeToDomainEvents
     , (domainEvents) =>
       for domainEvent in domainEvents
         @_applyDomainEventToReadModel domainEvent, readModel

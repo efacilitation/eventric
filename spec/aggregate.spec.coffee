@@ -2,14 +2,14 @@ describe 'Aggregate', ->
   Aggregate   = eventric.require 'Aggregate'
   DomainEvent = eventric.require 'DomainEvent'
 
-  it 'should inject the $raiseDomainEvent method into the aggregate root', ->
+  it 'should inject the $emitDomainEvent method into the aggregate root', ->
     exampleRoot = {}
     myAggregate = new Aggregate {}, 'MyAggregate', sandbox.stub().returns exampleRoot
 
-    expect(exampleRoot.$raiseDomainEvent).to.be.ok
+    expect(exampleRoot.$emitDomainEvent).to.be.ok
 
 
-  describe '#raiseDomainEvent', ->
+  describe '#emitDomainEvent', ->
     it 'should call a handle method on the aggregate based on the DomainEvent Name', ->
       class SomethingHappened
         constructor: sandbox.stub()
@@ -20,7 +20,7 @@ describe 'Aggregate', ->
         handleSomethingHappened: sandbox.stub()
 
       myAggregate = new Aggregate exampleContext, 'MyAggregate', ExampleRoot
-      myAggregate.raiseDomainEvent 'SomethingHappened', some: 'properties'
+      myAggregate.emitDomainEvent 'SomethingHappened', some: 'properties'
 
       applyCall = ExampleRoot::handleSomethingHappened.getCall 0
       expect(applyCall.args[0]).to.be.an.instanceof DomainEvent

@@ -94,7 +94,7 @@ Now we need an Aggregate which actually raises this DomainEvent and is able to h
 ```javascript
 collaboration.addAggregate('Todo', function() {
   this.changeDescription = function(description) {
-    this.$raiseDomainEvent('TodoDescriptionChanged', {description: description})
+    this.$emitDomainEvent('TodoDescriptionChanged', {description: description})
   }
   this.handleTodoDescriptionChanged = function(domainEvent) {
     this.description = domainEvent.payload.description;
@@ -102,7 +102,7 @@ collaboration.addAggregate('Todo', function() {
 });
 
 ```
-> Hint: `this.$raiseDomainEvent` is dependency injected and the handle method is called by naming convention after raising.
+> Hint: `this.$emitDomainEvent` is dependency injected and the handle method is called by naming convention after raising.
 
 
 ### [Adding CommandHandlers](https://github.com/efacilitation/eventric/wiki/BoundedContext#addcommand)

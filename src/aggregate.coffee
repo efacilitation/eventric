@@ -14,13 +14,13 @@ class Aggregate
     else
       @_root = new Root
 
-    @_root.$raiseDomainEvent = @raiseDomainEvent
+    @_root.$emitDomainEvent = @emitDomainEvent
 
 
-  raiseDomainEvent: (domainEventName, domainEventPayload) =>
+  emitDomainEvent: (domainEventName, domainEventPayload) =>
     DomainEventClass = @_boundedContext.getDomainEvent domainEventName
     if !DomainEventClass
-      throw new Error "Tried to raiseDomainEvent '#{domainEventName}' which is not defined"
+      throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @_domainEvents.push domainEvent

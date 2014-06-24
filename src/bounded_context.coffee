@@ -15,12 +15,14 @@ class BoundedContext
   _domainEventClasses: {}
   _domainEventHandlers: {}
   _readModelClasses: {}
+  _readModelInstances: {}
 
   constructor: (@name) ->
 
 
   initialize: ->
     @_initializeStore()
+    @_initializeReadModels()
 
     @_domainEventService = new DomainEventService
     @_domainEventService.initialize @_store, @
@@ -34,6 +36,32 @@ class BoundedContext
       $aggregate: @_aggregateService
       $adapter: => @getAdapter.apply @, arguments
     @
+
+
+  _initializeReadModels: ->
+    for readModelName, ReadModelClass of @_readModelClasses
+      readModel = new ReadModelClass
+
+      @_store.collection "ReadModel.#{readModelName}", (err, collection) =>
+        readModel.$store = collection
+
+        for eventName in readModel.subscribeToDomainEvents
+          @_subscribeReadModelToDomainEvent readModel, eventName
+
+        @_readModelInstances[readModelName] = readModel
+
+
+  _subscribeReadModelToDomainEvent: (readModel, eventName) ->
+    @addDomainEventHandler eventName, (domainEvent) =>
+      @_applyDomainEventToReadModel domainEvent, readModel
+
+
+  _applyDomainEventToReadModel: (domainEvent, readModel) ->
+    if !readModel["handle#{domainEvent.name}"]
+      throw new Error "Tried to apply DomainEvent '#{domainEvent.name}' to ReadModel without a matching handle method"
+
+    else
+      readModel["handle#{domainEvent.name}"] domainEvent
 
 
   _initializeStore: ->
@@ -115,23 +143,7 @@ class BoundedContext
 
 
   getReadModel: (readModelName) ->
-    ReadModelClass = @_readModelClasses[readModelName]
-    readModel = new ReadModelClass
-
-    @_store.find @name, name: $in: readModel.subscribeToDomainEvents
-    , (domainEvents) =>
-      for domainEvent in domainEvents
-        @_applyDomainEventToReadModel domainEvent, readModel
-
-    readModel
-
-
-  _applyDomainEventToReadModel: (domainEvent, readModel) ->
-    if !readModel["handle#{domainEvent.name}"]
-      console.log "Tried to apply DomainEvent '#{domainEvent.name}' to ReadModel without a matching handle method"
-
-    else
-      readModel["handle#{domainEvent.name}"] domainEvent
+    @_readModelInstances[readModelName]
 
 
   getAdapter: (adapterName) ->

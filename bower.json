@@ -5,7 +5,7 @@
   "authors": [
     "efa GmbH <team@efa-gmbh.com>"
   ],
-  "description": "Build web applications based on Domain-driven Design and Layered Architecture",
+  "description": "Build JavaScript applications based on DDD, CQRS and EventSourcing",
   "main": "build/release/eventric.js",
   "moduleType": [
     "globals",

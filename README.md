@@ -5,7 +5,7 @@
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-Build JavaScript applications based on Events and Domain-driven Design.
+Build JavaScript applications based on DDD, CQRS and EventSourcing
 
 Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Server and Client. Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
 
@@ -17,16 +17,16 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
 
 ## Features
 
-* DDD BuildingBlocks
-  * BoundedContext
-  * DomainEvent
-  * Aggregate
+**DDD BuildingBlocks**
+  * Well defined Interface to your `BoundedContext`
+  * Use `DomainEvents` everywhere
+  * Encapsulate your Domain-Logic in `Aggregates`
 
-* CQRS
-  * Persistent ReadModels and ProcessManagers
+**CQRS**
+  * Persistent `ReadModels` and `ProcessManagers`
   * Support for Occasionally Connected Applications
 
-* EventSourcing
+**EventSourcing**
   * Automated saving and applying of DomainEvents
   * Multiple Store Adapters
 

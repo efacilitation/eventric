@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "description": "Build web applications based on Domain-driven Design and Layered Architecture",
+  "description": "Build JavaScript applications based on DDD, CQRS and EventSourcing",
   "url": "http://eventricjs.org",
   "keywords": [
     "cqrs",

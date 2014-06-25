@@ -25,10 +25,8 @@ describe 'Read Module Feature', ->
       exampleContext = eventric.boundedContext 'exampleContext'
       exampleContext.set 'store', storeStub
 
-      class SomethingHappened
-        constructor: (params) ->
-          @someProperty = params.someProperty
-      exampleContext.addDomainEvent 'SomethingHappened', SomethingHappened
+      exampleContext.addDomainEvent 'SomethingHappened', (params) ->
+        @specific = params.whateverFoo
 
       class ExampleReadModel
         subscribeToDomainEvents: [
@@ -36,14 +34,19 @@ describe 'Read Module Feature', ->
         ]
 
         handleSomethingHappened: (domainEvent) ->
-          @$store.insert totallyDenormalized: domainEvent.payload.someProperty
+          @$store.insert totallyDenormalized: domainEvent.payload.specific
       exampleContext.addReadModel 'ExampleReadModel', ExampleReadModel
 
       class ExampleAggregateRoot
+        create: ->
+          @$emitDomainEvent 'ExampleGotCreatedFromGod'
+        handleExampleCreated: (domainEvent) ->
+          @whatever = 'bar'
         doSomething: ->
-          @$emitDomainEvent 'SomethingHappened', someProperty: 'foo'
-        handleExampleCreated: ->
-        handleSomethingHappened: ->
+          if @whatever is 'bar'
+            @$emitDomainEvent 'SomethingHappened', whateverFoo: 'foo'
+        handleSomethingHappened: (domainEvent) ->
+          @whatever = domainEvent.payload.whateverFoo
       exampleContext.addAggregate 'Example', ExampleAggregateRoot
 
       exampleContext.addCommandHandler 'doSomethingWithExample', (params, callback) ->

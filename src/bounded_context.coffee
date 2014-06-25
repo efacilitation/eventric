@@ -42,7 +42,7 @@ class BoundedContext
     for readModelName, ReadModelClass of @_readModelClasses
       readModel = new ReadModelClass
 
-      @_store.collection "ReadModel.#{readModelName}", (err, collection) =>
+      @_store.collection "#{@name}.ReadModel.#{readModelName}", (err, collection) =>
         readModel.$store = collection
 
         for eventName in readModel.subscribeToDomainEvents

@@ -79,11 +79,14 @@ class Aggregate
 
       else
         # automatically generate domainevent
+        class Created
+          constructor: (props) ->
+            @[key] = value for key, value of props
 
-        CreatedClass = class Created
-        domainEvent = @_createDomainEvent "#{@_name}Created", CreatedClass
+        domainEvent = @_createDomainEvent "#{@_name}Created", Created, props
         @_domainEvents.push domainEvent
 
+        # automatically "handle" domainevent
         @_root[key] = value for key, value of props
         resolve()
 

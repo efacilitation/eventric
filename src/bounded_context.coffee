@@ -35,6 +35,7 @@ class BoundedContext
     @_di =
       $aggregate: @_aggregateService
       $adapter: => @getAdapter.apply @, arguments
+      $readmodel: => @getReadModel.apply @, arguments
     @
 
 
@@ -43,10 +44,11 @@ class BoundedContext
       readModel = new ReadModelClass
 
       @_store.collection "#{@name}.ReadModel.#{readModelName}", (err, collection) =>
+        # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
         readModel.$store = collection
-
-        for eventName in readModel.subscribeToDomainEvents
-          @_subscribeReadModelToDomainEvent readModel, eventName
+        if readModel.subscribeToDomainEvents
+          for eventName in readModel.subscribeToDomainEvents
+            @_subscribeReadModelToDomainEvent readModel, eventName
 
         @_readModelInstances[readModelName] = readModel
 
@@ -119,6 +121,11 @@ class BoundedContext
   addDomainEventHandler: (eventName, handlerFn) ->
     @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
     @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
+    @
+
+
+  addDomainEventHandlers: (domainEventHandlersObj) ->
+    @addDomainEventHandler eventName, handlerFn for eventName, handlerFn of domainEventHandlersObj
     @
 
 

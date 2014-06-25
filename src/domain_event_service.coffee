@@ -24,11 +24,14 @@ class DomainEventService
         aggregateName = domainEvent.aggregate.name
 
         # now trigger the DomainEvent in multiple fashions
-        @trigger 'DomainEvent', domainEvent
-        @trigger aggregateName, domainEvent
-        @trigger eventName, domainEvent
+        nextTick = process?.nextTick ? setTimeout
+        nextTick =>
+          @trigger 'DomainEvent', domainEvent
+          @trigger aggregateName, domainEvent
+          @trigger eventName, domainEvent
 
-        next null
+          next null
+
     , (err) =>
       return callback err if err
       callback null

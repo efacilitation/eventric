@@ -4,9 +4,9 @@ _  = eventric.require 'HelperUnderscore'
 
 class RemoteBoundedContext
 
-  _boundedContextObjs: {}
-
   constructor: (@_remoteService) ->
+    @_boundedContextObjs = {}
+
 
   # TODO: split into client class
   command: (boundedContextName, command, callback) ->
@@ -24,6 +24,7 @@ class RemoteBoundedContext
       method: 'query'
       params: query
       callback
+
 
   # TODO: split into client class
   rpc: (payload, callback) ->

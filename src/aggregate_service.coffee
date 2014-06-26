@@ -6,7 +6,9 @@ Repository = eventric.require 'Repository'
 Aggregate  = eventric.require 'Aggregate'
 
 class AggregateService
-  _AggregateRootClasses: {}
+
+  constructor: ->
+    @_AggregateRootClasses = {}
 
   initialize: (@_store, @_domainEventService, @_boundedContext ) ->
     # proxy & queue public api

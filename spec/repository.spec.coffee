@@ -53,7 +53,7 @@ describe  'Repository', ->
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', (done) ->
       repository.findById 23, ->
-        expect(EventStoreStub.find.calledWith('someContext', {'aggregate.name': 'Foo', 'aggregate.id': 23})).to.be.true
+        expect(EventStoreStub.find.calledWith('someContext.events', {'aggregate.name': 'Foo', 'aggregate.id': 23})).to.be.true
         done()
 
 

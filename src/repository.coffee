@@ -26,7 +26,7 @@ class Repository
 
 
   _findDomainEventsForAggregate: (aggregateId, callback) ->
-    collectionName = @_boundedContext.name
+    collectionName = "#{@_boundedContext.name}.events"
     @_store.find collectionName, { 'aggregate.name': @_aggregateName, 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0

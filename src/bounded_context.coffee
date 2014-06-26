@@ -6,18 +6,18 @@ DomainEventService = eventric.require 'DomainEventService'
 
 
 class BoundedContext
-  _di: {}
-  _params: {}
-  _aggregateRootClasses: {}
-  _adapters: {}
-  _adapterInstances: {}
-  _commandHandlers: {}
-  _domainEventClasses: {}
-  _domainEventHandlers: {}
-  _readModelClasses: {}
-  _readModelInstances: {}
 
   constructor: (@name) ->
+    @_di = {}
+    @_params = {}
+    @_aggregateRootClasses = {}
+    @_adapters = {}
+    @_adapterInstances = {}
+    @_commandHandlers = {}
+    @_domainEventClasses = {}
+    @_domainEventHandlers = {}
+    @_readModelClasses = {}
+    @_readModelInstances = {}
 
 
   initialize: ->
@@ -41,16 +41,20 @@ class BoundedContext
 
   _initializeReadModels: ->
     for readModelName, ReadModelClass of @_readModelClasses
+      @_initializeReadModel readModelName, ReadModelClass
+
+
+  _initializeReadModel: (readModelName, ReadModelClass) ->
+    @_store.collection "#{@name}.ReadModel.#{readModelName}", (err, collection) =>
       readModel = new ReadModelClass
+      # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
+      readModel.$store = collection
+      readModel.$adapter = => @getAdapter.apply @, arguments
+      if readModel.subscribeToDomainEvents
+        for eventName in readModel.subscribeToDomainEvents
+          @_subscribeReadModelToDomainEvent readModel, eventName
 
-      @_store.collection "#{@name}.ReadModel.#{readModelName}", (err, collection) =>
-        # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
-        readModel.$store = collection
-        if readModel.subscribeToDomainEvents
-          for eventName in readModel.subscribeToDomainEvents
-            @_subscribeReadModelToDomainEvent readModel, eventName
-
-        @_readModelInstances[readModelName] = readModel
+      @_readModelInstances[readModelName] = readModel
 
 
   _subscribeReadModelToDomainEvent: (readModel, eventName) ->
@@ -176,12 +180,36 @@ class BoundedContext
     new Promise (resolve, reject) =>
       if @_commandHandlers[command.name]
         @_commandHandlers[command.name] command.params, (err, result) =>
-          resolve result
+          if err
+            reject err
+          else
+            resolve result
           callback? err, result
+
       else
         err = new Error "Given command #{command.name} not registered on bounded context"
         reject err
         callback? err, null
+
+
+  query: (query, callback) ->
+    new Promise (resolve, reject) =>
+      readModel = @getReadModel query.readModel
+      if not readModel
+        err = new Error "Given ReadModel #{query.readModel} not found on bounded context"
+      if not readModel[query.methodName]
+        err = new Error "Given method #{query.methodName} not found on ReadModel #{query.readModel}"
+
+      if err
+        reject err
+        callback? err, null
+      else
+        readModel[query.methodName] query.methodParams, (err, result) =>
+          if err
+            reject err
+          else
+            resolve result
+          callback? err, result
 
 
 module.exports = BoundedContext

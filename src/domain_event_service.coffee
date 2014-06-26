@@ -15,7 +15,7 @@ class DomainEventService
 
     async.eachSeries domainEvents, (domainEvent, next) =>
       # store the DomainEvent
-      collectionName = "events.#{@_boundedContext.name}"
+      collectionName = "#{@_boundedContext.name}.events"
       @_store.save collectionName, domainEvent, (err) =>
         return next err if err
 

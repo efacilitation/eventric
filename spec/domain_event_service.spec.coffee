@@ -30,7 +30,7 @@ describe 'DomainEventService', ->
 
     it 'should tell the Store to save the DomainEvent', (done) ->
       domainEventService.saveAndTrigger [domainEvent], (err) ->
-        expect(store.save).to.have.been.calledWith 'events.someContext', domainEvent
+        expect(store.save).to.have.been.calledWith 'someContext.events', domainEvent
         done()
 
     it 'should trigger the given DomainEvent', (done) ->

@@ -33,10 +33,10 @@ class Aggregate
     new DomainEvent
       id: @_generateUid()
       name: domainEventName
+      context: @_boundedContext.name
       aggregate:
         id: @id
         name: @_name
-        context: @_boundedContext.name
       payload: new DomainEventClass domainEventPayload
 
 

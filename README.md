@@ -73,7 +73,7 @@ eventricMongoDbStore.initialize(function() {
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
 
 ```javascript
-collaboration = eventric.boundedContext({name: 'collaboration'})
+collaboration = eventric.boundedContext('collaboration');
 ```
 
 ### [Define the Event]()
@@ -152,13 +152,12 @@ collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEve
 Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 
 ```javascript
-var todoId = null;
 collaboration.initialize(function() {
 
   collaboration.command({
     name: 'createTodo'
   }).then(function(todoId) {
-    return collaboration.command({
+    collaboration.command({
       name: 'changeTodoDescription',
       params: {
         id: todoId,

@@ -46,7 +46,6 @@ module.exports =
     @_params[key]
 
 
-  # TODO: Do we really need this name? A bounded context itself does not need one.
   boundedContext: (name) ->
     if !name
       throw new Error 'BoundedContexts must have a name'
@@ -57,7 +56,7 @@ module.exports =
       if !@_domainEventHandlers[name]
         return
 
-      eventName = domainEvent.getAggregateName() + ':' + domainEvent.getName()
+      eventName = domainEvent.aggregate.name + ':' + domainEvent.name
       if !@_domainEventHandlers[name][eventName]
         return
 

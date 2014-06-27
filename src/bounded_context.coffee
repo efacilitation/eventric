@@ -11,7 +11,7 @@ class BoundedContext
     @_di = {}
     @_params = {}
     @_aggregateRootClasses = {}
-    @_adapters = {}
+    @_adapterClasses = {}
     @_adapterInstances = {}
     @_commandHandlers = {}
     @_domainEventClasses = {}
@@ -23,6 +23,7 @@ class BoundedContext
   initialize: ->
     @_initializeStore()
     @_initializeReadModels()
+    @_initializeAdapters()
 
     @_domainEventService = new DomainEventService
     @_domainEventService.initialize @_store, @
@@ -68,6 +69,14 @@ class BoundedContext
 
     else
       readModel["handle#{domainEvent.name}"] domainEvent
+
+
+  _initializeAdapters: ->
+    for adapterName, adapterClass of @_adapterClasses
+      adapter = new @_adapterClasses[adapterName]
+      adapter.initialize?()
+
+      @_adapterInstances[adapterName] = adapter
 
 
   _initializeStore: ->
@@ -134,7 +143,7 @@ class BoundedContext
 
 
   addAdapter: (adapterName, adapterClass) ->
-    @_adapters[adapterName] = adapterClass
+    @_adapterClasses[adapterName] = adapterClass
     @
 
 
@@ -158,18 +167,7 @@ class BoundedContext
 
 
   getAdapter: (adapterName) ->
-    # return cache if available
-    return @_adapterInstances[adapterName] if @_adapterInstances[adapterName]
-
-    # build adapter
-    adapter = new @_adapters[adapterName]
-    adapter.initialize?()
-
-    # cache
-    @_adapterInstances[adapterName] = adapter
-
-    # return
-    adapter
+    @_adapterInstances[adapterName]
 
 
   getDomainEvent: (domainEventName) ->

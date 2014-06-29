@@ -7,7 +7,7 @@
 
 Build JavaScript applications based on DDD, CQRS and EventSourcing
 
-Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Server and Client. Information regarding the API and more can be found in the [Wiki](https://github.com/efacilitation/eventric/wiki).
+Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Server and Client.
 
 
 ### Why?
@@ -68,7 +68,7 @@ eventricMongoDbStore.initialize(function() {
 ```
 
 
-### [Setup BoundedContext](https://github.com/efacilitation/eventric/wiki/eventric#eventricboundedcontext)
+### Setup BoundedContext
 
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
 
@@ -76,7 +76,7 @@ Having discussed the upcoming **TodoApp Project** with the Business-Experts and 
 collaboration = eventric.boundedContext('collaboration');
 ```
 
-### [Define the Event]()
+### Define the Event
 
 Inside of our `Collaboration` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add one called `TodoDescriptionChanged`.
 
@@ -87,7 +87,7 @@ collaboration.addDomainEvent('TodoDescriptionChanged', function(params) {
 ```
 
 
-### [Adding an Aggregate](https://github.com/efacilitation/eventric/wiki/BoundedContext#addaggregate)
+### Adding an Aggregate
 
 Now we need an Aggregate which actually raises this DomainEvent and is able to handle it. Lets add it.
 
@@ -105,7 +105,7 @@ collaboration.addAggregate('Todo', function() {
 > Hint: `this.$emitDomainEvent` is dependency injected and the handle method is called by naming convention after raising.
 
 
-### [Adding CommandHandlers](https://github.com/efacilitation/eventric/wiki/BoundedContext#addcommand)
+### Adding CommandHandlers
 
 To actually work with the `BoundedContext` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
 
@@ -136,7 +136,7 @@ collaboration.addCommandHandler('changeTodoDescription', function(params, callba
 ```
 
 
-### [Adding a DomainEventHandler](https://github.com/efacilitation/eventric/wiki/BoundedContext#adddomaineventhandler)
+### Adding a DomainEventHandler
 
 And last but not least we want to console.log when the description of the `Todo` changes.
 
@@ -147,7 +147,7 @@ collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEve
 ```
 
 
-### Executing [Commands](https://github.com/efacilitation/eventric/wiki/BoundedContext#command)
+### Executing Commands
 
 Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 

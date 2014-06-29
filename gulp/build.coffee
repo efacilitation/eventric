@@ -6,8 +6,8 @@ uglify      = require 'gulp-uglify'
 runSequence = require 'run-sequence'
 
 module.exports = (gulp) ->
-  gulp.task 'build', ->
-    runSequence 'build:clean', 'build:helper', 'build:src', 'build:release'
+  gulp.task 'build', (next) ->
+    runSequence 'build:clean', 'build:helper', 'build:src', 'build:release', 'docs:generate', next
 
   gulp.task 'build:clean', ->
     gulp.src('build/**/*', read: false)

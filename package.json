@@ -32,9 +32,12 @@
     "prepublish": "node_modules/.bin/gulp build"
   },
   "devDependencies": {
+    "canonical-path": "*",
     "chai": "*",
     "coffee-script": "*",
     "commonjs-require": "*",
+    "dgeni": "*",
+    "dgeni-packages": "*",
     "growler": "*",
     "gulp": "*",
     "gulp-clean": "*",

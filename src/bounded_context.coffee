@@ -2,7 +2,6 @@ eventric = require 'eventric'
 
 _                  = eventric.require 'HelperUnderscore'
 AggregateService   = eventric.require 'AggregateService'
-DomainEventService = eventric.require 'DomainEventService'
 EventBus           = eventric.require 'EventBus'
 
 
@@ -235,13 +234,10 @@ class BoundedContext
     @_initializeAdapters()
 
     @_eventBus = new EventBus
-
-    @_domainEventService = new DomainEventService
-    @_domainEventService.initialize @_store, @_eventBus, @
     @_initializeDomainEventHandlers()
 
     @_aggregateService = new AggregateService
-    @_aggregateService.initialize @_store, @_domainEventService, @
+    @_aggregateService.initialize @_store, @_eventBus, @
     @_initializeAggregateService()
 
     @_di =

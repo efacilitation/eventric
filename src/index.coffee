@@ -3,13 +3,9 @@ require './helper/promise'
 
 moduleDefinition =
   BoundedContext: './bounded_context'
-
   Aggregate: './aggregate'
   AggregateService: './aggregate_service'
-
   DomainEvent: './domain_event'
-  DomainEventService: './domain_event_service'
-
   EventBus: './event_bus'
   Repository: './repository'
 
@@ -69,6 +65,11 @@ module.exports =
       @_domainEventHandlers[boundedContextName][eventName].push eventHandler
 
 
+  getDomainEventHandlers: (boundedContextName, domainEventName) ->
+    [].concat (@_domainEventHandlers[boundedContextName]?[domainEventName] ? []),
+              (@_domainEventHandlers[boundedContextName]?.all ? []),
+              (@_domainEventHandlersAll ? [])
+
   ###*
   *
   * @description Get a new BoundedContext instance.
@@ -88,8 +89,6 @@ module.exports =
 
   _delegateAllDomainEventsToGlobalHandlers: (boundedContext) ->
     boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
-      eventHandlers = [].concat (@_domainEventHandlers[boundedContext.name]?[domainEvent.name] ? []),
-                                (@_domainEventHandlers[boundedContext.name]?.all ? []),
-                                (@_domainEventHandlersAll ? [])
+      eventHandlers = @getDomainEventHandlers boundedContext.name, domainEvent.name
       for eventHandler in eventHandlers
         eventHandler domainEvent

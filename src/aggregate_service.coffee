@@ -10,7 +10,7 @@ class AggregateService
   constructor: ->
     @_AggregateRootClasses = {}
 
-  initialize: (@_store, @_domainEventService, @_boundedContext ) ->
+  initialize: (@_store, @_eventBus, @_boundedContext) ->
     # proxy & queue public api
     _queue = async.queue (payload, callback) =>
       payload.originalFunction.call @, payload.arguments...
@@ -102,13 +102,28 @@ class AggregateService
 
 
   _saveAndPublishDomainEvents: (aggregate, resolve, reject) ->
-    # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
-    @_domainEventService.saveAndPublish domainEvents, (err) =>
+
+    # TODO: this should be an transaction to guarantee consistency
+    async.eachSeries domainEvents, (domainEvent, next) =>
+      @_saveAndPublishDomainEvent domainEvent, next
+
+    , (err) =>
       return reject err if err
 
       # return the aggregateId
       resolve aggregate.id
+
+
+  _saveAndPublishDomainEvent: (domainEvent, next) =>
+    collectionName = "#{@_boundedContext.name}.events"
+
+    @_store.save collectionName, domainEvent, =>
+      # publish the domainevent on the eventbus
+      nextTick = process?.nextTick ? setTimeout
+      nextTick =>
+        @_eventBus.publishDomainEvent domainEvent
+        next null
 
 
   registerAggregateRoot: (aggregateName, AggregateRoot) ->

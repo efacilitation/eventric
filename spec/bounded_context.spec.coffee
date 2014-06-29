@@ -7,7 +7,6 @@ describe 'BoundedContext', ->
     extend: sandbox.stub()
 
   storeStub = null
-  domainEventServiceStub = null
   aggregateServiceStub = null
   eventricMock = null
 
@@ -17,17 +16,12 @@ describe 'BoundedContext', ->
     eventBusStub =
       subscribeToDomainEvent: sandbox.stub()
 
-    domainEventServiceStub =
-      initialize: sandbox.stub()
-      on: sandbox.stub()
-
     aggregateServiceStub =
       initialize: sandbox.stub()
 
     eventricMock =
       require: sandbox.stub()
       get: sandbox.stub()
-    eventricMock.require.withArgs('DomainEventService').returns sandbox.stub().returns domainEventServiceStub
     eventricMock.require.withArgs('AggregateService').returns sandbox.stub().returns aggregateServiceStub
     eventricMock.require.withArgs('EventBus').returns sandbox.stub().returns eventBusStub
     eventricMock.require.withArgs('Repository').returns RepositoryMock
@@ -37,21 +31,19 @@ describe 'BoundedContext', ->
     BoundedContext = eventric.require 'BoundedContext'
 
 
-  it 'should initialize aggregateservice and domaineventservice with the custom event store if configured', ->
+  it 'should initialize aggregateservice with the custom event store if configured', ->
     boundedContext = new BoundedContext
     boundedContext.set 'store', storeStub
     boundedContext.initialize()
     expect(aggregateServiceStub.initialize.calledWith storeStub).to.be.true
-    expect(domainEventServiceStub.initialize.calledWith storeStub).to.be.true
 
 
-  it 'should initialize aggregateservice and domaineventservice with the global event store if configured', ->
+  it 'should initialize aggregateservice with the global event store if configured', ->
     globalStoreStub = sandbox.stub()
     eventricMock.get.withArgs('store').returns globalStoreStub
     boundedContext = new BoundedContext
     boundedContext.initialize()
     expect(aggregateServiceStub.initialize.calledWith globalStoreStub).to.be.true
-    expect(domainEventServiceStub.initialize.calledWith globalStoreStub).to.be.true
 
 
   it 'should throw an error if neither a global nor a custom event store was configured', ->

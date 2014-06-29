@@ -1,19 +1,23 @@
 describe 'AggregateService', ->
-  DomainEventService = eventric.require 'DomainEventService'
+  DomainEvent = eventric.require 'DomainEvent'
 
   aggregateStubId = 1
   exampleAggregateRoot = null
   repositoryStub = null
-  domainEventService = null
   exampleAggregateStub = null
   AggregateService = null
-  eventStoreStub = null
+  storeStub = null
+  eventBusStub = null
   thenStub = null
   catchStub = null
   boundedContextStub = null
   beforeEach ->
-    boundedContextStub = {}
-    eventStoreStub = {}
+    boundedContextStub =
+      name: 'someContext'
+    storeStub =
+      save: sandbox.stub().yields null
+    eventBusStub =
+      publishDomainEvent: sandbox.stub()
     # TODO: stub promises in a more sane fashion
     catchStub = sandbox.stub()
     thenStub = sandbox.stub()
@@ -30,15 +34,11 @@ describe 'AggregateService', ->
         catch: catchStub.returns
           then: thenStub
       generateDomainEvent: sandbox.stub()
-      getDomainEvents: sandbox.stub()
+      getDomainEvents: sandbox.stub().returns {}
     exampleAggregateStub = new ExampleAggregateStub
 
     repositoryStub =
       findById: sandbox.stub()
-
-    # stub the DomainEventService
-    domainEventService = sinon.createStubInstance DomainEventService
-    domainEventService.saveAndPublish.yields null
 
     eventricMock =
       require: sandbox.stub()
@@ -62,7 +62,7 @@ describe 'AggregateService', ->
 
       # instantiate the AggregateService with the ReadAggregateRepository stub
       aggregateService = new AggregateService
-      aggregateService.initialize eventStoreStub, domainEventService, boundedContextStub
+      aggregateService.initialize storeStub, eventBusStub, boundedContextStub
       aggregateService.registerAggregateRoot 'ExampleAggregate', {}
 
 
@@ -77,14 +77,23 @@ describe 'AggregateService', ->
 
   describe '#command', ->
     aggregateService = null
+    domainEvent = null
 
     beforeEach ->
+      domainEvent = new DomainEvent
+        name: 'SomethingHappened'
+        aggregate:
+          id: 1
+          name: 'Example'
+
+      exampleAggregateStub.getDomainEvents.returns [domainEvent]
+
       # findById should find something
       repositoryStub.findById.yields null, exampleAggregateStub
 
       # instantiate the command service
       aggregateService = new AggregateService
-      aggregateService.initialize eventStoreStub, domainEventService, boundedContextStub
+      aggregateService.initialize storeStub, eventBusStub, boundedContextStub
       aggregateService.registerAggregateRoot 'ExampleAggregate', {}
 
 
@@ -141,16 +150,25 @@ describe 'AggregateService', ->
         done()
 
 
-    it 'should call saveAndPublish on DomainEventService with the generated DomainEvents', (done) ->
-      events = {}
-      exampleAggregateStub.getDomainEvents.returns events
+    it 'should tell the Store to save the DomainEvent', (done) ->
       thenStub.yields null
       aggregateService.command
         name: 'ExampleAggregate'
         id: 1
         methodName: 'doSomething'
-      .then ->
-        expect(domainEventService.saveAndPublish.withArgs(events).calledOnce).to.be.true
+      .then (aggregateId) ->
+        expect(storeStub.save).to.have.been.calledWith 'someContext.events', domainEvent
+        done()
+
+
+    it 'should publish the domainevent on the eventbus', (done) ->
+      thenStub.yields null
+      aggregateService.command
+        name: 'ExampleAggregate'
+        id: 1
+        methodName: 'doSomething'
+      .then (aggregateId) ->
+        expect(eventBusStub.publishDomainEvent).to.have.been.calledWith domainEvent
         done()
 
 

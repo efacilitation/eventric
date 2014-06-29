@@ -42,7 +42,7 @@ class Aggregate
 
   _handleDomainEvent: (domainEventName, domainEvent) ->
     if !@_root["handle#{domainEventName}"]
-      console.log "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
+      throw new Error "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
     else
       @_root["handle#{domainEventName}"] domainEvent

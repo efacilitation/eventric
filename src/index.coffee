@@ -3,21 +3,18 @@ require './helper/promise'
 
 moduleDefinition =
   BoundedContext: './bounded_context'
-  EventBus: './event_bus'
 
   Aggregate: './aggregate'
   AggregateService: './aggregate_service'
 
-  ReadAggregate: './read_aggregate'
-  ReadAggregateEntity: './read_aggregate_entity'
-
   DomainEvent: './domain_event'
   DomainEventService: './domain_event_service'
 
+  EventBus: './event_bus'
+  Repository: './repository'
+
   RemoteService: './remote_service'
   RemoteBoundedContext: './remote_bounded_context'
-
-  Repository: './repository'
 
   HelperAsync: './helper/async'
   HelperEvents: './helper/events'
@@ -74,15 +71,9 @@ module.exports =
 
   ###*
   *
-  * @description
+  * @description Get a new BoundedContext instance.
   *
-  * Use as: example = eventric.boundedContext(params)
-  *
-  * Get a new [[BoundedContext]] instance.
-  *
-  * @param {Object}
-  * - `name` Name for the BoundedContext
-  * - `store` An Instance of a eventric StoreAdapter (optional if configured globally)
+  * @param {String} name Name of the BoundedContext
   ###
   boundedContext: (name) ->
     if !name

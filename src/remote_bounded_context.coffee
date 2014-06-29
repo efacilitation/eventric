@@ -8,7 +8,7 @@ class RemoteBoundedContext
     @_boundedContextObjs = {}
 
 
-  # TODO: split into client class
+  # --- CLIENT ---
   command: (boundedContextName, command, callback) ->
     @rpc
       boundedContextName: boundedContextName
@@ -17,7 +17,6 @@ class RemoteBoundedContext
       callback
 
 
-  # TODO: split into client class
   query: (boundedContextName, query, callback) ->
     @rpc
       boundedContextName: boundedContextName
@@ -26,12 +25,11 @@ class RemoteBoundedContext
       callback
 
 
-  # TODO: split into client class
   rpc: (payload, callback) ->
     @_remoteService.rpc 'RemoteBoundedContext', payload, callback
 
 
-  # TODO: split into server class
+  # -- SERVER ---
   handle: (payload, callback) ->
     boundedContext = @getBoundedContextObj payload.boundedContextName
     if not boundedContext
@@ -50,7 +48,6 @@ class RemoteBoundedContext
 
 
   getBoundedContextObj: (boundedContextName) ->
-    return false unless boundedContextName of @_boundedContextObjs
     @_boundedContextObjs[boundedContextName]
 
 

@@ -302,9 +302,9 @@ class BoundedContext
 
 
   _initializeDomainEventHandlers: ->
-    for domainEventName, fnArray of @_domainEventHandlers
-      for fn in fnArray
-        @_eventBus.subscribeToDomainEvent domainEventName, fn
+    for domainEventName, domainEventHandlers of @_domainEventHandlers
+      for domainEventHandler in domainEventHandlers
+        @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
   _initializeAggregateService: ->

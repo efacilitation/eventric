@@ -14,6 +14,9 @@ describe 'BoundedContext', ->
   beforeEach ->
     storeStub = sandbox.stub()
 
+    eventBusStub =
+      subscribeToDomainEvent: sandbox.stub()
+
     domainEventServiceStub =
       initialize: sandbox.stub()
       on: sandbox.stub()
@@ -26,6 +29,7 @@ describe 'BoundedContext', ->
       get: sandbox.stub()
     eventricMock.require.withArgs('DomainEventService').returns sandbox.stub().returns domainEventServiceStub
     eventricMock.require.withArgs('AggregateService').returns sandbox.stub().returns aggregateServiceStub
+    eventricMock.require.withArgs('EventBus').returns sandbox.stub().returns eventBusStub
     eventricMock.require.withArgs('Repository').returns RepositoryMock
     eventricMock.require.withArgs('HelperUnderscore').returns HelperUnderscoreMock
     mockery.registerMock 'eventric', eventricMock

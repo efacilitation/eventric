@@ -1,14 +1,11 @@
 eventric = require 'eventric'
 
 async        = eventric.require 'HelperAsync'
-HelperEvents = eventric.require 'HelperEvents'
 _            = eventric.require 'HelperUnderscore'
 
 class DomainEventService
 
-  _.extend @prototype, HelperEvents
-
-  initialize: (@_store, @_boundedContext) ->
+  initialize: (@_store, @_eventBus, @_boundedContext) ->
 
   saveAndTrigger: (domainEvents, callback) ->
     # TODO: this should be an transaction to guarantee consistency
@@ -23,12 +20,10 @@ class DomainEventService
         aggregateId   = domainEvent.aggregate.id
         aggregateName = domainEvent.aggregate.name
 
-        # now trigger the DomainEvent in multiple fashions
+        # publish the domainevent on the eventbus
         nextTick = process?.nextTick ? setTimeout
         nextTick =>
-          @trigger 'DomainEvent', domainEvent
-          @trigger aggregateName, domainEvent
-          @trigger eventName, domainEvent
+          @_eventBus.publishDomainEvent domainEvent
 
           next null
 

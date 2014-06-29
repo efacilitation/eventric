@@ -3,8 +3,12 @@ describe 'DomainEventService', ->
   DomainEventService = eventric.require 'DomainEventService'
 
   store = null
+  eventBusStub = null
   domainEventService = null
   beforeEach ->
+    eventBusStub =
+      publishDomainEvent: sandbox.stub()
+
     boundedContextStub =
       name: 'someContext'
 
@@ -14,7 +18,7 @@ describe 'DomainEventService', ->
     store = sinon.createStubInstance Store
     store.save.yields null
     domainEventService = new DomainEventService
-    domainEventService.initialize store, boundedContextStub
+    domainEventService.initialize store, eventBusStub, boundedContextStub
 
 
   describe '#saveAndTrigger', ->
@@ -33,10 +37,7 @@ describe 'DomainEventService', ->
         expect(store.save).to.have.been.calledWith 'someContext.events', domainEvent
         done()
 
-    it 'should trigger the given DomainEvent', (done) ->
-      triggerSpy = sandbox.spy domainEventService, 'trigger'
+    it 'should publish the domainevent on the eventbus', (done) ->
       domainEventService.saveAndTrigger [domainEvent], (err) ->
-        expect(triggerSpy.calledWith 'DomainEvent', domainEvent).to.be.true
-        expect(triggerSpy.calledWith 'Example', domainEvent).to.be.true
-        expect(triggerSpy.calledWith 'SomethingHappened', domainEvent).to.be.true
+        expect(eventBusStub.publishDomainEvent).to.have.been.calledWith domainEvent
         done()

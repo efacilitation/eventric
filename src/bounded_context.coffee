@@ -3,6 +3,7 @@ eventric = require 'eventric'
 _                  = eventric.require 'HelperUnderscore'
 AggregateService   = eventric.require 'AggregateService'
 DomainEventService = eventric.require 'DomainEventService'
+EventBus           = eventric.require 'EventBus'
 
 
 class BoundedContext
@@ -233,8 +234,10 @@ class BoundedContext
     @_initializeReadModels()
     @_initializeAdapters()
 
+    @_eventBus = new EventBus
+
     @_domainEventService = new DomainEventService
-    @_domainEventService.initialize @_store, @
+    @_domainEventService.initialize @_store, @_eventBus, @
     @_initializeDomainEventHandlers()
 
     @_aggregateService = new AggregateService
@@ -301,7 +304,7 @@ class BoundedContext
   _initializeDomainEventHandlers: ->
     for domainEventName, fnArray of @_domainEventHandlers
       for fn in fnArray
-        @_domainEventService.on domainEventName, fn
+        @_eventBus.subscribeToDomainEvent domainEventName, fn
 
 
   _initializeAggregateService: ->

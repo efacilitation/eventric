@@ -46,6 +46,18 @@ module.exports =
     @_params[key]
 
 
+  ###*
+  *
+  * @description
+  *
+  * Use as: example = eventric.boundedContext(params)
+  *
+  * Get a new [[BoundedContext]] instance.
+  *
+  * @param {Object}
+  * - `name` Name for the BoundedContext
+  * - `store` An Instance of a eventric StoreAdapter (optional if configured globally)
+  ###
   boundedContext: (name) ->
     if !name
       throw new Error 'BoundedContexts must have a name'

@@ -20,103 +20,6 @@ class BoundedContext
     @_readModelInstances = {}
 
 
-
-  ###*
-  * @name initialize
-  *
-  * @description
-  * Use as: initialize(callback)
-  *
-  * Initializes the `BoundedContext` after the `add*` Methods
-  *
-  * @example
-    ```javascript
-    exampleContext.initialize(function() {
-      // ...
-    })
-    ```
-  ###
-  initialize: ->
-    @_initializeStore()
-    @_initializeReadModels()
-    @_initializeAdapters()
-
-    @_domainEventService = new DomainEventService
-    @_domainEventService.initialize @_store, @
-    @_initializeDomainEventHandlers()
-
-    @_aggregateService = new AggregateService
-    @_aggregateService.initialize @_store, @_domainEventService, @
-    @_initializeAggregateService()
-
-    @_di =
-      $aggregate: @_aggregateService
-      $adapter: => @getAdapter.apply @, arguments
-      $readmodel: => @getReadModel.apply @, arguments
-    @
-
-
-  _initializeReadModels: ->
-    for readModelName, ReadModelClass of @_readModelClasses
-      @_initializeReadModel readModelName, ReadModelClass
-
-
-  _initializeReadModel: (readModelName, ReadModelClass) ->
-    @_store.collection "#{@name}.ReadModel.#{readModelName}", (err, collection) =>
-      readModel = new ReadModelClass
-      # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
-      readModel.$store = collection
-      readModel.$adapter = => @getAdapter.apply @, arguments
-      if readModel.subscribeToDomainEvents
-        for eventName in readModel.subscribeToDomainEvents
-          @_subscribeReadModelToDomainEvent readModel, eventName
-
-      @_readModelInstances[readModelName] = readModel
-
-
-  _subscribeReadModelToDomainEvent: (readModel, eventName) ->
-    @addDomainEventHandler eventName, (domainEvent) =>
-      @_applyDomainEventToReadModel domainEvent, readModel
-
-
-  _applyDomainEventToReadModel: (domainEvent, readModel) ->
-    if !readModel["handle#{domainEvent.name}"]
-      throw new Error "Tried to apply DomainEvent '#{domainEvent.name}' to ReadModel without a matching handle method"
-
-    else
-      readModel["handle#{domainEvent.name}"] domainEvent
-
-
-  _initializeAdapters: ->
-    for adapterName, adapterClass of @_adapterClasses
-      adapter = new @_adapterClasses[adapterName]
-      adapter.initialize?()
-
-      @_adapterInstances[adapterName] = adapter
-
-
-  _initializeStore: ->
-    if @_params.store
-      @_store = @_params.store
-    else
-      globalStore = eventric.get 'store'
-      if globalStore
-        @_store = globalStore
-      else
-        throw new Error 'Missing Event Store for Bounded Context'
-
-
-  _initializeDomainEventHandlers: ->
-    for domainEventName, fnArray of @_domainEventHandlers
-      for fn in fnArray
-        @_domainEventService.on domainEventName, fn
-
-
-  _initializeAggregateService: ->
-    for aggregateName, AggregateRoot of @_aggregateRootClasses
-      @_aggregateService.registerAggregateRoot aggregateName, AggregateRoot
-
-
   ###*
   * @name set
   *
@@ -137,6 +40,15 @@ class BoundedContext
     @
 
 
+  ###*
+  * @name addDomainEvent
+  *
+  * @description
+  * Adds a DomainEvent Class which will be used when emitting or handling DomainEvents inside of Aggregates, ReadModels or ProcessManagers
+  *
+  * @param {String} domainEventName Name of the DomainEvent
+  * @param {Function} DomainEventClass DomainEventClass
+  ###
   addDomainEvent: (domainEventName, DomainEventClass) ->
     @_domainEventClasses[domainEventName] = DomainEventClass
     @
@@ -250,6 +162,26 @@ class BoundedContext
     @
 
 
+  ###*
+  *
+  * @name addAdapter
+  *
+  * @description
+  * Use as: addAdapter(adapterName, AdapterClass)
+  *
+  * Add adapter which get can be used inside of `CommandHandlers`
+  *
+  * @example
+    ```javascript
+    exampleContext.addAdapter('SomeAdapter', function() {
+      // ...
+    });
+    ```
+  *
+  * @param {String} adapterName Name of Adapter
+  *
+  * @param {Function} Adapter Class
+  ###
   addAdapter: (adapterName, adapterClass) ->
     @_adapterClasses[adapterName] = adapterClass
     @
@@ -260,6 +192,17 @@ class BoundedContext
     @
 
 
+  ###*
+  * @name addReadModel
+  *
+  * @description
+  * Add ReadModel that can subscribe to and handle DomainEvents
+  *
+  * @param {string} readModelName Name of the ReadModel
+  * @param {Function} The ReadModel Class definition
+  * - define `subscribeToDomainEvents` as Array of DomainEventName Strings
+  * - define handle Funtions for DomainEvents by convention: "handleDomainEventName"
+  ###
   addReadModel: (readModelName, ReadModelClass) ->
     @_readModelClasses[readModelName] = ReadModelClass
     @
@@ -270,14 +213,131 @@ class BoundedContext
     @
 
 
+  ###*
+  * @name initialize
+  *
+  * @description
+  * Use as: initialize(callback)
+  *
+  * Initializes the `BoundedContext` after the `add*` Methods
+  *
+  * @example
+    ```javascript
+    exampleContext.initialize(function() {
+      // ...
+    })
+    ```
+  ###
+  initialize: ->
+    @_initializeStore()
+    @_initializeReadModels()
+    @_initializeAdapters()
+
+    @_domainEventService = new DomainEventService
+    @_domainEventService.initialize @_store, @
+    @_initializeDomainEventHandlers()
+
+    @_aggregateService = new AggregateService
+    @_aggregateService.initialize @_store, @_domainEventService, @
+    @_initializeAggregateService()
+
+    @_di =
+      $aggregate: @_aggregateService
+      $adapter: => @getAdapter.apply @, arguments
+      $readmodel: => @getReadModel.apply @, arguments
+    @
+
+
+  _initializeReadModels: ->
+    for readModelName, ReadModelClass of @_readModelClasses
+      @_initializeReadModel readModelName, ReadModelClass
+
+
+  _initializeReadModel: (readModelName, ReadModelClass) ->
+    @_store.collection "#{@name}.ReadModel.#{readModelName}", (err, collection) =>
+      readModel = new ReadModelClass
+      # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
+      readModel.$store = collection
+      readModel.$adapter = => @getAdapter.apply @, arguments
+      if readModel.subscribeToDomainEvents
+        for eventName in readModel.subscribeToDomainEvents
+          @_subscribeReadModelToDomainEvent readModel, eventName
+
+      @_readModelInstances[readModelName] = readModel
+
+
+  _subscribeReadModelToDomainEvent: (readModel, eventName) ->
+    @addDomainEventHandler eventName, (domainEvent) =>
+      @_applyDomainEventToReadModel domainEvent, readModel
+
+
+  _applyDomainEventToReadModel: (domainEvent, readModel) ->
+    if !readModel["handle#{domainEvent.name}"]
+      throw new Error "Tried to apply DomainEvent '#{domainEvent.name}' to ReadModel without a matching handle method"
+
+    else
+      readModel["handle#{domainEvent.name}"] domainEvent
+
+
+  _initializeAdapters: ->
+    for adapterName, adapterClass of @_adapterClasses
+      adapter = new @_adapterClasses[adapterName]
+      adapter.initialize?()
+
+      @_adapterInstances[adapterName] = adapter
+
+
+  _initializeStore: ->
+    if @_params.store
+      @_store = @_params.store
+    else
+      globalStore = eventric.get 'store'
+      if globalStore
+        @_store = globalStore
+      else
+        throw new Error 'Missing Event Store for Bounded Context'
+
+
+  _initializeDomainEventHandlers: ->
+    for domainEventName, fnArray of @_domainEventHandlers
+      for fn in fnArray
+        @_domainEventService.on domainEventName, fn
+
+
+  _initializeAggregateService: ->
+    for aggregateName, AggregateRoot of @_aggregateRootClasses
+      @_aggregateService.registerAggregateRoot aggregateName, AggregateRoot
+
+
+  ###*
+  * @name getReadModel
+  *
+  * @description Get a ReadModel Instance after initialize()
+  *
+  * @param {String} readModelName Name of the ReadModel
+  ###
   getReadModel: (readModelName) ->
     @_readModelInstances[readModelName]
 
 
+  ###*
+  * @name getAdapter
+  *
+  * @description Get a Adapter Instance after initialize()
+  *
+  * @param {String} adapterName Name of the Adapter
+  ###
   getAdapter: (adapterName) ->
     @_adapterInstances[adapterName]
 
 
+  ###*
+  * @name getDomainEvent
+  *
+  * @description Get a DomainEvent Class after initialize()
+  *
+  * @param {String} domainEventName Name of the DomainEvent
+  ###
   getDomainEvent: (domainEventName) ->
     @_domainEventClasses[domainEventName]
 
@@ -286,9 +346,10 @@ class BoundedContext
   * @name command
   *
   * @description
+  *
   * Use as: command(command, callback)
   *
-  * Execute previously added `commands`. Upon successful execution this will trigger a `DomainEvent`.
+  * Execute previously added `commands`
   *
   * @example
     ```javascript
@@ -324,6 +385,31 @@ class BoundedContext
         callback? err, null
 
 
+  ###*
+  * @name query
+  *
+  * @description
+  *
+  * Use as: query(query, callback)
+  *
+  * Execute query against a previously added ReadModel
+  *
+  * @example
+    ```javascript
+    exampleContext.query({
+      readModel: 'Example',
+      methodeName: 'getSomething'
+    },
+    function(err, result) {
+      // callback
+    });
+    ```
+  *
+  * @param {Object} query Object with the query paramter
+  * - `readModel` Name of the ReadModel to query against
+  * - `methodName` Name of the method to be executed on the ReadModel
+  * - `methodParams` Parameters for the method
+  ###
   query: (query, callback) ->
     new Promise (resolve, reject) =>
       readModel = @getReadModel query.readModel

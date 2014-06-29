@@ -48,6 +48,24 @@ module.exports =
 
   ###*
   *
+  * @description Global DomainEvent Handlers
+  *
+  * @param {String} boundedContextName Name of the BoundedContext
+  * @param {String} eventName Name of the Event
+  * @param {Function} eventHandler Function which handles the DomainEvent
+  ###
+  addDomainEventHandler: (boundedContextName, eventName, eventHandler) ->
+    if !@_domainEventHandlers[boundedContextName]
+      @_domainEventHandlers[boundedContextName] = {}
+
+    if !@_domainEventHandlers[boundedContextName][eventName]
+      @_domainEventHandlers[boundedContextName][eventName] = []
+
+    @_domainEventHandlers[boundedContextName][eventName].push eventHandler
+
+
+  ###*
+  *
   * @description
   *
   * Use as: example = eventric.boundedContext(params)
@@ -64,25 +82,20 @@ module.exports =
     BoundedContext = @require 'BoundedContext'
     boundedContext = new BoundedContext name
 
-    boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
-      if !@_domainEventHandlers[name]
-        return
-
-      eventName = domainEvent.aggregate.name + ':' + domainEvent.name
-      if !@_domainEventHandlers[name][eventName]
-        return
-
-      for eventHandler in @_domainEventHandlers[name][eventName]
-        eventHandler domainEvent
+    @_delegateAllDomainEventsToGlobalHandlers boundedContext
 
     boundedContext
 
 
-  addDomainEventHandler: (boundedContextName, eventName, eventHandler) ->
-    if !@_domainEventHandlers[boundedContextName]
-      @_domainEventHandlers[boundedContextName] = {}
+  _delegateAllDomainEventsToGlobalHandlers: (boundedContext) ->
+    boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
+      if not @_domainEventHandlers[boundedContext.name]
+        return
 
-    if !@_domainEventHandlers[boundedContextName][eventName]
-      @_domainEventHandlers[boundedContextName][eventName] = []
+      boundedContextHandler = @_domainEventHandlers[boundedContext.name]
+      if not boundedContextHandler[domainEvent.name] and not boundedContextHandler.all
+        return
 
-    @_domainEventHandlers[boundedContextName][eventName].push eventHandler
+      eventHandlers = boundedContextHandler[domainEvent.name] ? boundedContextHandler.all
+      for eventHandler in eventHandlers
+        eventHandler domainEvent

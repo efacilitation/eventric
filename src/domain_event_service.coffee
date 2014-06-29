@@ -7,7 +7,7 @@ class DomainEventService
 
   initialize: (@_store, @_eventBus, @_boundedContext) ->
 
-  saveAndTrigger: (domainEvents, callback) ->
+  saveAndPublish: (domainEvents, callback) ->
     # TODO: this should be an transaction to guarantee consistency
 
     async.eachSeries domainEvents, (domainEvent, next) =>

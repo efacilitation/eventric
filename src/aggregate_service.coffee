@@ -54,7 +54,7 @@ class AggregateService
       aggregate.create aggregateProps
 
       .then =>
-        @_saveAndTriggerDomainEvents aggregate, resolve, reject
+        @_saveAndPublishDomainEvents aggregate, resolve, reject
 
       .catch (err) =>
         reject err
@@ -95,16 +95,16 @@ class AggregateService
           params: methodParams
 
         .then =>
-          @_saveAndTriggerDomainEvents aggregate, resolve, reject
+          @_saveAndPublishDomainEvents aggregate, resolve, reject
 
         .catch (err) =>
           reject err
 
 
-  _saveAndTriggerDomainEvents: (aggregate, resolve, reject) ->
+  _saveAndPublishDomainEvents: (aggregate, resolve, reject) ->
     # get the DomainEvents and hand them over to DomainEventService
     domainEvents = aggregate.getDomainEvents()
-    @_domainEventService.saveAndTrigger domainEvents, (err) =>
+    @_domainEventService.saveAndPublish domainEvents, (err) =>
       return reject err if err
 
       # return the aggregateId

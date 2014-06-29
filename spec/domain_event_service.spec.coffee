@@ -21,7 +21,7 @@ describe 'DomainEventService', ->
     domainEventService.initialize store, eventBusStub, boundedContextStub
 
 
-  describe '#saveAndTrigger', ->
+  describe '#saveAndPublish', ->
 
     domainEvent = null
     beforeEach ->
@@ -33,11 +33,11 @@ describe 'DomainEventService', ->
 
 
     it 'should tell the Store to save the DomainEvent', (done) ->
-      domainEventService.saveAndTrigger [domainEvent], (err) ->
+      domainEventService.saveAndPublish [domainEvent], (err) ->
         expect(store.save).to.have.been.calledWith 'someContext.events', domainEvent
         done()
 
     it 'should publish the domainevent on the eventbus', (done) ->
-      domainEventService.saveAndTrigger [domainEvent], (err) ->
+      domainEventService.saveAndPublish [domainEvent], (err) ->
         expect(eventBusStub.publishDomainEvent).to.have.been.calledWith domainEvent
         done()

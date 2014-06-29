@@ -38,7 +38,7 @@ describe 'AggregateService', ->
 
     # stub the DomainEventService
     domainEventService = sinon.createStubInstance DomainEventService
-    domainEventService.saveAndTrigger.yields null
+    domainEventService.saveAndPublish.yields null
 
     eventricMock =
       require: sandbox.stub()
@@ -141,7 +141,7 @@ describe 'AggregateService', ->
         done()
 
 
-    it 'should call saveAndTrigger on DomainEventService with the generated DomainEvents', (done) ->
+    it 'should call saveAndPublish on DomainEventService with the generated DomainEvents', (done) ->
       events = {}
       exampleAggregateStub.getDomainEvents.returns events
       thenStub.yields null
@@ -150,7 +150,7 @@ describe 'AggregateService', ->
         id: 1
         methodName: 'doSomething'
       .then ->
-        expect(domainEventService.saveAndTrigger.withArgs(events).calledOnce).to.be.true
+        expect(domainEventService.saveAndPublish.withArgs(events).calledOnce).to.be.true
         done()
 
 

@@ -96,6 +96,7 @@ module.exports =
       if not boundedContextHandler[domainEvent.name] and not boundedContextHandler.all
         return
 
-      eventHandlers = boundedContextHandler[domainEvent.name] ? boundedContextHandler.all
+      eventHandlers = [].concat (boundedContextHandler[domainEvent.name] ? []),
+                                (boundedContextHandler.all ? [])
       for eventHandler in eventHandlers
         eventHandler domainEvent

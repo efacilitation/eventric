@@ -27,6 +27,7 @@ moduleDefinition =
 module.exports =
   _params: {}
   _domainEventHandlers: {}
+  _domainEventHandlersAll: []
 
   require: (required) ->
     path = moduleDefinition[required] ? required
@@ -50,18 +51,24 @@ module.exports =
   *
   * @description Global DomainEvent Handlers
   *
-  * @param {String} boundedContextName Name of the BoundedContext
-  * @param {String} eventName Name of the Event
+  * @param {String} boundedContextName Name of the BoundedContext or 'all'
+  * @param {String} eventName Name of the Event or 'all'
   * @param {Function} eventHandler Function which handles the DomainEvent
   ###
-  addDomainEventHandler: (boundedContextName, eventName, eventHandler) ->
-    if !@_domainEventHandlers[boundedContextName]
-      @_domainEventHandlers[boundedContextName] = {}
+  addDomainEventHandler: ([boundedContextName, eventName]..., eventHandler) ->
+    boundedContextName ?= 'all'
+    eventName ?= 'all'
 
-    if !@_domainEventHandlers[boundedContextName][eventName]
-      @_domainEventHandlers[boundedContextName][eventName] = []
+    if boundedContextName is 'all' and eventName is 'all'
+      @_domainEventHandlersAll.push eventHandler
+    else
+      if !@_domainEventHandlers[boundedContextName]
+        @_domainEventHandlers[boundedContextName] = {}
 
-    @_domainEventHandlers[boundedContextName][eventName].push eventHandler
+      if !@_domainEventHandlers[boundedContextName][eventName]
+        @_domainEventHandlers[boundedContextName][eventName] = []
+
+      @_domainEventHandlers[boundedContextName][eventName].push eventHandler
 
 
   ###*
@@ -89,14 +96,8 @@ module.exports =
 
   _delegateAllDomainEventsToGlobalHandlers: (boundedContext) ->
     boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
-      if not @_domainEventHandlers[boundedContext.name]
-        return
-
-      boundedContextHandler = @_domainEventHandlers[boundedContext.name]
-      if not boundedContextHandler[domainEvent.name] and not boundedContextHandler.all
-        return
-
-      eventHandlers = [].concat (boundedContextHandler[domainEvent.name] ? []),
-                                (boundedContextHandler.all ? [])
+      eventHandlers = [].concat (@_domainEventHandlers[boundedContext.name]?[domainEvent.name] ? []),
+                                (@_domainEventHandlers[boundedContext.name]?.all ? []),
+                                (@_domainEventHandlersAll ? [])
       for eventHandler in eventHandlers
         eventHandler domainEvent

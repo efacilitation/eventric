@@ -7,14 +7,17 @@ describe 'Global Domain Event Handler Feature', ->
 
   describe 'given we created and initialized some example bounded context and added a global domain event handler', ->
     exampleContext = null
-    specificHandlerStub = null
+    specificOnContextHandlerStub = null
+    allOnContextHandlerStub = null
     allHandlerStub = null
     beforeEach ->
       # TODO: currently global domain event handlers have to be registered before calling eventric.boundedContext
-      specificHandlerStub = sandbox.stub()
-      eventric.addDomainEventHandler 'exampleContext', 'ExampleCreated', specificHandlerStub
+      specificOnContextHandlerStub = sandbox.stub()
+      eventric.addDomainEventHandler 'exampleContext', 'ExampleCreated', specificOnContextHandlerStub
+      allOnContextHandlerStub = sandbox.stub()
+      eventric.addDomainEventHandler 'exampleContext', allOnContextHandlerStub
       allHandlerStub = sandbox.stub()
-      eventric.addDomainEventHandler 'exampleContext', 'all', allHandlerStub
+      eventric.addDomainEventHandler allHandlerStub
 
       exampleContext = eventric.boundedContext 'exampleContext'
       exampleContext.set 'store', storeStub
@@ -35,6 +38,7 @@ describe 'Global Domain Event Handler Feature', ->
         exampleContext.command
           name: 'createExample'
         .then =>
-          expect(specificHandlerStub).to.have.been.called
+          expect(specificOnContextHandlerStub).to.have.been.called
+          expect(allOnContextHandlerStub).to.have.been.called
           expect(allHandlerStub).to.have.been.called
           done()

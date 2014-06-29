@@ -20,6 +20,22 @@ class BoundedContext
     @_readModelInstances = {}
 
 
+
+  ###*
+  * @name initialize
+  *
+  * @description
+  * Use as: initialize(callback)
+  *
+  * Initializes the `BoundedContext` after the `add*` Methods
+  *
+  * @example
+    ```javascript
+    exampleContext.initialize(function() {
+      // ...
+    })
+    ```
+  ###
   initialize: ->
     @_initializeStore()
     @_initializeReadModels()
@@ -101,6 +117,21 @@ class BoundedContext
       @_aggregateService.registerAggregateRoot aggregateName, AggregateRoot
 
 
+  ###*
+  * @name set
+  *
+  * @description
+  * > Use as: set(key, value)
+  * Configure settings for the `BoundedContext`.
+  *
+  * @example
+
+     exampleContext.set 'store', StoreAdapter
+
+  *
+  * @param {Object} key
+  * Available keys are: `store` Eventric Store Adapter
+  ###
   set: (key, value) ->
     @_params[key] = value
     @
@@ -116,6 +147,34 @@ class BoundedContext
     @
 
 
+  ###*
+  * @name addCommandHandler
+  *
+  * @dscription
+  * Use as: addCommandHandler(commandName, commandFunction)
+  *
+  * Add Commands to the `BoundedContext`. These will be available to the `command` method after calling `initialize`.
+  *
+  * @example
+    ```javascript
+    exampleContext.addCommandHandler('someCommand', function(params, callback) {
+      // ...
+    });
+    ```
+
+  * @param {String} commandName Name of the command
+  *
+  * @param {String} commandFunction Gets `this.aggregate` dependency injected
+  * `this.aggregate.command(params)` Execute command on Aggregate
+  *  * `params.name` Name of the Aggregate
+  *  * `params.id` Id of the Aggregate
+  *  * `params.methodName` MethodName inside the Aggregate
+  *  * `params.methodParams` Array of params which the specified AggregateMethod will get as function signature using a [splat](http://stackoverflow.com/questions/6201657/what-does-splats-mean-in-the-coffeescript-tutorial)
+  *
+  * `this.aggregate.create(params)` Execute command on Aggregate
+  *  * `params.name` Name of the Aggregate to be created
+  *  * `params.props` Initial properties so be set on the Aggregate or handed to the Aggregates create() method
+  ###
   addCommandHandler: (commandHandlerName, commandHandlerFn) ->
     @_commandHandlers[commandHandlerName] = => commandHandlerFn.apply @_di, arguments
     @
@@ -126,11 +185,60 @@ class BoundedContext
     @
 
 
+  ###*
+  * @name addAggregate
+  *
+  * @description
+  *
+  * Use as: addAggregate(aggregateName, aggregateDefinition)
+  *
+  * Add [Aggregates](https://github.com/efacilitation/eventric/wiki/BuildingBlocks#aggregateroot) to the `BoundedContext`. It takes an AggregateDefinition as argument. The AggregateDefinition must at least consists of one AggregateRoot and can optionally have multiple named AggregateEntities. The Root and Entities itself are completely vanilla since eventric follows the philosophy that your DomainModel-Code should be technology-agnostic.
+  *
+  * @example
+
+  ```javascript
+  exampleContext.addAggregate('Example', {
+    root: function(){
+      this.doSomething = function(description) {
+        // ...
+      }
+    },
+    entities: {
+      'ExampleEntityOne': function() {},
+      'ExampleEntityTwo': function() {}
+    }
+  });
+  ```
+  *
+  * @param {String} aggregateName Name of the Aggregate
+  * @param {String} aggregateDefinition Definition containing root and entities
+  ###
   addAggregate: (aggregateName, AggregateRootClass) ->
     @_aggregateRootClasses[aggregateName] = AggregateRootClass
     @
 
 
+  ###*
+  *
+  * @name addDomainEventHandler
+  *
+  * @description
+  * Use as: addDomainEventHandler(domainEventName, domainEventHandlerFunction)
+  *
+  * Add handler function which gets called when a specific `DomainEvent` gets triggered
+  *
+  * @example
+    ```javascript
+    exampleContext.addDomainEventHandler('Example:create', function(domainEvent) {
+      // ...
+    });
+    ```
+  *
+  * @param {String} domainEventName Name of the `DomainEvent`
+  *
+  * @param {Function} Function which gets called with `domainEvent` as argument
+  * - `domainEvent` Instance of [[DomainEvent]]
+  ###
   addDomainEventHandler: (eventName, handlerFn) ->
     @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
     @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
@@ -174,6 +282,32 @@ class BoundedContext
     @_domainEventClasses[domainEventName]
 
 
+  ###*
+  * @name command
+  *
+  * @description
+  * Use as: command(command, callback)
+  *
+  * Execute previously added `commands`. Upon successful execution this will trigger a `DomainEvent`.
+  *
+  * @example
+    ```javascript
+    exampleContext.command({
+      name: 'doSomething'
+    },
+    function(err, result) {
+      // callback
+    });
+    ```
+  *
+  * @param {Object} command Object containing the command definition
+  * - `name` The name of the `command`
+  * - `params` Object containing parameters. The `command` will get this as first parameter.
+  *
+  * @param {Function} callback Gets called after the command got executed with the arguments:
+  * - `err` null if successful
+  * - `result` Set by the `command`
+  ###
   command: (command, callback) ->
     new Promise (resolve, reject) =>
       if @_commandHandlers[command.name]

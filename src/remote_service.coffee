@@ -8,11 +8,10 @@ class RemoteService
     rpc =
       service: serviceName
       payload: payload
-
     @_adapter.rpc rpc, callback
 
-  handle: (rpc, callback) ->
 
+  handle: (rpc, callback) ->
     service = @getServiceHandler rpc.service
     if not service
       err = new Error "Tried to handle RPC call with not registered service #{rpc.service}"

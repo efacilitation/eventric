@@ -15,13 +15,10 @@ class Repository
 
   findById: (aggregateId, callback) =>
     return unless @_callbackIsAFunction callback
-
     @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
       aggregate = new Aggregate @_boundedContext, @_aggregateName, @_AggregateRoot
       aggregate.applyDomainEvents domainEvents
-
       aggregate.id = aggregateId
-
       callback null, aggregate
 
 
@@ -30,14 +27,12 @@ class Repository
     @_store.find collectionName, { 'aggregate.name': @_aggregateName, 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
-
       callback null, domainEvents
 
 
   _callbackIsAFunction: (callback) ->
     if typeof callback == 'function'
       return true
-
     else
       throw new Error 'No callback provided'
 

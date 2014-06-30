@@ -4,7 +4,6 @@ describe  'Repository', ->
   domainEvent = null
   EventStoreStub = null
   AggregateStub = null
-  aggregateDefinition = null
 
   beforeEach ->
     class EventStore

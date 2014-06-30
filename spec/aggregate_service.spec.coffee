@@ -2,7 +2,6 @@ describe 'AggregateService', ->
   DomainEvent = eventric.require 'DomainEvent'
 
   aggregateStubId = 1
-  exampleAggregateRoot = null
   repositoryStub = null
   exampleAggregateStub = null
   AggregateService = null

@@ -6,12 +6,13 @@ describe 'BoundedContext', ->
   HelperUnderscoreMock =
     extend: sandbox.stub()
 
-  storeStub = null
+  storeFake = null
   aggregateServiceStub = null
   eventricMock = null
 
   beforeEach ->
-    storeStub = sandbox.stub()
+    storeFake =
+      collection: sandbox.stub().yields null
 
     eventBusStub =
       subscribeToDomainEvent: sandbox.stub()
@@ -31,31 +32,56 @@ describe 'BoundedContext', ->
     BoundedContext = eventric.require 'BoundedContext'
 
 
-  it 'should initialize aggregateservice with the custom event store if configured', ->
-    boundedContext = new BoundedContext
-    boundedContext.set 'store', storeStub
-    boundedContext.initialize()
-    expect(aggregateServiceStub.initialize.calledWith storeStub).to.be.true
+  describe '#initialize', ->
+
+    it 'should initialize aggregate service with the custom event store if configured', ->
+      boundedContext = new BoundedContext
+      boundedContext.set 'store', storeFake
+      boundedContext.initialize()
+      expect(aggregateServiceStub.initialize.calledWith storeFake).to.be.true
 
 
-  it 'should initialize aggregateservice with the global event store if configured', ->
-    globalStoreStub = sandbox.stub()
-    eventricMock.get.withArgs('store').returns globalStoreStub
-    boundedContext = new BoundedContext
-    boundedContext.initialize()
-    expect(aggregateServiceStub.initialize.calledWith globalStoreStub).to.be.true
+    it 'should initialize aggregate service with the global event store if configured', ->
+      globalStoreStub = {}
+      eventricMock.get.withArgs('store').returns globalStoreStub
+      boundedContext = new BoundedContext
+      boundedContext.initialize()
+      expect(aggregateServiceStub.initialize.calledWith globalStoreStub).to.be.true
 
 
-  it 'should throw an error if neither a global nor a custom event store was configured', ->
-    boundedContext = new BoundedContext
-    expect(boundedContext.initialize).to.throw Error
+    it 'should throw an error if neither a global nor a custom event store was configured', ->
+      boundedContext = new BoundedContext
+      expect(boundedContext.initialize).to.throw Error
+
+
+    it 'should instantiate all registered read models', ->
+      storeFake =
+        collection: sandbox.stub().yields null, {}
+      eventricMock.get.withArgs('store').returns storeFake
+      boundedContext = new BoundedContext
+      AggregateStub = sandbox.stub()
+      boundedContext.addReadModel 'Aggregate', AggregateStub
+      boundedContext.initialize()
+      expect(AggregateStub).to.have.been.calledWithNew
+
+
+    it 'should instantiate and initialize all registered adapters', ->
+      storeFake = {}
+      eventricMock.get.withArgs('store').returns storeFake
+      boundedContext = new BoundedContext
+      AdapterFactory = sandbox.stub()
+      boundedContext.addAdapter 'Adapter', AdapterFactory
+      boundedContext.initialize()
+      expect(AdapterFactory).to.have.been.calledWithNew
+
+
 
 
   describe '#command', ->
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', ->
         someContext = new BoundedContext
-        someContext.set 'store', storeStub
+        someContext.set 'store', storeFake
         someContext.initialize()
 
         command =
@@ -74,7 +100,7 @@ describe 'BoundedContext', ->
       it 'should execute the command handler', ->
         commandStub = sandbox.stub()
         someContext = new BoundedContext
-        someContext.set 'store', storeStub
+        someContext.set 'store', storeFake
         someContext.initialize()
         someContext.addCommandHandler 'doSomething', commandStub
 
@@ -85,3 +111,67 @@ describe 'BoundedContext', ->
 
         someContext.command command, ->
         expect(commandStub.calledWith command.params, sinon.match.func).to.be.true
+
+
+  describe '#query', ->
+
+    someContext = null
+
+    beforeEach ->
+      someContext = new BoundedContext
+      someContext.set 'store', storeFake
+
+    describe 'given the query has no read model matching the name', ->
+      it 'should callback with an error', (done) ->
+        someContext.initialize()
+        someContext.query
+          readModelName: 'ReadModel'
+        .catch (error) ->
+          expect(error).to.be.an.instanceOf Error
+          expect(error.message).to.match /Given ReadModel ReadModel not found/
+          done()
+
+
+    describe 'given the query has no matching method on the read model', ->
+      it 'should callback with an error', (done) ->
+        class ReadModel
+        someContext.addReadModel 'ReadModel', ReadModel
+        someContext.initialize()
+        someContext.query
+          readModelName: 'ReadModel'
+          methodName: 'readSomething'
+        .catch (error) ->
+          expect(error).to.be.an.instanceOf Error
+          expect(error.message).to.match /Given method readSomething not found/
+          done()
+
+
+    describe 'given the read model and the given method on it exists', ->
+      class ReadModel
+        readSomething: sinon.stub().yields null
+
+      beforeEach ->
+        someContext.addReadModel 'ReadModel', ReadModel
+        someContext.initialize()
+
+
+      it 'should call the method passing in the method params', (done) ->
+        params =
+          foo: 'bar'
+          bar: 'foo'
+        someContext.query
+          readModelName: 'ReadModel'
+          methodName: 'readSomething'
+          methodParams: params
+        .then ->
+          expect(ReadModel::readSomething).to.have.been.calledWith params
+          done()
+
+
+      it 'should callback with the result of the method', ->
+        ReadModel::readSomething.yields null, 'result'
+        someContext.query
+          readModelName: 'ReadModel'
+          methodName: 'readSomething'
+        , (error, result) ->
+          expect(result).to.equal 'result'

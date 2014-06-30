@@ -243,8 +243,19 @@ class BoundedContext
     @_di =
       $aggregate: @_aggregateService
       $adapter: => @getAdapter.apply @, arguments
-      $readmodel: => @getReadModel.apply @, arguments
+      $readModel: => @getReadModel.apply @, arguments
     @
+
+
+  _initializeStore: ->
+    if @_params.store
+      @_store = @_params.store
+    else
+      globalStore = eventric.get 'store'
+      if globalStore
+        @_store = globalStore
+      else
+        throw new Error 'Missing Event Store for Bounded Context'
 
 
   _initializeReadModels: ->
@@ -284,17 +295,6 @@ class BoundedContext
       adapter.initialize?()
 
       @_adapterInstances[adapterName] = adapter
-
-
-  _initializeStore: ->
-    if @_params.store
-      @_store = @_params.store
-    else
-      globalStore = eventric.get 'store'
-      if globalStore
-        @_store = globalStore
-      else
-        throw new Error 'Missing Event Store for Bounded Context'
 
 
   _initializeDomainEventHandlers: ->
@@ -411,10 +411,10 @@ class BoundedContext
   ###
   query: (query, callback) ->
     new Promise (resolve, reject) =>
-      readModel = @getReadModel query.readModel
+      readModel = @getReadModel query.readModelName
       if not readModel
-        err = new Error "Given ReadModel #{query.readModel} not found on bounded context"
-      if not readModel[query.methodName]
+        err = new Error "Given ReadModel #{query.readModelName} not found on bounded context"
+      else if not readModel[query.methodName]
         err = new Error "Given method #{query.methodName} not found on ReadModel #{query.readModel}"
 
       if err

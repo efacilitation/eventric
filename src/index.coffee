@@ -4,7 +4,6 @@ require './helper/promise'
 moduleDefinition =
   BoundedContext: './bounded_context'
   Aggregate: './aggregate'
-  AggregateService: './aggregate_service'
   DomainEvent: './domain_event'
   EventBus: './event_bus'
   Repository: './repository'

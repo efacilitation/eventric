@@ -1,7 +1,7 @@
 eventric = require 'eventric'
 
 _                  = eventric.require 'HelperUnderscore'
-AggregateService   = eventric.require 'AggregateService'
+Repository         = eventric.require 'Repository'
 EventBus           = eventric.require 'EventBus'
 
 
@@ -18,6 +18,7 @@ class BoundedContext
     @_domainEventHandlers = {}
     @_projectionClasses = {}
     @_projectionInstances = {}
+    @_repositoryInstances = {}
 
 
   ###*
@@ -230,20 +231,17 @@ class BoundedContext
   ###
   initialize: ->
     @_initializeStore()
+    @_initializeRepositories()
     @_initializeProjections()
     @_initializeAdapters()
 
     @_eventBus = new EventBus
     @_initializeDomainEventHandlers()
 
-    @_aggregateService = new AggregateService
-    @_aggregateService.initialize @_store, @_eventBus, @
-    @_initializeAggregateService()
-
     @_di =
-      $aggregate: @_aggregateService
-      $adapter: => @getAdapter.apply @, arguments
+      $repository: => @getRepository.apply @, arguments
       $projection: => @getProjection.apply @, arguments
+      $adapter: => @getAdapter.apply @, arguments
     @
 
 
@@ -256,6 +254,14 @@ class BoundedContext
         @_store = globalStore
       else
         throw new Error 'Missing Event Store for Bounded Context'
+
+
+  _initializeRepositories: ->
+    for aggregateName, AggregateRoot of @_aggregateRootClasses
+      @_repositoryInstances[aggregateName] = new Repository
+        aggregateName: aggregateName
+        AggregateRoot: AggregateRoot
+        boundedContext: @
 
 
   _initializeProjections: ->
@@ -272,12 +278,12 @@ class BoundedContext
       for key, value of projection
         if key.indexOf 'handle' is 0 and value typeof 'function'
           eventName = key.replace /^handle/, ''
-          @_subscribeprojectionToDomainEvent projection, eventName
+          @_subscribeProjectionToDomainEvent projection, eventName
 
       @_projectionInstances[projectionName] = projection
 
 
-  _subscribeprojectionToDomainEvent: (projection, eventName) ->
+  _subscribeProjectionToDomainEvent: (projection, eventName) ->
     @addDomainEventHandler eventName, (domainEvent) =>
       @_applyDomainEventToProjection domainEvent, projection
 
@@ -304,9 +310,15 @@ class BoundedContext
         @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
-  _initializeAggregateService: ->
-    for aggregateName, AggregateRoot of @_aggregateRootClasses
-      @_aggregateService.registerAggregateRoot aggregateName, AggregateRoot
+  ###*
+  * @name getRepository
+  *
+  * @description Get a Repository for the given aggregateName
+  *
+  * @param {String} aggregateName Name of the Aggregate
+  ###
+  getRepository: (aggregateName) ->
+    @_repositoryInstances[aggregateName]
 
 
   ###*
@@ -340,6 +352,24 @@ class BoundedContext
   ###
   getDomainEvent: (domainEventName) ->
     @_domainEventClasses[domainEventName]
+
+
+  ###*
+  * @name getStore
+  *
+  * @description Get the Store after initialization
+  ###
+  getStore: ->
+    @_store
+
+
+  ###*
+  * @name getEventBus
+  *
+  * @description Get the EventBus after initialization
+  ###
+  getEventBus: ->
+    @_eventBus
 
 
   ###*

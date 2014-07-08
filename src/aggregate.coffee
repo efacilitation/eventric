@@ -10,11 +10,11 @@ class Aggregate
     @_domainEvents = []
 
     if !Root
-      @_root = {}
+      @root = {}
     else
-      @_root = new Root
+      @root = new Root
 
-    @_root.$emitDomainEvent = @emitDomainEvent
+    @root.$emitDomainEvent = @emitDomainEvent
 
 
   emitDomainEvent: (domainEventName, domainEventPayload) =>
@@ -41,11 +41,11 @@ class Aggregate
 
 
   _handleDomainEvent: (domainEventName, domainEvent) ->
-    if !@_root["handle#{domainEventName}"]
-      throw new Error "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
+    if @root["handle#{domainEventName}"]
+      @root["handle#{domainEventName}"] domainEvent
 
     else
-      @_root["handle#{domainEventName}"] domainEvent
+      err = new Error "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
 
   getDomainEvents: ->
@@ -64,55 +64,22 @@ class Aggregate
     new Promise (resolve, reject) =>
       @id = @_generateUid()
 
-      if typeof @_root.create == 'function'
+      if typeof @root.create == 'function'
         try
-          check = @_root.create props
+          check = @root.create props
           if check instanceof Promise
             check.then =>
-              resolve()
+              resolve @
             check.catch (err) =>
               reject err
           else
-            resolve()
+            resolve @
         catch e
           reject e
 
       else
-        # automatically generate domainevent
-        class Created
-          constructor: (props) ->
-            @[key] = value for key, value of props
-
-        domainEvent = @_createDomainEvent "#{@_name}Created", Created, props
-        @_domainEvents.push domainEvent
-
-        # automatically "handle" domainevent
-        @_root[key] = value for key, value of props
-        resolve()
-
-
-  command: (command) ->
-    new Promise (resolve, reject) =>
-      if command.name not of @_root
-        err = new Error "Given commandName '#{command.name}' not found as method in the #{@_name} Aggregate Root"
-        return reject err
-
-      # make sure we have a params array
-      command.params = [] if !command.params
-      if not (command.params instanceof Array)
-        command.params = [command.params]
-
-      try
-        check = @_root[command.name] command.params...
-        if check instanceof Promise
-          check.then =>
-            resolve()
-          check.catch (err) =>
-            reject err
-        else
-          resolve()
-      catch err
-        reject err
+        @emitDomainEvent "#{@_name}Created", props
+        resolve @
 
 
   _generateUid: (separator) ->
@@ -124,7 +91,7 @@ class Aggregate
 
 
   toJSON: ->
-    Clone @_root
+    Clone @root
 
 
 module.exports = Aggregate

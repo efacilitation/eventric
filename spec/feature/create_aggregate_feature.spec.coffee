@@ -10,14 +10,18 @@ describe 'Create Aggregate Feature', ->
     beforeEach ->
       exampleContext = eventric.boundedContext 'exampleContext'
       exampleContext.set 'store', eventStoreMock
+      exampleContext.addDomainEvent 'ExampleCreated', (params) ->
       exampleContext.addAggregate 'Example', class Example
 
 
     describe 'when we command the bounded context to create an aggregate', ->
       beforeEach ->
-        exampleContext.addCommandHandler 'createExample', ->
-          @$aggregate.create
-            name: 'Example'
+        exampleContext.addCommandHandler 'createExample', (params, done) ->
+          @$repository('Example').create()
+          .then (exampleId) =>
+            @$repository('Example').save exampleId
+          .then =>
+            done()
 
 
       it 'then it should haved triggered the correct DomainEvent', (done) ->

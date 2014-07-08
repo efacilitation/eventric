@@ -25,8 +25,11 @@ describe 'Projection Feature', ->
       exampleContext = eventric.boundedContext 'exampleContext'
       exampleContext.set 'store', storeStub
 
-      exampleContext.addDomainEvent 'SomethingHappened', (params) ->
-        @specific = params.whateverFoo
+      exampleContext.addDomainEvents
+        ExampleCreated: ->
+
+        SomethingHappened: (params) ->
+          @specific = params.whateverFoo
 
       class ExampleProjection
         handleSomethingHappened: (domainEvent) ->
@@ -34,8 +37,6 @@ describe 'Projection Feature', ->
       exampleContext.addProjection 'ExampleProjection', ExampleProjection
 
       class ExampleAggregateRoot
-        create: ->
-          @$emitDomainEvent 'ExampleGotCreatedFromGod'
         handleExampleCreated: (domainEvent) ->
           @whatever = 'bar'
         doSomething: ->
@@ -45,13 +46,13 @@ describe 'Projection Feature', ->
           @whatever = domainEvent.payload.whateverFoo
       exampleContext.addAggregate 'Example', ExampleAggregateRoot
 
-      exampleContext.addCommandHandler 'doSomethingWithExample', (params, callback) ->
-        @$aggregate.command
-          id: params.id
-          name: 'Example'
-          methodName: 'doSomething'
+      exampleContext.addCommandHandler 'doSomethingWithExample', (params, done) ->
+        @$repository('Example').findById params.id
+        .then (example) =>
+          example.doSomething()
+          @$repository('Example').save params.id
         .then =>
-          callback null
+          done()
 
       exampleContext.initialize()
 

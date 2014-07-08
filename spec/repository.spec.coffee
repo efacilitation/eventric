@@ -4,6 +4,7 @@ describe  'Repository', ->
   domainEvent = null
   EventStoreStub = null
   AggregateStub = null
+  AggregateRootStub = null
 
   beforeEach ->
     class EventStore
@@ -21,8 +22,12 @@ describe  'Repository', ->
       domainEvent
     ]
 
+    class AggregateRootStub
+    aggregateRootStub = new AggregateRootStub
+
     class AggregateStub
       applyDomainEvents: sandbox.stub()
+      root: aggregateRootStub
 
     eventricMock =
       require: sandbox.stub()
@@ -34,19 +39,19 @@ describe  'Repository', ->
 
     boundedContextStub =
       name: 'someContext'
+      getStore: sandbox.stub().returns EventStoreStub
 
     Repository = eventric.require 'Repository'
     repository = new Repository
       aggregateName: 'Foo'
       boundedContext: boundedContextStub
-      store: EventStoreStub
 
 
   describe '#findById', ->
 
     it 'should return an aggregate', (done) ->
       repository.findById 23, (err, aggregate) ->
-        expect(aggregate).to.be.an.instanceof AggregateStub
+        expect(aggregate).to.be.an.instanceof AggregateRootStub
         done()
 
 

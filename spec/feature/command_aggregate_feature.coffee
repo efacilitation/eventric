@@ -16,7 +16,7 @@ describe 'Command Aggregate Feature', ->
       exampleContext.addAggregate 'Example', class Example
 
 
-    describe 'when we command the bounded context to command an aggregate', ->
+    describe 'when we send a command to the bounded context', ->
       beforeEach ->
         eventStoreMock.find.yields null, [
           name: 'ExampleCreated'
@@ -60,13 +60,12 @@ describe 'Command Aggregate Feature', ->
 
         exampleContext.addCommandHandlers
           someBoundedContextFunction: (params, callback) ->
-            @$aggregate.command
-              id: params.id
-              name: 'Example'
-              methodName: 'doSomething'
-              methodParams: [1]
-            .then =>
-              callback null
+            @$repository('Example').findById params.id
+            .then (example) =>
+              example.doSomething [1]
+              @$repository('Example').save params.id
+            .then ->
+              callback()
 
 
       it 'then it should have triggered the correct DomainEvent', (done) ->

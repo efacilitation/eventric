@@ -34,21 +34,6 @@ describe 'BoundedContext', ->
 
   describe '#initialize', ->
 
-    it 'should initialize aggregate service with the custom event store if configured', ->
-      boundedContext = new BoundedContext
-      boundedContext.set 'store', storeFake
-      boundedContext.initialize()
-      expect(aggregateServiceStub.initialize.calledWith storeFake).to.be.true
-
-
-    it 'should initialize aggregate service with the global event store if configured', ->
-      globalStoreStub = {}
-      eventricMock.get.withArgs('store').returns globalStoreStub
-      boundedContext = new BoundedContext
-      boundedContext.initialize()
-      expect(aggregateServiceStub.initialize.calledWith globalStoreStub).to.be.true
-
-
     it 'should throw an error if neither a global nor a custom event store was configured', ->
       boundedContext = new BoundedContext
       expect(boundedContext.initialize).to.throw Error

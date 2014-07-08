@@ -22,13 +22,16 @@ describe 'Global Domain Event Handler Feature', ->
       exampleContext = eventric.boundedContext 'exampleContext'
       exampleContext.set 'store', storeStub
 
+      exampleContext.addDomainEvent 'ExampleCreated', ->
+
       exampleContext.addAggregate 'Example', ->
 
-      exampleContext.addCommandHandler 'createExample', (params, callback) ->
-        @$aggregate.create
-          name: 'Example'
+      exampleContext.addCommandHandler 'createExample', (params, done) ->
+        @$repository('Example').create()
+        .then (exampleId) =>
+          @$repository('Example').save exampleId
         .then =>
-          callback null
+          done null
 
 
     describe 'when DomainEvents got emitted which the handler subscribed to', ->

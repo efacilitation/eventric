@@ -38,14 +38,17 @@ class Repository
       return callback null, [] if domainEvents.length == 0
       callback null, domainEvents
 
-  create: ([initialProperties]..., callback=->) =>
+  create: (initialProperties, callback) =>
+    if typeof initialProperties is 'function' and not callback
+      callback = initialProperties
+
     new Promise (resolve, reject) =>
       # create Aggregate
       aggregate = new Aggregate @_boundedContext, @_aggregateName, @_AggregateRoot
       aggregate.create initialProperties
       .then (aggregate) =>
         @_aggregateInstances[aggregate.id] = aggregate
-        callback null, aggregate.id
+        callback? null, aggregate.id
         resolve aggregate.id
 
 
@@ -54,7 +57,7 @@ class Repository
       aggregate = @_aggregateInstances[aggregateId]
       if not aggregate
         err = new Error 'Tried to save unknown aggregate'
-        callback err, null
+        callback? err, null
         reject err
         return
 

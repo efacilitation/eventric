@@ -60,7 +60,7 @@ describe 'BoundedContext', ->
       eventricMock.get.withArgs('store').returns storeFake
       boundedContext = new BoundedContext
       AggregateStub = sandbox.stub()
-      boundedContext.addReadModel 'Aggregate', AggregateStub
+      boundedContext.addProjection 'Aggregate', AggregateStub
       boundedContext.initialize()
       expect(AggregateStub).to.have.been.calledWithNew
 
@@ -125,20 +125,20 @@ describe 'BoundedContext', ->
       it 'should callback with an error', (done) ->
         someContext.initialize()
         someContext.query
-          readModelName: 'ReadModel'
+          projectionName: 'Projection'
         .catch (error) ->
           expect(error).to.be.an.instanceOf Error
-          expect(error.message).to.match /Given ReadModel ReadModel not found/
+          expect(error.message).to.match /Given Projection Projection not found/
           done()
 
 
     describe 'given the query has no matching method on the read model', ->
       it 'should callback with an error', (done) ->
-        class ReadModel
-        someContext.addReadModel 'ReadModel', ReadModel
+        class Projection
+        someContext.addProjection 'Projection', Projection
         someContext.initialize()
         someContext.query
-          readModelName: 'ReadModel'
+          projectionName: 'Projection'
           methodName: 'readSomething'
         .catch (error) ->
           expect(error).to.be.an.instanceOf Error
@@ -147,11 +147,11 @@ describe 'BoundedContext', ->
 
 
     describe 'given the read model and the given method on it exists', ->
-      class ReadModel
+      class Projection
         readSomething: sinon.stub().yields null
 
       beforeEach ->
-        someContext.addReadModel 'ReadModel', ReadModel
+        someContext.addProjection 'Projection', Projection
         someContext.initialize()
 
 
@@ -160,18 +160,18 @@ describe 'BoundedContext', ->
           foo: 'bar'
           bar: 'foo'
         someContext.query
-          readModelName: 'ReadModel'
+          projectionName: 'Projection'
           methodName: 'readSomething'
           methodParams: params
         .then ->
-          expect(ReadModel::readSomething).to.have.been.calledWith params
+          expect(Projection::readSomething).to.have.been.calledWith params
           done()
 
 
       it 'should callback with the result of the method', ->
-        ReadModel::readSomething.yields null, 'result'
+        Projection::readSomething.yields null, 'result'
         someContext.query
-          readModelName: 'ReadModel'
+          projectionName: 'Projection'
           methodName: 'readSomething'
         , (error, result) ->
           expect(result).to.equal 'result'

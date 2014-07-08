@@ -57,7 +57,7 @@ describe 'Projection Feature', ->
 
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->
-      it.only 'then the Projection should call $store with the denormalized state', (done) ->
+      it 'then the Projection should call $store with the denormalized state', (done) ->
         exampleContext.command
           name: 'doSomethingWithExample'
           params:

@@ -12,7 +12,7 @@ Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Se
 
 ### Why?
 
-It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)+[CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) Frameworks where you put a lot of effort into defining your data structure and so often end up with an [anemic domain model](http://www.martinfowler.com/bliki/AnemicDomainModel.html) on larger projects.
+Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 
 
 ## Features
@@ -23,12 +23,13 @@ It is an alternative to [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E
   * Encapsulate your Domain-Logic in `Aggregates`
 
 **CQRS**
-  * Persistent `ReadModels` and `ProcessManagers`
-  * Support for Occasionally Connected Applications
+  * Persistent `Projections`
+
 
 **EventSourcing**
   * Automated saving and applying of DomainEvents
   * Multiple Store Adapters
+  * Support for Occasionally Connected Applications
 
 
 ## Philosophy
@@ -78,31 +79,31 @@ collaboration = eventric.boundedContext('collaboration');
 
 ### Define the Event
 
-Inside of our `Collaboration` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add one called `TodoDescriptionChanged`.
+Inside of our `Collaboration` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add two called `TodoCreated` and `TodoDescriptionChanged`.
 
 ```javascript
-collaboration.addDomainEvent('TodoDescriptionChanged', function(params) {
-  this.description = params.description;
-})
+collaboration.addDomainEvents({
+  TodoCreated: function(params) {},
+  TodoDescriptionChanged: function(params) {
+    this.description = params.description;
+  }
+)
 ```
 
 
 ### Adding an Aggregate
 
-Now we need an Aggregate which actually raises this DomainEvent and is able to handle it. Lets add it.
+Now we need an Aggregate which actually raises this DomainEvents.
 
 ```javascript
 collaboration.addAggregate('Todo', function() {
   this.changeDescription = function(description) {
     this.$emitDomainEvent('TodoDescriptionChanged', {description: description})
   }
-  this.handleTodoDescriptionChanged = function(domainEvent) {
-    this.description = domainEvent.payload.description;
-  }
 });
 
 ```
-> Hint: `this.$emitDomainEvent` is dependency injected and the handle method is called by naming convention after raising.
+> Hint: `this.$emitDomainEvent` is dependency injected
 
 
 ### Adding CommandHandlers
@@ -110,28 +111,36 @@ collaboration.addAggregate('Todo', function() {
 To actually work with the `BoundedContext` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
 
 ```javascript
-collaboration.addCommandHandler('createTodo', function(params, callback) {
-  this.$aggregate.create({
-    name: 'Todo'
-  }).then(function(aggregateId){
-    callback(null, aggregateId);
-  })
+collaboration.addCommandHandler('createTodo', function(params, done) {
+  this.$repository('Todo').create()
+
+    .then(function (todoId) {
+      return $repository('Todo').save(todoId);
+    })
+
+    .then(function() {
+      done()
+    });
+
 });
 ```
-> Hint: `this.$aggregate` is dependency injected
+> Hint: `this.$repository` is dependency injected
 
 It would be nice if we could change the description of the `Todo`, so let's add this `CommandHandler` too.
 
 ```javascript
-collaboration.addCommandHandler('changeTodoDescription', function(params, callback) {
-  this.$aggregate.command({
-    name: 'Todo',
-    id: params.id,
-    methodName: 'changeDescription',
-    methodParams: [params.description]
-  }).then(function() {
-    callback(null, null);
-  });
+collaboration.addCommandHandler('changeTodoDescription', function(params, done) {
+  this.$repository('Todo').findById(params.id)
+
+    .then(function (todo) {
+      todo.changeDescription params.description
+      return $repository('Todo').save(params.id);
+    })
+
+    .then(function() {
+      done()
+    });
+
 });
 ```
 
@@ -152,20 +161,18 @@ collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEve
 Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 
 ```javascript
-collaboration.initialize(function() {
+collaboration.initialize()
 
+collaboration.command({
+  name: 'createTodo'
+}).then(function(todoId) {
   collaboration.command({
-    name: 'createTodo'
-  }).then(function(todoId) {
-    collaboration.command({
-      name: 'changeTodoDescription',
-      params: {
-        id: todoId,
-        description: 'Do something'
-      }
-    })
-  });
-
+    name: 'changeTodoDescription',
+    params: {
+      id: todoId,
+      description: 'Do something'
+    }
+  })
 });
 ```
 After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing.

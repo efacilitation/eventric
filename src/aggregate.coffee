@@ -31,7 +31,7 @@ class Aggregate
 
   _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
     new DomainEvent
-      id: @_generateUid()
+      id: eventric.generateUid()
       name: domainEventName
       aggregate:
         id: @id
@@ -62,7 +62,7 @@ class Aggregate
 
   create: (props) ->
     new Promise (resolve, reject) =>
-      @id = @_generateUid()
+      @id = eventric.generateUid()
 
       if typeof @root.create == 'function'
         try
@@ -80,14 +80,6 @@ class Aggregate
       else
         @emitDomainEvent "#{@_name}Created", props
         resolve @
-
-
-  _generateUid: (separator) ->
-    # http://stackoverflow.com/a/12223573
-    S4 = ->
-      (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
-    delim = separator or "-"
-    S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
 
 
   toJSON: ->

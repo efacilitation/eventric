@@ -16,8 +16,8 @@ class BoundedContext
     @_commandHandlers = {}
     @_domainEventClasses = {}
     @_domainEventHandlers = {}
-    @_readModelClasses = {}
-    @_readModelInstances = {}
+    @_projectionClasses = {}
+    @_projectionInstances = {}
 
 
   ###*
@@ -44,7 +44,7 @@ class BoundedContext
   * @name addDomainEvent
   *
   * @description
-  * Adds a DomainEvent Class which will be used when emitting or handling DomainEvents inside of Aggregates, ReadModels or ProcessManagers
+  * Adds a DomainEvent Class which will be used when emitting or handling DomainEvents inside of Aggregates, Projectionpr or ProcessManagers
   *
   * @param {String} domainEventName Name of the DomainEvent
   * @param {Function} DomainEventClass DomainEventClass
@@ -193,23 +193,23 @@ class BoundedContext
 
 
   ###*
-  * @name addReadModel
+  * @name addProjection
   *
   * @description
-  * Add ReadModel that can subscribe to and handle DomainEvents
+  * Add Projection that can subscribe to and handle DomainEvents
   *
-  * @param {string} readModelName Name of the ReadModel
-  * @param {Function} The ReadModel Class definition
+  * @param {string} projectionName Name of the Projection
+  * @param {Function} The Projection Class definition
   * - define `subscribeToDomainEvents` as Array of DomainEventName Strings
   * - define handle Funtions for DomainEvents by convention: "handleDomainEventName"
   ###
-  addReadModel: (readModelName, ReadModelClass) ->
-    @_readModelClasses[readModelName] = ReadModelClass
+  addProjection: (projectionName, ProjectionClass) ->
+    @_projectionClasses[projectionName] = ProjectionClass
     @
 
 
-  addReadModels: (viewsObj) ->
-    @addReadModel readModelName, ReadModelClass for readModelName, ReadModelClass of viewsObj
+  addProjections: (viewsObj) ->
+    @addProjection projectionName, ProjectionClass for projectionName, ProjectionClass of viewsObj
     @
 
 
@@ -230,7 +230,7 @@ class BoundedContext
   ###
   initialize: ->
     @_initializeStore()
-    @_initializeReadModels()
+    @_initializeProjections()
     @_initializeAdapters()
 
     @_eventBus = new EventBus
@@ -243,7 +243,7 @@ class BoundedContext
     @_di =
       $aggregate: @_aggregateService
       $adapter: => @getAdapter.apply @, arguments
-      $readModel: => @getReadModel.apply @, arguments
+      $projection: => @getProjection.apply @, arguments
     @
 
 
@@ -258,35 +258,36 @@ class BoundedContext
         throw new Error 'Missing Event Store for Bounded Context'
 
 
-  _initializeReadModels: ->
-    for readModelName, ReadModelClass of @_readModelClasses
-      @_initializeReadModel readModelName, ReadModelClass
+  _initializeProjections: ->
+    for projectionName, ProjectionClass of @_projectionClasses
+      @_initializeProjection projectionName, ProjectionClass
 
 
-  _initializeReadModel: (readModelName, ReadModelClass) ->
-    @_store.collection "#{@name}.ReadModel.#{readModelName}", (err, collection) =>
-      readModel = new ReadModelClass
+  _initializeProjection: (projectionName, ProjectionClass) ->
+    @_store.collection "#{@name}.Projection.#{projectionName}", (err, collection) =>
+      projection = new ProjectionClass
       # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
-      readModel.$store = collection
-      readModel.$adapter = => @getAdapter.apply @, arguments
-      if readModel.subscribeToDomainEvents
-        for eventName in readModel.subscribeToDomainEvents
-          @_subscribeReadModelToDomainEvent readModel, eventName
+      projection.$store = collection
+      projection.$adapter = => @getAdapter.apply @, arguments
+      for key, value of projection
+        if key.indexOf 'handle' is 0 and value typeof 'function'
+          eventName = key.replace /^handle/, ''
+          @_subscribeprojectionToDomainEvent projection, eventName
 
-      @_readModelInstances[readModelName] = readModel
+      @_projectionInstances[projectionName] = projection
 
 
-  _subscribeReadModelToDomainEvent: (readModel, eventName) ->
+  _subscribeprojectionToDomainEvent: (projection, eventName) ->
     @addDomainEventHandler eventName, (domainEvent) =>
-      @_applyDomainEventToReadModel domainEvent, readModel
+      @_applyDomainEventToProjection domainEvent, projection
 
 
-  _applyDomainEventToReadModel: (domainEvent, readModel) ->
-    if !readModel["handle#{domainEvent.name}"]
-      throw new Error "Tried to apply DomainEvent '#{domainEvent.name}' to ReadModel without a matching handle method"
+  _applyDomainEventToProjection: (domainEvent, projection) ->
+    if !projection["handle#{domainEvent.name}"]
+      throw new Error "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
 
     else
-      readModel["handle#{domainEvent.name}"] domainEvent
+      projection["handle#{domainEvent.name}"] domainEvent
 
 
   _initializeAdapters: ->
@@ -309,14 +310,14 @@ class BoundedContext
 
 
   ###*
-  * @name getReadModel
+  * @name getProjection
   *
-  * @description Get a ReadModel Instance after initialize()
+  * @description Get a Projection Instance after initialize()
   *
-  * @param {String} readModelName Name of the ReadModel
+  * @param {String} projectionName Name of the Projection
   ###
-  getReadModel: (readModelName) ->
-    @_readModelInstances[readModelName]
+  getProjection: (projectionName) ->
+    @_projectionInstances[projectionName]
 
 
   ###*
@@ -391,12 +392,12 @@ class BoundedContext
   *
   * Use as: query(query, callback)
   *
-  * Execute query against a previously added ReadModel
+  * Execute query against a previously added Projection
   *
   * @example
     ```javascript
     exampleContext.query({
-      readModel: 'Example',
+      projection: 'Example',
       methodeName: 'getSomething'
     },
     function(err, result) {
@@ -405,23 +406,23 @@ class BoundedContext
     ```
   *
   * @param {Object} query Object with the query paramter
-  * - `readModel` Name of the ReadModel to query against
-  * - `methodName` Name of the method to be executed on the ReadModel
+  * - `projection` Name of the Projection to query against
+  * - `methodName` Name of the method to be executed on the Projection
   * - `methodParams` Parameters for the method
   ###
   query: (query, callback) ->
     new Promise (resolve, reject) =>
-      readModel = @getReadModel query.readModelName
-      if not readModel
-        err = new Error "Given ReadModel #{query.readModelName} not found on bounded context"
-      else if not readModel[query.methodName]
-        err = new Error "Given method #{query.methodName} not found on ReadModel #{query.readModel}"
+      projection = @getProjection query.projectionName
+      if not projection
+        err = new Error "Given Projection #{query.projectionName} not found on bounded context"
+      else if not projection[query.methodName]
+        err = new Error "Given method #{query.methodName} not found on Projection #{query.projection}"
 
       if err
         reject err
         callback? err, null
       else
-        readModel[query.methodName] query.methodParams, (err, result) =>
+        projection[query.methodName] query.methodParams, (err, result) =>
           if err
             reject err
           else

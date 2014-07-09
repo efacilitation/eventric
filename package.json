@@ -21,12 +21,12 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.48",
+  "version": "0.0.53",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"
   },
-  "main": "build/node/index.js",
+  "main": "src/index.coffee",
   "scripts": {
     "test": "node_modules/.bin/gulp spec",
     "prepublish": "node_modules/.bin/gulp build"

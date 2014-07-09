@@ -161,19 +161,22 @@ collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEve
 Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 
 ```javascript
-collaboration.initialize()
+collaboration.initialize(function() {
 
-collaboration.command({
-  name: 'createTodo'
-}).then(function(todoId) {
   collaboration.command({
-    name: 'changeTodoDescription',
-    params: {
-      id: todoId,
-      description: 'Do something'
-    }
-  })
+    name: 'createTodo'
+  }).then(function(todoId) {
+    collaboration.command({
+      name: 'changeTodoDescription',
+      params: {
+        id: todoId,
+        description: 'Do something'
+      }
+    })
+  });
+
 });
+
 ```
 After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing.
 

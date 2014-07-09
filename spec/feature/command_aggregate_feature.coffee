@@ -74,8 +74,8 @@ describe 'Command Aggregate Feature', ->
           expect(domainEvent.name).to.equal 'SomethingHappened'
           done()
 
-        exampleContext.initialize()
-        exampleContext.command
-          name: 'someBoundedContextFunction'
-          params:
-            id: 1
+        exampleContext.initialize =>
+          exampleContext.command
+            name: 'someBoundedContextFunction'
+            params:
+              id: 1

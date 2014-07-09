@@ -15,7 +15,7 @@ describe 'Projection Feature', ->
 
   describe 'given we created and initialized some example bounded context including a Projection', ->
     exampleContext = null
-    beforeEach ->
+    beforeEach (done) ->
       storeStub.find.yields null, [
         name: 'ExampleCreated'
         aggregate:
@@ -47,15 +47,16 @@ describe 'Projection Feature', ->
           @whatever = domainEvent.payload.whateverFoo
       exampleContext.addAggregate 'Example', ExampleAggregateRoot
 
-      exampleContext.addCommandHandler 'doSomethingWithExample', (params, done) ->
+      exampleContext.addCommandHandler 'doSomethingWithExample', (params, callback) ->
         @$repository('Example').findById params.id
         .then (example) =>
           example.doSomething()
           @$repository('Example').save params.id
         .then =>
-          done()
+          callback()
 
-      exampleContext.initialize()
+      exampleContext.initialize =>
+        done()
 
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->

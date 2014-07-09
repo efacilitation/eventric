@@ -30,6 +30,6 @@ describe 'Create Aggregate Feature', ->
           expect(domainEvent.name).to.equal 'ExampleCreated'
           done()
 
-        exampleContext.initialize()
-        exampleContext.command
-          name: 'createExample'
+        exampleContext.initialize =>
+          exampleContext.command
+            name: 'createExample'

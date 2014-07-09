@@ -7,6 +7,7 @@ describe 'Projection Feature', ->
   beforeEach ->
     projectionStoreStub =
       insert: sandbox.stub()
+      remove: sandbox.stub().yields null
     storeStub =
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null

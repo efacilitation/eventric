@@ -11,8 +11,12 @@ describe 'BoundedContext', ->
   eventricMock = null
 
   beforeEach ->
+    collectionStub =
+      remove: sandbox.stub().yields null
+
     storeFake =
-      collection: sandbox.stub().yields null
+      find: sandbox.stub().yields null, []
+      collection: sandbox.stub().yields null, collectionStub
 
     eventBusStub =
       subscribeToDomainEvent: sandbox.stub()
@@ -39,15 +43,13 @@ describe 'BoundedContext', ->
       expect(boundedContext.initialize).to.throw Error
 
 
-    it 'should instantiate all registered read models', ->
-      storeFake =
-        collection: sandbox.stub().yields null, {}
+    it 'should instantiate all registered projections', ->
       eventricMock.get.withArgs('store').returns storeFake
       boundedContext = new BoundedContext
-      AggregateStub = sandbox.stub()
-      boundedContext.addProjection 'Aggregate', AggregateStub
+      ProjectionStub = sandbox.stub()
+      boundedContext.addProjection 'SomeProjection', ProjectionStub
       boundedContext.initialize()
-      expect(AggregateStub).to.have.been.calledWithNew
+      expect(ProjectionStub).to.have.been.calledWithNew
 
 
     it 'should instantiate and initialize all registered adapters', ->

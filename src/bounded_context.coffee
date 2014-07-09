@@ -1,8 +1,9 @@
 eventric = require 'eventric'
 
-_                  = eventric.require 'HelperUnderscore'
-Repository         = eventric.require 'Repository'
-EventBus           = eventric.require 'EventBus'
+_           = eventric.require 'HelperUnderscore'
+async       = eventric.require 'HelperAsync'
+Repository  = eventric.require 'Repository'
+EventBus    = eventric.require 'EventBus'
 
 
 class BoundedContext
@@ -16,7 +17,7 @@ class BoundedContext
     @_commandHandlers = {}
     @_domainEventClasses = {}
     @_domainEventHandlers = {}
-    @_projectionClasses = {}
+    @_projectionClasses = []
     @_projectionInstances = {}
     @_repositoryInstances = {}
 
@@ -205,7 +206,9 @@ class BoundedContext
   * - define handle Funtions for DomainEvents by convention: "handleDomainEventName"
   ###
   addProjection: (projectionName, ProjectionClass) ->
-    @_projectionClasses[projectionName] = ProjectionClass
+    @_projectionClasses.push
+      name: projectionName
+      class: ProjectionClass
     @
 
 
@@ -218,7 +221,7 @@ class BoundedContext
   * @name initialize
   *
   * @description
-  * Use as: initialize(callback)
+  * Use as: initialize()
   *
   * Initializes the `BoundedContext` after the `add*` Methods
   *
@@ -229,20 +232,21 @@ class BoundedContext
     })
     ```
   ###
-  initialize: ->
+  initialize: (callback) ->
+    @_eventBus = new EventBus
     @_initializeStore()
     @_initializeRepositories()
-    @_initializeProjections()
     @_initializeAdapters()
+    @_initializeProjections()
+    .then =>
+      @_initializeDomainEventHandlers()
 
-    @_eventBus = new EventBus
-    @_initializeDomainEventHandlers()
+      @_di =
+        $repository: => @getRepository.apply @, arguments
+        $projection: => @getProjection.apply @, arguments
+        $adapter: => @getAdapter.apply @, arguments
 
-    @_di =
-      $repository: => @getRepository.apply @, arguments
-      $projection: => @getProjection.apply @, arguments
-      $adapter: => @getAdapter.apply @, arguments
-    @
+      callback()
 
 
   _initializeStore: ->
@@ -264,33 +268,58 @@ class BoundedContext
         boundedContext: @
 
 
-  _initializeProjections: ->
-    for projectionName, ProjectionClass of @_projectionClasses
-      @_initializeProjection projectionName, ProjectionClass
+  _initializeProjections: (callback) ->
+    new Promise (resolve, reject) =>
+      async.eachSeries @_projectionClasses, (projection, next) =>
+        @_store.collection "#{@name}.Projection.#{projection.name}", (err, collection) =>
+          # clear the collection
+          # we replay all events the collection subscribed to
+          # TODO: store last applied event and go from there
+          collection.remove =>
+            @_initializeProjection projection.name, projection.class, collection, =>
+              next()
+
+      , (err) =>
+        return reject err if err
+        resolve()
 
 
-  _initializeProjection: (projectionName, ProjectionClass) ->
-    @_store.collection "#{@name}.Projection.#{projectionName}", (err, collection) =>
-      projection = new ProjectionClass
-      # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
-      projection.$store = collection
-      projection.$adapter = => @getAdapter.apply @, arguments
-      for key, value of projection
-        if key.indexOf 'handle' is 0 and value typeof 'function'
-          eventName = key.replace /^handle/, ''
-          @_subscribeProjectionToDomainEvent projection, eventName
+  _initializeProjection: (projectionName, ProjectionClass, collection, callback) ->
+    projection = new ProjectionClass
+    # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
+    projection.$store = collection
+    projection.$adapter = => @getAdapter.apply @, arguments
+    eventNames = []
 
+    for key, value of projection
+      if (key.indexOf 'handle') is 0 and (typeof value is 'function')
+        eventName = key.replace /^handle/, ''
+        eventNames.push eventName
+
+    @_applyDomainEventsFromStoreToProjection projection, eventNames, =>
+      @_subscribeProjectionToDomainEvents projection, eventNames
       @_projectionInstances[projectionName] = projection
+      callback()
 
 
-  _subscribeProjectionToDomainEvent: (projection, eventName) ->
-    @addDomainEventHandler eventName, (domainEvent) =>
-      @_applyDomainEventToProjection domainEvent, projection
+  _applyDomainEventsFromStoreToProjection: (projection, eventNames, callback) ->
+    query = 'name': $in: eventNames
+    @_store.find "#{@name}.events", query, (err, events) =>
+      for event in events
+        @_applyDomainEventToProjection event, projection
+
+      callback()
+
+
+  _subscribeProjectionToDomainEvents: (projection, eventNames) ->
+    for eventName in eventNames
+      @addDomainEventHandler eventName, (domainEvent) =>
+        @_applyDomainEventToProjection domainEvent, projection
 
 
   _applyDomainEventToProjection: (domainEvent, projection) ->
     if !projection["handle#{domainEvent.name}"]
-      throw new Error "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
+      err = new Error "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
 
     else
       projection["handle#{domainEvent.name}"] domainEvent

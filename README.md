@@ -14,22 +14,17 @@ Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Se
 
 Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 
+[![MVC evolved](http://img.youtube.com/vi/XSc7NPedAxw/0.jpg)](http://www.youtube.com/watch?v=T-D1KVIuvjA)
+
 
 ## Features
 
-**DDD BuildingBlocks**
-  * Well defined Interface to your `BoundedContext`
-  * Use `DomainEvents` everywhere
-  * Encapsulate your Domain-Logic in `Aggregates`
-
-**CQRS**
-  * Persistent `Projections`
-
-
-**EventSourcing**
-  * Automated saving and applying of DomainEvents
-  * Multiple Store Adapters
-  * Support for Occasionally Connected Applications
+* Well defined `Context` Interface
+* Capture `DomainEvents` explicitly
+* Persistent `Projections`
+* Multiple `Store Adapters`
+* Automated saving and applying of DomainEvents
+* Support for Occasionally Connected Applications
 
 
 ## Philosophy

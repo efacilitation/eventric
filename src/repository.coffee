@@ -78,8 +78,8 @@ class Repository
           reject err
 
         else
-          resolve()
-          callback null, null
+          resolve aggregate.id
+          callback null, aggregate.id
 
 
 module.exports = Repository

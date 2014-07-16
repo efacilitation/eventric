@@ -14,7 +14,7 @@ Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Se
 
 Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 
-[![MVC evolved](http://img.youtube.com/vi/XSc7NPedAxw/0.jpg)](http://www.youtube.com/watch?v=T-D1KVIuvjA)
+[![MVC evolved](http://img.youtube.com/vi/XSc7NPedAxw/0.jpg)](http://www.youtube.com/watch?v=XSc7NPedAxw)
 
 
 ## Features

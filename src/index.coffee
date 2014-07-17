@@ -42,6 +42,33 @@ module.exports =
 
   ###*
   *
+  * @description Get a new BoundedContext instance.
+  *
+  * @param {String} name Name of the BoundedContext
+  ###
+  boundedContext: (name) ->
+    if !name
+      throw new Error 'BoundedContexts must have a name'
+    BoundedContext = @require 'BoundedContext'
+    boundedContext = new BoundedContext name
+
+    @_delegateAllDomainEventsToGlobalHandlers boundedContext
+
+    boundedContext
+
+  context: ->
+    @boundedContext arguments...
+
+
+  _delegateAllDomainEventsToGlobalHandlers: (boundedContext) ->
+    boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
+      eventHandlers = @getDomainEventHandlers boundedContext.name, domainEvent.name
+      for eventHandler in eventHandlers
+        eventHandler domainEvent
+
+
+  ###*
+  *
   * @description Global DomainEvent Handlers
   *
   * @param {String} boundedContextName Name of the BoundedContext or 'all'
@@ -68,29 +95,6 @@ module.exports =
     [].concat (@_domainEventHandlers[boundedContextName]?[domainEventName] ? []),
               (@_domainEventHandlers[boundedContextName]?.all ? []),
               (@_domainEventHandlersAll ? [])
-
-  ###*
-  *
-  * @description Get a new BoundedContext instance.
-  *
-  * @param {String} name Name of the BoundedContext
-  ###
-  boundedContext: (name) ->
-    if !name
-      throw new Error 'BoundedContexts must have a name'
-    BoundedContext = @require 'BoundedContext'
-    boundedContext = new BoundedContext name
-
-    @_delegateAllDomainEventsToGlobalHandlers boundedContext
-
-    boundedContext
-
-
-  _delegateAllDomainEventsToGlobalHandlers: (boundedContext) ->
-    boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
-      eventHandlers = @getDomainEventHandlers boundedContext.name, domainEvent.name
-      for eventHandler in eventHandlers
-        eventHandler domainEvent
 
 
   generateUid: (separator) ->

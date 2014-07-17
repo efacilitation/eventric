@@ -132,6 +132,11 @@ class BoundedContext
     @
 
 
+  addAggregates: (aggregatesObj) ->
+    @addAggregate aggregateName, AggregateRootClass for aggregateName, AggregateRootClass of aggregatesObj
+    @
+
+
   ###*
   *
   * @name addDomainEventHandler

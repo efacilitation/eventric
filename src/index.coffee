@@ -2,14 +2,14 @@
 require './helper/promise'
 
 moduleDefinition =
-  BoundedContext: './bounded_context'
+  MicroContext: './micro_context'
   Aggregate: './aggregate'
   DomainEvent: './domain_event'
   EventBus: './event_bus'
   Repository: './repository'
 
   RemoteService: './remote_service'
-  RemoteBoundedContext: './remote_bounded_context'
+  RemoteMicroContext: './remote_micro_context'
 
   HelperAsync: './helper/async'
   HelperEvents: './helper/events'
@@ -42,27 +42,28 @@ module.exports =
 
   ###*
   *
-  * @description Get a new BoundedContext instance.
+  * @description Get a new MicroContext instance.
   *
-  * @param {String} name Name of the BoundedContext
+  * @param {String} name Name of the MicroContext
   ###
-  boundedContext: (name) ->
+  microContext: (name) ->
     if !name
-      throw new Error 'BoundedContexts must have a name'
-    BoundedContext = @require 'BoundedContext'
-    boundedContext = new BoundedContext name
+      throw new Error 'MicroContexts must have a name'
+    MicroContext = @require 'MicroContext'
+    microContext = new MicroContext name
 
-    @_delegateAllDomainEventsToGlobalHandlers boundedContext
+    @_delegateAllDomainEventsToGlobalHandlers microContext
 
-    boundedContext
+    microContext
+
 
   context: ->
-    @boundedContext arguments...
+    @microContext arguments...
 
 
-  _delegateAllDomainEventsToGlobalHandlers: (boundedContext) ->
-    boundedContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
-      eventHandlers = @getDomainEventHandlers boundedContext.name, domainEvent.name
+  _delegateAllDomainEventsToGlobalHandlers: (microContext) ->
+    microContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
+      eventHandlers = @getDomainEventHandlers microContext.name, domainEvent.name
       for eventHandler in eventHandlers
         eventHandler domainEvent
 
@@ -71,29 +72,29 @@ module.exports =
   *
   * @description Global DomainEvent Handlers
   *
-  * @param {String} boundedContextName Name of the BoundedContext or 'all'
+  * @param {String} microContextName Name of the MicroContext or 'all'
   * @param {String} eventName Name of the Event or 'all'
   * @param {Function} eventHandler Function which handles the DomainEvent
   ###
-  addDomainEventHandler: ([boundedContextName, eventName]..., eventHandler) ->
-    boundedContextName ?= 'all'
+  addDomainEventHandler: ([microContextName, eventName]..., eventHandler) ->
+    microContextName ?= 'all'
     eventName ?= 'all'
 
-    if boundedContextName is 'all' and eventName is 'all'
+    if microContextName is 'all' and eventName is 'all'
       @_domainEventHandlersAll.push eventHandler
     else
-      if !@_domainEventHandlers[boundedContextName]
-        @_domainEventHandlers[boundedContextName] = {}
+      if !@_domainEventHandlers[microContextName]
+        @_domainEventHandlers[microContextName] = {}
 
-      if !@_domainEventHandlers[boundedContextName][eventName]
-        @_domainEventHandlers[boundedContextName][eventName] = []
+      if !@_domainEventHandlers[microContextName][eventName]
+        @_domainEventHandlers[microContextName][eventName] = []
 
-      @_domainEventHandlers[boundedContextName][eventName].push eventHandler
+      @_domainEventHandlers[microContextName][eventName].push eventHandler
 
 
-  getDomainEventHandlers: (boundedContextName, domainEventName) ->
-    [].concat (@_domainEventHandlers[boundedContextName]?[domainEventName] ? []),
-              (@_domainEventHandlers[boundedContextName]?.all ? []),
+  getDomainEventHandlers: (microContextName, domainEventName) ->
+    [].concat (@_domainEventHandlers[microContextName]?[domainEventName] ? []),
+              (@_domainEventHandlers[microContextName]?.all ? []),
               (@_domainEventHandlersAll ? [])
 
 

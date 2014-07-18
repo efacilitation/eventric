@@ -6,7 +6,7 @@ Repository  = eventric.require 'Repository'
 EventBus    = eventric.require 'EventBus'
 
 
-class BoundedContext
+class MicroContext
 
   constructor: (@name) ->
     @_di = {}
@@ -27,11 +27,11 @@ class BoundedContext
   *
   * @description
   * > Use as: set(key, value)
-  * Configure settings for the `BoundedContext`.
+  * Configure settings for the `MicroContext`.
   *
   * @example
 
-     exampleContext.set 'store', StoreAdapter
+     exampleMicroContext.set 'store', StoreAdapter
 
   *
   * @param {Object} key
@@ -67,11 +67,11 @@ class BoundedContext
   * @dscription
   * Use as: addCommandHandler(commandName, commandFunction)
   *
-  * Add Commands to the `BoundedContext`. These will be available to the `command` method after calling `initialize`.
+  * Add Commands to the `MicroContext`. These will be available to the `command` method after calling `initialize`.
   *
   * @example
     ```javascript
-    exampleContext.addCommandHandler('someCommand', function(params, callback) {
+    exampleMicroContext.addCommandHandler('someCommand', function(params, callback) {
       // ...
     });
     ```
@@ -106,12 +106,12 @@ class BoundedContext
   *
   * Use as: addAggregate(aggregateName, aggregateDefinition)
   *
-  * Add [Aggregates](https://github.com/efacilitation/eventric/wiki/BuildingBlocks#aggregateroot) to the `BoundedContext`. It takes an AggregateDefinition as argument. The AggregateDefinition must at least consists of one AggregateRoot and can optionally have multiple named AggregateEntities. The Root and Entities itself are completely vanilla since eventric follows the philosophy that your DomainModel-Code should be technology-agnostic.
+  * Add [Aggregates](https://github.com/efacilitation/eventric/wiki/BuildingBlocks#aggregateroot) to the `MicroContext`. It takes an AggregateDefinition as argument. The AggregateDefinition must at least consists of one AggregateRoot and can optionally have multiple named AggregateEntities. The Root and Entities itself are completely vanilla since eventric follows the philosophy that your DomainModel-Code should be technology-agnostic.
   *
   * @example
 
   ```javascript
-  exampleContext.addAggregate('Example', {
+  exampleMicroContext.addAggregate('Example', {
     root: function(){
       this.doSomething = function(description) {
         // ...
@@ -148,7 +148,7 @@ class BoundedContext
   *
   * @example
     ```javascript
-    exampleContext.addDomainEventHandler('Example:create', function(domainEvent) {
+    exampleMicroContext.addDomainEventHandler('Example:create', function(domainEvent) {
       // ...
     });
     ```
@@ -180,7 +180,7 @@ class BoundedContext
   *
   * @example
     ```javascript
-    exampleContext.addAdapter('SomeAdapter', function() {
+    exampleMicroContext.addAdapter('SomeAdapter', function() {
       // ...
     });
     ```
@@ -228,11 +228,11 @@ class BoundedContext
   * @description
   * Use as: initialize()
   *
-  * Initializes the `BoundedContext` after the `add*` Methods
+  * Initializes the `MicroContext` after the `add*` Methods
   *
   * @example
     ```javascript
-    exampleContext.initialize(function() {
+    exampleMicroContext.initialize(function() {
       // ...
     })
     ```
@@ -262,7 +262,7 @@ class BoundedContext
       if globalStore
         @_store = globalStore
       else
-        throw new Error 'Missing Event Store for Bounded Context'
+        throw new Error 'Missing Event Store for Bounded MicroContext'
 
 
   _initializeRepositories: ->
@@ -270,7 +270,7 @@ class BoundedContext
       @_repositoryInstances[aggregateName] = new Repository
         aggregateName: aggregateName
         AggregateRoot: AggregateRoot
-        boundedContext: @
+        microContext: @
 
 
   _initializeProjections: (callback) ->
@@ -417,7 +417,7 @@ class BoundedContext
   *
   * @example
     ```javascript
-    exampleContext.command({
+    exampleMicroContext.command({
       name: 'doSomething'
     },
     function(err, result) {
@@ -444,7 +444,7 @@ class BoundedContext
           callback? err, result
 
       else
-        err = new Error "Given command #{command.name} not registered on bounded context"
+        err = new Error "Given command #{command.name} not registered on bounded microContext"
         reject err
         callback? err, null
 
@@ -460,7 +460,7 @@ class BoundedContext
   *
   * @example
     ```javascript
-    exampleContext.query({
+    exampleMicroContext.query({
       projection: 'Example',
       methodeName: 'getSomething'
     },
@@ -478,7 +478,7 @@ class BoundedContext
     new Promise (resolve, reject) =>
       projection = @getProjection query.projectionName
       if not projection
-        err = new Error "Given Projection #{query.projectionName} not found on bounded context"
+        err = new Error "Given Projection #{query.projectionName} not found on bounded microContext"
       else if not projection[query.methodName]
         err = new Error "Given method #{query.methodName} not found on Projection #{query.projection}"
 
@@ -494,4 +494,4 @@ class BoundedContext
           callback? err, result
 
 
-module.exports = BoundedContext
+module.exports = MicroContext

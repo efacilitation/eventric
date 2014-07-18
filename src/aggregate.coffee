@@ -6,7 +6,7 @@ DomainEvent     = eventric.require 'DomainEvent'
 
 class Aggregate
 
-  constructor: (@_boundedContext, @_name, Root) ->
+  constructor: (@_microContext, @_name, Root) ->
     @_domainEvents = []
 
     if !Root
@@ -18,7 +18,7 @@ class Aggregate
 
 
   emitDomainEvent: (domainEventName, domainEventPayload) =>
-    DomainEventClass = @_boundedContext.getDomainEvent domainEventName
+    DomainEventClass = @_microContext.getDomainEvent domainEventName
     if !DomainEventClass
       throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
@@ -36,7 +36,7 @@ class Aggregate
       aggregate:
         id: @id
         name: @_name
-      boundedContext: @_boundedContext.name
+      microContext: @_microContext.name
       payload: new DomainEventClass domainEventPayload
 
 

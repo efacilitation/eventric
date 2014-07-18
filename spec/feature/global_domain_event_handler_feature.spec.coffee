@@ -5,28 +5,28 @@ describe 'Global Domain Event Handler Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created and initialized some example bounded context and added a global domain event handler', ->
-    exampleContext = null
-    specificOnContextHandlerStub = null
-    allOnContextHandlerStub = null
+  describe 'given we created and initialized some example bounded microContext and added a global domain event handler', ->
+    exampleMicroContext = null
+    specificOnMicroContextHandlerStub = null
+    allOnMicroContextHandlerStub = null
     allHandlerStub = null
     beforeEach ->
-      # TODO: currently global domain event handlers have to be registered before calling eventric.boundedContext
-      specificOnContextHandlerStub = sandbox.stub()
-      eventric.addDomainEventHandler 'exampleContext', 'ExampleCreated', specificOnContextHandlerStub
-      allOnContextHandlerStub = sandbox.stub()
-      eventric.addDomainEventHandler 'exampleContext', allOnContextHandlerStub
+      # TODO: currently global domain event handlers have to be registered before calling eventric.microContext
+      specificOnMicroContextHandlerStub = sandbox.stub()
+      eventric.addDomainEventHandler 'exampleMicroContext', 'ExampleCreated', specificOnMicroContextHandlerStub
+      allOnMicroContextHandlerStub = sandbox.stub()
+      eventric.addDomainEventHandler 'exampleMicroContext', allOnMicroContextHandlerStub
       allHandlerStub = sandbox.stub()
       eventric.addDomainEventHandler allHandlerStub
 
-      exampleContext = eventric.boundedContext 'exampleContext'
-      exampleContext.set 'store', storeStub
+      exampleMicroContext = eventric.microContext 'exampleMicroContext'
+      exampleMicroContext.set 'store', storeStub
 
-      exampleContext.addDomainEvent 'ExampleCreated', ->
+      exampleMicroContext.addDomainEvent 'ExampleCreated', ->
 
-      exampleContext.addAggregate 'Example', ->
+      exampleMicroContext.addAggregate 'Example', ->
 
-      exampleContext.addCommandHandler 'createExample', (params, done) ->
+      exampleMicroContext.addCommandHandler 'createExample', (params, done) ->
         @$repository('Example').create()
         .then (exampleId) =>
           @$repository('Example').save exampleId
@@ -37,11 +37,11 @@ describe 'Global Domain Event Handler Feature', ->
     describe 'when DomainEvents got emitted which the handler subscribed to', ->
 
       it 'then it should execute the registered global domain event handler', (done) ->
-        exampleContext.initialize =>
-          exampleContext.command
+        exampleMicroContext.initialize =>
+          exampleMicroContext.command
             name: 'createExample'
           .then =>
-            expect(specificOnContextHandlerStub).to.have.been.called
-            expect(allOnContextHandlerStub).to.have.been.called
+            expect(specificOnMicroContextHandlerStub).to.have.been.called
+            expect(allOnMicroContextHandlerStub).to.have.been.called
             expect(allHandlerStub).to.have.been.called
             done()

@@ -4,7 +4,7 @@ class DomainEvent
     @name           = params.name
     @payload        = params.payload
     @aggregate      = params.aggregate
-    @boundedContext = params.boundedContext
+    @microContext = params.microContext
     @timestamp      = new Date().getTime()
 
 

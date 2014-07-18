@@ -9,7 +9,7 @@ class Repository
   constructor: (params) ->
     @_aggregateName  = params.aggregateName
     @_AggregateRoot  = params.AggregateRoot
-    @_boundedContext = params.boundedContext
+    @_microContext = params.microContext
 
     @_aggregateInstances = {}
 
@@ -21,7 +21,7 @@ class Repository
           callback err, null
           reject err
         else
-          aggregate = new Aggregate @_boundedContext, @_aggregateName, @_AggregateRoot
+          aggregate = new Aggregate @_microContext, @_aggregateName, @_AggregateRoot
           aggregate.applyDomainEvents domainEvents
           aggregate.id = aggregateId
 
@@ -32,8 +32,8 @@ class Repository
 
 
   _findDomainEventsForAggregate: (aggregateId, callback) ->
-    collectionName = "#{@_boundedContext.name}.events"
-    @_boundedContext.getStore().find collectionName, { 'aggregate.name': @_aggregateName, 'aggregate.id': aggregateId }, (err, domainEvents) =>
+    collectionName = "#{@_microContext.name}.events"
+    @_microContext.getStore().find collectionName, { 'aggregate.name': @_aggregateName, 'aggregate.id': aggregateId }, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
       callback null, domainEvents
@@ -44,7 +44,7 @@ class Repository
 
     new Promise (resolve, reject) =>
       # create Aggregate
-      aggregate = new Aggregate @_boundedContext, @_aggregateName, @_AggregateRoot
+      aggregate = new Aggregate @_microContext, @_aggregateName, @_AggregateRoot
       aggregate.create initialProperties
       .then (aggregate) =>
         @_aggregateInstances[aggregate.id] = aggregate
@@ -61,16 +61,16 @@ class Repository
         reject err
         return
 
-      collectionName = "#{@_boundedContext.name}.events"
+      collectionName = "#{@_microContext.name}.events"
       domainEvents   = aggregate.getDomainEvents()
 
       # TODO: this should be an transaction to guarantee consistency
       async.eachSeries domainEvents, (domainEvent, next) =>
-        @_boundedContext.getStore().save collectionName, domainEvent, =>
+        @_microContext.getStore().save collectionName, domainEvent, =>
           # publish the domainevent on the eventbus
           nextTick = process?.nextTick ? setTimeout
           nextTick =>
-            @_boundedContext.getEventBus().publishDomainEvent domainEvent
+            @_microContext.getEventBus().publishDomainEvent domainEvent
             next null
       , (err) =>
         if err

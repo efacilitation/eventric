@@ -38,7 +38,7 @@ Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 
 ## A Note on DDD
 
-Please keep in mind that eventric.js supplies you only with a structure that has common-sense in the DDD+CQRS community. But you really should get to know the tactical side of DDD as well, which is at least as important (and fun!) as the technical BuildingBlocks. When you dive into the topic you will quickly learn that the BoundedContext is mostly refered to as a tactical pattern. We decided to make it a technical pattern too because we think that it will help grasp the concept.
+Please keep in mind that eventric.js supplies you only with a structure that has common-sense in the DDD+CQRS community. But you really should get to know the tactical side of DDD as well, which is at least as important (and fun!) as the technical BuildingBlocks.
 
 
 ## Getting started
@@ -64,20 +64,20 @@ eventricMongoDbStore.initialize(function() {
 ```
 
 
-### Setup BoundedContext
+### Setup Context
 
-Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `BoundedContext` named `Collaboration`.
+Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `Context` named `Todo`.
 
 ```javascript
-collaboration = eventric.boundedContext('collaboration');
+todoContext = eventric.context('Todo');
 ```
 
 ### Define the Event
 
-Inside of our `Collaboration` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add two called `TodoCreated` and `TodoDescriptionChanged`.
+Inside of our `Todo` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add two called `TodoCreated` and `TodoDescriptionChanged`.
 
 ```javascript
-collaboration.addDomainEvents({
+todo.addDomainEvents({
   TodoCreated: function(params) {},
   TodoDescriptionChanged: function(params) {
     this.description = params.description;
@@ -91,7 +91,7 @@ collaboration.addDomainEvents({
 Now we need an Aggregate which actually raises this DomainEvents.
 
 ```javascript
-collaboration.addAggregate('Todo', function() {
+todoContext.addAggregate('Todo', function() {
   this.changeDescription = function(description) {
     this.$emitDomainEvent('TodoDescriptionChanged', {description: description})
   }
@@ -103,10 +103,10 @@ collaboration.addAggregate('Todo', function() {
 
 ### Adding CommandHandlers
 
-To actually work with the `BoundedContext` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
+To actually work with the `Context` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
 
 ```javascript
-collaboration.addCommandHandler('createTodo', function(params, done) {
+todoContext.addCommandHandler('CreateTodo', function(params, done) {
   this.$repository('Todo').create()
 
     .then(function (todoId) {
@@ -124,7 +124,7 @@ collaboration.addCommandHandler('createTodo', function(params, done) {
 It would be nice if we could change the description of the `Todo`, so let's add this `CommandHandler` too.
 
 ```javascript
-collaboration.addCommandHandler('changeTodoDescription', function(params, done) {
+todoContext.addCommandHandler('ChangeTodoDescription', function(params, done) {
   this.$repository('Todo').findById(params.id)
 
     .then(function (todo) {
@@ -145,7 +145,7 @@ collaboration.addCommandHandler('changeTodoDescription', function(params, done) 
 And last but not least we want to console.log when the description of the `Todo` changes.
 
 ```javascript
-collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEvent) {
+todoContext.addDomainEventHandler('TodoDescriptionChanged', function(domainEvent) {
   console.log(domainEvent.payload.description);
 });
 ```
@@ -156,13 +156,13 @@ collaboration.addDomainEventHandler('TodoDescriptionChanged', function(domainEve
 Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 
 ```javascript
-collaboration.initialize(function() {
+todoContext.initialize(function() {
 
-  collaboration.command({
-    name: 'createTodo'
+  todoContext.command({
+    name: 'CreateTodo'
   }).then(function(todoId) {
-    collaboration.command({
-      name: 'changeTodoDescription',
+    todoContext.command({
+      name: 'ChangeTodoDescription',
       params: {
         id: todoId,
         description: 'Do something'

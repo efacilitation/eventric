@@ -5,19 +5,19 @@ describe 'Create Aggregate Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created and initialized some example bounded context including an aggregate', ->
-    exampleContext = null
+  describe 'given we created and initialized some example bounded microContext including an aggregate', ->
+    exampleMicroContext = null
     beforeEach ->
-      exampleContext = eventric.boundedContext 'exampleContext'
-      exampleContext.set 'store', eventStoreMock
-      exampleContext.addDomainEvent 'ExampleCreated', (params) ->
+      exampleMicroContext = eventric.microContext 'ExampleMicroContext'
+      exampleMicroContext.set 'store', eventStoreMock
+      exampleMicroContext.addDomainEvent 'ExampleCreated', (params) ->
 
-      exampleContext.addAggregate 'Example', class Example
+      exampleMicroContext.addAggregate 'Example', class Example
 
 
-    describe 'when we command the bounded context to create an aggregate without a create function', ->
+    describe 'when we command the bounded microContext to create an aggregate without a create function', ->
       beforeEach ->
-        exampleContext.addCommandHandler 'createExample', (params, done) ->
+        exampleMicroContext.addCommandHandler 'CreateExample', (params, done) ->
           @$repository('Example').create()
           .then (exampleId) =>
             @$repository('Example').save exampleId
@@ -26,10 +26,10 @@ describe 'Create Aggregate Feature', ->
 
 
       it 'then it should haved triggered the correct DomainEvent', (done) ->
-        exampleContext.addDomainEventHandler 'ExampleCreated', (domainEvent) ->
+        exampleMicroContext.addDomainEventHandler 'ExampleCreated', (domainEvent) ->
           expect(domainEvent.name).to.equal 'ExampleCreated'
           done()
 
-        exampleContext.initialize =>
-          exampleContext.command
-            name: 'createExample'
+        exampleMicroContext.initialize =>
+          exampleMicroContext.command
+            name: 'CreateExample'

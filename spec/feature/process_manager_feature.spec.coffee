@@ -1,6 +1,6 @@
 eventric = require 'eventric'
 
-describe.only 'ProcessManager', ->
+describe 'ProcessManager', ->
 
   projectionStoreStub = null
   storeStub = null

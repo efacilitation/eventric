@@ -16,7 +16,7 @@ describe 'ProcessManager', ->
   describe 'given we created a microContext and added a ProcessManager', ->
     initializeProcessManagerStub = null
     handleDomainEventProcessManagerStub = null
-    exampleMicroContext = null
+    exampleContext = null
     beforeEach ->
       storeStub.find.yields null, [
         name: 'ExampleCreated'
@@ -29,41 +29,43 @@ describe 'ProcessManager', ->
       handleDomainEventProcessManagerStub = sandbox.stub()
       eventric.addProcessManager 'ExampleProcess',
         initializeWhen:
-          ExampleContext: 'ExampleCreated'
+          Example: [
+            'ExampleCreated'
+          ]
         class: ->
-          initialize: ->
+          initialize: (domainEvent) ->
             initializeProcessManagerStub()
-            exampleMicroContext.command
-              name: 'DoSomethingWithExample'
+            exampleContext.command
+              name: 'ChangeExample'
               params:
                 id: 1
             , ->
 
-          handleExampleContextSomethingHappened: ->
+          fromExample_handleExampleChanged: ->
             handleDomainEventProcessManagerStub()
             @$endProcess()
 
-      exampleMicroContext = eventric.microContext 'ExampleContext'
-      exampleMicroContext.set 'store', storeStub
+      exampleContext = eventric.microContext 'Example'
+      exampleContext.set 'store', storeStub
 
-      exampleMicroContext.addDomainEvents
+      exampleContext.addDomainEvents
         ExampleCreated: ->
-        SomethingHappened: ->
+        ExampleChanged: ->
 
       class ExampleAggregateRoot
         doSomething: ->
-          @$emitDomainEvent 'SomethingHappened'
+          @$emitDomainEvent 'ExampleChanged'
 
-      exampleMicroContext.addAggregate 'Example', ExampleAggregateRoot
+      exampleContext.addAggregate 'Example', ExampleAggregateRoot
 
-      exampleMicroContext.addCommandHandler 'CreateExample', (params, callback) ->
+      exampleContext.addCommandHandler 'CreateExample', (params, callback) ->
         @$repository('Example').create()
         .then (exampleId) =>
           @$repository('Example').save exampleId
         .then =>
           callback()
 
-      exampleMicroContext.addCommandHandler 'DoSomethingWithExample', (params, callback) ->
+      exampleContext.addCommandHandler 'ChangeExample', (params, callback) ->
         @$repository('Example').findById params.id
         .then (example) =>
           example.doSomething()
@@ -75,12 +77,12 @@ describe 'ProcessManager', ->
     describe 'when a DomainEvent gets emitted the ProcessManager defined as initializeWhen', ->
 
       it 'then it should execute and end the process', (done) ->
-        exampleMicroContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
+        exampleContext.addDomainEventHandler 'ExampleChanged', (domainEvent) ->
           expect(initializeProcessManagerStub).to.have.been.called
           expect(handleDomainEventProcessManagerStub).to.have.been.called
           done()
 
-        exampleMicroContext.initialize =>
-          exampleMicroContext.command
+        exampleContext.initialize =>
+          exampleContext.command
             name: 'CreateExample'
           .then ->

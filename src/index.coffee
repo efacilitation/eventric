@@ -110,10 +110,11 @@ module.exports =
   * @param {Object} processManagerObject Object containing `initializeWhen` and `class`
   ###
   addProcessManager: (processManagerName, processManagerObj) ->
-    for microContextName, domainEventName of processManagerObj.initializeWhen
-      @addDomainEventHandler microContextName, domainEventName, (domainEvent) =>
-        # TODO: make sure we dont spawn twice
-        @_spawnProcessManager processManagerName, processManagerObj.class, microContextName, domainEvent
+    for microContextName, domainEventNames of processManagerObj.initializeWhen
+      for domainEventName in domainEventNames
+        @addDomainEventHandler microContextName, domainEventName, (domainEvent) =>
+          # TODO: make sure we dont spawn twice
+          @_spawnProcessManager processManagerName, processManagerObj.class, microContextName, domainEvent
 
 
   _spawnProcessManager: (processManagerName, ProcessManagerClass, microContextName, domainEvent) ->
@@ -125,7 +126,7 @@ module.exports =
 
     handleContextDomainEventNames = []
     for key, value of processManager
-      if (key.indexOf 'handle') is 0 and (typeof value is 'function')
+      if (key.indexOf 'from') is 0 and (typeof value is 'function')
         handleContextDomainEventNames.push key
 
 
@@ -145,7 +146,7 @@ module.exports =
   _subscribeProcessManagerToDomainEvents: (processManager, handleContextDomainEventNames) ->
     @addDomainEventHandler (domainEvent) =>
       for handleContextDomainEventName in handleContextDomainEventNames
-        if "handle#{domainEvent.microContext}#{domainEvent.name}" == handleContextDomainEventName
+        if "from#{domainEvent.microContext}_handle#{domainEvent.name}" == handleContextDomainEventName
           @_applyDomainEventToProcessManager handleContextDomainEventName, domainEvent, processManager
 
 

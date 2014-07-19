@@ -77,7 +77,7 @@ todoContext = eventric.context('Todo');
 Inside of our `Todo` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add two called `TodoCreated` and `TodoDescriptionChanged`.
 
 ```javascript
-todo.addDomainEvents({
+todoContext.addDomainEvents({
   TodoCreated: function(params) {},
   TodoDescriptionChanged: function(params) {
     this.description = params.description;

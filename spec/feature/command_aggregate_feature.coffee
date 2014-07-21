@@ -8,15 +8,15 @@ describe 'Command Aggregate Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created and initialized some example bounded microContext including an aggregate', ->
-    exampleMicroContext = null
+  describe 'given we created and initialized some example context including an aggregate', ->
+    exampleContext = null
     beforeEach ->
-      exampleMicroContext = eventric.microContext 'exampleMicroContext'
-      exampleMicroContext.set 'store', eventStoreMock
-      exampleMicroContext.addAggregate 'Example', class Example
+      exampleContext = eventric.context 'exampleContext'
+      exampleContext.set 'store', eventStoreMock
+      exampleContext.addAggregate 'Example', class Example
 
 
-    describe 'when we send a command to the bounded microContext', ->
+    describe 'when we send a command to the context', ->
       beforeEach ->
         eventStoreMock.find.yields null, [
           name: 'ExampleCreated'
@@ -31,7 +31,7 @@ describe 'Command Aggregate Feature', ->
             @rootProp = params.rootProp
             @entity   = params.entity
 
-        exampleMicroContext.addDomainEvent 'SomethingHappened', SomethingHappened
+        exampleContext.addDomainEvent 'SomethingHappened', SomethingHappened
 
         class ExampleEntity
           someEntityFunction: ->
@@ -56,10 +56,10 @@ describe 'Command Aggregate Feature', ->
             @entities[2] = domainEvent.payload.entity
 
 
-        exampleMicroContext.addAggregate 'Example', ExampleRoot
+        exampleContext.addAggregate 'Example', ExampleRoot
 
-        exampleMicroContext.addCommandHandlers
-          someMicroContextFunction: (params, callback) ->
+        exampleContext.addCommandHandlers
+          someContextFunction: (params, callback) ->
             @$repository('Example').findById params.id
             .then (example) =>
               example.doSomething [1]
@@ -69,13 +69,13 @@ describe 'Command Aggregate Feature', ->
 
 
       it 'then it should have triggered the correct DomainEvent', (done) ->
-        exampleMicroContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
+        exampleContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
           expect(domainEvent.payload.entity.entityProp).to.equal 'bar'
           expect(domainEvent.name).to.equal 'SomethingHappened'
           done()
 
-        exampleMicroContext.initialize =>
-          exampleMicroContext.command
-            name: 'someMicroContextFunction'
+        exampleContext.initialize =>
+          exampleContext.command
+            name: 'someContextFunction'
             params:
               id: 1

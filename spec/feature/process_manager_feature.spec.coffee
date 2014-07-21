@@ -13,7 +13,7 @@ describe 'ProcessManager', ->
       save: sandbox.stub().yields null
       collection: sandbox.stub().yields null, projectionStoreStub
 
-  describe 'given we created a microContext and added a ProcessManager', ->
+  describe 'given we created a context and added a ProcessManager', ->
     initializeProcessManagerStub = null
     handleDomainEventProcessManagerStub = null
     exampleContext = null
@@ -45,7 +45,7 @@ describe 'ProcessManager', ->
             handleDomainEventProcessManagerStub()
             @$endProcess()
 
-      exampleContext = eventric.microContext 'Example'
+      exampleContext = eventric.context 'Example'
       exampleContext.set 'store', storeStub
 
       exampleContext.addDomainEvents

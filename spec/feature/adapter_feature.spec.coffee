@@ -6,12 +6,12 @@ describe 'Adapter Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created and initialized some example bounded microContext including an aggregate', ->
-    exampleMicroContext = null
+  describe 'given we created and initialized some example context including an aggregate', ->
+    exampleContext = null
     beforeEach ->
-      exampleMicroContext = eventric.microContext 'exampleMicroContext'
-      exampleMicroContext.set 'store', eventStoreMock
-      exampleMicroContext.addAggregate 'Example', class Example
+      exampleContext = eventric.context 'exampleContext'
+      exampleContext.set 'store', eventStoreMock
+      exampleContext.addAggregate 'Example', class Example
 
 
     describe 'when we use a command which calls a previously added adapter function', ->
@@ -19,16 +19,16 @@ describe 'Adapter Feature', ->
       beforeEach ->
         class ExampleAdapter
           someAdapterFunction: sandbox.stub()
-        exampleMicroContext.addAdapter 'exampleAdapter', ExampleAdapter
+        exampleContext.addAdapter 'exampleAdapter', ExampleAdapter
 
-        exampleMicroContext.addCommandHandler 'doSomething', (params, callback) ->
+        exampleContext.addCommandHandler 'doSomething', (params, callback) ->
               @$adapter('exampleAdapter').someAdapterFunction()
               callback()
 
 
       it 'then it should have called the adapter function', (done) ->
-        exampleMicroContext.initialize =>
-          exampleMicroContext.command
+        exampleContext.initialize =>
+          exampleContext.command
             name: 'doSomething'
           , ->
             expect(ExampleAdapter::someAdapterFunction).to.have.been.calledOnce

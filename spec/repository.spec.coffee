@@ -37,14 +37,14 @@ describe  'Repository', ->
 
     mockery.registerMock 'eventric', eventricMock
 
-    microContextStub =
-      name: 'someMicroContext'
+    contextStub =
+      name: 'someContext'
       getStore: sandbox.stub().returns EventStoreStub
 
     Repository = eventric.require 'Repository'
     repository = new Repository
       aggregateName: 'Foo'
-      microContext: microContextStub
+      context: contextStub
 
 
   describe '#findById', ->
@@ -57,7 +57,7 @@ describe  'Repository', ->
 
     it 'should ask the adapter for the DomainEvents matching the AggregateId', (done) ->
       repository.findById 23, ->
-        expect(EventStoreStub.find.calledWith('someMicroContext.events', {'aggregate.name': 'Foo', 'aggregate.id': 23})).to.be.true
+        expect(EventStoreStub.find.calledWith('someContext.events', {'aggregate.name': 'Foo', 'aggregate.id': 23})).to.be.true
         done()
 
 

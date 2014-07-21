@@ -2,14 +2,14 @@
 require './helper/promise'
 
 moduleDefinition =
-  MicroContext: './micro_context'
+  Context: './context'
   Aggregate: './aggregate'
   DomainEvent: './domain_event'
   EventBus: './event_bus'
   Repository: './repository'
 
   RemoteService: './remote_service'
-  RemoteMicroContext: './remote_micro_context'
+  RemoteContext: './remote_context'
 
   HelperAsync: './helper/async'
   HelperEvents: './helper/events'
@@ -43,28 +43,24 @@ module.exports =
 
   ###*
   *
-  * @description Get a new MicroContext instance.
+  * @description Get a new context instance.
   *
-  * @param {String} name Name of the MicroContext
+  * @param {String} name Name of the context
   ###
-  microContext: (name) ->
+  context: (name) ->
     if !name
-      throw new Error 'MicroContexts must have a name'
-    MicroContext = @require 'MicroContext'
-    microContext = new MicroContext name
+      throw new Error 'Contexts must have a name'
+    Context = @require 'Context'
+    context = new Context name
 
-    @_delegateAllDomainEventsToGlobalHandlers microContext
+    @_delegateAllDomainEventsToGlobalHandlers context
 
-    microContext
-
-
-  context: ->
-    @microContext arguments...
+    context
 
 
-  _delegateAllDomainEventsToGlobalHandlers: (microContext) ->
-    microContext.addDomainEventHandler 'DomainEvent', (domainEvent) =>
-      eventHandlers = @getDomainEventHandlers microContext.name, domainEvent.name
+  _delegateAllDomainEventsToGlobalHandlers: (context) ->
+    context.addDomainEventHandler 'DomainEvent', (domainEvent) =>
+      eventHandlers = @getDomainEventHandlers context.name, domainEvent.name
       for eventHandler in eventHandlers
         eventHandler domainEvent
 
@@ -73,25 +69,25 @@ module.exports =
   *
   * @description Global DomainEvent Handlers
   *
-  * @param {String} microContextName Name of the MicroContext or 'all'
+  * @param {String} contextName Name of the context or 'all'
   * @param {String} eventName Name of the Event or 'all'
   * @param {Function} eventHandler Function which handles the DomainEvent
   ###
-  addDomainEventHandler: ([microContextName, eventName]..., eventHandler) ->
-    microContextName ?= 'all'
+  addDomainEventHandler: ([contextName, eventName]..., eventHandler) ->
+    contextName ?= 'all'
     eventName ?= 'all'
 
-    if microContextName is 'all' and eventName is 'all'
+    if contextName is 'all' and eventName is 'all'
       @_domainEventHandlersAll.push eventHandler
     else
-      @_domainEventHandlers[microContextName] ?= {}
-      @_domainEventHandlers[microContextName][eventName] ?= []
-      @_domainEventHandlers[microContextName][eventName].push eventHandler
+      @_domainEventHandlers[contextName] ?= {}
+      @_domainEventHandlers[contextName][eventName] ?= []
+      @_domainEventHandlers[contextName][eventName].push eventHandler
 
 
-  getDomainEventHandlers: (microContextName, domainEventName) ->
-    [].concat (@_domainEventHandlers[microContextName]?[domainEventName] ? []),
-              (@_domainEventHandlers[microContextName]?.all ? []),
+  getDomainEventHandlers: (contextName, domainEventName) ->
+    [].concat (@_domainEventHandlers[contextName]?[domainEventName] ? []),
+              (@_domainEventHandlers[contextName]?.all ? []),
               (@_domainEventHandlersAll ? [])
 
 
@@ -102,6 +98,7 @@ module.exports =
     delim = separator or "-"
     S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
 
+
   ###*
   *
   * @description Global Process Manager
@@ -110,14 +107,14 @@ module.exports =
   * @param {Object} processManagerObject Object containing `initializeWhen` and `class`
   ###
   addProcessManager: (processManagerName, processManagerObj) ->
-    for microContextName, domainEventNames of processManagerObj.initializeWhen
+    for contextName, domainEventNames of processManagerObj.initializeWhen
       for domainEventName in domainEventNames
-        @addDomainEventHandler microContextName, domainEventName, (domainEvent) =>
+        @addDomainEventHandler contextName, domainEventName, (domainEvent) =>
           # TODO: make sure we dont spawn twice
-          @_spawnProcessManager processManagerName, processManagerObj.class, microContextName, domainEvent
+          @_spawnProcessManager processManagerName, processManagerObj.class, contextName, domainEvent
 
 
-  _spawnProcessManager: (processManagerName, ProcessManagerClass, microContextName, domainEvent) ->
+  _spawnProcessManager: (processManagerName, ProcessManagerClass, contextName, domainEvent) ->
     processManagerId = @generateUid()
     processManager = new ProcessManagerClass
 
@@ -128,7 +125,6 @@ module.exports =
     for key, value of processManager
       if (key.indexOf 'from') is 0 and (typeof value is 'function')
         handleContextDomainEventNames.push key
-
 
     @_subscribeProcessManagerToDomainEvents processManager, handleContextDomainEventNames
 
@@ -146,7 +142,7 @@ module.exports =
   _subscribeProcessManagerToDomainEvents: (processManager, handleContextDomainEventNames) ->
     @addDomainEventHandler (domainEvent) =>
       for handleContextDomainEventName in handleContextDomainEventNames
-        if "from#{domainEvent.microContext}_handle#{domainEvent.name}" == handleContextDomainEventName
+        if "from#{domainEvent.context}_handle#{domainEvent.name}" == handleContextDomainEventName
           @_applyDomainEventToProcessManager handleContextDomainEventName, domainEvent, processManager
 
 

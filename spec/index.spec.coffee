@@ -2,31 +2,31 @@ eventric = require 'eventric'
 
 describe 'Index', ->
 
-  microContextInstance = null
-  MicroContextStub = null
+  contextInstance = null
+  contextStub = null
 
   beforeEach ->
-    microContextInstance =
+    contextInstance =
       addDomainEventHandler: sandbox.stub()
-    MicroContextStub = sandbox.stub().returns microContextInstance
+    contextStub = sandbox.stub().returns contextInstance
 
-    sandbox.stub eventric, 'require', -> MicroContextStub
-
-
-  describe '#microContext', ->
-
-    it 'should throw an error if no name given for the bounded microContext', ->
-      expect(-> new eventric.microContext).to.throw Error
+    sandbox.stub eventric, 'require', -> contextStub
 
 
-    it 'should create a bounded microContext instance', ->
-      someMicroContext = eventric.microContext 'someMicroContext'
-      expect(MicroContextStub).to.have.been.calledWithNew
+  describe '#context', ->
+
+    it 'should throw an error if no name given for the context', ->
+      expect(-> new eventric.context).to.throw Error
 
 
-    it 'should register global domain event handlers on the bounded microContext', ->
-      someMicroContext = eventric.microContext 'someMicroContext'
-      expect(microContextInstance.addDomainEventHandler).to.have.been.calledWith 'DomainEvent'
+    it 'should create a context instance', ->
+      someContext = eventric.context 'someContext'
+      expect(contextStub).to.have.been.calledWithNew
+
+
+    it 'should register global domain event handlers on the context', ->
+      someContext = eventric.context 'someContext'
+      expect(contextInstance.addDomainEventHandler).to.have.been.calledWith 'DomainEvent'
 
 
   describe '#set/#get', ->

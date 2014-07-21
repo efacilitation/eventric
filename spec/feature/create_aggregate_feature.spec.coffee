@@ -5,19 +5,19 @@ describe 'Create Aggregate Feature', ->
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
 
-  describe 'given we created and initialized some example bounded microContext including an aggregate', ->
-    exampleMicroContext = null
+  describe 'given we created and initialized some example context including an aggregate', ->
+    exampleContext = null
     beforeEach ->
-      exampleMicroContext = eventric.microContext 'ExampleMicroContext'
-      exampleMicroContext.set 'store', eventStoreMock
-      exampleMicroContext.addDomainEvent 'ExampleCreated', (params) ->
+      exampleContext = eventric.context 'Examplecontext'
+      exampleContext.set 'store', eventStoreMock
+      exampleContext.addDomainEvent 'ExampleCreated', (params) ->
 
-      exampleMicroContext.addAggregate 'Example', class Example
+      exampleContext.addAggregate 'Example', class Example
 
 
-    describe 'when we command the bounded microContext to create an aggregate without a create function', ->
+    describe 'when we command the context to create an aggregate without a create function', ->
       beforeEach ->
-        exampleMicroContext.addCommandHandler 'CreateExample', (params, done) ->
+        exampleContext.addCommandHandler 'CreateExample', (params, done) ->
           @$repository('Example').create()
           .then (exampleId) =>
             @$repository('Example').save exampleId
@@ -26,10 +26,10 @@ describe 'Create Aggregate Feature', ->
 
 
       it 'then it should haved triggered the correct DomainEvent', (done) ->
-        exampleMicroContext.addDomainEventHandler 'ExampleCreated', (domainEvent) ->
+        exampleContext.addDomainEventHandler 'ExampleCreated', (domainEvent) ->
           expect(domainEvent.name).to.equal 'ExampleCreated'
           done()
 
-        exampleMicroContext.initialize =>
-          exampleMicroContext.command
+        exampleContext.initialize =>
+          exampleContext.command
             name: 'CreateExample'

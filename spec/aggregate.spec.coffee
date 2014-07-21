@@ -13,13 +13,13 @@ describe 'Aggregate', ->
     it 'should call a handle method on the aggregate based on the DomainEvent Name', ->
       class SomethingHappened
         constructor: sandbox.stub()
-      exampleMicroContext =
+      exampleContext =
         getDomainEvent: sandbox.stub().returns SomethingHappened
 
       class ExampleRoot
         handleSomethingHappened: sandbox.stub()
 
-      myAggregate = new Aggregate exampleMicroContext, 'MyAggregate', ExampleRoot
+      myAggregate = new Aggregate exampleContext, 'MyAggregate', ExampleRoot
       myAggregate.emitDomainEvent 'SomethingHappened', some: 'properties'
 
       applyCall = ExampleRoot::handleSomethingHappened.getCall 0

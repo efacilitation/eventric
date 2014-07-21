@@ -6,7 +6,7 @@ Repository  = eventric.require 'Repository'
 EventBus    = eventric.require 'EventBus'
 
 
-class MicroContext
+class context
 
   constructor: (@name) ->
     @_di = {}
@@ -27,11 +27,11 @@ class MicroContext
   *
   * @description
   * > Use as: set(key, value)
-  * Configure settings for the `MicroContext`.
+  * Configure settings for the `context`.
   *
   * @example
 
-     exampleMicroContext.set 'store', StoreAdapter
+     exampleContext.set 'store', StoreAdapter
 
   *
   * @param {Object} key
@@ -67,11 +67,11 @@ class MicroContext
   * @dscription
   * Use as: addCommandHandler(commandName, commandFunction)
   *
-  * Add Commands to the `MicroContext`. These will be available to the `command` method after calling `initialize`.
+  * Add Commands to the `context`. These will be available to the `command` method after calling `initialize`.
   *
   * @example
     ```javascript
-    exampleMicroContext.addCommandHandler('someCommand', function(params, callback) {
+    exampleContext.addCommandHandler('someCommand', function(params, callback) {
       // ...
     });
     ```
@@ -106,12 +106,12 @@ class MicroContext
   *
   * Use as: addAggregate(aggregateName, aggregateDefinition)
   *
-  * Add [Aggregates](https://github.com/efacilitation/eventric/wiki/BuildingBlocks#aggregateroot) to the `MicroContext`. It takes an AggregateDefinition as argument. The AggregateDefinition must at least consists of one AggregateRoot and can optionally have multiple named AggregateEntities. The Root and Entities itself are completely vanilla since eventric follows the philosophy that your DomainModel-Code should be technology-agnostic.
+  * Add [Aggregates](https://github.com/efacilitation/eventric/wiki/BuildingBlocks#aggregateroot) to the `context`. It takes an AggregateDefinition as argument. The AggregateDefinition must at least consists of one AggregateRoot and can optionally have multiple named AggregateEntities. The Root and Entities itself are completely vanilla since eventric follows the philosophy that your DomainModel-Code should be technology-agnostic.
   *
   * @example
 
   ```javascript
-  exampleMicroContext.addAggregate('Example', {
+  exampleContext.addAggregate('Example', {
     root: function(){
       this.doSomething = function(description) {
         // ...
@@ -148,7 +148,7 @@ class MicroContext
   *
   * @example
     ```javascript
-    exampleMicroContext.addDomainEventHandler('Example:create', function(domainEvent) {
+    exampleContext.addDomainEventHandler('Example:create', function(domainEvent) {
       // ...
     });
     ```
@@ -180,7 +180,7 @@ class MicroContext
   *
   * @example
     ```javascript
-    exampleMicroContext.addAdapter('SomeAdapter', function() {
+    exampleContext.addAdapter('SomeAdapter', function() {
       // ...
     });
     ```
@@ -228,11 +228,11 @@ class MicroContext
   * @description
   * Use as: initialize()
   *
-  * Initializes the `MicroContext` after the `add*` Methods
+  * Initializes the `context` after the `add*` Methods
   *
   * @example
     ```javascript
-    exampleMicroContext.initialize(function() {
+    exampleContext.initialize(function() {
       // ...
     })
     ```
@@ -262,7 +262,7 @@ class MicroContext
       if globalStore
         @_store = globalStore
       else
-        throw new Error 'Missing Event Store for Bounded MicroContext'
+        throw new Error 'Missing Event Store for Context'
 
 
   _initializeRepositories: ->
@@ -270,7 +270,7 @@ class MicroContext
       @_repositoryInstances[aggregateName] = new Repository
         aggregateName: aggregateName
         AggregateRoot: AggregateRoot
-        microContext: @
+        context: @
 
 
   _initializeProjections: (callback) ->
@@ -417,7 +417,7 @@ class MicroContext
   *
   * @example
     ```javascript
-    exampleMicroContext.command({
+    exampleContext.command({
       name: 'doSomething'
     },
     function(err, result) {
@@ -444,7 +444,7 @@ class MicroContext
           callback? err, result
 
       else
-        err = new Error "Given command #{command.name} not registered on bounded microContext"
+        err = new Error "Given command #{command.name} not registered on context"
         reject err
         callback? err, null
 
@@ -460,7 +460,7 @@ class MicroContext
   *
   * @example
     ```javascript
-    exampleMicroContext.query({
+    exampleContext.query({
       projection: 'Example',
       methodeName: 'getSomething'
     },
@@ -478,7 +478,7 @@ class MicroContext
     new Promise (resolve, reject) =>
       projection = @getProjection query.projectionName
       if not projection
-        err = new Error "Given Projection #{query.projectionName} not found on bounded microContext"
+        err = new Error "Given Projection #{query.projectionName} not found on context"
       else if not projection[query.methodName]
         err = new Error "Given method #{query.methodName} not found on Projection #{query.projection}"
 
@@ -494,4 +494,4 @@ class MicroContext
           callback? err, result
 
 
-module.exports = MicroContext
+module.exports = context

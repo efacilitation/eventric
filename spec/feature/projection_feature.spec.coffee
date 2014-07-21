@@ -13,8 +13,8 @@ describe 'Projection Feature', ->
       save: sandbox.stub().yields null
       collection: sandbox.stub().yields null, projectionStoreStub
 
-  describe 'given we created and initialized some example bounded microContext including a Projection', ->
-    exampleMicroContext = null
+  describe 'given we created and initialized some example context including a Projection', ->
+    exampleContext = null
     beforeEach (done) ->
       storeStub.find.yields null, [
         name: 'ExampleCreated'
@@ -23,10 +23,10 @@ describe 'Projection Feature', ->
           name: 'Example'
       ]
 
-      exampleMicroContext = eventric.microContext 'exampleMicroContext'
-      exampleMicroContext.set 'store', storeStub
+      exampleContext = eventric.context 'exampleContext'
+      exampleContext.set 'store', storeStub
 
-      exampleMicroContext.addDomainEvents
+      exampleContext.addDomainEvents
         ExampleCreated: ->
 
         SomethingHappened: (params) ->
@@ -35,7 +35,7 @@ describe 'Projection Feature', ->
       class ExampleProjection
         handleSomethingHappened: (domainEvent) ->
           @$store.insert totallyDenormalized: domainEvent.payload.specific
-      exampleMicroContext.addProjection 'ExampleProjection', ExampleProjection
+      exampleContext.addProjection 'ExampleProjection', ExampleProjection
 
       class ExampleAggregateRoot
         handleExampleCreated: (domainEvent) ->
@@ -45,9 +45,9 @@ describe 'Projection Feature', ->
             @$emitDomainEvent 'SomethingHappened', whateverFoo: 'foo'
         handleSomethingHappened: (domainEvent) ->
           @whatever = domainEvent.payload.whateverFoo
-      exampleMicroContext.addAggregate 'Example', ExampleAggregateRoot
+      exampleContext.addAggregate 'Example', ExampleAggregateRoot
 
-      exampleMicroContext.addCommandHandler 'doSomethingWithExample', (params, callback) ->
+      exampleContext.addCommandHandler 'doSomethingWithExample', (params, callback) ->
         @$repository('Example').findById params.id
         .then (example) =>
           example.doSomething()
@@ -55,13 +55,13 @@ describe 'Projection Feature', ->
         .then =>
           callback()
 
-      exampleMicroContext.initialize =>
+      exampleContext.initialize =>
         done()
 
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->
       it 'then the Projection should call $store with the denormalized state', (done) ->
-        exampleMicroContext.command
+        exampleContext.command
           name: 'doSomethingWithExample'
           params:
             id: 1

@@ -1,5 +1,5 @@
-describe 'MicroContext', ->
-  MicroContext = null
+describe 'Context', ->
+  Context = null
 
   class RepositoryMock
 
@@ -34,22 +34,22 @@ describe 'MicroContext', ->
     eventricMock.require.withArgs('HelperAsync').returns eventric.require 'HelperAsync'
     mockery.registerMock 'eventric', eventricMock
 
-    MicroContext = eventric.require 'MicroContext'
+    Context = eventric.require 'Context'
 
 
   describe '#initialize', ->
 
     it 'should throw an error if neither a global nor a custom event store was configured', ->
-      microContext = new MicroContext
-      expect(microContext.initialize).to.throw Error
+      context = new Context
+      expect(context.initialize).to.throw Error
 
 
     it 'should instantiate all registered projections', (done) ->
       eventricMock.get.withArgs('store').returns storeFake
-      microContext = new MicroContext
+      context = new Context
       ProjectionStub = sandbox.stub()
-      microContext.addProjection 'SomeProjection', ProjectionStub
-      microContext.initialize =>
+      context.addProjection 'SomeProjection', ProjectionStub
+      context.initialize =>
         expect(ProjectionStub).to.have.been.calledWithNew
         done()
 
@@ -57,10 +57,10 @@ describe 'MicroContext', ->
     it 'should instantiate and initialize all registered adapters', (done) ->
       storeFake = {}
       eventricMock.get.withArgs('store').returns storeFake
-      microContext = new MicroContext
+      context = new Context
       AdapterFactory = sandbox.stub()
-      microContext.addAdapter 'Adapter', AdapterFactory
-      microContext.initialize =>
+      context.addAdapter 'Adapter', AdapterFactory
+      context.initialize =>
         expect(AdapterFactory).to.have.been.calledWithNew
         done()
 
@@ -70,9 +70,9 @@ describe 'MicroContext', ->
   describe '#command', ->
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', (done) ->
-        someMicroContext = new MicroContext
-        someMicroContext.set 'store', storeFake
-        someMicroContext.initialize =>
+        someContext = new Context
+        someContext.set 'store', storeFake
+        someContext.initialize =>
 
           command =
             name: 'doSomething'
@@ -82,7 +82,7 @@ describe 'MicroContext', ->
 
           callback = sinon.spy()
 
-          someMicroContext.command command, callback
+          someContext.command command, callback
           expect(callback.calledWith sinon.match.instanceOf Error).to.be.true
           done()
 
@@ -90,33 +90,33 @@ describe 'MicroContext', ->
     describe 'has a registered handler', ->
       it 'should execute the command handler', (done) ->
         commandStub = sandbox.stub()
-        someMicroContext = new MicroContext
-        someMicroContext.set 'store', storeFake
-        someMicroContext.initialize =>
-          someMicroContext.addCommandHandler 'doSomething', commandStub
+        someContext = new Context
+        someContext.set 'store', storeFake
+        someContext.initialize =>
+          someContext.addCommandHandler 'doSomething', commandStub
 
           command =
             name: 'doSomething'
             params:
               foo: 'bar'
 
-          someMicroContext.command command, ->
+          someContext.command command, ->
           expect(commandStub.calledWith command.params, sinon.match.func).to.be.true
           done()
 
 
   describe '#query', ->
 
-    someMicroContext = null
+    someContext = null
 
     beforeEach ->
-      someMicroContext = new MicroContext
-      someMicroContext.set 'store', storeFake
+      someContext = new Context
+      someContext.set 'store', storeFake
 
     describe 'given the query has no read model matching the name', ->
       it 'should callback with an error', (done) ->
-        someMicroContext.initialize =>
-          someMicroContext.query
+        someContext.initialize =>
+          someContext.query
             projectionName: 'Projection'
           .catch (error) ->
             expect(error).to.be.an.instanceOf Error
@@ -127,9 +127,9 @@ describe 'MicroContext', ->
     describe 'given the query has no matching method on the read model', ->
       it 'should callback with an error', (done) ->
         class Projection
-        someMicroContext.addProjection 'Projection', Projection
-        someMicroContext.initialize =>
-          someMicroContext.query
+        someContext.addProjection 'Projection', Projection
+        someContext.initialize =>
+          someContext.query
             projectionName: 'Projection'
             methodName: 'readSomething'
           .catch (error) ->
@@ -143,8 +143,8 @@ describe 'MicroContext', ->
         readSomething: sinon.stub().yields null
 
       beforeEach (done) ->
-        someMicroContext.addProjection 'Projection', Projection
-        someMicroContext.initialize =>
+        someContext.addProjection 'Projection', Projection
+        someContext.initialize =>
           done()
 
 
@@ -152,7 +152,7 @@ describe 'MicroContext', ->
         params =
           foo: 'bar'
           bar: 'foo'
-        someMicroContext.query
+        someContext.query
           projectionName: 'Projection'
           methodName: 'readSomething'
           methodParams: params
@@ -163,7 +163,7 @@ describe 'MicroContext', ->
 
       it 'should callback with the result of the method', ->
         Projection::readSomething.yields null, 'result'
-        someMicroContext.query
+        someContext.query
           projectionName: 'Projection'
           methodName: 'readSomething'
         , (error, result) ->

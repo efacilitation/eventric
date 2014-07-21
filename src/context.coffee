@@ -9,9 +9,7 @@ EventBus    = eventric.require 'EventBus'
 class context
 
   constructor: (@name) ->
-    @_diCommandHandler = {}
-    @_diQueryHandler = {}
-    @_diDomainEventHandler = {}
+    @_di = {}
     @_params = {}
     @_aggregateRootClasses = {}
     @_adapterClasses = {}
@@ -93,7 +91,7 @@ class context
   *  * `params.props` Initial properties so be set on the Aggregate or handed to the Aggregates create() method
   ###
   addCommandHandler: (commandHandlerName, commandHandlerFn) ->
-    @_commandHandlers[commandHandlerName] = => commandHandlerFn.apply @_diCommandHandler, arguments
+    @_commandHandlers[commandHandlerName] = => commandHandlerFn.apply @_di, arguments
     @
 
 
@@ -122,7 +120,7 @@ class context
   * @param {String} queryFunction Function to execute on query
   ###
   addQueryHandler: (queryHandlerName, queryHandlerFn) ->
-    @_queryHandlers[queryHandlerName] = => queryHandlerFn.apply @_diQueryHandler, arguments
+    @_queryHandlers[queryHandlerName] = => queryHandlerFn.apply @_di, arguments
     @
 
 
@@ -192,7 +190,7 @@ class context
   ###
   addDomainEventHandler: (eventName, handlerFn) ->
     @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
-    @_domainEventHandlers[eventName].push => handlerFn.apply @_diDomainEventHandler, arguments
+    @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
     @
 
 
@@ -274,25 +272,18 @@ class context
     @_initializeStore()
     @_initializeRepositories()
     @_initializeAdapters()
+
+    @_di =
+      $repository: => @getRepository.apply @, arguments
+      $projection: => @getProjection.apply @, arguments
+      $adapter: => @getAdapter.apply @, arguments
+      $query: => @query.apply @, arguments
+      $getProjectionStore: (projectionName, callback) =>
+        @getProjectionStore projectionName, callback
+
     @_initializeProjections()
     .then =>
       @_initializeDomainEventHandlers()
-
-      @_diCommandHandler =
-        $repository: => @getRepository.apply @, arguments
-        $projection: => @getProjection.apply @, arguments
-        $adapter: => @getAdapter.apply @, arguments
-        $query: => @query.apply @, arguments
-
-      @_diQueryHandler =
-        $getProjectionStore: (projectionName, callback) =>
-          @getProjectionStore projectionName, callback
-
-      @_diDomainEventHandler =
-        $projection: => @getProjection.apply @, arguments
-        $adapter: => @getAdapter.apply @, arguments
-        $query: => @query.apply @, arguments
-
       callback()
 
 
@@ -318,20 +309,22 @@ class context
   _initializeProjections: (callback) ->
     new Promise (resolve, reject) =>
       async.eachSeries @_projectionClasses, (projection, next) =>
-        @clearProjectionStore projection.name, =>
-          @getProjectionStore projection.name, (err, projectionStore) =>
-            @_initializeProjection projection.name, projection.class, projectionStore, =>
-              next()
+        @clearProjectionStore projection.name
+        .then =>
+          @getProjectionStore projection.name
+        .then (projectionStore) =>
+          @_initializeProjection projection, projectionStore, =>
+            next()
 
       , (err) =>
         return reject err if err
         resolve()
 
 
-  _initializeProjection: (projectionName, ProjectionClass, projectionStore, callback) ->
+  _initializeProjection: (projection, projectionStore, callback) ->
+    projectionName = projection.name
+    ProjectionClass = projection.class
     projection = new ProjectionClass
-    projection["$#{@_store.getStoreName()}"] = projectionStore
-    projection.$adapter = => @getAdapter.apply @, arguments
     eventNames = []
 
     for key, value of projection
@@ -339,19 +332,31 @@ class context
         eventName = key.replace /^handle/, ''
         eventNames.push eventName
 
-    @_applyDomainEventsFromStoreToProjection projection, eventNames, =>
+    @_callInitializeOnProjection projection
+    .then =>
+      @_applyDomainEventsFromStoreToProjection projection, eventNames
+    .then =>
       @_subscribeProjectionToDomainEvents projection, eventNames
       @_projectionInstances[projectionName] = projection
       callback()
 
 
-  _applyDomainEventsFromStoreToProjection: (projection, eventNames, callback) ->
-    query = 'name': $in: eventNames
-    @_store.find "#{@name}.events", query, (err, events) =>
-      for event in events
-        @_applyDomainEventToProjection event, projection
+  _callInitializeOnProjection: (projection) ->
+    new Promise (resolve, reject) =>
+      resolve projection if not projection.initialize
+      projection.initialize.apply @_di, [ =>
+        resolve projection
+      ]
 
-      callback()
+
+  _applyDomainEventsFromStoreToProjection: (projection, eventNames, callback) ->
+    new Promise (resolve, reject) =>
+      query = 'name': $in: eventNames
+      @_store.find "#{@name}.events", query, (err, events) =>
+        for event in events
+          @_applyDomainEventToProjection event, projection
+
+        resolve()
 
 
   _subscribeProjectionToDomainEvents: (projection, eventNames) ->
@@ -360,12 +365,12 @@ class context
         @_applyDomainEventToProjection domainEvent, projection
 
 
-  _applyDomainEventToProjection: (domainEvent, projection) ->
+  _applyDomainEventToProjection: (domainEvent, projection) =>
     if !projection["handle#{domainEvent.name}"]
       err = new Error "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
 
     else
-      projection["handle#{domainEvent.name}"] domainEvent
+      projection["handle#{domainEvent.name}"].apply @_di, [domainEvent]
 
 
   _initializeAdapters: ->
@@ -383,11 +388,20 @@ class context
 
 
   getProjectionStore: (projectionName, callback) =>
-    @_store.getProjectionStore (@_getProjectionStoreName projectionName), callback
+    new Promise (resolve, reject) =>
+
+      @_store.getProjectionStore (@_getProjectionStoreName projectionName), (err, projectionStore) =>
+        callback? err, projectionStore
+        return reject err if err
+        resolve projectionStore
 
 
   clearProjectionStore: (projectionName, callback) =>
-    @_store.clearProjectionStore (@_getProjectionStoreName projectionName), callback
+    new Promise (resolve, reject) =>
+      @_store.clearProjectionStore (@_getProjectionStoreName projectionName), (err, done) =>
+        callback? err, done
+        return reject err if err
+        resolve done
 
 
   _getProjectionStoreName: (projectionName) =>

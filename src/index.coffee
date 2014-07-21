@@ -16,6 +16,8 @@ moduleDefinition =
   HelperUnderscore: './helper/underscore'
   HelperClone: './helper/clone'
 
+  StoreInMemory: './store_inmemory'
+
 
 module.exports =
   _params: {}

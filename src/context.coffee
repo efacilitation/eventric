@@ -282,6 +282,7 @@ class context
         $repository: => @getRepository.apply @, arguments
         $projection: => @getProjection.apply @, arguments
         $adapter: => @getAdapter.apply @, arguments
+        $query: => @query.apply @, arguments
 
       @_diQueryHandler =
         $getProjectionStore: (projectionName, callback) =>
@@ -290,6 +291,7 @@ class context
       @_diDomainEventHandler =
         $projection: => @getProjection.apply @, arguments
         $adapter: => @getAdapter.apply @, arguments
+        $query: => @query.apply @, arguments
 
       callback()
 
@@ -532,7 +534,6 @@ class context
           else
             resolve result
           callback? err, result
-
 
       else
         err = new Error "Given query #{query.name} not registered on context"

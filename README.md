@@ -43,24 +43,10 @@ Please keep in mind that eventric.js supplies you only with a structure that has
 
 ## Getting started
 
-For this example we use `MongoDB`. So a prerequisite is to install it locally. If its up and running we need the `eventric` and `eventric-store-mongodb` npm packages.
-
+We need to install eventric first.
 
 ```
 npm install eventric
-npm install eventric-store-mongodb
-```
-
-
-Initialize the Store and configure eventric to use it.
-
-```javascript
-eventric = require('eventric');
-
-eventricMongoDbStore = require('eventric-store-mongodb');
-eventricMongoDbStore.initialize(function() {
-  eventric.set('store', eventricMongoDbStore);
-});
 ```
 
 
@@ -69,6 +55,8 @@ eventricMongoDbStore.initialize(function() {
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `Context` named `Todo`.
 
 ```javascript
+eventric = require('eventric');
+
 todoContext = eventric.context('Todo');
 ```
 

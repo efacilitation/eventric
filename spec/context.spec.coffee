@@ -6,18 +6,10 @@ describe 'Context', ->
   HelperUnderscoreMock =
     extend: sandbox.stub()
 
-  storeFake = null
   aggregateServiceStub = null
   eventricMock = null
 
   beforeEach ->
-    collectionStub =
-      remove: sandbox.stub().yields null
-
-    storeFake =
-      find: sandbox.stub().yields null, []
-      collection: sandbox.stub().yields null, collectionStub
-
     eventBusStub =
       subscribeToDomainEvent: sandbox.stub()
 
@@ -32,6 +24,7 @@ describe 'Context', ->
     eventricMock.require.withArgs('Repository').returns RepositoryMock
     eventricMock.require.withArgs('HelperUnderscore').returns HelperUnderscoreMock
     eventricMock.require.withArgs('HelperAsync').returns eventric.require 'HelperAsync'
+    eventricMock.require.withArgs('StoreInMemory').returns eventric.require 'StoreInMemory'
     mockery.registerMock 'eventric', eventricMock
 
     Context = eventric.require 'Context'
@@ -45,7 +38,6 @@ describe 'Context', ->
 
 
     it 'should instantiate all registered projections', (done) ->
-      eventricMock.get.withArgs('store').returns storeFake
       context = new Context
       ProjectionStub = sandbox.stub()
       context.addProjection 'SomeProjection', ProjectionStub
@@ -55,8 +47,6 @@ describe 'Context', ->
 
 
     it 'should instantiate and initialize all registered adapters', (done) ->
-      storeFake = {}
-      eventricMock.get.withArgs('store').returns storeFake
       context = new Context
       AdapterFactory = sandbox.stub()
       context.addAdapter 'Adapter', AdapterFactory
@@ -65,13 +55,10 @@ describe 'Context', ->
         done()
 
 
-
-
   describe '#command', ->
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', (done) ->
         someContext = new Context
-        someContext.set 'store', storeFake
         someContext.initialize =>
 
           command =
@@ -91,7 +78,6 @@ describe 'Context', ->
       it 'should execute the command handler', (done) ->
         commandStub = sandbox.stub()
         someContext = new Context
-        someContext.set 'store', storeFake
         someContext.initialize =>
           someContext.addCommandHandler 'doSomething', commandStub
 
@@ -106,65 +92,28 @@ describe 'Context', ->
 
 
   describe '#query', ->
-
     someContext = null
-
     beforeEach ->
       someContext = new Context
-      someContext.set 'store', storeFake
 
-    describe 'given the query has no read model matching the name', ->
+    describe 'given the query has no matching queryhandler', ->
       it 'should callback with an error', (done) ->
         someContext.initialize =>
           someContext.query
-            projectionName: 'Projection'
+            name: 'getSomething'
           .catch (error) ->
             expect(error).to.be.an.instanceOf Error
-            expect(error.message).to.match /Given Projection Projection not found/
             done()
 
 
-    describe 'given the query has no matching method on the read model', ->
-      it 'should callback with an error', (done) ->
-        class Projection
-        someContext.addProjection 'Projection', Projection
+    describe 'given the query has a matching queryhandler', ->
+      it 'should call the queryhandler function', (done) ->
+        queryStub = sandbox.stub().yields null, 'result'
+        someContext.addQueryHandler 'getSomething', queryStub
         someContext.initialize =>
           someContext.query
-            projectionName: 'Projection'
-            methodName: 'readSomething'
-          .catch (error) ->
-            expect(error).to.be.an.instanceOf Error
-            expect(error.message).to.match /Given method readSomething not found/
+            name: 'getSomething'
+          .then (result) ->
+            expect(result).to.equal 'result'
+            expect(queryStub).to.have.been.calledWith
             done()
-
-
-    describe 'given the read model and the given method on it exists', ->
-      class Projection
-        readSomething: sinon.stub().yields null
-
-      beforeEach (done) ->
-        someContext.addProjection 'Projection', Projection
-        someContext.initialize =>
-          done()
-
-
-      it 'should call the method passing in the method params', (done) ->
-        params =
-          foo: 'bar'
-          bar: 'foo'
-        someContext.query
-          projectionName: 'Projection'
-          methodName: 'readSomething'
-          methodParams: params
-        .then ->
-          expect(Projection::readSomething).to.have.been.calledWith params
-          done()
-
-
-      it 'should callback with the result of the method', ->
-        Projection::readSomething.yields null, 'result'
-        someContext.query
-          projectionName: 'Projection'
-          methodName: 'readSomething'
-        , (error, result) ->
-          expect(result).to.equal 'result'

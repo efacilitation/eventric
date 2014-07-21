@@ -2,29 +2,11 @@ eventric = require 'eventric'
 
 describe 'ProcessManager', ->
 
-  projectionStoreStub = null
-  storeStub = null
-  beforeEach ->
-    projectionStoreStub =
-      insert: sandbox.stub()
-      remove: sandbox.stub().yields null
-    storeStub =
-      find: sandbox.stub().yields null, []
-      save: sandbox.stub().yields null
-      collection: sandbox.stub().yields null, projectionStoreStub
-
   describe 'given we created a context and added a ProcessManager', ->
     initializeProcessManagerStub = null
     handleDomainEventProcessManagerStub = null
     exampleContext = null
     beforeEach ->
-      storeStub.find.yields null, [
-        name: 'ExampleCreated'
-        aggregate:
-          id: 1
-          name: 'Example'
-      ]
-
       initializeProcessManagerStub = sandbox.stub()
       handleDomainEventProcessManagerStub = sandbox.stub()
       eventric.addProcessManager 'ExampleProcess',
@@ -46,7 +28,6 @@ describe 'ProcessManager', ->
             @$endProcess()
 
       exampleContext = eventric.context 'Example'
-      exampleContext.set 'store', storeStub
 
       exampleContext.addDomainEvents
         ExampleCreated: ->

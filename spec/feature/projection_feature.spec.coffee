@@ -11,7 +11,9 @@ describe 'Projection Feature', ->
     storeStub =
       find: sandbox.stub().yields null, []
       save: sandbox.stub().yields null
-      collection: sandbox.stub().yields null, projectionStoreStub
+      getProjectionStore: sandbox.stub().yields null, projectionStoreStub
+      clearProjectionStore: sandbox.stub().yields null
+      getStoreName: sandbox.stub().returns 'somestore'
 
   describe 'given we created and initialized some example context including a Projection', ->
     exampleContext = null
@@ -34,7 +36,7 @@ describe 'Projection Feature', ->
 
       class ExampleProjection
         handleSomethingHappened: (domainEvent) ->
-          @$store.insert totallyDenormalized: domainEvent.payload.specific
+          @$somestore.insert totallyDenormalized: domainEvent.payload.specific
       exampleContext.addProjection 'ExampleProjection', ExampleProjection
 
       class ExampleAggregateRoot

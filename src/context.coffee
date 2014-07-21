@@ -9,12 +9,15 @@ EventBus    = eventric.require 'EventBus'
 class context
 
   constructor: (@name) ->
-    @_di = {}
+    @_diCommandHandler = {}
+    @_diQueryHandler = {}
+    @_diDomainEventHandler = {}
     @_params = {}
     @_aggregateRootClasses = {}
     @_adapterClasses = {}
     @_adapterInstances = {}
     @_commandHandlers = {}
+    @_queryHandlers = {}
     @_domainEventClasses = {}
     @_domainEventHandlers = {}
     @_projectionClasses = []
@@ -90,12 +93,41 @@ class context
   *  * `params.props` Initial properties so be set on the Aggregate or handed to the Aggregates create() method
   ###
   addCommandHandler: (commandHandlerName, commandHandlerFn) ->
-    @_commandHandlers[commandHandlerName] = => commandHandlerFn.apply @_di, arguments
+    @_commandHandlers[commandHandlerName] = => commandHandlerFn.apply @_diCommandHandler, arguments
     @
 
 
   addCommandHandlers: (commandObj) ->
     @addCommandHandler commandHandlerName, commandFunction for commandHandlerName, commandFunction of commandObj
+    @
+
+
+  ###*
+  * @name addQueryHandler
+  *
+  * @dscription
+  * Use as: addQueryHandler(queryHandler, queryFunction)
+  *
+  * Add Commands to the `context`. These will be available to the `query` method after calling `initialize`.
+  *
+  * @example
+    ```javascript
+    exampleContext.addQueryHandler('SomeQuery', function(params, callback) {
+      // ...
+    });
+    ```
+
+  * @param {String} queryHandler Name of the query
+  *
+  * @param {String} queryFunction Function to execute on query
+  ###
+  addQueryHandler: (queryHandlerName, queryHandlerFn) ->
+    @_queryHandlers[queryHandlerName] = => queryHandlerFn.apply @_diQueryHandler, arguments
+    @
+
+
+  addQueryHandlers: (commandObj) ->
+    @addQueryHandler queryHandlerName, queryFunction for queryHandlerName, queryFunction of commandObj
     @
 
 
@@ -160,7 +192,7 @@ class context
   ###
   addDomainEventHandler: (eventName, handlerFn) ->
     @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
-    @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
+    @_domainEventHandlers[eventName].push => handlerFn.apply @_diDomainEventHandler, arguments
     @
 
 
@@ -246,8 +278,16 @@ class context
     .then =>
       @_initializeDomainEventHandlers()
 
-      @_di =
+      @_diCommandHandler =
         $repository: => @getRepository.apply @, arguments
+        $projection: => @getProjection.apply @, arguments
+        $adapter: => @getAdapter.apply @, arguments
+
+      @_diQueryHandler =
+        $getProjectionStore: (projectionName, callback) =>
+          @_getProjectionStore projectionName, callback
+
+      @_diDomainEventHandler =
         $projection: => @getProjection.apply @, arguments
         $adapter: => @getAdapter.apply @, arguments
 
@@ -262,7 +302,7 @@ class context
       if globalStore
         @_store = globalStore
       else
-        throw new Error 'Missing Event Store for Context'
+        @_store = eventric.require 'StoreInMemory'
 
 
   _initializeRepositories: ->
@@ -276,12 +316,9 @@ class context
   _initializeProjections: (callback) ->
     new Promise (resolve, reject) =>
       async.eachSeries @_projectionClasses, (projection, next) =>
-        @_store.collection "#{@name}.Projection.#{projection.name}", (err, collection) =>
-          # clear the collection
-          # we replay all events the collection subscribed to
-          # TODO: store last applied event and go from there
-          collection.remove =>
-            @_initializeProjection projection.name, projection.class, collection, =>
+        @_clearProjectionStore projection.name, =>
+          @_getProjectionStore projection.name, (err, projectionStore) =>
+            @_initializeProjection projection.name, projection.class, projectionStore, =>
               next()
 
       , (err) =>
@@ -289,10 +326,9 @@ class context
         resolve()
 
 
-  _initializeProjection: (projectionName, ProjectionClass, collection, callback) ->
+  _initializeProjection: (projectionName, ProjectionClass, projectionStore, callback) ->
     projection = new ProjectionClass
-    # TODO: change the injected variable name to "$mongodb, $mysql etc" (@_store.name)
-    projection.$store = collection
+    projection["$#{@_store.getStoreName()}"] = projectionStore
     projection.$adapter = => @getAdapter.apply @, arguments
     eventNames = []
 
@@ -342,6 +378,18 @@ class context
     for domainEventName, domainEventHandlers of @_domainEventHandlers
       for domainEventHandler in domainEventHandlers
         @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
+
+
+  _getProjectionStore: (projectionName, callback) =>
+    @_store.getProjectionStore (@_getProjectionStoreName projectionName), callback
+
+
+  _clearProjectionStore: (projectionName, callback) =>
+    @_store.clearProjectionStore (@_getProjectionStoreName projectionName), callback
+
+
+  _getProjectionStoreName: (projectionName) =>
+    "#{@name}.Projection.#{projectionName}"
 
 
   ###*
@@ -456,13 +504,15 @@ class context
   *
   * Use as: query(query, callback)
   *
-  * Execute query against a previously added Projection
+  * Execute previously added `QueryHandler`
   *
   * @example
     ```javascript
     exampleContext.query({
-      projection: 'Example',
-      methodeName: 'getSomething'
+      name: 'Example',
+      params: {
+        foo: 'bar'
+      }
     },
     function(err, result) {
       // callback
@@ -470,28 +520,24 @@ class context
     ```
   *
   * @param {Object} query Object with the query paramter
-  * - `projection` Name of the Projection to query against
-  * - `methodName` Name of the method to be executed on the Projection
-  * - `methodParams` Parameters for the method
+  * - `name` Name of the QueryHandler to be executed
+  * - `params` Parameters for the QueryHandler function
   ###
   query: (query, callback) ->
     new Promise (resolve, reject) =>
-      projection = @getProjection query.projectionName
-      if not projection
-        err = new Error "Given Projection #{query.projectionName} not found on context"
-      else if not projection[query.methodName]
-        err = new Error "Given method #{query.methodName} not found on Projection #{query.projection}"
-
-      if err
-        reject err
-        callback? err, null
-      else
-        projection[query.methodName] query.methodParams, (err, result) =>
+      if @_queryHandlers[query.name]
+        @_queryHandlers[query.name] query.params, (err, result) =>
           if err
             reject err
           else
             resolve result
           callback? err, result
+
+
+      else
+        err = new Error "Given query #{query.name} not registered on context"
+        reject err
+        callback? err, null
 
 
 module.exports = context

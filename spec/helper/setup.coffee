@@ -20,6 +20,7 @@ before ->
   mockery.warnOnUnregistered false
   mockery.warnOnReplace false
 
+  eventric.set 'store', undefined
 
 afterEach ->
   mockery.resetCache()

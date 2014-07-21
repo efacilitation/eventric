@@ -84,7 +84,7 @@ describe 'Remote Context', ->
 
       remoteServiceStub = sinon.createStubInstance RemoteService
       remotecontext = new RemoteContext remoteServiceStub
-      remotecontext.registercontextObj 'exampleContext', exampleContext
+      remotecontext.registerContextObj 'exampleContext', exampleContext
       remotecontext.handle rpc.payload, callback
 
       expect(exampleContext.command.calledWith command, callback).to.be.true

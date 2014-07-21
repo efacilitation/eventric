@@ -31,7 +31,7 @@ class RemoteContext
 
   # -- SERVER ---
   handle: (payload, callback) ->
-    context = @getcontextObj payload.contextName
+    context = @getContextObj payload.contextName
     if not context
       err = new Error "Tried to handle RPC class with not registered context #{payload.contextName}"
       return callback err, null
@@ -43,11 +43,11 @@ class RemoteContext
     context[payload.method] payload.params, callback
 
 
-  registercontextObj: (contextName, contextObj) ->
+  registerContextObj: (contextName, contextObj) ->
     @_contextObjs[contextName] = contextObj
 
 
-  getcontextObj: (contextName) ->
+  getContextObj: (contextName) ->
     @_contextObjs[contextName]
 
 

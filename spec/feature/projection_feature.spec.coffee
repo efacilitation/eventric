@@ -2,31 +2,10 @@ eventric = require 'eventric'
 
 describe 'Projection Feature', ->
 
-  projectionStoreStub = null
-  storeStub = null
-  beforeEach ->
-    projectionStoreStub =
-      insert: sandbox.stub()
-      remove: sandbox.stub().yields null
-    storeStub =
-      find: sandbox.stub().yields null, []
-      save: sandbox.stub().yields null
-      getProjectionStore: sandbox.stub().yields null, projectionStoreStub
-      clearProjectionStore: sandbox.stub().yields null
-      getStoreName: sandbox.stub().returns 'somestore'
-
   describe 'given we created and initialized some example context including a Projection', ->
     exampleContext = null
     beforeEach (done) ->
-      storeStub.find.yields null, [
-        name: 'ExampleCreated'
-        aggregate:
-          id: 1
-          name: 'Example'
-      ]
-
       exampleContext = eventric.context 'exampleContext'
-      exampleContext.set 'store', storeStub
 
       exampleContext.addDomainEvents
         ExampleCreated: ->
@@ -36,7 +15,7 @@ describe 'Projection Feature', ->
 
       class ExampleProjection
         handleSomethingHappened: (domainEvent) ->
-          @$somestore.insert totallyDenormalized: domainEvent.payload.specific
+          @$inmemory.totallyDenormalized = domainEvent.payload.specific
       exampleContext.addProjection 'ExampleProjection', ExampleProjection
 
       class ExampleAggregateRoot
@@ -58,6 +37,14 @@ describe 'Projection Feature', ->
           callback()
 
       exampleContext.initialize =>
+        store = exampleContext.getStore()
+        sandbox.stub store, 'find'
+        store.find.yields null, [
+          name: 'ExampleCreated'
+          aggregate:
+            id: 1
+            name: 'Example'
+        ]
         done()
 
 
@@ -68,5 +55,6 @@ describe 'Projection Feature', ->
           params:
             id: 1
         .then ->
-          expect(projectionStoreStub.insert).to.have.been.calledWith totallyDenormalized: 'foo'
-          done()
+          exampleContext.getProjectionStore 'ExampleProjection', (err, projectionStore) ->
+            expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'
+            done()

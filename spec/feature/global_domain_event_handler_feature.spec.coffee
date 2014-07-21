@@ -1,9 +1,4 @@
 describe 'Global Domain Event Handler Feature', ->
-  storeStub = null
-  beforeEach ->
-    storeStub =
-      find: sandbox.stub().yields null, []
-      save: sandbox.stub().yields null
 
   describe 'given we created and initialized some example context and added a global domain event handler', ->
     exampleContext = null
@@ -20,7 +15,6 @@ describe 'Global Domain Event Handler Feature', ->
       eventric.addDomainEventHandler allHandlerStub
 
       exampleContext = eventric.context 'exampleContext'
-      exampleContext.set 'store', storeStub
 
       exampleContext.addDomainEvent 'ExampleCreated', ->
 

@@ -2,29 +2,15 @@ eventric = require 'eventric'
 
 describe 'Command Aggregate Feature', ->
 
-  eventStoreMock = null
-  beforeEach ->
-    eventStoreMock =
-      find: sandbox.stub().yields null, []
-      save: sandbox.stub().yields null
-
   describe 'given we created and initialized some example context including an aggregate', ->
     exampleContext = null
     beforeEach ->
       exampleContext = eventric.context 'exampleContext'
-      exampleContext.set 'store', eventStoreMock
       exampleContext.addAggregate 'Example', class Example
 
 
     describe 'when we send a command to the context', ->
       beforeEach ->
-        eventStoreMock.find.yields null, [
-          name: 'ExampleCreated'
-          aggregate:
-            id: 1
-            name: 'Example'
-        ]
-
         class SomethingHappened
           constructor: (params) ->
             @someId   = params.someId
@@ -75,6 +61,15 @@ describe 'Command Aggregate Feature', ->
           done()
 
         exampleContext.initialize =>
+          store = exampleContext.getStore()
+          sandbox.stub store, 'find'
+          store.find.yields null, [
+            name: 'ExampleCreated'
+            aggregate:
+              id: 1
+              name: 'Example'
+          ]
+
           exampleContext.command
             name: 'someContextFunction'
             params:

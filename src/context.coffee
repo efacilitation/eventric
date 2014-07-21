@@ -285,7 +285,7 @@ class context
 
       @_diQueryHandler =
         $getProjectionStore: (projectionName, callback) =>
-          @_getProjectionStore projectionName, callback
+          @getProjectionStore projectionName, callback
 
       @_diDomainEventHandler =
         $projection: => @getProjection.apply @, arguments
@@ -316,8 +316,8 @@ class context
   _initializeProjections: (callback) ->
     new Promise (resolve, reject) =>
       async.eachSeries @_projectionClasses, (projection, next) =>
-        @_clearProjectionStore projection.name, =>
-          @_getProjectionStore projection.name, (err, projectionStore) =>
+        @clearProjectionStore projection.name, =>
+          @getProjectionStore projection.name, (err, projectionStore) =>
             @_initializeProjection projection.name, projection.class, projectionStore, =>
               next()
 
@@ -380,11 +380,11 @@ class context
         @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
-  _getProjectionStore: (projectionName, callback) =>
+  getProjectionStore: (projectionName, callback) =>
     @_store.getProjectionStore (@_getProjectionStoreName projectionName), callback
 
 
-  _clearProjectionStore: (projectionName, callback) =>
+  clearProjectionStore: (projectionName, callback) =>
     @_store.clearProjectionStore (@_getProjectionStoreName projectionName), callback
 
 

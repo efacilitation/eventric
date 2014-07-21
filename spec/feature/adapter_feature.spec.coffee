@@ -1,16 +1,9 @@
 describe 'Adapter Feature', ->
 
-  eventStoreMock = null
-  beforeEach ->
-    eventStoreMock =
-      find: sandbox.stub().yields null, []
-      save: sandbox.stub().yields null
-
   describe 'given we created and initialized some example context including an aggregate', ->
     exampleContext = null
     beforeEach ->
       exampleContext = eventric.context 'exampleContext'
-      exampleContext.set 'store', eventStoreMock
       exampleContext.addAggregate 'Example', class Example
 
 

@@ -1,15 +1,8 @@
 describe 'Create Aggregate Feature', ->
-  eventStoreMock = null
-  beforeEach ->
-    eventStoreMock =
-      find: sandbox.stub().yields null, []
-      save: sandbox.stub().yields null
-
   describe 'given we created and initialized some example context including an aggregate', ->
     exampleContext = null
     beforeEach ->
       exampleContext = eventric.context 'Examplecontext'
-      exampleContext.set 'store', eventStoreMock
       exampleContext.addDomainEvent 'ExampleCreated', (params) ->
 
       exampleContext.addAggregate 'Example', class Example

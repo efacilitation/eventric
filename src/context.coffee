@@ -325,6 +325,9 @@ class Context
     projectionName = projection.name
     ProjectionClass = projection.class
     projection = new ProjectionClass
+    for diName, diFn of @_di
+      projection[diName] = diFn
+
     eventNames = []
 
     for key, value of projection
@@ -344,9 +347,8 @@ class Context
   _callInitializeOnProjection: (projection) ->
     new Promise (resolve, reject) =>
       resolve projection if not projection.initialize
-      projection.initialize.apply @_di, [ =>
+      projection.initialize =>
         resolve projection
-      ]
 
 
   _applyDomainEventsFromStoreToProjection: (projection, eventNames) ->
@@ -373,9 +375,7 @@ class Context
       err = new Error "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
 
     else
-      projection["handle#{domainEvent.name}"].apply @_di, [domainEvent, =>
-        callback()
-      ]
+      projection["handle#{domainEvent.name}"] domainEvent, callback
 
 
   _initializeAdapters: ->

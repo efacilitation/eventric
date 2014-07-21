@@ -9,19 +9,25 @@ class RemoteContext
 
 
   # --- CLIENT ---
-  command: (contextName, command, callback) ->
+  command: (contextName, commandName, commandParams, callback) ->
+    if not callback and typeof commandParams is 'function'
+      callback = commandParams
+
     @rpc
       contextName: contextName
       method: 'command'
-      params: command
+      params: [commandName, commandParams]
       callback
 
 
-  query: (contextName, query, callback) ->
+  query: (contextName, queryName, queryParams, callback) ->
+    if not callback and typeof queryParams is 'function'
+      callback = queryParams
+
     @rpc
       contextName: contextName
       method: 'query'
-      params: query
+      params: [queryName, queryParams]
       callback
 
 
@@ -40,7 +46,7 @@ class RemoteContext
       err = new Error "RPC method #{payload.method} not found on Class #{payload.contextName}"
       return callback err, null
 
-    context[payload.method] payload.params, callback
+    context[payload.method] payload.params..., callback
 
 
   registerContextObj: (contextName, contextObj) ->

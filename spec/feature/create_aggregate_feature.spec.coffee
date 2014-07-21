@@ -24,5 +24,4 @@ describe 'Create Aggregate Feature', ->
           done()
 
         exampleContext.initialize =>
-          exampleContext.command
-            name: 'CreateExample'
+          exampleContext.command 'CreateExample'

@@ -146,16 +146,13 @@ Initialize the Context, create a `Todo` and tell the `Todo` to change its descri
 ```javascript
 todoContext.initialize(function() {
 
-  todoContext.command({
-    name: 'CreateTodo'
-  }).then(function(todoId) {
-    todoContext.command({
-      name: 'ChangeTodoDescription',
-      params: {
+  todoContext.command('CreateTodo')
+  .then(function(todoId) {
+    todoContext.command('ChangeTodoDescription', {
         id: todoId,
         description: 'Do something'
       }
-    })
+    )
   });
 
 });

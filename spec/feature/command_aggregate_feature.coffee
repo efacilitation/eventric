@@ -70,7 +70,4 @@ describe 'Command Aggregate Feature', ->
               name: 'Example'
           ]
 
-          exampleContext.command
-            name: 'someContextFunction'
-            params:
-              id: 1
+          exampleContext.command 'someContextFunction', id: 1

@@ -61,15 +61,12 @@ describe 'Context', ->
         someContext = new Context
         someContext.initialize =>
 
-          command =
-            name: 'doSomething'
-            params:
-              id: 42
-              foo: 'bar'
-
           callback = sinon.spy()
 
-          someContext.command command, callback
+          someContext.command 'doSomething',
+            id: 42
+            foo: 'bar'
+          , callback
           expect(callback.calledWith sinon.match.instanceOf Error).to.be.true
           done()
 
@@ -81,13 +78,9 @@ describe 'Context', ->
         someContext.initialize =>
           someContext.addCommandHandler 'doSomething', commandStub
 
-          command =
-            name: 'doSomething'
-            params:
-              foo: 'bar'
-
-          someContext.command command, ->
-          expect(commandStub.calledWith command.params, sinon.match.func).to.be.true
+          params = foo: 'bar'
+          someContext.command 'doSomething', params, ->
+          expect(commandStub.calledWith params, sinon.match.func).to.be.true
           done()
 
 
@@ -99,8 +92,7 @@ describe 'Context', ->
     describe 'given the query has no matching queryhandler', ->
       it 'should callback with an error', (done) ->
         someContext.initialize =>
-          someContext.query
-            name: 'getSomething'
+          someContext.query 'getSomething'
           .catch (error) ->
             expect(error).to.be.an.instanceOf Error
             done()
@@ -111,8 +103,7 @@ describe 'Context', ->
         queryStub = sandbox.stub().yields null, 'result'
         someContext.addQueryHandler 'getSomething', queryStub
         someContext.initialize =>
-          someContext.query
-            name: 'getSomething'
+          someContext.query 'getSomething'
           .then (result) ->
             expect(result).to.equal 'result'
             expect(queryStub).to.have.been.calledWith

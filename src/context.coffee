@@ -486,26 +486,25 @@ class Context
   *
   * @example
     ```javascript
-    exampleContext.command({
-      name: 'doSomething'
-    },
+    exampleContext.command('doSomething',
     function(err, result) {
       // callback
     });
     ```
   *
-  * @param {Object} command Object containing the command definition
-  * - `name` The name of the `command`
-  * - `params` Object containing parameters. The `command` will get this as first parameter.
-  *
+  * @param {String} `commandName` Name of the CommandHandler to be executed
+  * @param {Object} `commandParams` Parameters for the CommandHandler function
   * @param {Function} callback Gets called after the command got executed with the arguments:
   * - `err` null if successful
   * - `result` Set by the `command`
   ###
-  command: (command, callback) ->
+  command: (commandName, commandParams, callback) ->
+    if not callback and typeof commandParams is 'function'
+      callback = commandParams
+
     new Promise (resolve, reject) =>
-      if @_commandHandlers[command.name]
-        @_commandHandlers[command.name] command.params, (err, result) =>
+      if @_commandHandlers[commandName]
+        @_commandHandlers[commandName] commandParams, (err, result) =>
           if err
             reject err
           else
@@ -513,7 +512,7 @@ class Context
           callback? err, result
 
       else
-        err = new Error "Given command #{command.name} not registered on context"
+        err = new Error "Given command #{commandName} not registered on context"
         reject err
         callback? err, null
 
@@ -529,9 +528,7 @@ class Context
   *
   * @example
     ```javascript
-    exampleContext.query({
-      name: 'Example',
-      params: {
+    exampleContext.query('Example', {
         foo: 'bar'
       }
     },
@@ -540,14 +537,19 @@ class Context
     });
     ```
   *
-  * @param {Object} query Object with the query paramter
-  * - `name` Name of the QueryHandler to be executed
-  * - `params` Parameters for the QueryHandler function
+  * @param {String} `queryName` Name of the QueryHandler to be executed
+  * @param {Object} `queryParams` Parameters for the QueryHandler function
+  * @param {Function} `callback` Callback which gets called after query
+  * - `err` null if successful
+  * - `result` Set by the `query`
   ###
-  query: (query, callback) ->
+  query: (queryName, queryParams, callback) ->
+    if not callback and typeof queryParams is 'function'
+      callback = queryParams
+
     new Promise (resolve, reject) =>
-      if @_queryHandlers[query.name]
-        @_queryHandlers[query.name] query.params, (err, result) =>
+      if @_queryHandlers[queryName]
+        @_queryHandlers[queryName] queryParams, (err, result) =>
           if err
             reject err
           else
@@ -555,7 +557,7 @@ class Context
           callback? err, result
 
       else
-        err = new Error "Given query #{query.name} not registered on context"
+        err = new Error "Given query #{queryName} not registered on context"
         reject err
         callback? err, null
 

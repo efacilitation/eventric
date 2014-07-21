@@ -55,10 +55,7 @@ describe 'Projection Feature', ->
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->
       it 'then the Projection should call $store with the denormalized state', (done) ->
-        exampleContext.command
-          name: 'doSomethingWithExample'
-          params:
-            id: 1
+        exampleContext.command 'doSomethingWithExample', id: 1
         .then ->
           exampleContext.getProjectionStore 'ExampleProjection', (err, projectionStore) ->
             expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'

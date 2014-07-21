@@ -18,8 +18,9 @@ describe 'Projection Feature', ->
           @$getProjectionStore 'ExampleProjection', (err, projectionStore) =>
             @inmemory = projectionStore
             done()
-        handleSomethingHappened: (domainEvent) ->
+        handleSomethingHappened: (domainEvent, done) ->
           @inmemory.totallyDenormalized = domainEvent.payload.specific
+          done()
       exampleContext.addProjection 'ExampleProjection', ExampleProjection
 
       class ExampleAggregateRoot

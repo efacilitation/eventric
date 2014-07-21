@@ -6,7 +6,7 @@ Repository  = eventric.require 'Repository'
 EventBus    = eventric.require 'EventBus'
 
 
-class context
+class Context
 
   constructor: (@name) ->
     @_di = {}
@@ -349,28 +349,33 @@ class context
       ]
 
 
-  _applyDomainEventsFromStoreToProjection: (projection, eventNames, callback) ->
+  _applyDomainEventsFromStoreToProjection: (projection, eventNames) ->
     new Promise (resolve, reject) =>
       query = 'name': $in: eventNames
-      @_store.find "#{@name}.events", query, (err, events) =>
-        for event in events
-          @_applyDomainEventToProjection event, projection
 
-        resolve()
+      @_store.find "#{@name}.events", query, (err, events) =>
+        async.eachSeries events, (event, next) =>
+          @_applyDomainEventToProjection event, projection, =>
+            next()
+
+        , (err) =>
+          resolve()
 
 
   _subscribeProjectionToDomainEvents: (projection, eventNames) ->
     for eventName in eventNames
-      @addDomainEventHandler eventName, (domainEvent) =>
+      @addDomainEventHandler eventName, (domainEvent, done) =>
         @_applyDomainEventToProjection domainEvent, projection
 
 
-  _applyDomainEventToProjection: (domainEvent, projection) =>
+  _applyDomainEventToProjection: (domainEvent, projection, callback=->) =>
     if !projection["handle#{domainEvent.name}"]
       err = new Error "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
 
     else
-      projection["handle#{domainEvent.name}"].apply @_di, [domainEvent]
+      projection["handle#{domainEvent.name}"].apply @_di, [domainEvent, =>
+        callback()
+      ]
 
 
   _initializeAdapters: ->
@@ -555,4 +560,4 @@ class context
         callback? err, null
 
 
-module.exports = context
+module.exports = Context

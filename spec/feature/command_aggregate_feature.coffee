@@ -1,5 +1,3 @@
-eventric = require 'eventric'
-
 describe 'Command Aggregate Feature', ->
 
   describe 'given we created and initialized some example context including an aggregate', ->

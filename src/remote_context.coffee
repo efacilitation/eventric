@@ -1,6 +1,6 @@
 eventric = require 'eventric'
 
-_  = eventric.require 'HelperUnderscore'
+_  = require './helper/underscore'
 
 class RemoteContext
 

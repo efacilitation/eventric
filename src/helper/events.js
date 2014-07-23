@@ -37,8 +37,7 @@
 
 // https://github.com/jashkenas/backbone
 
-eventric = require('eventric');
-_ = eventric.require('HelperUnderscore');
+_ = require('./underscore');
 
 array = []
 slice = array.slice

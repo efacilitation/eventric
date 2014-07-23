@@ -1,8 +1,8 @@
 eventric = require 'eventric'
 
-_               = eventric.require 'HelperUnderscore'
-Clone           = eventric.require 'HelperClone'
-DomainEvent     = eventric.require 'DomainEvent'
+_               = require './helper/underscore'
+Clone           = require './helper/clone'
+DomainEvent     = require './domain_event'
 
 class Aggregate
 

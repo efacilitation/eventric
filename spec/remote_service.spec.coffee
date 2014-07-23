@@ -1,5 +1,5 @@
 describe 'RemoteService', ->
-  RemoteService = eventric.require 'RemoteService'
+  RemoteService = require 'eventric/remote_service'
 
   rpc = null
   beforeEach ->

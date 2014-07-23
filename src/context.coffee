@@ -1,9 +1,9 @@
 eventric = require 'eventric'
 
-_           = eventric.require 'HelperUnderscore'
-async       = eventric.require 'HelperAsync'
-Repository  = eventric.require 'Repository'
-EventBus    = eventric.require 'EventBus'
+_           = require './helper/underscore'
+async       = require './helper/async'
+Repository  = require './repository'
+EventBus    = require './event_bus'
 
 
 class Context
@@ -295,7 +295,7 @@ class Context
       if globalStore
         @_store = globalStore
       else
-        @_store = eventric.require 'StoreInMemory'
+        @_store = require './store_inmemory'
 
 
   _initializeRepositories: ->

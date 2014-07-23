@@ -1,6 +1,6 @@
 describe 'Remote Context', ->
-  RemoteService = eventric.require 'RemoteService'
-  RemoteContext = eventric.require 'RemoteContext'
+  RemoteService = require 'eventric/remote_service'
+  RemoteContext = require 'eventric/remote_context'
 
   describe '#command', ->
 

@@ -1,19 +1,17 @@
-eventric = require 'eventric'
-
 describe 'Index', ->
 
-  contextInstance = null
-  contextStub = null
-
-  beforeEach ->
-    contextInstance =
-      addDomainEventHandler: sandbox.stub()
-    contextStub = sandbox.stub().returns contextInstance
-
-    sandbox.stub eventric, 'require', -> contextStub
-
-
   describe '#context', ->
+    contextInstance = null
+    contextStub = null
+
+    beforeEach ->
+      contextInstance =
+        addDomainEventHandler: sandbox.stub()
+      contextStub = sandbox.stub().returns contextInstance
+
+      mockery.registerMock './context', contextStub
+      mockery.registerMock 'eventric/context', contextStub
+
 
     it 'should throw an error if no name given for the context', ->
       expect(-> new eventric.context).to.throw Error

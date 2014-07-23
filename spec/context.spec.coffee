@@ -2,32 +2,16 @@ describe 'Context', ->
   Context = null
 
   class RepositoryMock
-
-  HelperUnderscoreMock =
-    extend: sandbox.stub()
-
-  aggregateServiceStub = null
   eventricMock = null
 
   beforeEach ->
     eventBusStub =
       subscribeToDomainEvent: sandbox.stub()
 
-    aggregateServiceStub =
-      initialize: sandbox.stub()
+    mockery.registerMock './event_bus', sandbox.stub().returns eventBusStub
+    mockery.registerMock './repository', RepositoryMock
 
-    eventricMock =
-      require: sandbox.stub()
-      get: sandbox.stub()
-    eventricMock.require.withArgs('AggregateService').returns sandbox.stub().returns aggregateServiceStub
-    eventricMock.require.withArgs('EventBus').returns sandbox.stub().returns eventBusStub
-    eventricMock.require.withArgs('Repository').returns RepositoryMock
-    eventricMock.require.withArgs('HelperUnderscore').returns HelperUnderscoreMock
-    eventricMock.require.withArgs('HelperAsync').returns eventric.require 'HelperAsync'
-    eventricMock.require.withArgs('StoreInMemory').returns eventric.require 'StoreInMemory'
-    mockery.registerMock 'eventric', eventricMock
-
-    Context = eventric.require 'Context'
+    Context = require 'eventric/context'
 
 
   describe '#initialize', ->

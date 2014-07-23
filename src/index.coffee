@@ -1,39 +1,11 @@
 # polyfill promises
 require './helper/promise'
 
-moduleDefinition =
-  Context: './context'
-  Aggregate: './aggregate'
-  DomainEvent: './domain_event'
-  EventBus: './event_bus'
-  Repository: './repository'
-
-  RemoteService: './remote_service'
-  RemoteContext: './remote_context'
-
-  HelperAsync: './helper/async'
-  HelperEvents: './helper/events'
-  HelperUnderscore: './helper/underscore'
-  HelperClone: './helper/clone'
-
-  StoreInMemory: './store_inmemory'
-
-
 module.exports =
   _params: {}
   _domainEventHandlers: {}
   _domainEventHandlersAll: []
   _processManagerInstances: {}
-
-  require: (required) ->
-    path = moduleDefinition[required] ? required
-
-    try
-      require path
-    catch e
-      console.log e
-      throw e
-
 
   set: (key, value) ->
     @_params[key] = value
@@ -52,7 +24,7 @@ module.exports =
   context: (name) ->
     if !name
       throw new Error 'Contexts must have a name'
-    Context = @require 'Context'
+    Context = require './context'
     context = new Context name
 
     @_delegateAllDomainEventsToGlobalHandlers context

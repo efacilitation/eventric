@@ -1,5 +1,5 @@
 describe  'Repository', ->
-  DomainEvent = eventric.require 'DomainEvent'
+  DomainEvent = require 'eventric/domain_event'
   repository = null
   domainEvent = null
   EventStoreStub = null
@@ -28,20 +28,14 @@ describe  'Repository', ->
     class AggregateStub
       applyDomainEvents: sandbox.stub()
       root: aggregateRootStub
-
-    eventricMock =
-      require: sandbox.stub()
-    eventricMock.require.withArgs('HelperAsync').returns eventric.require 'HelperAsync'
-    eventricMock.require.withArgs('HelperUnderscore').returns eventric.require 'HelperUnderscore'
-    eventricMock.require.withArgs('Aggregate').returns AggregateStub
-
-    mockery.registerMock 'eventric', eventricMock
+    mockery.registerMock './aggregate', AggregateStub
+    mockery.registerMock 'eventric/aggregate', AggregateStub
 
     contextStub =
       name: 'someContext'
       getStore: sandbox.stub().returns EventStoreStub
 
-    Repository = eventric.require 'Repository'
+    Repository = require 'eventric/repository'
     repository = new Repository
       aggregateName: 'Foo'
       context: contextStub

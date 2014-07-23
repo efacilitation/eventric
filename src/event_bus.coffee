@@ -1,6 +1,6 @@
 eventric = require 'eventric'
 
-HelperEvents = eventric.require 'HelperEvents'
+HelperEvents = require './helper/events'
 
 class EventBus
 

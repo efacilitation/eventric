@@ -1,8 +1,8 @@
 eventric = require 'eventric'
 
-_         = eventric.require 'HelperUnderscore'
-async     = eventric.require 'HelperAsync'
-Aggregate = eventric.require 'Aggregate'
+_         = require './helper/underscore'
+async     = require './helper/async'
+Aggregate = require './aggregate'
 
 class Repository
 

@@ -1,5 +1,3 @@
-eventric = require 'eventric'
-
 describe 'Query Projection Feature', ->
 
   describe 'given we created and initialized some example context including a queryhandler', ->

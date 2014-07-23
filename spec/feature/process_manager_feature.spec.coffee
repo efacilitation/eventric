@@ -1,5 +1,3 @@
-eventric = require 'eventric'
-
 describe 'ProcessManager', ->
 
   describe 'given we created a context and added a ProcessManager', ->

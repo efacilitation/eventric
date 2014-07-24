@@ -14,11 +14,11 @@ module.exports = (gulp) ->
       .pipe(clean())
 
   gulp.task 'build:helper', ->
-    gulp.src('src/helper/*.js')
-      .pipe(gulp.dest('build/node/helper'))
+    gulp.src('+(src)/+(helper)/*.js')
+      .pipe(gulp.dest('build/node'))
 
   gulp.task 'build:src', ->
-    gulp.src('src/*.coffee')
+    gulp.src(['index.coffee', '+(src)/*.coffee'])
       .pipe(coffee({bare: true}))
       .pipe(gulp.dest('build/node'))
 

@@ -7,7 +7,7 @@ runSequence = require 'run-sequence'
 
 module.exports = (gulp) ->
   gulp.task 'build', (next) ->
-    runSequence 'build:clean', 'build:helper', 'build:src', 'build:release', 'docs:generate', next
+    runSequence 'build:clean', 'build:helper', 'build:src', 'build:release', next
 
   gulp.task 'build:clean', ->
     gulp.src('build/**/*', read: false)

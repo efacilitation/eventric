@@ -312,7 +312,7 @@ class Context
       $domainService: =>
         (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
       $projectionStore: (projectionName, callback) =>
-        @projectionStore projectionName, callback
+        @getProjectionStore projectionName, callback
 
     @_initializeProjections()
     .then =>
@@ -344,7 +344,7 @@ class Context
       async.eachSeries @_projectionClasses, (projection, next) =>
         @clearProjectionStore projection.name
         .then =>
-          @projectionStore projection.name
+          @getProjectionStore projection.name
         .then (projectionStore) =>
           @_initializeProjection projection, projectionStore, =>
             next()
@@ -425,10 +425,10 @@ class Context
         @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
-  projectionStore: (projectionName, callback) =>
+  getProjectionStore: (projectionName, callback) =>
     new Promise (resolve, reject) =>
 
-      @_store.projectionStore (@_projectionStoreName projectionName), (err, projectionStore) =>
+      @_store.getProjectionStore (@_projectionStoreName projectionName), (err, projectionStore) =>
         callback? err, projectionStore
         return reject err if err
         resolve projectionStore

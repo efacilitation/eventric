@@ -21,7 +21,7 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.72",
+  "version": "0.0.73",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"
@@ -40,7 +40,6 @@
     "dgeni-packages": "0.9.6",
     "growler": "*",
     "gulp": "*",
-    "gulp-clean": "*",
     "gulp-util": "*",
     "gulp-mocha": "*",
     "gulp-watch": "*",
@@ -59,6 +58,7 @@
     "karma-mocha": "*",
     "mockery": "*",
     "mocha": "*",
+    "rimraf": "*",
     "run-sequence": "*",
     "sinon": "*",
     "sinon-chai": "*"

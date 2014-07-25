@@ -1,8 +1,8 @@
 coffee      = require 'gulp-coffee'
 concat      = require 'gulp-concat'
-clean       = require 'gulp-clean'
 commonjs    = require 'gulp-wrap-commonjs'
 uglify      = require 'gulp-uglify'
+rimraf      = require 'rimraf'
 runSequence = require 'run-sequence'
 
 module.exports = (gulp) ->
@@ -10,8 +10,8 @@ module.exports = (gulp) ->
     runSequence 'build:clean', 'build:helper', 'build:src', 'build:release', next
 
   gulp.task 'build:clean', ->
-    gulp.src('build/**/*', read: false)
-      .pipe(clean())
+    rimraf './build', ->
+      console.log 'wat'
 
   gulp.task 'build:helper', ->
     gulp.src('+(src)/+(helper)/*.js')

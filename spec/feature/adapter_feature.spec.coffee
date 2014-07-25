@@ -15,8 +15,8 @@ describe 'Adapter Feature', ->
         exampleContext.addAdapter 'exampleAdapter', ExampleAdapter
 
         exampleContext.addCommandHandler 'doSomething', (params, callback) ->
-              @$adapter('exampleAdapter').someAdapterFunction()
-              callback()
+          @$adapter('exampleAdapter').someAdapterFunction()
+          callback()
 
 
       it 'then it should have called the adapter function', (done) ->

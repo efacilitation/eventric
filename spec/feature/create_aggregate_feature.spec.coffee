@@ -5,7 +5,7 @@ describe 'Create Aggregate Feature', ->
       exampleContext = eventric.context 'Examplecontext'
       exampleContext.addDomainEvent 'ExampleCreated', (params) ->
 
-      exampleContext.addAggregate 'Example', class Example
+      exampleContext.addAggregate 'Example', ->
 
 
     describe 'when we command the context to create an aggregate without a create function', ->

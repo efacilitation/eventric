@@ -9,41 +9,26 @@ describe 'Command Aggregate Feature', ->
 
     describe 'when we send a command to the context', ->
       beforeEach ->
-        class SomethingHappened
-          constructor: (params) ->
-            @someId   = params.someId
-            @rootProp = params.rootProp
-            @entity   = params.entity
+        exampleContext.addDomainEvent 'SomethingHappened', (params) ->
+          @someId   = params.someId
+          @someProp = params.someProp
+          @entity   = params.entity
 
-        exampleContext.addDomainEvent 'SomethingHappened', SomethingHappened
-
-        class ExampleEntity
-          someEntityFunction: ->
-            @entityProp = 'bar'
-
-        class ExampleRoot
+        exampleContext.addAggregate 'Example', ->
           doSomething: (someId) ->
-            entity = new ExampleEntity
-            entity.someEntityFunction()
-
             @$emitDomainEvent 'SomethingHappened',
               someId: someId
-              rootProp: 'foo'
-              entity: entity
+              someProp: 'foo'
 
           handleExampleCreated: ->
             @entities = []
 
           handleSomethingHappened: (domainEvent) ->
             @someId = domainEvent.payload.someId
-            @rootProp = domainEvent.payload.rootProp
-            @entities[2] = domainEvent.payload.entity
-
-
-        exampleContext.addAggregate 'Example', ExampleRoot
+            @someProp = domainEvent.payload.someProp
 
         exampleContext.addCommandHandlers
-          someContextFunction: (params, callback) ->
+          DoSomething: (params, callback) ->
             @$repository('Example').findById params.id
             .then (example) =>
               example.doSomething [1]
@@ -54,7 +39,7 @@ describe 'Command Aggregate Feature', ->
 
       it 'then it should have triggered the correct DomainEvent', (done) ->
         exampleContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
-          expect(domainEvent.payload.entity.entityProp).to.equal 'bar'
+          expect(domainEvent.payload.someProp).to.equal 'foo'
           expect(domainEvent.name).to.equal 'SomethingHappened'
           done()
 
@@ -68,4 +53,4 @@ describe 'Command Aggregate Feature', ->
               name: 'Example'
           ]
 
-          exampleContext.command 'someContextFunction', id: 1
+          exampleContext.command 'DoSomething', id: 1

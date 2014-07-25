@@ -11,7 +11,7 @@ describe 'Projection Feature', ->
         SomethingHappened: (params) ->
           @specific = params.whateverFoo
 
-      class ExampleProjection
+      exampleContext.addProjection 'ExampleProjection', ->
         initialize: (done) ->
           @$projectionStore 'ExampleProjection', (err, projectionStore) =>
             @inmemory = projectionStore
@@ -19,9 +19,8 @@ describe 'Projection Feature', ->
         handleSomethingHappened: (domainEvent, done) ->
           @inmemory.totallyDenormalized = domainEvent.payload.specific
           done()
-      exampleContext.addProjection 'ExampleProjection', ExampleProjection
 
-      class ExampleAggregateRoot
+      exampleContext.addAggregate 'Example', ->
         handleExampleCreated: (domainEvent) ->
           @whatever = 'bar'
         doSomething: ->
@@ -29,7 +28,6 @@ describe 'Projection Feature', ->
             @$emitDomainEvent 'SomethingHappened', whateverFoo: 'foo'
         handleSomethingHappened: (domainEvent) ->
           @whatever = domainEvent.payload.whateverFoo
-      exampleContext.addAggregate 'Example', ExampleAggregateRoot
 
       exampleContext.addCommandHandler 'doSomethingWithExample', (params, callback) ->
         @$repository('Example').findById params.id
@@ -52,7 +50,7 @@ describe 'Projection Feature', ->
 
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->
-      it 'then the Projection should call $store with the denormalized state', (done) ->
+      it 'then the Projection should call the projectionStore with the denormalized state', (done) ->
         exampleContext.command 'doSomethingWithExample', id: 1
         .then ->
           exampleContext.projectionStore 'ExampleProjection', (err, projectionStore) ->

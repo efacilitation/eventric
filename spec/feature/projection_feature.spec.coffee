@@ -53,6 +53,6 @@ describe 'Projection Feature', ->
       it 'then the Projection should call the projectionStore with the denormalized state', (done) ->
         exampleContext.command 'doSomethingWithExample', id: 1
         .then ->
-          exampleContext.projectionStore 'ExampleProjection', (err, projectionStore) ->
+          exampleContext.getProjectionStore 'ExampleProjection', (err, projectionStore) ->
             expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'
             done()

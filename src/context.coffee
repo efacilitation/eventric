@@ -21,6 +21,7 @@ class Context
     @_projectionClasses = []
     @_projectionInstances = {}
     @_repositoryInstances = {}
+    @_domainServices = {}
 
 
   ###*
@@ -201,6 +202,36 @@ class Context
 
   ###*
   *
+  * @name addDomainService
+  *
+  * @description
+  * Use as: addDomainService(domainServiceName, domainServiceFunction)
+  *
+  * Add function which gets called when called using $domainService
+  *
+  * @example
+    ```javascript
+    exampleContext.addDomainService('DoSomethingSpecial', function(params, callback) {
+      // ...
+    });
+    ```
+  *
+  * @param {String} domainServiceName Name of the `DomainService`
+  *
+  * @param {Function} Function which gets called with params as argument
+  ###
+  addDomainService: (domainServiceName, domainServiceFn) ->
+    @_domainServices[domainServiceName] = => domainServiceFn.apply @_di, arguments
+    @
+
+
+  addDomainServices: (domainServiceObjs) ->
+    @addDomainService domainServiceName, domainServiceFn for domainServiceName, domainServiceFn of domainServiceObjs
+    @
+
+
+  ###*
+  *
   * @name addAdapter
   *
   * @description
@@ -278,6 +309,8 @@ class Context
       $projection: => @getProjection.apply @, arguments
       $adapter: => @getAdapter.apply @, arguments
       $query: => @query.apply @, arguments
+      $domainService: =>
+        (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
       $getProjectionStore: (projectionName, callback) =>
         @getProjectionStore projectionName, callback
 
@@ -455,6 +488,17 @@ class Context
   ###
   getDomainEvent: (domainEventName) ->
     @_domainEventClasses[domainEventName]
+
+
+  ###*
+  * @name getDomainService
+  *
+  * @description Get a DomainService after initialize()
+  *
+  * @param {String} domainServiceName Name of the DomainService
+  ###
+  getDomainService: (domainServiceName) ->
+    @_domainServices[domainServiceName]
 
 
   ###*

@@ -25,7 +25,7 @@ module.exports =
     callback null, events
 
 
-  getProjectionStore: (projectionName, callback) ->
+  projectionStore: (projectionName, callback) ->
     @_projections[projectionName] ?= {}
     callback null, @_projections[projectionName]
 

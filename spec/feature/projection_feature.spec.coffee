@@ -13,7 +13,7 @@ describe 'Projection Feature', ->
 
       class ExampleProjection
         initialize: (done) ->
-          @$getProjectionStore 'ExampleProjection', (err, projectionStore) =>
+          @$projectionStore 'ExampleProjection', (err, projectionStore) =>
             @inmemory = projectionStore
             done()
         handleSomethingHappened: (domainEvent, done) ->
@@ -55,6 +55,6 @@ describe 'Projection Feature', ->
       it 'then the Projection should call $store with the denormalized state', (done) ->
         exampleContext.command 'doSomethingWithExample', id: 1
         .then ->
-          exampleContext.getProjectionStore 'ExampleProjection', (err, projectionStore) ->
+          exampleContext.projectionStore 'ExampleProjection', (err, projectionStore) ->
             expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'
             done()

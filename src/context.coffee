@@ -311,8 +311,8 @@ class Context
       $query: => @query.apply @, arguments
       $domainService: =>
         (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
-      $getProjectionStore: (projectionName, callback) =>
-        @getProjectionStore projectionName, callback
+      $projectionStore: (projectionName, callback) =>
+        @projectionStore projectionName, callback
 
     @_initializeProjections()
     .then =>
@@ -344,7 +344,7 @@ class Context
       async.eachSeries @_projectionClasses, (projection, next) =>
         @clearProjectionStore projection.name
         .then =>
-          @getProjectionStore projection.name
+          @projectionStore projection.name
         .then (projectionStore) =>
           @_initializeProjection projection, projectionStore, =>
             next()
@@ -425,10 +425,10 @@ class Context
         @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
-  getProjectionStore: (projectionName, callback) =>
+  projectionStore: (projectionName, callback) =>
     new Promise (resolve, reject) =>
 
-      @_store.getProjectionStore (@_getProjectionStoreName projectionName), (err, projectionStore) =>
+      @_store.projectionStore (@_projectionStoreName projectionName), (err, projectionStore) =>
         callback? err, projectionStore
         return reject err if err
         resolve projectionStore
@@ -436,13 +436,13 @@ class Context
 
   clearProjectionStore: (projectionName, callback) =>
     new Promise (resolve, reject) =>
-      @_store.clearProjectionStore (@_getProjectionStoreName projectionName), (err, done) =>
+      @_store.clearProjectionStore (@_projectionStoreName projectionName), (err, done) =>
         callback? err, done
         return reject err if err
         resolve done
 
 
-  _getProjectionStoreName: (projectionName) =>
+  _projectionStoreName: (projectionName) =>
     "#{@name}.Projection.#{projectionName}"
 
 

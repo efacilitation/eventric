@@ -19,6 +19,8 @@ describe 'Global Domain Event Handler Feature', ->
       exampleContext.addDomainEvent 'ExampleCreated', ->
 
       exampleContext.addAggregate 'Example', ->
+        create: ->
+          @$emitDomainEvent 'ExampleCreated'
 
       exampleContext.addCommandHandler 'createExample', (params, done) ->
         @$repository('Example').create()

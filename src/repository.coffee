@@ -38,14 +38,16 @@ class Repository
       return callback null, [] if domainEvents.length == 0
       callback null, domainEvents
 
-  create: (initialProperties, callback) =>
-    if typeof initialProperties is 'function' and not callback
-      callback = initialProperties
+
+  create: =>
+    params = arguments
+    if typeof params[params.length-1] is 'function'
+      callback = params.pop()
 
     new Promise (resolve, reject) =>
       # create Aggregate
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
-      aggregate.create initialProperties
+      aggregate.create params...
       .then (aggregate) =>
         @_aggregateInstances[aggregate.id] = aggregate
         callback? null, aggregate.id

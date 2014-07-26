@@ -60,13 +60,14 @@ class Aggregate
     @_handleDomainEvent domainEvent.name, domainEvent
 
 
-  create: (props) ->
+  create: ->
+    params = arguments
     new Promise (resolve, reject) =>
       @id = eventric.generateUid()
 
       if typeof @root.create == 'function'
         try
-          check = @root.create props
+          check = @root.create params...
           if check instanceof Promise
             check.then =>
               resolve @
@@ -76,10 +77,6 @@ class Aggregate
             resolve @
         catch e
           reject e
-
-      else
-        @emitDomainEvent "#{@_name}Created", props
-        resolve @
 
 
   toJSON: ->

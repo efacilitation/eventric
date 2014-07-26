@@ -9,9 +9,8 @@ module.exports = (gulp) ->
   gulp.task 'build', (next) ->
     runSequence 'build:clean', 'build:helper', 'build:src', 'build:release', next
 
-  gulp.task 'build:clean', ->
-    rimraf './build', ->
-      console.log 'wat'
+  gulp.task 'build:clean', (next) ->
+    rimraf './build', next
 
   gulp.task 'build:helper', ->
     gulp.src('+(src)/+(helper)/*.js')

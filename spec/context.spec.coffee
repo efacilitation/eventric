@@ -14,7 +14,6 @@ describe 'Context', ->
     mockery.registerMock 'eventric/src/event_bus', sandbox.stub().returns eventBusStub
     mockery.registerMock './repository', RepositoryMock
     mockery.registerMock 'eventric/src/repository', RepositoryMock
-    mockery.register
 
     Context = require 'eventric/src/context'
 

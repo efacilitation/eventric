@@ -346,6 +346,7 @@ class Context
         (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
       $projectionStore: (projectionName, callback) =>
         @getProjectionStore projectionName, callback
+      $emitDomainEvent: => @emitDomainEvent.apply @, arguments
 
     @_initializeProjections()
     .then =>

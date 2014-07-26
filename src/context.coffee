@@ -4,6 +4,7 @@ _           = require './helper/underscore'
 async       = require './helper/async'
 Repository  = require './repository'
 EventBus    = require './event_bus'
+DomainEvent = require './domain_event'
 
 
 class Context
@@ -42,6 +43,38 @@ class Context
   set: (key, value) ->
     @_params[key] = value
     @
+
+
+  ###*
+  * @name emitDomainEvent
+  *
+  * @description emit Domain Event in the context
+  *
+  * @param {String} domainEventName Name of the DomainEvent
+  * @param {Object} domainEventPayload payload for the DomainEvent
+  ###
+  emitDomainEvent: (domainEventName, domainEventPayload) =>
+    DomainEventClass = @getDomainEvent domainEventName
+    if !DomainEventClass
+      throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
+
+    domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
+
+    collectionName = @_eventStoreName()
+    @_store.save collectionName, domainEvent, =>
+      @_eventBus.publishDomainEvent domainEvent
+
+
+  _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
+    new DomainEvent
+      id: eventric.generateUid()
+      name: domainEventName
+      context: @name
+      payload: new DomainEventClass domainEventPayload
+
+
+  _eventStoreName: ->
+    "#{@name}.events"
 
 
   ###*

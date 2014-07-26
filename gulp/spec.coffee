@@ -20,7 +20,7 @@ module.exports = (gulp) ->
 
   gulp.task 'spec:server', =>
     if !fs.existsSync 'node_modules/eventric'
-      fs.symlinkSync '../src', 'node_modules/eventric', 'dir'
+      fs.symlinkSync '..', 'node_modules/eventric', 'dir'
 
     gulp.src([
       'spec/helper/setup.coffee'

@@ -1,6 +1,6 @@
 describe 'Aggregate', ->
-  Aggregate   = require 'eventric/aggregate'
-  DomainEvent = require 'eventric/domain_event'
+  Aggregate   = require 'eventric/src/aggregate'
+  DomainEvent = require 'eventric/src/domain_event'
 
   it 'should inject the $emitDomainEvent method into the aggregate root', ->
     exampleRoot = {}

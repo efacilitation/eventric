@@ -1,5 +1,5 @@
 describe  'Repository', ->
-  DomainEvent = require 'eventric/domain_event'
+  DomainEvent = require 'eventric/src/domain_event'
   repository = null
   domainEvent = null
   EventStoreStub = null
@@ -29,13 +29,13 @@ describe  'Repository', ->
       applyDomainEvents: sandbox.stub()
       root: aggregateRootStub
     mockery.registerMock './aggregate', AggregateStub
-    mockery.registerMock 'eventric/aggregate', AggregateStub
+    mockery.registerMock 'eventric/src/aggregate', AggregateStub
 
     contextStub =
       name: 'someContext'
       getStore: sandbox.stub().returns EventStoreStub
 
-    Repository = require 'eventric/repository'
+    Repository = require 'eventric/src/repository'
     repository = new Repository
       aggregateName: 'Foo'
       context: contextStub

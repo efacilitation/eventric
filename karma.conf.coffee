@@ -14,6 +14,7 @@ module.exports = (config) ->
       'build/spec/helper.js'
 
       # source
+      'index.coffee'
       'src/**/*.+(coffee|js)'
 
       # specs
@@ -28,6 +29,7 @@ module.exports = (config) ->
 
     # compile coffee scripts and wrap into commonjs
     preprocessors:
+      'index.coffee': ['commonjs', 'coffee']
       'src/**/*.coffee': ['commonjs', 'coffee']
       'src/**/*.js': ['commonjs']
       'spec/**/*.coffee': ['coffee']
@@ -39,7 +41,9 @@ module.exports = (config) ->
     commonjsPreprocessor:
       options:
         pathReplace: (path) ->
-          path.replace 'src', 'eventric'
+          path = path.replace /^index/, 'eventric/index'
+          path = path.replace 'src', 'eventric/src'
+          path
 
     # web server port
     port: 9876

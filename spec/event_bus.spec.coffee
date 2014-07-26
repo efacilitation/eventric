@@ -1,6 +1,6 @@
 describe 'EventBus', ->
-  DomainEvent = require 'eventric/domain_event'
-  EventBus    = require 'eventric/event_bus'
+  DomainEvent = require 'eventric/src/domain_event'
+  EventBus    = require 'eventric/src/event_bus'
 
   store = null
   eventBus = null

@@ -9,8 +9,12 @@ describe 'Create Aggregate Feature', ->
 
         exampleContext.addDomainEvent 'ExampleCreated', (params) ->
 
-        exampleContext.addAggregate 'Example', class Example
-          create: sandbox.stub()
+        class Example
+          create: (name, email, callback) ->
+            callback()
+        sandbox.spy Example::, 'create'
+
+        exampleContext.addAggregate 'Example', Example
 
         exampleContext.addCommandHandler 'CreateExample', (params, done) ->
           @$repository('Example').create params.name, params.email
@@ -23,6 +27,6 @@ describe 'Create Aggregate Feature', ->
           exampleContext.command 'CreateExample',
             name: 'MyName'
             email: 'MyEmail'
-
-          expect(Example::create).to.have.been.calledWith 'MyName', 'MyEmail'
-          done()
+          .then ->
+            expect(Example::create).to.have.been.calledWith 'MyName', 'MyEmail', sinon.match.func
+            done()

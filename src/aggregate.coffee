@@ -64,19 +64,24 @@ class Aggregate
     params = arguments
     new Promise (resolve, reject) =>
       @id = eventric.generateUid()
+      if typeof @root.create isnt 'function'
+        throw new Error 'No create function on aggregate'
 
-      if typeof @root.create == 'function'
-        try
-          check = @root.create params...
-          if check instanceof Promise
-            check.then =>
-              resolve @
-            check.catch (err) =>
-              reject err
+      try
+        check = @root.create params..., (err) =>
+          if err
+            reject err
           else
             resolve @
-        catch e
-          reject e
+
+        if check instanceof Promise
+          check.then =>
+            resolve @
+          check.catch (err) =>
+            reject err
+
+      catch e
+        reject e
 
 
   toJSON: ->

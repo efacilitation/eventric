@@ -42,7 +42,8 @@ class Aggregate
 
   _handleDomainEvent: (domainEventName, domainEvent) ->
     if @root["handle#{domainEventName}"]
-      @root["handle#{domainEventName}"] domainEvent
+      # TODO: should we wait until the domainevent got handled?
+      @root["handle#{domainEventName}"] domainEvent, ->
 
     else
       err = new Error "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"

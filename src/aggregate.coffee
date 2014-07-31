@@ -42,7 +42,6 @@ class Aggregate
 
   _handleDomainEvent: (domainEventName, domainEvent) ->
     if @root["handle#{domainEventName}"]
-      # TODO: should we wait until the domainevent got handled?
       @root["handle#{domainEventName}"] domainEvent, ->
 
     else

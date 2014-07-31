@@ -583,11 +583,12 @@ class Context
     new Promise (resolve, reject) =>
       if @_commandHandlers[commandName]
         @_commandHandlers[commandName] commandParams, (err, result) =>
-          if err
-            reject err
-          else
-            resolve result
-          callback? err, result
+          eventric.nextTick =>
+            if err
+              reject err
+            else
+              resolve result
+            callback? err, result
 
       else
         err = new Error "Given command #{commandName} not registered on context"
@@ -628,11 +629,12 @@ class Context
     new Promise (resolve, reject) =>
       if @_queryHandlers[queryName]
         @_queryHandlers[queryName] queryParams, (err, result) =>
-          if err
-            reject err
-          else
-            resolve result
-          callback? err, result
+          eventric.nextTick =>
+            if err
+              reject err
+            else
+              resolve result
+            callback? err, result
 
       else
         err = new Error "Given query #{queryName} not registered on context"

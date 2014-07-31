@@ -126,3 +126,9 @@ module.exports =
 
     else
       processManager[handleContextDomainEventName] domainEvent
+
+
+  nextTick: (next) ->
+    nextTick = process?.nextTick ? setTimeout
+    nextTick ->
+      next()

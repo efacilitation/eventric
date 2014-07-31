@@ -52,7 +52,6 @@ class Repository
       callback = params.pop()
 
     new Promise (resolve, reject) =>
-      # create Aggregate
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
       aggregate.create params...
       .then (aggregate) =>
@@ -76,9 +75,7 @@ class Repository
       # TODO: this should be an transaction to guarantee consistency
       async.eachSeries domainEvents, (domainEvent, next) =>
         @_context.getStore().save collectionName, domainEvent, =>
-          # publish the domainevent on the eventbus
-          nextTick = process?.nextTick ? setTimeout
-          nextTick =>
+          eventric.nextTick =>
             @_context.getEventBus().publishDomainEvent domainEvent
             next null
       , (err) =>

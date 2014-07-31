@@ -14,21 +14,28 @@ class Repository
     @_aggregateInstances = {}
 
 
-  findById: (aggregateId, callback=->) =>
+  findById: (aggregateId, callback = ->) =>
     new Promise (resolve, reject) =>
       @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
         if err
           callback err, null
           reject err
-        else
-          aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
-          aggregate.applyDomainEvents domainEvents
-          aggregate.id = aggregateId
+          return
 
-          @_aggregateInstances[aggregateId] = aggregate
+        if not domainEvents.length
+          err = "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
+          callback err, null
+          reject err
+          return
 
-          callback null, aggregate.root
-          resolve aggregate.root
+        aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
+        aggregate.applyDomainEvents domainEvents
+        aggregate.id = aggregateId
+
+        @_aggregateInstances[aggregateId] = aggregate
+
+        callback null, aggregate.root
+        resolve aggregate.root
 
 
   _findDomainEventsForAggregate: (aggregateId, callback) ->

@@ -15,7 +15,8 @@ describe 'ProcessManager', ->
         class: ->
           initialize: (domainEvent) ->
             initializeProcessManagerStub()
-            exampleContext.command 'ChangeExample', id: 1
+            exampleContext.command 'ChangeExample',
+              id: domainEvent.aggregate.id
 
           fromExample_handleExampleChanged: ->
             handleDomainEventProcessManagerStub()

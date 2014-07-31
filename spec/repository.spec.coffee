@@ -49,6 +49,14 @@ describe  'Repository', ->
         done()
 
 
+    it 'should return an error if no domainEvents were found', (done) ->
+      EventStoreStub.find.yields null, []
+      repository.findById 42, (err, aggregate) ->
+        expect(err).to.be.ok
+        expect(aggregate).not.to.be.ok
+        done()
+
+
     it 'should ask the adapter for the DomainEvents matching the AggregateId', (done) ->
       repository.findById 23, ->
         expect(EventStoreStub.find.calledWith('someContext.events', {'aggregate.name': 'Foo', 'aggregate.id': 23})).to.be.true
@@ -59,4 +67,3 @@ describe  'Repository', ->
       repository.findById 23, (err, aggregate) ->
         expect(AggregateStub::applyDomainEvents).to.have.been.calledWith [domainEvent]
         done()
-

@@ -44,6 +44,15 @@ describe 'Context', ->
 
 
   describe '#command', ->
+    describe 'given the context was not initialized yet', ->
+      it 'should callback with an error', (done) ->
+        someContext = new Context
+        someContext.command 'getSomething'
+        .catch (error) ->
+          expect(error).to.be.an.instanceOf Error
+          done()
+
+
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', (done) ->
         someContext = new Context
@@ -76,6 +85,14 @@ describe 'Context', ->
     someContext = null
     beforeEach ->
       someContext = new Context
+
+    describe 'given the context was not initialized yet', ->
+      it 'should callback with an error', (done) ->
+        someContext.query 'getSomething'
+        .catch (error) ->
+          expect(error).to.be.an.instanceOf Error
+          done()
+
 
     describe 'given the query has no matching queryhandler', ->
       it 'should callback with an error', (done) ->

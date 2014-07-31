@@ -10,6 +10,7 @@ DomainEvent = require './domain_event'
 class Context
 
   constructor: (@name) ->
+    @_initialized = false
     @_di = {}
     @_params = {}
     @_aggregateRootClasses = {}
@@ -351,6 +352,7 @@ class Context
     @_initializeProjections()
     .then =>
       @_initializeDomainEventHandlers()
+      @_initialized = true
       callback()
 
 
@@ -581,6 +583,12 @@ class Context
       callback = commandParams
 
     new Promise (resolve, reject) =>
+      if not @_initialized
+        err = new Error 'Context not initialized yet'
+        reject err
+        callback? err, null
+        return
+
       if @_commandHandlers[commandName]
         @_commandHandlers[commandName] commandParams, (err, result) =>
           eventric.nextTick =>
@@ -627,6 +635,12 @@ class Context
       callback = queryParams
 
     new Promise (resolve, reject) =>
+      if not @_initialized
+        err = new Error 'Context not initialized yet'
+        reject err
+        callback? err, null
+        return
+
       if @_queryHandlers[queryName]
         @_queryHandlers[queryName] queryParams, (err, result) =>
           eventric.nextTick =>

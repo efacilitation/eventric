@@ -4,7 +4,7 @@ describe 'ProcessManager', ->
     initializeProcessManagerStub = null
     handleDomainEventProcessManagerStub = null
     exampleContext = null
-    beforeEach ->
+    beforeEach (done) ->
       initializeProcessManagerStub = sandbox.stub()
       handleDomainEventProcessManagerStub = sandbox.stub()
       eventric.addProcessManager 'ExampleProcess',
@@ -53,6 +53,9 @@ describe 'ProcessManager', ->
         .then =>
           callback()
 
+      exampleContext.initialize ->
+        done()
+
 
     describe 'when a DomainEvent gets emitted the ProcessManager defined as initializeWhen', ->
 
@@ -62,5 +65,4 @@ describe 'ProcessManager', ->
           expect(handleDomainEventProcessManagerStub).to.have.been.called
           done()
 
-        exampleContext.initialize =>
-          exampleContext.command 'CreateExample'
+        exampleContext.command 'CreateExample'

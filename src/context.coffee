@@ -24,6 +24,7 @@ class Context
     @_projectionInstances = {}
     @_repositoryInstances = {}
     @_domainServices = {}
+    @_eventBus = new EventBus
 
 
   ###*
@@ -223,14 +224,16 @@ class Context
   * @param {Function} Function which gets called with `domainEvent` as argument
   * - `domainEvent` Instance of [[DomainEvent]]
   ###
-  addDomainEventHandler: (eventName, handlerFn) ->
-    @_domainEventHandlers[eventName] = [] unless @_domainEventHandlers[eventName]
-    @_domainEventHandlers[eventName].push => handlerFn.apply @_di, arguments
+  addDomainEventHandler: (domainEventName, handlerFn) ->
+    domainEventHandler = => handlerFn.apply @_di, arguments
+    @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
+    @_domainEventHandlers[domainEventName] = [] unless @_domainEventHandlers[domainEventName]
+    @_domainEventHandlers[domainEventName].push domainEventHandler
     @
 
 
   addDomainEventHandlers: (domainEventHandlersObj) ->
-    @addDomainEventHandler eventName, handlerFn for eventName, handlerFn of domainEventHandlersObj
+    @addDomainEventHandler domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
     @
 
 
@@ -333,7 +336,6 @@ class Context
     ```
   ###
   initialize: (callback) ->
-    @_eventBus = new EventBus
     @_initializeStore()
     @_initializeRepositories()
     @_initializeAdapters()
@@ -351,7 +353,6 @@ class Context
 
     @_initializeProjections()
     .then =>
-      @_initializeDomainEventHandlers()
       @_initialized = true
       callback()
 
@@ -453,12 +454,6 @@ class Context
       adapter.initialize?()
 
       @_adapterInstances[adapterName] = adapter
-
-
-  _initializeDomainEventHandlers: ->
-    for domainEventName, domainEventHandlers of @_domainEventHandlers
-      for domainEventHandler in domainEventHandlers
-        @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
   getProjectionStore: (projectionName, callback) =>

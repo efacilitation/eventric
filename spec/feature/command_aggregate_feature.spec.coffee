@@ -8,13 +8,18 @@ describe 'Command Aggregate Feature', ->
 
 
     describe 'when we send a command to the context', ->
-      beforeEach ->
+      beforeEach (done) ->
+        exampleContext.addDomainEvent 'ExampleCreated', ->
         exampleContext.addDomainEvent 'SomethingHappened', (params) ->
           @someId   = params.someId
           @someProp = params.someProp
           @entity   = params.entity
 
         exampleContext.addAggregate 'Example', ->
+          create: (callback) ->
+            @$emitDomainEvent 'ExampleCreated'
+            callback()
+
           doSomething: (someId) ->
             @$emitDomainEvent 'SomethingHappened',
               someId: someId
@@ -28,6 +33,14 @@ describe 'Command Aggregate Feature', ->
             @someProp = domainEvent.payload.someProp
 
         exampleContext.addCommandHandlers
+          CreateExample: (params, callback) ->
+            exampleId = null
+            @$repository('Example').create()
+            .then (exampleId) =>
+              @$repository('Example').save exampleId
+            .then (exampleId) ->
+              callback null, exampleId
+
           DoSomething: (params, callback) ->
             @$repository('Example').findById params.id
             .then (example) =>
@@ -36,6 +49,9 @@ describe 'Command Aggregate Feature', ->
             .then ->
               callback()
 
+        exampleContext.initialize ->
+          done()
+
 
       it 'then it should have triggered the correct DomainEvent', (done) ->
         exampleContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
@@ -43,14 +59,6 @@ describe 'Command Aggregate Feature', ->
           expect(domainEvent.name).to.equal 'SomethingHappened'
           done()
 
-        exampleContext.initialize =>
-          store = exampleContext.getStore()
-          sandbox.stub store, 'find'
-          store.find.yields null, [
-            name: 'ExampleCreated'
-            aggregate:
-              id: 1
-              name: 'Example'
-          ]
-
-          exampleContext.command 'DoSomething', id: 1
+        exampleContext.command 'CreateExample'
+        .then (exampleId) ->
+          exampleContext.command 'DoSomething', id: exampleId

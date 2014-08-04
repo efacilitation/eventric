@@ -51,7 +51,7 @@ class Aggregate
       eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
 
-  getDomainEvents: ->
+  getDomainEvents: =>
     @_domainEvents
 
 
@@ -63,7 +63,7 @@ class Aggregate
     @_handleDomainEvent domainEvent.name, domainEvent
 
 
-  create: ->
+  create: =>
     params = arguments
     new Promise (resolve, reject) =>
       @id = eventric.generateUid()

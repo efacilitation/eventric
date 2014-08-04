@@ -11,6 +11,7 @@ class Repository
     @_AggregateRoot  = params.AggregateRoot
     @_context        = params.context
 
+    @_command = {}
     @_aggregateInstances = {}
 
 
@@ -33,7 +34,9 @@ class Repository
         aggregate.applyDomainEvents domainEvents
         aggregate.id = aggregateId
 
-        @_aggregateInstances[aggregateId] = aggregate
+        commandId = @_command.id ? 'nocommand'
+        @_aggregateInstances[commandId] ?= {}
+        @_aggregateInstances[commandId][aggregateId] = aggregate
 
         callback null, aggregate.root
         resolve aggregate.root
@@ -56,14 +59,17 @@ class Repository
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
       aggregate.create params...
       .then (aggregate) =>
-        @_aggregateInstances[aggregate.id] = aggregate
+        commandId = @_command.id ? 'nocommand'
+        @_aggregateInstances[commandId] ?= {}
+        @_aggregateInstances[commandId][aggregate.id] = aggregate
         callback? null, aggregate.id
         resolve aggregate.id
 
 
   save: (aggregateId, callback=->) =>
     new Promise (resolve, reject) =>
-      aggregate = @_aggregateInstances[aggregateId]
+      commandId = @_command.id ? 'nocommand'
+      aggregate = @_aggregateInstances[commandId][aggregateId]
       if not aggregate
         err = "Tried to save unknown aggregate #{@_aggregateName}"
         eventric.log.error err
@@ -74,10 +80,19 @@ class Repository
 
       collectionName = "#{@_context.name}.events"
       domainEvents   = aggregate.getDomainEvents()
+      if domainEvents.length < 1
+        err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
+        eventric.log.debug err, @_command
+        err = new Error err
+        callback? err, null
+        reject err
+        return
+
       eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
       async.eachSeries domainEvents, (domainEvent, next) =>
+        domainEvent.command = @_command
         @_context.getStore().save collectionName, domainEvent, =>
           eventric.log.debug "Saved DomainEvent", domainEvent
           next null
@@ -93,6 +108,10 @@ class Repository
 
           resolve aggregate.id
           callback null, aggregate.id
+
+
+  setCommand: (command) ->
+    @_command = command
 
 
 module.exports = Repository

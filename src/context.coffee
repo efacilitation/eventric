@@ -5,6 +5,7 @@ async       = require './helper/async'
 Repository  = require './repository'
 EventBus    = require './event_bus'
 DomainEvent = require './domain_event'
+Clone       = require './helper/clone'
 
 
 class Context
@@ -127,7 +128,19 @@ class Context
   *  * `params.props` Initial properties so be set on the Aggregate or handed to the Aggregates create() method
   ###
   addCommandHandler: (commandHandlerName, commandHandlerFn) ->
-    @_commandHandlers[commandHandlerName] = => commandHandlerFn.apply @_di, arguments
+    @_commandHandlers[commandHandlerName] = =>
+      command =
+        id: eventric.generateUid()
+        name: commandHandlerName
+        params: arguments[0] ? null
+
+      new_di = Clone @_di
+      new_di.$repository = =>
+        repository = @getRepository.apply @, arguments
+        repository.setCommand command
+        repository
+
+      commandHandlerFn.apply new_di, arguments
     @
 
 
@@ -341,7 +354,6 @@ class Context
     @_initializeAdapters()
 
     @_di =
-      $repository: => @getRepository.apply @, arguments
       $projection: => @getProjection.apply @, arguments
       $adapter: => @getAdapter.apply @, arguments
       $query: => @query.apply @, arguments

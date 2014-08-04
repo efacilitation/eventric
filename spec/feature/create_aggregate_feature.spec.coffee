@@ -11,6 +11,7 @@ describe 'Create Aggregate Feature', ->
 
         class Example
           create: (name, email, callback) ->
+            @$emitDomainEvent 'ExampleCreated'
             callback()
         sandbox.spy Example::, 'create'
 
@@ -20,7 +21,7 @@ describe 'Create Aggregate Feature', ->
           @$repository('Example').create params.name, params.email
           .then (exampleId) =>
             @$repository('Example').save exampleId
-          .then =>
+          .then ->
             done()
 
         exampleContext.initialize ->

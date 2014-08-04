@@ -75,8 +75,10 @@ class Repository
       # TODO: this should be an transaction to guarantee consistency
       async.eachSeries domainEvents, (domainEvent, next) =>
         @_context.getStore().save collectionName, domainEvent, =>
+          eventric.log.debug 'Saved DomainEvent', domainEvent
           eventric.nextTick =>
             @_context.getEventBus().publishDomainEvent domainEvent
+            eventric.log.debug 'Published DomainEvent', domainEvent
             next null
       , (err) =>
         if err

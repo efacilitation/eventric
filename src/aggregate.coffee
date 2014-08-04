@@ -20,12 +20,15 @@ class Aggregate
   emitDomainEvent: (domainEventName, domainEventPayload) =>
     DomainEventClass = @_context.getDomainEvent domainEventName
     if !DomainEventClass
-      throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
+      err = "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
+      eventric.log.error err
+      throw new Error err
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
+    eventric.log.debug 'Created and Handled DomainEvent in Aggregate', domainEvent
     # TODO: do a rollback if something goes wrong inside the handle function
 
 

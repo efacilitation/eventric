@@ -574,6 +574,7 @@ class Context
   * - `result` Set by the `command`
   ###
   command: (commandName, commandParams, callback) ->
+    eventric.log.debug 'Got Command', commandName, commandParams
     if not callback and typeof commandParams is 'function'
       callback = commandParams
 
@@ -626,6 +627,7 @@ class Context
   * - `result` Set by the `query`
   ###
   query: (queryName, queryParams, callback) ->
+    eventric.log.debug 'Got Query', queryName, queryParams
     if not callback and typeof queryParams is 'function'
       callback = queryParams
 

@@ -7,6 +7,8 @@ module.exports =
   _domainEventHandlersAll: []
   _processManagerInstances: {}
 
+  log: require './logger'
+
   set: (key, value) ->
     @_params[key] = value
 

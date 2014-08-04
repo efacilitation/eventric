@@ -28,7 +28,7 @@ class Aggregate
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
-    eventric.log.debug 'Created and Handled DomainEvent in Aggregate', domainEvent
+    eventric.log.debug "Created and Handled DomainEvent in Aggregate", domainEvent
     # TODO: do a rollback if something goes wrong inside the handle function
 
 
@@ -48,7 +48,7 @@ class Aggregate
       @root["handle#{domainEventName}"] domainEvent, ->
 
     else
-      err = new Error "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
+      eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
 
   getDomainEvents: ->
@@ -68,7 +68,9 @@ class Aggregate
     new Promise (resolve, reject) =>
       @id = eventric.generateUid()
       if typeof @root.create isnt 'function'
-        throw new Error 'No create function on aggregate'
+        err = "No create function on aggregate"
+        eventric.log.error err
+        throw new Error err
 
       try
         check = @root.create params..., (err) =>

@@ -9,7 +9,7 @@ class Repository
   constructor: (params) ->
     @_aggregateName  = params.aggregateName
     @_AggregateRoot  = params.AggregateRoot
-    @_context = params.context
+    @_context        = params.context
 
     @_aggregateInstances = {}
 
@@ -24,6 +24,7 @@ class Repository
 
         if not domainEvents.length
           err = "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
+          eventric.log.error err
           callback err, null
           reject err
           return
@@ -64,28 +65,32 @@ class Repository
     new Promise (resolve, reject) =>
       aggregate = @_aggregateInstances[aggregateId]
       if not aggregate
-        err = new Error 'Tried to save unknown aggregate'
+        err = "Tried to save unknown aggregate #{@_aggregateName}"
+        eventric.log.error err
+        err = new Error err
         callback? err, null
         reject err
         return
 
       collectionName = "#{@_context.name}.events"
       domainEvents   = aggregate.getDomainEvents()
+      eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
       async.eachSeries domainEvents, (domainEvent, next) =>
         @_context.getStore().save collectionName, domainEvent, =>
-          eventric.log.debug 'Saved DomainEvent', domainEvent
-          eventric.nextTick =>
-            @_context.getEventBus().publishDomainEvent domainEvent
-            eventric.log.debug 'Published DomainEvent', domainEvent
-            next null
+          eventric.log.debug "Saved DomainEvent", domainEvent
+          next null
       , (err) =>
         if err
           callback err, null
           reject err
 
         else
+          for domainEvent in domainEvents
+            @_context.getEventBus().publishDomainEvent domainEvent
+            eventric.log.debug "Published DomainEvent", domainEvent
+
           resolve aggregate.id
           callback null, aggregate.id
 

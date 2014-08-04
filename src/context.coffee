@@ -575,12 +575,15 @@ class Context
   ###
   command: (commandName, commandParams, callback) ->
     eventric.log.debug 'Got Command', commandName, commandParams
+
     if not callback and typeof commandParams is 'function'
       callback = commandParams
 
     new Promise (resolve, reject) =>
       if not @_initialized
-        err = new Error 'Context not initialized yet'
+        err = 'Context not initialized yet'
+        eventric.log.error err
+        err = new Error err
         reject err
         callback? err, null
         return
@@ -595,7 +598,9 @@ class Context
             callback? err, result
 
       else
-        err = new Error "Given command #{commandName} not registered on context"
+        err = "Given command #{commandName} not registered on context"
+        eventric.log.error err
+        err = new Error err
         reject err
         callback? err, null
 
@@ -633,7 +638,9 @@ class Context
 
     new Promise (resolve, reject) =>
       if not @_initialized
-        err = new Error 'Context not initialized yet'
+        err = 'Context not initialized yet'
+        eventric.log.error err
+        err = new Error err
         reject err
         callback? err, null
         return
@@ -648,7 +655,9 @@ class Context
             callback? err, result
 
       else
-        err = new Error "Given query #{queryName} not registered on context"
+        err = "Given query #{queryName} not registered on context"
+        eventric.log.error err
+        err = new Error err
         reject err
         callback? err, null
 

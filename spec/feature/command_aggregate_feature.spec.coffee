@@ -12,7 +12,7 @@ describe 'Command Aggregate Feature', ->
         @someProp = params.someProp
         @entity   = params.entity
 
-      exampleContext.addAggregate 'Example', ->
+      class Example
         create: (callback) ->
           @$emitDomainEvent 'ExampleCreated'
           callback()
@@ -28,6 +28,7 @@ describe 'Command Aggregate Feature', ->
         handleSomethingHappened: (domainEvent) ->
           @someId = domainEvent.payload.someId
           @someProp = domainEvent.payload.someProp
+      exampleContext.addAggregate 'Example', Example
 
       exampleContext.addCommandHandlers
         CreateExample: (params, callback) ->

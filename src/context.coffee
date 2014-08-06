@@ -134,11 +134,23 @@ class Context
         name: commandHandlerName
         params: arguments[0] ? null
 
+      repositoryCache = null
       new_di = Clone @_di
-      new_di.$repository = =>
-        repository = @getRepository.apply @, arguments
-        repository.setCommand command
-        repository
+      new_di.$repository = (aggregateName) =>
+
+        if not repositoryCache
+          AggregateRoot = @_aggregateRootClasses[aggregateName]
+          repository = new Repository
+            aggregateName: aggregateName
+            AggregateRoot: AggregateRoot
+            context: @
+          #repository.addMiddlewares @_repositoryMiddlewares()
+          repositoryCache = repository
+
+        repositoryCache.setCommand command
+        #repository.setUser user
+
+        repositoryCache
 
       commandHandlerFn.apply new_di, arguments
     @
@@ -350,7 +362,6 @@ class Context
   ###
   initialize: (callback) ->
     @_initializeStore()
-    @_initializeRepositories()
     @_initializeAdapters()
 
     @_di =
@@ -378,14 +389,6 @@ class Context
         @_store = globalStore
       else
         @_store = require './store_inmemory'
-
-
-  _initializeRepositories: ->
-    for aggregateName, AggregateRoot of @_aggregateRootClasses
-      @_repositoryInstances[aggregateName] = new Repository
-        aggregateName: aggregateName
-        AggregateRoot: AggregateRoot
-        context: @
 
 
   _initializeProjections: (callback) ->
@@ -487,17 +490,6 @@ class Context
 
   _projectionStoreName: (projectionName) =>
     "#{@name}.Projection.#{projectionName}"
-
-
-  ###*
-  * @name getRepository
-  *
-  * @description Get a Repository for the given aggregateName
-  *
-  * @param {String} aggregateName Name of the Aggregate
-  ###
-  getRepository: (aggregateName) ->
-    @_repositoryInstances[aggregateName]
 
 
   ###*

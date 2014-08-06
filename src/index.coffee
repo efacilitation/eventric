@@ -2,6 +2,7 @@
 require './helper/promise'
 
 module.exports =
+  _contexts: {}
   _params: {}
   _domainEventHandlers: {}
   _domainEventHandlersAll: []
@@ -25,13 +26,31 @@ module.exports =
   ###
   context: (name) ->
     if !name
-      throw new Error 'Contexts must have a name'
+      err = 'Contexts must have a name'
+      @log.error err
+      throw new Error err
     Context = require './context'
     context = new Context name
 
     @_delegateAllDomainEventsToGlobalHandlers context
 
+    @_contexts[name] = context
+
     context
+
+
+  getContext: (name) ->
+    @_contexts[name]
+
+
+  remote: (name) ->
+    if !name
+      err = 'Missing name'
+      @log.error err
+      throw new Error err
+    Remote = require './remote'
+    remote = new Remote name
+    remote
 
 
   _delegateAllDomainEventsToGlobalHandlers: (context) ->

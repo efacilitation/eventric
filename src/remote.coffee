@@ -28,6 +28,25 @@ class Remote
           params: commandArguments
       .then (result) ->
         resolve result
+      .catch (error) ->
+        reject error
+
+
+  query: ->
+    queryArguments = arguments
+    new Promise (resolve, reject) =>
+      transportName = @get 'default transport'
+      transport = @getTransport transportName
+      transport.rpc
+        transportName: transportName
+        payload:
+          contextName: @_contextName
+          method: 'query'
+          params: queryArguments
+      .then (result) ->
+        resolve result
+      .catch (error) ->
+        reject error
 
 
   addTransport: (transportName, Transport) ->

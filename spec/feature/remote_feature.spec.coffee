@@ -10,6 +10,10 @@ describe 'Remote Feature', ->
         doSomethingStub()
         callback()
 
+    exampleContext.addQueryHandlers
+      getSomething: (params, callback) ->
+        callback null, 'something'
+
     exampleContext.initialize ->
       done()
 
@@ -20,6 +24,14 @@ describe 'Remote Feature', ->
       exampleRemote.command 'DoSomething'
       .then ->
         expect(doSomethingStub).to.have.been.calledOnce
+        done()
+
+
+    it.only 'then it should be able to answer queries over a remote', (done) ->
+      exampleRemote = eventric.remote 'Example'
+      exampleRemote.query 'getSomething'
+      .then (result) ->
+        expect(result).to.equal 'something'
         done()
 
 

@@ -4,7 +4,6 @@ else
   root = global
 
 if !root._spec_setup
-  root.eventric = require 'eventric'
   root.sinon    = require 'sinon'
   root.mockery  = require 'mockery'
   root.chai     = require 'chai'
@@ -19,6 +18,10 @@ before ->
   mockery.enable useCleanCache: true
   mockery.warnOnUnregistered false
   mockery.warnOnReplace false
+
+
+beforeEach ->
+  root.eventric = require 'eventric'
 
 
 afterEach ->

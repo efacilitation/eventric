@@ -1,14 +1,17 @@
 # polyfill promises
 require './helper/promise'
 
-module.exports =
-  _contexts: {}
-  _params: {}
-  _domainEventHandlers: {}
-  _domainEventHandlersAll: []
-  _processManagerInstances: {}
+class Eventric
 
-  log: require './logger'
+  constructor: ->
+    @_contexts = {}
+    @_params = {}
+    @_domainEventHandlers = {}
+    @_domainEventHandlersAll = []
+    @_processManagerInstances = {}
+    @log = require './logger'
+    @addRemoteTransportEndpoint 'inmemory', (require './remote_inmemory').endpoint
+
 
   set: (key, value) ->
     @_params[key] = value
@@ -43,14 +46,36 @@ module.exports =
     @_contexts[name]
 
 
-  remote: (name) ->
-    if !name
-      err = 'Missing name'
+  remote: (contextName) ->
+    if !contextName
+      err = 'Missing context name'
       @log.error err
       throw new Error err
     Remote = require './remote'
-    remote = new Remote name
+    remote = new Remote contextName
     remote
+
+
+  addRemoteTransportEndpoint: (remoteTransportName, RemoteTransportEndpoint) ->
+    new RemoteTransportEndpoint @_handleRPCRequest
+
+
+  _handleRPCRequest: (request, callback) =>
+    payload = request.payload
+    context = @getContext payload.contextName
+    if not context
+      err = "Tried to handle RPC with not registered context #{payload.contextName}"
+      @log.error err
+      return callback err, null
+
+    if payload.method not of context
+      err = "RPC method #{payload.method} not found on Context #{payload.contextName}"
+      @log.error err
+      return callback err, null
+
+    #middleware(payload, user)
+
+    context[payload.method] payload.params..., callback
 
 
   _delegateAllDomainEventsToGlobalHandlers: (context) ->
@@ -153,3 +178,6 @@ module.exports =
     nextTick = process?.nextTick ? setTimeout
     nextTick ->
       next()
+
+
+module.exports = new Eventric

@@ -1,6 +1,6 @@
 customRemoteBridge = null
 
-class InMemoryRemoteTransportEndpoint
+class InMemoryRemoteEndpoint
   constructor: (@_handleRPCRequest) ->
     customRemoteBridge = (rpcRequest) =>
       new Promise (resolve, reject) =>
@@ -8,10 +8,10 @@ class InMemoryRemoteTransportEndpoint
           return reject error if error
           resolve result
 
-module.exports.endpoint = InMemoryRemoteTransportEndpoint
+module.exports.endpoint = InMemoryRemoteEndpoint
 
 
-class InMemoryRemoteTransportClient
+class InMemoryRemoteClient
   rpc: (rpcRequest) ->
     new Promise (resolve, reject) ->
       customRemoteBridge rpcRequest
@@ -20,4 +20,4 @@ class InMemoryRemoteTransportClient
       .catch (error) ->
         reject error
 
-module.exports.transport = InMemoryRemoteTransportClient
+module.exports.client = InMemoryRemoteClient

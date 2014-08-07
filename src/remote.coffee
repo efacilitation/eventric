@@ -2,9 +2,9 @@ class Remote
 
   constructor: (@_contextName) ->
     @_params = {}
-    @_transports = {}
-    @addTransport 'inmemory', (require './remote_inmemory').transport
-    @set 'default transport', 'inmemory'
+    @_clients = {}
+    @addClient 'inmemory', (require './remote_inmemory').client
+    @set 'default client', 'inmemory'
 
 
   set: (key, value) ->
@@ -29,10 +29,10 @@ class Remote
 
   _rpc: (method, params) ->
     new Promise (resolve, reject) =>
-      transportName = @get 'default transport'
-      transport = @getTransport transportName
-      transport.rpc
-        transportName: transportName
+      clientName = @get 'default client'
+      client = @getClient clientName
+      client.rpc
+        clientName: clientName
         payload:
           contextName: @_contextName
           method: method
@@ -43,12 +43,12 @@ class Remote
         reject error
 
 
-  addTransport: (transportName, Transport) ->
-    @_transports[transportName] = new Transport
+  addClient: (clientName, Client) ->
+    @_clients[clientName] = new Client
 
 
-  getTransport: (transportName) ->
-    @_transports[transportName]
+  getClient: (clientName) ->
+    @_clients[clientName]
 
 
 module.exports = Remote

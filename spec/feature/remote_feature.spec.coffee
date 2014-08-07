@@ -59,22 +59,22 @@ describe 'Remote Feature', ->
   describe 'given we created and initialized some example context with a custom remote endpoint', ->
     customRemoteBridge = null
     beforeEach ->
-      class CustomRemoteTransportEndpoint
+      class CustomRemoteEndpoint
         constructor: (@_handleRPCRequest) ->
           customRemoteBridge = (rpcRequest) =>
             @_handleRPCRequest rpcRequest
 
-      eventric.addRemoteTransportEndpoint 'custom', CustomRemoteTransportEndpoint
+      eventric.addRemoteEndpoint 'custom', CustomRemoteEndpoint
 
 
-    it 'then it should be able to receive commands over the custom remote transport', (done) ->
-      class CustomRemoteTransportClient
+    it 'then it should be able to receive commands over the custom remote client', (done) ->
+      class CustomRemoteClient
         rpc: (rpcRequest) ->
           customRemoteBridge rpcRequest
 
       exampleRemote = eventric.remote 'Example'
-      exampleRemote.addTransport 'custom', CustomRemoteTransportClient
-      exampleRemote.set 'default transport', 'custom'
+      exampleRemote.addClient 'custom', CustomRemoteClient
+      exampleRemote.set 'default client', 'custom'
       exampleRemote.command 'DoSomething'
       .then ->
         expect(doSomethingStub).to.have.been.calledOnce

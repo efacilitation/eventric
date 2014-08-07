@@ -10,7 +10,7 @@ class Eventric
     @_domainEventHandlersAll = []
     @_processManagerInstances = {}
     @log = require './logger'
-    @addRemoteTransportEndpoint 'inmemory', (require './remote_inmemory').endpoint
+    @addRemoteEndpoint 'inmemory', (require './remote_inmemory').endpoint
 
 
   set: (key, value) ->
@@ -56,20 +56,20 @@ class Eventric
     remote
 
 
-  addRemoteTransportEndpoint: (remoteTransportName, RemoteTransportEndpoint) ->
-    new RemoteTransportEndpoint @_handleRPCRequest
+  addRemoteEndpoint: (remoteName, RemoteEndpoint) ->
+    new RemoteEndpoint @_handleRemoteRPCRequest
 
 
-  _handleRPCRequest: (request, callback) =>
+  _handleRemoteRPCRequest: (request, callback) =>
     payload = request.payload
     context = @getContext payload.contextName
     if not context
-      err = "Tried to handle RPC with not registered context #{payload.contextName}"
+      err = "Tried to handle Remote RPC with not registered context #{payload.contextName}"
       @log.error err
       return callback err, null
 
     if payload.method not of context
-      err = "RPC method #{payload.method} not found on Context #{payload.contextName}"
+      err = "Remote RPC method #{payload.method} not found on Context #{payload.contextName}"
       @log.error err
       return callback err, null
 

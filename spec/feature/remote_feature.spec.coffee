@@ -60,20 +60,23 @@ describe 'Remote Feature', ->
     customRemoteBridge = null
     beforeEach ->
       class CustomRemoteEndpoint
-        constructor: (@_handleRPCRequest) ->
+        constructor: ->
           customRemoteBridge = (rpcRequest) =>
             @_handleRPCRequest rpcRequest
 
-      eventric.addRemoteEndpoint 'custom', CustomRemoteEndpoint
+        setRPCHandler: (@_handleRPCRequest) ->
+
+      eventric.addRemoteEndpoint 'custom', new CustomRemoteEndpoint
 
 
     it 'then it should be able to receive commands over the custom remote client', (done) ->
       class CustomRemoteClient
-        rpc: (rpcRequest) ->
+        rpc: (rpcRequest, callback) ->
           customRemoteBridge rpcRequest
+          callback()
 
       exampleRemote = eventric.remote 'Example'
-      exampleRemote.addClient 'custom', CustomRemoteClient
+      exampleRemote.addClient 'custom', new CustomRemoteClient
       exampleRemote.set 'default client', 'custom'
       exampleRemote.command 'DoSomething'
       .then ->

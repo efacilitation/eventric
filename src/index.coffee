@@ -56,26 +56,24 @@ class Eventric
     remote
 
 
-  addRemoteEndpoint: (remoteName, RemoteEndpoint) ->
-    new RemoteEndpoint @_handleRemoteRPCRequest
+  addRemoteEndpoint: (remoteName, remoteEndpoint) ->
+    remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
 
 
   _handleRemoteRPCRequest: (request, callback) =>
-    payload = request.payload
-    context = @getContext payload.contextName
+    context = @getContext request.contextName
     if not context
-      err = "Tried to handle Remote RPC with not registered context #{payload.contextName}"
+      err = "Tried to handle Remote RPC with not registered context #{request.contextName}"
       @log.error err
       return callback err, null
 
-    if payload.method not of context
-      err = "Remote RPC method #{payload.method} not found on Context #{payload.contextName}"
+    if request.method not of context
+      err = "Remote RPC method #{request.method} not found on Context #{request.contextName}"
       @log.error err
       return callback err, null
 
-    #middleware(payload, user)
-
-    context[payload.method] payload.params..., callback
+    #middleware(request, user)
+    context[request.method] request.params..., callback
 
 
   _delegateAllDomainEventsToGlobalHandlers: (context) ->

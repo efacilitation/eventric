@@ -1,23 +1,27 @@
 customRemoteBridge = null
 
 class InMemoryRemoteEndpoint
-  constructor: (@_handleRPCRequest) ->
+  constructor: ->
     customRemoteBridge = (rpcRequest) =>
       new Promise (resolve, reject) =>
         @_handleRPCRequest rpcRequest, (error, result) ->
           return reject error if error
           resolve result
 
-module.exports.endpoint = InMemoryRemoteEndpoint
+  setRPCHandler: (@_handleRPCRequest) ->
+
+
+module.exports.endpoint = new InMemoryRemoteEndpoint
 
 
 class InMemoryRemoteClient
-  rpc: (rpcRequest) ->
-    new Promise (resolve, reject) ->
-      customRemoteBridge rpcRequest
-      .then (result) ->
-        resolve result
-      .catch (error) ->
-        reject error
+  rpc: (rpcRequest, callback) ->
+    if not customRemoteBridge
+      throw new Error 'No Remote Endpoint available for inmemory Client'
+    customRemoteBridge rpcRequest
+    .then (result) ->
+      callback null, result
+    .catch (error) ->
+      callback error
 
-module.exports.client = InMemoryRemoteClient
+module.exports.client = new InMemoryRemoteClient

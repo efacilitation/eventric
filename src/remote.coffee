@@ -32,19 +32,18 @@ class Remote
       clientName = @get 'default client'
       client = @getClient clientName
       client.rpc
-        clientName: clientName
-        payload:
-          contextName: @_contextName
-          method: method
-          params: params
-      .then (result) ->
-        resolve result
-      .catch (error) ->
-        reject error
+        contextName: @_contextName
+        method: method
+        params: Array.prototype.slice.call params
+      , (err, result) ->
+        if err
+          reject err
+        else
+          resolve result
 
 
-  addClient: (clientName, Client) ->
-    @_clients[clientName] = new Client
+  addClient: (clientName, client) ->
+    @_clients[clientName] = client
 
 
   getClient: (clientName) ->

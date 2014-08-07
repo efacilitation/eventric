@@ -578,10 +578,10 @@ class Context
   * - `result` Set by the `command`
   ###
   command: (commandName, commandParams, callback) ->
-    eventric.log.debug 'Got Command', commandName, commandParams
+    eventric.log.debug 'Got Command', commandName
 
-    if not callback and typeof commandParams is 'function'
-      callback = commandParams
+    if callback is undefined and typeof arguments[arguments.length-1] is 'function'
+      callback = arguments[arguments.length-1]
 
     new Promise (resolve, reject) =>
       if not @_initialized
@@ -636,9 +636,10 @@ class Context
   * - `result` Set by the `query`
   ###
   query: (queryName, queryParams, callback) ->
-    eventric.log.debug 'Got Query', queryName, queryParams
-    if not callback and typeof queryParams is 'function'
-      callback = queryParams
+    eventric.log.debug 'Got Query', queryName
+
+    if callback is undefined and typeof arguments[arguments.length-1] is 'function'
+      callback = arguments[arguments.length-1]
 
     new Promise (resolve, reject) =>
       if not @_initialized

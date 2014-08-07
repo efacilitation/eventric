@@ -5,10 +5,23 @@ describe 'Remote Feature', ->
     doSomethingStub = sandbox.stub()
 
     exampleContext = eventric.context 'Example'
+    exampleContext.addDomainEvents
+      ExampleCreated: ->
+
     exampleContext.addCommandHandlers
+      CreateExample: (params, callback) ->
+        @$repository('Example').create()
+        .then (exampleId) =>
+          @$repository('Example').save exampleId
       DoSomething: (params, callback) ->
         doSomethingStub()
         callback()
+
+    class Example
+      create: (callback) ->
+        @$emitDomainEvent 'ExampleCreated'
+        callback()
+    exampleContext.addAggregate 'Example', Example
 
     exampleContext.addQueryHandlers
       getSomething: (params, callback) ->
@@ -27,12 +40,20 @@ describe 'Remote Feature', ->
         done()
 
 
-    it.only 'then it should be able to answer queries over a remote', (done) ->
+    it 'then it should be able to answer queries over a remote', (done) ->
       exampleRemote = eventric.remote 'Example'
       exampleRemote.query 'getSomething'
       .then (result) ->
         expect(result).to.equal 'something'
         done()
+
+
+    it 'then it should be possible to subscribe to domainevents and receive them', (done) ->
+      exampleRemote = eventric.remote 'Example'
+      exampleRemote.subscribeToDomainEvent 'ExampleCreated', ->
+        done()
+
+      exampleRemote.command 'CreateExample'
 
 
   describe 'given we created and initialized some example context with a custom remote endpoint', ->

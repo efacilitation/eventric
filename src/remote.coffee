@@ -16,24 +16,18 @@ class Remote
 
 
   command: ->
-    commandArguments = arguments
-    new Promise (resolve, reject) =>
-      transportName = @get 'default transport'
-      transport = @getTransport transportName
-      transport.rpc
-        transportName: transportName
-        payload:
-          contextName: @_contextName
-          method: 'command'
-          params: commandArguments
-      .then (result) ->
-        resolve result
-      .catch (error) ->
-        reject error
+    @_rpc 'command', arguments
 
 
   query: ->
-    queryArguments = arguments
+    @_rpc 'query', arguments
+
+
+  subscribeToDomainEvent: ->
+    @_rpc 'addDomainEventHandler', arguments
+
+
+  _rpc: (method, params) ->
     new Promise (resolve, reject) =>
       transportName = @get 'default transport'
       transport = @getTransport transportName
@@ -41,8 +35,8 @@ class Remote
         transportName: transportName
         payload:
           contextName: @_contextName
-          method: 'query'
-          params: queryArguments
+          method: method
+          params: params
       .then (result) ->
         resolve result
       .catch (error) ->

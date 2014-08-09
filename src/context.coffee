@@ -12,8 +12,8 @@ class Context
 
   constructor: (@name) ->
     @_initialized = false
+    @_params = eventric.get()
     @_di = {}
-    @_params = {}
     @_aggregateRootClasses = {}
     @_adapterClasses = {}
     @_adapterInstances = {}
@@ -29,7 +29,8 @@ class Context
     @_storeInstances = {}
     @_eventBus = new EventBus
 
-    @set 'domain events store', 'inmemory'
+
+  log: eventric.log
 
 
   ###*
@@ -369,8 +370,11 @@ class Context
     ```
   ###
   initialize: (callback) ->
+    @log.debug "[#{@name}] Initializing"
+    @log.debug "[#{@name}] Initializing Store"
     @_initializeStores()
     .then =>
+      @log.debug "[#{@name}] Finished initializing Store"
       @_di =
         $adapter: => @getAdapter.apply @, arguments
         $query: => @query.apply @, arguments
@@ -379,10 +383,15 @@ class Context
         $projectionStore: => @getProjectionStore.apply @, arguments
         $emitDomainEvent: => @emitDomainEvent.apply @, arguments
 
+      @log.debug "[#{@name}] Initializing Adapters"
       @_initializeAdapters()
     .then =>
+      @log.debug "[#{@name}] Finished initializing Adapters"
+      @log.debug "[#{@name}] Initializing Projections"
       @_initializeProjections()
     .then =>
+      @log.debug "[#{@name}] Finished initializing Projections"
+      @log.debug "[#{@name}] Finished initializing"
       @_initialized = true
       callback()
 
@@ -397,8 +406,10 @@ class Context
           options: store.options
 
       async.eachSeries stores, (store, next) =>
+        @log.debug "[#{@name}] Initializing Store #{store.name}"
         @_storeInstances[store.name] = new store.Class
-        @_storeInstances[store.name].initialize @name, store.options, ->
+        @_storeInstances[store.name].initialize @name, store.options, =>
+          @log.debug "[#{@name}] Finished initializing Store #{store.name}"
           next()
 
       , (err) ->
@@ -441,7 +452,7 @@ class Context
 
       if not projection.stores
         err = "No Stores configured on Projection #{projectionObj.name}"
-        eventric.log.error err
+        @log.error err
         throw new Error err
 
       projection["$store"] ?= {}
@@ -558,7 +569,7 @@ class Context
   * @description Get the DomainEventsStore after initialization
   ###
   getDomainEventsStore: ->
-    storeName = @get 'domain events store'
+    storeName = @get 'default domain events store'
     @_storeInstances[storeName]
 
 
@@ -566,7 +577,7 @@ class Context
     new Promise (resolve, reject) =>
       if not @_storeInstances[storeName]
         err = "Requested Store with name #{storeName} not found"
-        eventric.log.error err
+        @log.error err
         callback? err, null
         return reject err
 
@@ -580,7 +591,7 @@ class Context
     new Promise (resolve, reject) =>
       if not @_storeInstances[storeName]
         err = "Requested Store with name #{storeName} not found"
-        eventric.log.error err
+        @log.error err
         callback? err, null
         return reject err
 
@@ -623,7 +634,7 @@ class Context
   * - `result` Set by the `command`
   ###
   command: (commandName, commandParams, callback) ->
-    eventric.log.debug 'Got Command', commandName
+    @log.debug 'Got Command', commandName
 
     if callback is undefined and typeof arguments[arguments.length-1] is 'function'
       callback = arguments[arguments.length-1]
@@ -631,7 +642,7 @@ class Context
     new Promise (resolve, reject) =>
       if not @_initialized
         err = 'Context not initialized yet'
-        eventric.log.error err
+        @log.error err
         err = new Error err
         reject err
         callback? err, null
@@ -648,7 +659,7 @@ class Context
 
       else
         err = "Given command #{commandName} not registered on context"
-        eventric.log.error err
+        @log.error err
         err = new Error err
         reject err
         callback? err, null
@@ -681,7 +692,7 @@ class Context
   * - `result` Set by the `query`
   ###
   query: (queryName, queryParams, callback) ->
-    eventric.log.debug 'Got Query', queryName
+    @log.debug 'Got Query', queryName
 
     if callback is undefined and typeof arguments[arguments.length-1] is 'function'
       callback = arguments[arguments.length-1]
@@ -689,7 +700,7 @@ class Context
     new Promise (resolve, reject) =>
       if not @_initialized
         err = 'Context not initialized yet'
-        eventric.log.error err
+        @log.error err
         err = new Error err
         reject err
         callback? err, null
@@ -706,7 +717,7 @@ class Context
 
       else
         err = "Given query #{queryName} not registered on context"
-        eventric.log.error err
+        @log.error err
         err = new Error err
         reject err
         callback? err, null

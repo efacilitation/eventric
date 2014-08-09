@@ -13,6 +13,7 @@ class Eventric
     @log = require './logger'
     @addRemoteEndpoint 'inmemory', (require './remote_inmemory').endpoint
     @addStore 'inmemory', require './store_inmemory'
+    @set 'default domain events store', 'inmemory'
 
 
   set: (key, value) ->
@@ -20,7 +21,10 @@ class Eventric
 
 
   get: (key) ->
-    @_params[key]
+    if not key
+      @_params
+    else
+      @_params[key]
 
 
   addStore: (storeName, StoreClass, storeOptions={}) ->

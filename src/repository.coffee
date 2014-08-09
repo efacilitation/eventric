@@ -13,6 +13,7 @@ class Repository
 
     @_command = {}
     @_aggregateInstances = {}
+    @_store = @_context.getDomainEventsStore()
 
 
   findById: (aggregateId, callback = ->) =>
@@ -43,8 +44,7 @@ class Repository
 
 
   _findDomainEventsForAggregate: (aggregateId, callback) ->
-    collectionName = "#{@_context.name}.events"
-    @_context.getStore().find collectionName, { 'aggregate.name': @_aggregateName, 'aggregate.id': aggregateId }, (err, domainEvents) =>
+    @_store.findDomainEventsByAggregateId aggregateId, (err, domainEvents) =>
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
       callback null, domainEvents
@@ -78,7 +78,6 @@ class Repository
         reject err
         return
 
-      collectionName = "#{@_context.name}.events"
       domainEvents   = aggregate.getDomainEvents()
       if domainEvents.length < 1
         err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
@@ -93,7 +92,7 @@ class Repository
       # TODO: this should be an transaction to guarantee consistency
       async.eachSeries domainEvents, (domainEvent, next) =>
         domainEvent.command = @_command
-        @_context.getStore().save collectionName, domainEvent, =>
+        @_store.saveDomainEvent domainEvent, =>
           eventric.log.debug "Saved DomainEvent", domainEvent
           next null
       , (err) =>

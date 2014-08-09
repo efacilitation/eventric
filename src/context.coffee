@@ -25,7 +25,11 @@ class Context
     @_projectionInstances = {}
     @_repositoryInstances = {}
     @_domainServices = {}
+    @_storeClasses = {}
+    @_storeInstances = {}
     @_eventBus = new EventBus
+
+    @set 'domain events store', 'inmemory'
 
 
   ###*
@@ -48,6 +52,10 @@ class Context
     @
 
 
+  get: (key) ->
+    @_params[key]
+
+
   ###*
   * @name emitDomainEvent
   *
@@ -62,9 +70,7 @@ class Context
       throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
-
-    collectionName = @_eventStoreName()
-    @_store.save collectionName, domainEvent, =>
+    @getDomainEventsStore().saveDomainEvent domainEvent, =>
       @_eventBus.publishDomainEvent domainEvent
 
 
@@ -76,8 +82,10 @@ class Context
       payload: new DomainEventClass domainEventPayload
 
 
-  _eventStoreName: ->
-    "#{@name}.events"
+  addStore: (storeName, StoreClass, storeOptions={}) ->
+    @_storeClasses[storeName] =
+      Class: StoreClass
+      options: storeOptions
 
 
   ###*
@@ -361,92 +369,107 @@ class Context
     ```
   ###
   initialize: (callback) ->
-    @_initializeStore()
-    @_initializeAdapters()
+    @_initializeStores()
+    .then =>
+      @_di =
+        $adapter: => @getAdapter.apply @, arguments
+        $query: => @query.apply @, arguments
+        $domainService: =>
+          (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
+        $projectionStore: => @getProjectionStore.apply @, arguments
+        $emitDomainEvent: => @emitDomainEvent.apply @, arguments
 
-    @_di =
-      $projection: => @getProjection.apply @, arguments
-      $adapter: => @getAdapter.apply @, arguments
-      $query: => @query.apply @, arguments
-      $domainService: =>
-        (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
-      $projectionStore: (projectionName, callback) =>
-        @getProjectionStore projectionName, callback
-      $emitDomainEvent: => @emitDomainEvent.apply @, arguments
-
-    @_initializeProjections()
+      @_initializeAdapters()
+    .then =>
+      @_initializeProjections()
     .then =>
       @_initialized = true
       callback()
 
 
-  _initializeStore: ->
-    if @_params.store
-      @_store = @_params.store
-    else
-      globalStore = eventric.get 'store'
-      if globalStore
-        @_store = globalStore
-      else
-        @_store = require './store_inmemory'
+  _initializeStores: ->
+    new Promise (resolve, reject) =>
+      stores = []
+      for storeName, store of (_.defaults @_storeClasses, eventric.getStores())
+        stores.push
+          name: storeName
+          Class: store.Class
+          options: store.options
+
+      async.eachSeries stores, (store, next) =>
+        @_storeInstances[store.name] = new store.Class
+        @_storeInstances[store.name].initialize @name, store.options, ->
+          next()
+
+      , (err) ->
+        return reject err if err
+        resolve()
 
 
-  _initializeProjections: (callback) ->
+  _initializeProjections: ->
     new Promise (resolve, reject) =>
       async.eachSeries @_projectionClasses, (projection, next) =>
-        @clearProjectionStore projection.name
-        .then =>
-          @getProjectionStore projection.name
-        .then (projectionStore) =>
-          @_initializeProjection projection, projectionStore, =>
-            next()
+        eventNames = null
+        projectionName = projection.name
+        @_initializeProjection projection
+        .then (projection) =>
+          eventNames = []
+          for key, value of projection
+            if (key.indexOf 'handle') is 0 and (typeof value is 'function')
+              eventName = key.replace /^handle/, ''
+              eventNames.push eventName
+
+          @_applyDomainEventsFromStoreToProjection projection, eventNames
+        .then (projection) =>
+          @_subscribeProjectionToDomainEvents projection, eventNames
+          @_projectionInstances[projectionName] = projection
+          resolve()
 
       , (err) =>
         return reject err if err
         resolve()
 
 
-  _initializeProjection: (projection, projectionStore, callback) ->
-    projectionName = projection.name
-    ProjectionClass = projection.class
-    projection = new ProjectionClass
-    for diName, diFn of @_di
-      projection[diName] = diFn
-
-    eventNames = []
-
-    for key, value of projection
-      if (key.indexOf 'handle') is 0 and (typeof value is 'function')
-        eventName = key.replace /^handle/, ''
-        eventNames.push eventName
-
-    @_callInitializeOnProjection projection
-    .then =>
-      @_applyDomainEventsFromStoreToProjection projection, eventNames
-    .then =>
-      @_subscribeProjectionToDomainEvents projection, eventNames
-      @_projectionInstances[projectionName] = projection
-      callback()
-
-
-  _callInitializeOnProjection: (projection) ->
+  _initializeProjection: (projectionObj) ->
     new Promise (resolve, reject) =>
-      resolve projection if not projection.initialize
-      projection.initialize =>
-        resolve projection
+
+      projectionName = projectionObj.name
+      ProjectionClass = projectionObj.class
+      projection = new ProjectionClass
+      for diName, diFn of @_di
+        projection[diName] = diFn
+
+      if not projection.stores
+        err = "No Stores configured on Projection #{projectionObj.name}"
+        eventric.log.error err
+        throw new Error err
+
+      projection["$store"] ?= {}
+
+      async.eachSeries projection.stores, (projectionStoreName, next) =>
+        @getProjectionStore projectionStoreName, projectionName, (err, projectionStore) ->
+          if projectionStore
+            projection["$store"][projectionStoreName] = projectionStore
+            next()
+
+      , (err) ->
+        resolve projection if not projection.initialize
+        projection.initialize ->
+          resolve projection
 
 
   _applyDomainEventsFromStoreToProjection: (projection, eventNames) ->
     new Promise (resolve, reject) =>
-      query = 'name': $in: eventNames
+      @getDomainEventsStore().findDomainEventsByNames eventNames, (err, events) =>
+        if events.length is 0
+          return resolve projection, eventNames
 
-      @_store.find "#{@name}.events", query, (err, events) =>
         async.eachSeries events, (event, next) =>
           @_applyDomainEventToProjection event, projection, =>
             next()
 
         , (err) =>
-          resolve()
+          resolve projection, eventNames
 
 
   _subscribeProjectionToDomainEvents: (projection, eventNames) ->
@@ -464,32 +487,14 @@ class Context
 
 
   _initializeAdapters: ->
-    for adapterName, adapterClass of @_adapterClasses
-      adapter = new @_adapterClasses[adapterName]
-      adapter.initialize?()
-
-      @_adapterInstances[adapterName] = adapter
-
-
-  getProjectionStore: (projectionName, callback) =>
     new Promise (resolve, reject) =>
+      for adapterName, adapterClass of @_adapterClasses
+        adapter = new @_adapterClasses[adapterName]
+        adapter.initialize?()
 
-      @_store.getProjectionStore (@_projectionStoreName projectionName), (err, projectionStore) =>
-        callback? err, projectionStore
-        return reject err if err
-        resolve projectionStore
+        @_adapterInstances[adapterName] = adapter
 
-
-  clearProjectionStore: (projectionName, callback) =>
-    new Promise (resolve, reject) =>
-      @_store.clearProjectionStore (@_projectionStoreName projectionName), (err, done) =>
-        callback? err, done
-        return reject err if err
-        resolve done
-
-
-  _projectionStoreName: (projectionName) =>
-    "#{@name}.Projection.#{projectionName}"
+      resolve()
 
 
   ###*
@@ -537,12 +542,41 @@ class Context
 
 
   ###*
-  * @name getStore
+  * @name getDomainEventsStore
   *
-  * @description Get the Store after initialization
+  * @description Get the DomainEventsStore after initialization
   ###
-  getStore: ->
-    @_store
+  getDomainEventsStore: ->
+    storeName = @get 'domain events store'
+    @_storeInstances[storeName]
+
+
+  getProjectionStore: (storeName, projectionName, callback) =>
+    new Promise (resolve, reject) =>
+      if not @_storeInstances[storeName]
+        err = "Requested Store with name #{storeName} not found"
+        eventric.log.error err
+        callback? err, null
+        return reject err
+
+      @_storeInstances[storeName].getProjectionStore projectionName, (err, projectionStore) =>
+        callback? err, projectionStore
+        return reject err if err
+        resolve projectionStore
+
+
+  clearProjectionStore: (storeName, projectionName, callback) =>
+    new Promise (resolve, reject) =>
+      if not @_storeInstances[storeName]
+        err = "Requested Store with name #{storeName} not found"
+        eventric.log.error err
+        callback? err, null
+        return reject err
+
+      @_storeInstances[storeName].clearProjectionStore projectionName, (err, done) =>
+        callback? err, done
+        return reject err if err
+        resolve done
 
 
   ###*

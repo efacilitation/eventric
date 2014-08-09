@@ -6,7 +6,7 @@ describe 'Query Projection Feature', ->
       exampleContext = eventric.context 'exampleContext'
 
       exampleContext.addQueryHandler 'getExample', (params, callback) ->
-        @$projectionStore 'ExampleProjection', (err, projectionStore) ->
+        @$projectionStore 'inmemory', 'ExampleProjection', (err, projectionStore) ->
           callback null, projectionStore
 
       exampleContext.initialize =>

@@ -12,12 +12,10 @@ describe 'Projection Feature', ->
           @specific = params.whateverFoo
 
       exampleContext.addProjection 'ExampleProjection', ->
-        initialize: (done) ->
-          @$projectionStore 'ExampleProjection', (err, projectionStore) =>
-            @inmemory = projectionStore
-            done()
+        stores: ['inmemory']
+
         handleSomethingHappened: (domainEvent, done) ->
-          @inmemory.totallyDenormalized = domainEvent.payload.specific
+          @$store.inmemory.totallyDenormalized = domainEvent.payload.specific
           done()
 
       exampleContext.addAggregate 'Example', ->
@@ -59,6 +57,6 @@ describe 'Projection Feature', ->
         .then (exampleId) ->
           exampleContext.command 'doSomethingWithExample', id: exampleId
         .then ->
-          exampleContext.getProjectionStore 'ExampleProjection', (err, projectionStore) ->
+          exampleContext.getProjectionStore 'inmemory', 'ExampleProjection', (err, projectionStore) ->
             expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'
             done()

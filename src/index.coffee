@@ -9,8 +9,10 @@ class Eventric
     @_domainEventHandlers = {}
     @_domainEventHandlersAll = []
     @_processManagerInstances = {}
+    @_storeClasses = {}
     @log = require './logger'
     @addRemoteEndpoint 'inmemory', (require './remote_inmemory').endpoint
+    @addStore 'inmemory', require './store_inmemory'
 
 
   set: (key, value) ->
@@ -19,6 +21,16 @@ class Eventric
 
   get: (key) ->
     @_params[key]
+
+
+  addStore: (storeName, StoreClass, storeOptions={}) ->
+    @_storeClasses[storeName] =
+      Class: StoreClass
+      options: storeOptions
+
+
+  getStores: ->
+    @_storeClasses
 
 
   ###*

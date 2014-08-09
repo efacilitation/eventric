@@ -21,21 +21,23 @@ describe 'Context', ->
   describe '#initialize', ->
 
     it 'should throw an error if neither a global nor a custom event store was configured', ->
-      context = new Context
+      context = new Context 'exampleContext'
       expect(context.initialize).to.throw Error
 
 
     it 'should instantiate all registered projections', (done) ->
-      context = new Context
-      ProjectionStub = sandbox.stub()
+      context = new Context 'exampleContext'
+      class ProjectionStub
+        stores: ['inmemory']
       context.addProjection 'SomeProjection', ProjectionStub
       context.initialize =>
-        expect(ProjectionStub).to.have.been.calledWithNew
-        done()
+        context.getProjectionStore 'inmemory', 'SomeProjection', (err, projectionStore) ->
+          expect(projectionStore).to.deep.equal {}
+          done()
 
 
     it 'should instantiate and initialize all registered adapters', (done) ->
-      context = new Context
+      context = new Context 'exampleContext'
       AdapterFactory = sandbox.stub()
       context.addAdapter 'Adapter', AdapterFactory
       context.initialize =>
@@ -46,7 +48,7 @@ describe 'Context', ->
   describe '#command', ->
     describe 'given the context was not initialized yet', ->
       it 'should callback with an error', (done) ->
-        someContext = new Context
+        someContext = new Context 'exampleContext'
         someContext.command 'getSomething'
         .catch (error) ->
           expect(error).to.be.an.instanceOf Error
@@ -55,7 +57,7 @@ describe 'Context', ->
 
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', (done) ->
-        someContext = new Context
+        someContext = new Context 'exampleContext'
         someContext.initialize =>
 
           callback = sinon.spy()
@@ -71,7 +73,7 @@ describe 'Context', ->
     describe 'has a registered handler', ->
       it 'should execute the command handler', (done) ->
         commandStub = sandbox.stub()
-        someContext = new Context
+        someContext = new Context 'exampleContext'
         someContext.initialize =>
           someContext.addCommandHandler 'doSomething', commandStub
 
@@ -84,7 +86,7 @@ describe 'Context', ->
   describe '#query', ->
     someContext = null
     beforeEach ->
-      someContext = new Context
+      someContext = new Context 'exampleContext'
 
     describe 'given the context was not initialized yet', ->
       it 'should callback with an error', (done) ->
@@ -119,17 +121,10 @@ describe 'Context', ->
     storeStub = null
     beforeEach (done) ->
       someContext = new Context 'ExampleContext'
-      storeStub =
-        save: sandbox.stub().yields null
-      someContext.set 'store', storeStub
       someContext.addDomainEvent 'WhatSoEver', ->
       someContext.initialize =>
         someContext.emitDomainEvent 'WhatSoEver'
         done()
-
-
-    it 'should call save on the store', ->
-      expect(storeStub.save).to.have.been.called
 
 
     it 'should publish the DomainEvent on the EventBus', ->

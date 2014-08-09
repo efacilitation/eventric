@@ -1,39 +1,52 @@
-module.exports =
+class InMemoryStore
 
-  _events: {}
+  _domainEvents: {}
   _projections: {}
 
-  save: (collectionName, doc, callback) ->
-    @_events[collectionName] ?= []
-    @_events[collectionName].push doc
+  initialize: (@_contextName, [options]..., callback) ->
+    @_domainEventsCollectionName = "#{@_contextName}.domain_events"
+    @_projectionCollectionName   = "#{@_contextName}.projections"
+
+    @_domainEvents[@_domainEventsCollectionName] = []
+    callback()
+
+
+  saveDomainEvent: (domainEvent, callback) ->
+    @_domainEvents[@_domainEventsCollectionName].push doc
     callback null, doc
 
 
-  find: ([collectionName, query, projection]..., callback) ->
+  findAllDomainEvents: (callback) ->
     events = []
-    @_events[collectionName] ?= []
+    callback null, @_domainEvents[@_domainEventsCollectionName]
 
-    if query['aggregate.id']
-      aggregateId = query['aggregate.id']
 
-      events = @_events[collectionName].filter (event) ->
-        event.aggregate.id == aggregateId
+  findDomainEventsByName: (name, callback) ->
+    @_domainEvents[@_domainEventsCollectionName].filter (event) ->
+      event.name == name
 
-    else
-      events = @_events[collectionName]
 
-    callback null, events
+  findDomainEventsByAggregateId: (aggregateId, callback) ->
+    @_domainEvents[@_domainEventsCollectionName].filter (event) ->
+      event.aggregate?.id == aggregateId
+
+
+  findDomainEventsByAggregateName: (aggregateName, callback) ->
+    @_domainEvents[@_domainEventsCollectionName].filter (event) ->
+      event.aggregate?.name == aggregateName
 
 
   getProjectionStore: (projectionName, callback) ->
-    @_projections[projectionName] ?= {}
+    @_projections[@_projectionCollectionName] ?= {}
+    @_projections[@_projectionCollectionName][projectionName] ?= {}
     callback null, @_projections[projectionName]
 
 
   clearProjectionStore: (projectionName, callback) ->
-    delete @_projections[projectionName]
+    @_projections[@_projectionCollectionName] ?= {}
+    @_projections[@_projectionCollectionName][projectionName] ?= {}
+    delete @_projections[@_projectionCollectionName][projectionName]
     callback null, null
 
 
-  getStoreName: ->
-    'inmemory'
+module.exports = InMemoryStore

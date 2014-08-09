@@ -60,7 +60,7 @@ describe 'ProcessManager', ->
     describe 'when a DomainEvent gets emitted the ProcessManager defined as initializeWhen', ->
 
       it 'then it should execute and end the process', (done) ->
-        exampleContext.addDomainEventHandler 'ExampleChanged', (domainEvent) ->
+        exampleContext.subscribeToDomainEvent 'ExampleChanged', (domainEvent) ->
           expect(initializeProcessManagerStub).to.have.been.called
           expect(handleDomainEventProcessManagerStub).to.have.been.called
           done()

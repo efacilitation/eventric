@@ -54,7 +54,7 @@ describe 'Command Aggregate Feature', ->
     describe 'when we send a command to the context', ->
 
       it 'then it should have triggered the correct DomainEvent', (done) ->
-        exampleContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
+        exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->
           expect(domainEvent.payload.someProp).to.equal 'foo'
           expect(domainEvent.name).to.equal 'SomethingHappened'
           done()
@@ -68,7 +68,7 @@ describe 'Command Aggregate Feature', ->
 
       it 'then it should execute all commands as expected', (done) ->
         commandCount = 0
-        exampleContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
+        exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->
           commandCount++
 
           if commandCount == 2

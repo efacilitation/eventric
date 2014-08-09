@@ -89,7 +89,7 @@ class Eventric
 
 
   _delegateAllDomainEventsToGlobalHandlers: (context) ->
-    context.addDomainEventHandler 'DomainEvent', (domainEvent) =>
+    context.subscribeToDomainEvent 'DomainEvent', (domainEvent) =>
       eventHandlers = @getDomainEventHandlers context.name, domainEvent.name
       for eventHandler in eventHandlers
         eventHandler domainEvent
@@ -103,7 +103,7 @@ class Eventric
   * @param {String} eventName Name of the Event or 'all'
   * @param {Function} eventHandler Function which handles the DomainEvent
   ###
-  addDomainEventHandler: ([contextName, eventName]..., eventHandler) ->
+  subscribeToDomainEvent: ([contextName, eventName]..., eventHandler) ->
     contextName ?= 'all'
     eventName ?= 'all'
 
@@ -139,7 +139,7 @@ class Eventric
   addProcessManager: (processManagerName, processManagerObj) ->
     for contextName, domainEventNames of processManagerObj.initializeWhen
       for domainEventName in domainEventNames
-        @addDomainEventHandler contextName, domainEventName, (domainEvent) =>
+        @subscribeToDomainEvent contextName, domainEventName, (domainEvent) =>
           # TODO: make sure we dont spawn twice
           @_spawnProcessManager processManagerName, processManagerObj.class, contextName, domainEvent
 
@@ -170,7 +170,7 @@ class Eventric
 
 
   _subscribeProcessManagerToDomainEvents: (processManager, handleContextDomainEventNames) ->
-    @addDomainEventHandler (domainEvent) =>
+    @subscribeToDomainEvent (domainEvent) =>
       for handleContextDomainEventName in handleContextDomainEventNames
         if "from#{domainEvent.context}_handle#{domainEvent.name}" == handleContextDomainEventName
           @_applyDomainEventToProcessManager handleContextDomainEventName, domainEvent, processManager

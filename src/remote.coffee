@@ -24,7 +24,7 @@ class Remote
 
 
   subscribeToDomainEvent: ->
-    @_rpc 'addDomainEventHandler', arguments
+    @_rpc 'subscribeToDomainEvent', arguments
 
 
   _rpc: (method, params) ->

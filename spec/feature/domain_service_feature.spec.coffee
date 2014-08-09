@@ -27,7 +27,7 @@ describe 'DomainService Feature', ->
 
 
       it 'then should have emitted the correct domain event', (done) ->
-        exampleContext.addDomainEventHandler 'SomethingHappened', (domainEvent) ->
+        exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->
           expect(domainEvent.name).to.be.ok
           done()
 

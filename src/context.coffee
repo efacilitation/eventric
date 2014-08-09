@@ -238,16 +238,16 @@ class Context
 
   ###*
   *
-  * @name addDomainEventHandler
+  * @name subscribeToDomainEvent
   *
   * @description
-  * Use as: addDomainEventHandler(domainEventName, domainEventHandlerFunction)
+  * Use as: subscribeToDomainEvent(domainEventName, domainEventHandlerFunction)
   *
   * Add handler function which gets called when a specific `DomainEvent` gets triggered
   *
   * @example
     ```javascript
-    exampleContext.addDomainEventHandler('Example:create', function(domainEvent) {
+    exampleContext.subscribeToDomainEvent('Example:create', function(domainEvent) {
       // ...
     });
     ```
@@ -257,7 +257,7 @@ class Context
   * @param {Function} Function which gets called with `domainEvent` as argument
   * - `domainEvent` Instance of [[DomainEvent]]
   ###
-  addDomainEventHandler: (domainEventName, handlerFn) ->
+  subscribeToDomainEvent: (domainEventName, handlerFn) ->
     domainEventHandler = => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
     @_domainEventHandlers[domainEventName] = [] unless @_domainEventHandlers[domainEventName]
@@ -265,8 +265,8 @@ class Context
     @
 
 
-  addDomainEventHandlers: (domainEventHandlersObj) ->
-    @addDomainEventHandler domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
+  subscribeToDomainEvents: (domainEventHandlersObj) ->
+    @subscribeToDomainEvent domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
     @
 
 
@@ -474,7 +474,7 @@ class Context
 
   _subscribeProjectionToDomainEvents: (projection, eventNames) ->
     for eventName in eventNames
-      @addDomainEventHandler eventName, (domainEvent, done) =>
+      @subscribeToDomainEvent eventName, (domainEvent, done) =>
         @_applyDomainEventToProjection domainEvent, projection
 
 

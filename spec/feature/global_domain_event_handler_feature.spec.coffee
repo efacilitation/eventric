@@ -8,11 +8,11 @@ describe 'Global Domain Event Handler Feature', ->
     beforeEach ->
       # TODO: currently global domain event handlers have to be registered before calling eventric.context
       specificOncontextHandlerStub = sandbox.stub()
-      eventric.addDomainEventHandler 'exampleContext', 'ExampleCreated', specificOncontextHandlerStub
+      eventric.subscribeToDomainEvent 'exampleContext', 'ExampleCreated', specificOncontextHandlerStub
       allOncontextHandlerStub = sandbox.stub()
-      eventric.addDomainEventHandler 'exampleContext', allOncontextHandlerStub
+      eventric.subscribeToDomainEvent 'exampleContext', allOncontextHandlerStub
       allHandlerStub = sandbox.stub()
-      eventric.addDomainEventHandler allHandlerStub
+      eventric.subscribeToDomainEvent allHandlerStub
 
       exampleContext = eventric.context 'exampleContext'
 

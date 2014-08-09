@@ -6,7 +6,7 @@ describe 'DomainService Feature', ->
     beforeEach ->
       exampleContext = eventric.context 'exampleContext'
 
-      exampleContext.addDomainEvent 'SomethingHappened', ->
+      exampleContext.defineDomainEvent 'SomethingHappened', ->
       exampleContext.addCommandHandler 'DoSomething', (params, callback) ->
       	@$domainService 'DoSomethingSpecial', params, callback
 

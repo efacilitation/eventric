@@ -5,7 +5,7 @@ describe 'Projection Feature', ->
     beforeEach (done) ->
       exampleContext = eventric.context 'exampleContext'
 
-      exampleContext.addDomainEvents
+      exampleContext.defineDomainEvents
         ExampleCreated: ->
 
         SomethingHappened: (params) ->

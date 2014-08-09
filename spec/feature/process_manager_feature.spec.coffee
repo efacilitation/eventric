@@ -24,7 +24,7 @@ describe 'ProcessManager', ->
 
       exampleContext = eventric.context 'Example'
 
-      exampleContext.addDomainEvents
+      exampleContext.defineDomainEvents
         ExampleCreated: ->
         ExampleChanged: ->
 

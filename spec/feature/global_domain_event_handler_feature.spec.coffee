@@ -16,7 +16,7 @@ describe 'Global Domain Event Handler Feature', ->
 
       exampleContext = eventric.context 'exampleContext'
 
-      exampleContext.addDomainEvent 'ExampleCreated', ->
+      exampleContext.defineDomainEvent 'ExampleCreated', ->
 
       exampleContext.addAggregate 'Example', ->
         create: (callback) ->

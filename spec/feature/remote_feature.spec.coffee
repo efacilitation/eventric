@@ -5,7 +5,7 @@ describe 'Remote Feature', ->
     doSomethingStub = sandbox.stub()
 
     exampleContext = eventric.context 'Example'
-    exampleContext.addDomainEvents
+    exampleContext.defineDomainEvents
       ExampleCreated: ->
 
     exampleContext.addCommandHandlers

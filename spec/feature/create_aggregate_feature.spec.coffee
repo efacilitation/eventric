@@ -7,7 +7,7 @@ describe 'Create Aggregate Feature', ->
       it 'should call the create function on the aggregate with the given params', (done) ->
         exampleContext = eventric.context 'Examplecontext'
 
-        exampleContext.addDomainEvent 'ExampleCreated', (params) ->
+        exampleContext.defineDomainEvent 'ExampleCreated', (params) ->
 
         class Example
           create: (name, email, callback) ->

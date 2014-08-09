@@ -6,8 +6,8 @@ describe 'Command Aggregate Feature', ->
       exampleContext = eventric.context 'exampleContext'
       exampleContext.addAggregate 'Example', class Example
 
-      exampleContext.addDomainEvent 'ExampleCreated', ->
-      exampleContext.addDomainEvent 'SomethingHappened', (params) ->
+      exampleContext.defineDomainEvent 'ExampleCreated', ->
+      exampleContext.defineDomainEvent 'SomethingHappened', (params) ->
         @someId   = params.someId
         @someProp = params.someProp
         @entity   = params.entity

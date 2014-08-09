@@ -89,7 +89,7 @@ class Context
 
 
   ###*
-  * @name addDomainEvent
+  * @name defineDomainEvent
   *
   * @description
   * Adds a DomainEvent Class which will be used when emitting or handling DomainEvents inside of Aggregates, Projectionpr or ProcessManagers
@@ -97,13 +97,13 @@ class Context
   * @param {String} domainEventName Name of the DomainEvent
   * @param {Function} DomainEventClass DomainEventClass
   ###
-  addDomainEvent: (domainEventName, DomainEventClass) ->
+  defineDomainEvent: (domainEventName, DomainEventClass) ->
     @_domainEventClasses[domainEventName] = DomainEventClass
     @
 
 
-  addDomainEvents: (domainEventClassesObj) ->
-    @addDomainEvent domainEventName, DomainEventClass for domainEventName, DomainEventClass of domainEventClassesObj
+  defineDomainEvents: (domainEventClassesObj) ->
+    @defineDomainEvent domainEventName, DomainEventClass for domainEventName, DomainEventClass of domainEventClassesObj
     @
 
 

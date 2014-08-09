@@ -121,7 +121,7 @@ describe 'Context', ->
     storeStub = null
     beforeEach (done) ->
       someContext = new Context 'ExampleContext'
-      someContext.addDomainEvent 'WhatSoEver', ->
+      someContext.defineDomainEvent 'WhatSoEver', ->
       someContext.initialize =>
         someContext.emitDomainEvent 'WhatSoEver'
         done()

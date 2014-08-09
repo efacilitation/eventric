@@ -25,38 +25,41 @@ class InMemoryStore
 
 
   findDomainEventsByName: (name, callback) ->
-    events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
-      event.name == name
-    callback null, events
+    if name instanceof Array
+      checkFn = (eventName) ->
+        (name.indexOf eventName) > -1
+    else
+      checkFn = (eventName) ->
+        eventName == name
 
-
-  findDomainEventsByNames: (names, callback) ->
     events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
-      (names.indexOf event.name) > -1
+      checkFn event.name
     callback null, events
 
 
   findDomainEventsByAggregateId: (aggregateId, callback) ->
-    events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
-      event.aggregate?.id == aggregateId
-    callback null, events
+    if aggregateId instanceof Array
+      checkFn = (eventAggregateId) ->
+        (aggregateId.indexOf eventAggregateId) > -1
+    else
+      checkFn = (eventAggregateId) ->
+        eventAggregateId == aggregateId
 
-
-  findDomainEventsByAggregateIds: (aggregateIds, callback) ->
     events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
-      (aggregateIds.indexOf event.aggregate?.id) > -1
+      checkFn event.aggregate?.id
     callback null, events
 
 
   findDomainEventsByAggregateName: (aggregateName, callback) ->
-    events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
-      event.aggregate?.name == aggregateName
-    callback null, events
+    if aggregateName instanceof Array
+      checkFn = (eventAggregateName) ->
+        (aggregateId.indexOf eventAggregateName) > -1
+    else
+      checkFn = (eventAggregateName) ->
+        eventAggregateName == aggregateId
 
-
-  findDomainEventsByAggregateNames: (aggregateNames, callback) ->
     events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
-      (aggregateNames.indexOf event.aggregate?.name) > -1
+      checkFn event.aggregate?.name
     callback null, events
 
 

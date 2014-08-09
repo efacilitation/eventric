@@ -446,16 +446,27 @@ class Context
 
       projection["$store"] ?= {}
 
-      async.eachSeries projection.stores, (projectionStoreName, next) =>
-        @getProjectionStore projectionStoreName, projectionName, (err, projectionStore) ->
-          if projectionStore
-            projection["$store"][projectionStoreName] = projectionStore
-            next()
+      @_clearProjectionStores projection.stores, projectionName
+      .then =>
+        async.eachSeries projection.stores, (projectionStoreName, next) =>
+          @getProjectionStore projectionStoreName, projectionName, (err, projectionStore) ->
+            if projectionStore
+              projection["$store"][projectionStoreName] = projectionStore
+              next()
 
-      , (err) ->
-        resolve projection if not projection.initialize
-        projection.initialize ->
-          resolve projection
+        , (err) ->
+          resolve projection if not projection.initialize
+          projection.initialize ->
+            resolve projection
+
+
+  _clearProjectionStores: (projectionStores, projectionName) ->
+    new Promise (resolve, reject) =>
+      async.eachSeries projectionStores, (projectionStoreName, next) =>
+          @clearProjectionStore projectionStoreName, projectionName, ->
+            next()
+        , (err) ->
+          resolve()
 
 
   _applyDomainEventsFromStoreToProjection: (projection, eventNames) ->

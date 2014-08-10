@@ -9,6 +9,7 @@ class Remote
 
   set: (key, value) ->
     @_params[key] = value
+    @
 
 
   get: (key) ->
@@ -44,6 +45,7 @@ class Remote
 
   addClient: (clientName, client) ->
     @_clients[clientName] = client
+    @
 
 
   getClient: (clientName) ->

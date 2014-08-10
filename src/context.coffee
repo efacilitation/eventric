@@ -633,36 +633,30 @@ class Context
   * - `err` null if successful
   * - `result` Set by the `command`
   ###
-  command: (commandName, commandParams, callback) ->
+  command: (commandName, commandParams) ->
     @log.debug 'Got Command', commandName
-
-    if callback is undefined and typeof arguments[arguments.length-1] is 'function'
-      callback = arguments[arguments.length-1]
 
     new Promise (resolve, reject) =>
       if not @_initialized
         err = 'Context not initialized yet'
         @log.error err
         err = new Error err
-        reject err
-        callback? err, null
-        return
+        return reject err
 
       if @_commandHandlers[commandName]
         @_commandHandlers[commandName] commandParams, (err, result) =>
+          @log.debug 'Completed Command', commandName
           eventric.nextTick =>
             if err
               reject err
             else
               resolve result
-            callback? err, result
 
       else
         err = "Given command #{commandName} not registered on context"
         @log.error err
         err = new Error err
         reject err
-        callback? err, null
 
 
   ###*
@@ -691,11 +685,8 @@ class Context
   * - `err` null if successful
   * - `result` Set by the `query`
   ###
-  query: (queryName, queryParams, callback) ->
+  query: (queryName, queryParams) ->
     @log.debug 'Got Query', queryName
-
-    if callback is undefined and typeof arguments[arguments.length-1] is 'function'
-      callback = arguments[arguments.length-1]
 
     new Promise (resolve, reject) =>
       if not @_initialized
@@ -703,24 +694,22 @@ class Context
         @log.error err
         err = new Error err
         reject err
-        callback? err, null
         return
 
       if @_queryHandlers[queryName]
         @_queryHandlers[queryName] queryParams, (err, result) =>
+          @log.debug 'Completed Query', queryName
           eventric.nextTick =>
             if err
               reject err
             else
               resolve result
-            callback? err, result
 
       else
         err = "Given query #{queryName} not registered on context"
         @log.error err
         err = new Error err
         reject err
-        callback? err, null
 
 
 module.exports = Context

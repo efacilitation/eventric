@@ -65,9 +65,9 @@ describe 'Context', ->
           someContext.command 'doSomething',
             id: 42
             foo: 'bar'
-          , callback
-          expect(callback.calledWith sinon.match.instanceOf Error).to.be.true
-          done()
+          .catch (error) ->
+            expect(error).to.be.an.instanceof Error
+            done()
 
 
     describe 'has a registered handler', ->
@@ -78,7 +78,7 @@ describe 'Context', ->
           someContext.addCommandHandler 'doSomething', commandStub
 
           params = foo: 'bar'
-          someContext.command 'doSomething', params, ->
+          someContext.command 'doSomething', params
           expect(commandStub.calledWith params, sinon.match.func).to.be.true
           done()
 

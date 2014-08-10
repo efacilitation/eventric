@@ -89,7 +89,11 @@ class Eventric
       return callback err, null
 
     #middleware(request, user)
-    context[request.method] request.params..., callback
+    context[request.method] request.params...
+    .then (result) ->
+      callback null, result
+    .catch (error) ->
+      callback error
 
 
   _delegateAllDomainEventsToGlobalHandlers: (context) ->

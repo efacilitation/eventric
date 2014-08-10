@@ -65,12 +65,12 @@ todoContext = eventric.context('Todo');
 Inside of our `Todo` Context things will happen which are called DomainEvents. A technique to come up with these is called [EventStorming](http://ziobrando.blogspot.co.uk/2013/11/introducing-event-storming.html). Lets add two called `TodoCreated` and `TodoDescriptionChanged`.
 
 ```javascript
-todoContext.addDomainEvents({
+todoContext.defineDomainEvents({
   TodoCreated: function(params) {},
   TodoDescriptionChanged: function(params) {
     this.description = params.description;
   }
-)
+});
 ```
 
 
@@ -80,12 +80,16 @@ Now we need an Aggregate which actually raises this DomainEvents.
 
 ```javascript
 todoContext.addAggregate('Todo', function() {
+  this.create = function(callback) {
+    this.$emitDomainEvent('TodoCreated');
+    callback();
+  }
   this.changeDescription = function(description) {
-    this.$emitDomainEvent('TodoDescriptionChanged', {description: description})
+    this.$emitDomainEvent('TodoDescriptionChanged', {description: description});
   }
 });
-
 ```
+> Hint: `this.create` is called by convention when you create an aggregate using `this.$repository('Todo').create`
 > Hint: `this.$emitDomainEvent` is dependency injected
 
 
@@ -95,16 +99,14 @@ To actually work with the `Context` from the outside world we need `CommandHandl
 
 ```javascript
 todoContext.addCommandHandler('CreateTodo', function(params, done) {
-  this.$repository('Todo').create()
-
+  todoRepository = this.$repository('Todo');
+  todoRepository.create()
     .then(function (todoId) {
-      return $repository('Todo').save(todoId);
+      return todoRepository.save(todoId);
     })
-
-    .then(function() {
-      done()
+    .then(function(todoId) {
+      done(null, todoId);
     });
-
 });
 ```
 > Hint: `this.$repository` is dependency injected
@@ -113,17 +115,15 @@ It would be nice if we could change the description of the `Todo`, so let's add 
 
 ```javascript
 todoContext.addCommandHandler('ChangeTodoDescription', function(params, done) {
-  this.$repository('Todo').findById(params.id)
-
+  todoRepository = this.$repository('Todo');
+  todoRepository.findById(params.id)
     .then(function (todo) {
-      todo.changeDescription params.description
-      return $repository('Todo').save(params.id);
+      todo.changeDescription(params.description);
+      return todoRepository.save(params.id);
     })
-
     .then(function() {
-      done()
+      done();
     });
-
 });
 ```
 
@@ -133,7 +133,7 @@ todoContext.addCommandHandler('ChangeTodoDescription', function(params, done) {
 And last but not least we want to console.log when the description of the `Todo` changes.
 
 ```javascript
-todoContext.addDomainEventHandler('TodoDescriptionChanged', function(domainEvent) {
+todoContext.subscribeToDomainEvent('TodoDescriptionChanged', function(domainEvent) {
   console.log(domainEvent.payload.description);
 });
 ```
@@ -145,20 +145,17 @@ Initialize the Context, create a `Todo` and tell the `Todo` to change its descri
 
 ```javascript
 todoContext.initialize(function() {
-
   todoContext.command('CreateTodo')
   .then(function(todoId) {
     todoContext.command('ChangeTodoDescription', {
         id: todoId,
         description: 'Do something'
       }
-    )
+    );
   });
-
 });
-
 ```
-After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing.
+After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing into the `InMemory Store`.
 
 Congratulations, you have successfully applied DDD and CQRS! :)
 

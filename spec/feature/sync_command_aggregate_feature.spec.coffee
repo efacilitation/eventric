@@ -22,7 +22,7 @@ describe 'Sync Command Aggregate Feature', ->
           .then (exampleId) ->
             callback null, exampleId
 
-      exampleContext.set 'sync mode', true
+      exampleContext.enableWaitingMode()
 
 
     describe 'and an according projection and query handler', ->
@@ -42,7 +42,7 @@ describe 'Sync Command Aggregate Feature', ->
         exampleContext.initialize -> done()
 
 
-      describe 'when we enable sync mode and send a command', ->
+      describe 'when we enable waiting mode and send a command', ->
         it 'should wait for the projection to be updated before returning from the command', (done) ->
           exampleContext.command 'CreateExample', {}
           .then ->
@@ -70,7 +70,7 @@ describe 'Sync Command Aggregate Feature', ->
           done()
 
 
-      describe 'when we enable sync mode and send a command', ->
+      describe 'when we enable waiting mode and send a command', ->
 
         it 'should wait for the domain event handler to be finished before returning from the command', (done) ->
           exampleContext.command 'CreateExample', {}

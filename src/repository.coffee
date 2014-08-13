@@ -100,8 +100,7 @@ class Repository
           callback err, null
           reject err
         else
-          syncMode = @_context.get 'sync mode'
-          if not syncMode
+          if not @_context.isWaitingModeEnabled()
             for domainEvent in domainEvents
               @_context.getEventBus().publish domainEvent.name, domainEvent, ->
               eventric.log.debug "Published DomainEvent", domainEvent
@@ -109,7 +108,7 @@ class Repository
             callback null, aggregate.id
           else
             async.eachSeries domainEvents, (domainEvent, next) =>
-              eventric.log.debug "Publishing DomainEvent in sync mode", domainEvent
+              eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
               @_context.getEventBus().publishAndWait domainEvent.name, domainEvent, next
             , (err) =>
               if err

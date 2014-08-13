@@ -717,4 +717,15 @@ class Context
         reject err
 
 
+  enableWaitingMode: ->
+    @set 'waiting mode', true
+
+
+  disableWaitingMode: ->
+    @set 'waiting mode', false
+
+
+  isWaitingModeEnabled: ->
+    @get 'waiting mode'
+
 module.exports = Context

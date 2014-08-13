@@ -50,7 +50,7 @@ describe 'Projection Feature', ->
       exampleContext.initialize ->
         done()
 
-      exampleContext.set 'sync mode', true
+      exampleContext.enableWaitingMode()
 
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->

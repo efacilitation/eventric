@@ -72,7 +72,7 @@ class Context
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @getDomainEventsStore().saveDomainEvent domainEvent, =>
-      @_eventBus.publishDomainEvent domainEvent
+      @_eventBus.publish domainEvent.name, domainEvent, ->
 
 
   _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
@@ -259,8 +259,13 @@ class Context
   * - `domainEvent` Instance of [[DomainEvent]]
   ###
   subscribeToDomainEvent: (domainEventName, handlerFn) ->
-    domainEventHandler = => handlerFn.apply @_di, arguments
-    @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
+    # TODO: Refactor this decoration, async event handlers are recognized by their number of arguments
+    isAsyncHandler = handlerFn.length < 2
+    if isAsyncHandler
+      domainEventHandler = () => handlerFn.apply @_di, arguments
+    else
+      domainEventHandler = (domainEvent, done) => handlerFn.call @_di, domainEvent, done
+    @_eventBus.subscribe domainEventName, domainEventHandler
     @_domainEventHandlers[domainEventName] = [] unless @_domainEventHandlers[domainEventName]
     @_domainEventHandlers[domainEventName].push domainEventHandler
     @
@@ -497,7 +502,7 @@ class Context
   _subscribeProjectionToDomainEvents: (projection, eventNames) ->
     for eventName in eventNames
       @subscribeToDomainEvent eventName, (domainEvent, done) =>
-        @_applyDomainEventToProjection domainEvent, projection
+        @_applyDomainEventToProjection domainEvent, projection, done
 
 
   _applyDomainEventToProjection: (domainEvent, projection, callback=->) =>

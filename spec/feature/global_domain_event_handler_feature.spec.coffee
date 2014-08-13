@@ -35,9 +35,9 @@ describe 'Global Domain Event Handler Feature', ->
 
       it 'then it should execute the registered global domain event handler', (done) ->
         exampleContext.initialize =>
-          exampleContext.command 'createExample'
-          .then =>
+          exampleContext.subscribeToDomainEvent 'ExampleCreated', ->
             expect(specificOncontextHandlerStub).to.have.been.called
             expect(allOncontextHandlerStub).to.have.been.called
             expect(allHandlerStub).to.have.been.called
             done()
+          exampleContext.command 'createExample'

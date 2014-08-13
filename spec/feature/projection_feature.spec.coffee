@@ -50,6 +50,8 @@ describe 'Projection Feature', ->
       exampleContext.initialize ->
         done()
 
+      exampleContext.set 'sync mode', true
+
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->
       it 'then the Projection should call the projectionStore with the denormalized state', (done) ->

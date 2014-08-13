@@ -99,14 +99,28 @@ class Repository
         if err
           callback err, null
           reject err
-
         else
-          for domainEvent in domainEvents
-            @_context.getEventBus().publishDomainEvent domainEvent
-            eventric.log.debug "Published DomainEvent", domainEvent
+          syncMode = @_context.get 'sync mode'
+          if not syncMode
+            for domainEvent in domainEvents
+              @_context.getEventBus().publish domainEvent.name, domainEvent, ->
+              eventric.log.debug "Published DomainEvent", domainEvent
+            resolve aggregate.id
+            callback null, aggregate.id
+          else
+            async.eachSeries domainEvents, (domainEvent, next) =>
+              eventric.log.debug "Publishing DomainEvent in sync mode", domainEvent
+              @_context.getEventBus().publishAndWait domainEvent.name, domainEvent, next
+            , (err) =>
+              if err
+                callback err, null
+                reject err
+              else
+                resolve aggregate.id
+                callback null, aggregate.id
 
-          resolve aggregate.id
-          callback null, aggregate.id
+
+
 
 
   setCommand: (command) ->

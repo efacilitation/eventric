@@ -2,13 +2,12 @@ describe 'Context', ->
   Context = null
 
   class RepositoryMock
-  eventricMock = null
   eventBusStub = null
 
   beforeEach ->
     eventBusStub =
-      subscribeToDomainEvent: sandbox.stub()
-      publishDomainEvent: sandbox.stub()
+      subscribe: sandbox.stub()
+      publish: sandbox.stub()
 
     mockery.registerMock './event_bus', sandbox.stub().returns eventBusStub
     mockery.registerMock 'eventric/src/event_bus', sandbox.stub().returns eventBusStub
@@ -118,7 +117,6 @@ describe 'Context', ->
 
 
   describe '#emitDomainEvent', ->
-    storeStub = null
     beforeEach (done) ->
       someContext = new Context 'ExampleContext'
       someContext.defineDomainEvent 'WhatSoEver', ->
@@ -128,4 +126,4 @@ describe 'Context', ->
 
 
     it 'should publish the DomainEvent on the EventBus', ->
-      expect(eventBusStub.publishDomainEvent).to.have.been.called
+      expect(eventBusStub.publish).to.have.been.called

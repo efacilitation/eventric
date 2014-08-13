@@ -69,7 +69,7 @@ describe 'EventBus', ->
         done()
 
 
-    it 'should assume handlers to be synchronous when they don´t expect a done callback argument', ->
+    it 'should assume handlers to be synchronous when they don´t expect a done callback argument', (done) ->
       spy1 = sandbox.spy()
       spy2 = sandbox.spy()
       handler1 = -> spy1()
@@ -82,7 +82,7 @@ describe 'EventBus', ->
         done()
 
 
-    it 'should only call back when all handlers have finished', ->
+    it 'should only call back when all handlers have finished', (done) ->
       callCount = 0
       handler1 = (event, done) ->
         setTimeout ->

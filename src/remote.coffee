@@ -24,8 +24,11 @@ class Remote
     @_rpc 'query', arguments
 
 
-  subscribeToDomainEvent: ->
-    @_rpc 'subscribeToDomainEvent', arguments
+  subscribeToDomainEvent: (eventName, handlerFn) ->
+    clientName = @get 'default client'
+    client = @getClient clientName
+    channel = "#{@_contextName}/#{eventName}"
+    client.subscribe channel, eventName, handlerFn
 
 
   _rpc: (method, params) ->

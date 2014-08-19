@@ -10,6 +10,7 @@ class Eventric
     @_domainEventHandlersAll = []
     @_processManagerInstances = {}
     @_storeClasses = {}
+    @_remoteEndpoints = []
     @log = require './logger'
     @addRemoteEndpoint 'inmemory', (require './remote_inmemory').endpoint
     @addStore 'inmemory', require './store_inmemory'
@@ -52,6 +53,7 @@ class Eventric
     context = new Context name
 
     @_delegateAllDomainEventsToGlobalHandlers context
+    @_delegateAllDomainEventsToRemoteEndpoints context
 
     @_contexts[name] = context
 
@@ -73,6 +75,7 @@ class Eventric
 
 
   addRemoteEndpoint: (remoteName, remoteEndpoint) ->
+    @_remoteEndpoints.push remoteEndpoint
     remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
 
 
@@ -102,6 +105,12 @@ class Eventric
       for eventHandler in eventHandlers
         eventHandler domainEvent
 
+
+  _delegateAllDomainEventsToRemoteEndpoints: (context) ->
+    context.subscribeToDomainEvent 'DomainEvent', (domainEvent) =>
+      channel = "#{context.name}/#{domainEvent.name}"
+      @_remoteEndpoints.forEach (remoteEndpoint) ->
+        remoteEndpoint.publish channel, domainEvent.name, domainEvent
 
   ###*
   *

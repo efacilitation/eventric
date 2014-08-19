@@ -1,4 +1,5 @@
 customRemoteBridge = null
+eventHandlers = {}
 
 class InMemoryRemoteEndpoint
   constructor: ->
@@ -9,6 +10,11 @@ class InMemoryRemoteEndpoint
           resolve result
 
   setRPCHandler: (@_handleRPCRequest) ->
+
+
+  publish: (channel, eventName, payload) ->
+    if eventHandlers[channel] and eventHandlers[channel][eventName]
+      eventHandlers[channel][eventName].forEach (handler) -> handler(payload)
 
 
 module.exports.endpoint = new InMemoryRemoteEndpoint
@@ -23,5 +29,12 @@ class InMemoryRemoteClient
       callback null, result
     .catch (error) ->
       callback error
+
+
+  subscribe: (channel, eventName, handlerFn) ->
+    eventHandlers[channel] ?= {}
+    eventHandlers[channel][eventName] ?= []
+    eventHandlers[channel][eventName].push handlerFn
+
 
 module.exports.client = new InMemoryRemoteClient

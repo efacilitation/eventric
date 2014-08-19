@@ -48,12 +48,17 @@ describe 'Remote Feature', ->
         done()
 
 
-    it 'then it should be possible to subscribe to domainevents and receive them', (done) ->
+    it 'then it should be possible to subscribe to domain events and receive them', (done) ->
       exampleRemote = eventric.remote 'Example'
-      exampleRemote.subscribeToDomainEvent 'ExampleCreated', ->
-        done()
 
-      exampleRemote.command 'CreateExample'
+      numberOfReceivedEvents = 0
+      exampleRemote.subscribeToDomainEvent 'ExampleCreated', ->
+        numberOfReceivedEvents++
+        if numberOfReceivedEvents is 2
+          done()
+
+      exampleRemote.command 'CreateExample', {}
+      exampleRemote.command 'CreateExample', {}
 
 
   describe 'given we created and initialized some example context with a custom remote endpoint', ->

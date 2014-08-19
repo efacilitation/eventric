@@ -1,17 +1,24 @@
-path = require("canonical-path")
-module.exports = (config) ->
-  require("dgeni-packages/jsdoc") config
-  require("dgeni-packages/nunjucks") config
+path    = require("canonical-path")
+Package = require('dgeni').Package
 
-  config.set "logging.level", "debug"
-  config.prepend "rendering.templateFolders", [path.resolve(__dirname, "templates")]
-  config.prepend "rendering.templatePatterns", ["common.template.html"]
-  config.set "source.projectPath", "."
-  config.set "source.files", [
-    pattern: "build/node/src/*.js"
-    basePath: path.resolve(__dirname, "..")
+module.exports = new Package('privacly', [
+  require('dgeni-packages/jsdoc'),
+  require('dgeni-packages/nunjucks')
+])
+
+.config (log, readFilesProcessor, templateFinder, writeFilesProcessor) ->
+
+  log.level = 'debug'
+
+  readFilesProcessor.basePath = path.resolve(__dirname, '..')
+
+  readFilesProcessor.sourceFiles = [
+    {
+      include: 'build/node/src/*.js'
+    }
   ]
 
-  config.set "rendering.outputFolder", "../build/"
-  config.set "rendering.contentsFolder", "docs"
-  config
+  templateFinder.templateFolders.unshift(path.resolve(__dirname, 'templates'))
+  templateFinder.templatePatterns.unshift('common.template.html')
+
+  writeFilesProcessor.outputFolder  = 'build/docs/'

@@ -36,8 +36,8 @@
     "chai": "*",
     "coffee-script": "*",
     "commonjs-require": "*",
-    "dgeni": "0.3.0",
-    "dgeni-packages": "0.9.6",
+    "dgeni": "*",
+    "dgeni-packages": "*",
     "growler": "*",
     "gulp": "*",
     "gulp-util": "*",
@@ -61,7 +61,8 @@
     "rimraf": "*",
     "run-sequence": "*",
     "sinon": "*",
-    "sinon-chai": "*"
+    "sinon-chai": "*",
+    "lodash": "*"
   },
   "dependencies": {},
   "licenses": [

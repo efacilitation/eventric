@@ -61,6 +61,17 @@ describe 'Remote Feature', ->
       exampleRemote.command 'CreateExample', {}
 
 
+    it 'then it should be possible to unsubscribe from domain events', (done) ->
+      exampleRemote = eventric.remote 'Example'
+      firstHandler = sandbox.stub()
+      exampleRemote.subscribeToDomainEvent 'ExampleCreated', firstHandler
+      exampleRemote.unsubscribeFromDomainEvent 'ExampleCreated', firstHandler
+      exampleRemote.subscribeToDomainEvent 'ExampleCreated', ->
+        expect(firstHandler).not.to.have.been.called
+        done()
+      exampleRemote.command 'CreateExample', {}
+
+
   describe 'given we created and initialized some example context with a custom remote endpoint', ->
     customRemoteBridge = null
     beforeEach ->

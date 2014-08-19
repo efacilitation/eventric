@@ -108,9 +108,9 @@ class Eventric
 
   _delegateAllDomainEventsToRemoteEndpoints: (context) ->
     context.subscribeToDomainEvent 'DomainEvent', (domainEvent) =>
-      channel = "#{context.name}/#{domainEvent.name}"
+      eventName = "#{context.name}/#{domainEvent.name}"
       @_remoteEndpoints.forEach (remoteEndpoint) ->
-        remoteEndpoint.publish channel, domainEvent.name, domainEvent
+        remoteEndpoint.publish eventName, domainEvent
 
   ###*
   *

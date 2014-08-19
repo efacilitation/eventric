@@ -27,8 +27,15 @@ class Remote
   subscribeToDomainEvent: (eventName, handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
-    channel = "#{@_contextName}/#{eventName}"
-    client.subscribe channel, eventName, handlerFn
+    fullEventName = "#{@_contextName}/#{eventName}"
+    client.subscribe fullEventName, handlerFn
+
+
+  unsubscribeFromDomainEvent: (eventName, handlerFn) ->
+    clientName = @get 'default client'
+    client = @getClient clientName
+    fullEventName = "#{@_contextName}/#{eventName}"
+    client.unsubscribe fullEventName, handlerFn
 
 
   _rpc: (method, params) ->

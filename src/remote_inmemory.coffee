@@ -12,9 +12,9 @@ class InMemoryRemoteEndpoint
   setRPCHandler: (@_handleRPCRequest) ->
 
 
-  publish: (channel, eventName, payload) ->
-    if eventHandlers[channel] and eventHandlers[channel][eventName]
-      eventHandlers[channel][eventName].forEach (handler) -> handler(payload)
+  publish: (eventName, payload) ->
+    if eventHandlers[eventName]
+      eventHandlers[eventName].forEach (handler) -> handler(payload)
 
 
 module.exports.endpoint = new InMemoryRemoteEndpoint
@@ -31,10 +31,13 @@ class InMemoryRemoteClient
       callback error
 
 
-  subscribe: (channel, eventName, handlerFn) ->
-    eventHandlers[channel] ?= {}
-    eventHandlers[channel][eventName] ?= []
-    eventHandlers[channel][eventName].push handlerFn
+  subscribe: (eventName, handlerFn) ->
+    eventHandlers[eventName] ?= []
+    eventHandlers[eventName].push handlerFn
+
+
+  unsubscribe: (eventName, handlerFn) ->
+    eventHandlers[eventName] = eventHandlers[eventName].filter (registeredHandler) -> registeredHandler isnt handlerFn
 
 
 module.exports.client = new InMemoryRemoteClient

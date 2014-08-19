@@ -488,7 +488,7 @@ class Context
   _applyDomainEventsFromStoreToProjection: (projection, eventNames) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findDomainEventsByName eventNames, (err, events) =>
-        if events.length is 0
+        if not events or events.length is 0
           return resolve projection, eventNames
 
         async.eachSeries events, (event, next) =>

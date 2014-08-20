@@ -15,6 +15,15 @@ describe 'EventBus', ->
       eventBus.publishDomainEvent publishedEvent, ->
 
 
+  describe '#subscribeToDomainEventWithAggregateId', ->
+    it 'should subscribe to the event with given event name and aggregate id', (done) ->
+      publishedEvent = name: 'SomeEvent', aggregate: id: 12345
+      eventBus.subscribeToDomainEventWithAggregateId 'SomeEvent', 12345, (event) ->
+        expect(event).to.equal publishedEvent
+        done()
+      eventBus.publishDomainEvent publishedEvent, ->
+
+
   describe '#publishDomainEvent', ->
     it 'should always publish a generic "DomainEvent" event', (done) ->
       publishedEvent = name: 'SomeEvent'

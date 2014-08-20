@@ -7,6 +7,7 @@ describe 'Context', ->
   beforeEach ->
     eventBusStub =
       subscribeToDomainEvent: sandbox.stub()
+      subscribeToDomainEventWithAggregateId: sandbox.stub()
       publishDomainEvent: sandbox.stub()
 
     mockery.registerMock './event_bus', sandbox.stub().returns eventBusStub

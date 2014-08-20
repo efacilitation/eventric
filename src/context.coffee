@@ -257,13 +257,21 @@ class Context
   *
   * @param {Function} Function which gets called with `domainEvent` as argument
   * - `domainEvent` Instance of [[DomainEvent]]
+  *
   ###
   subscribeToDomainEvent: (domainEventName, handlerFn, options = {}) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler, options
-    @_domainEventHandlers[domainEventName] = [] unless @_domainEventHandlers[domainEventName]
-    @_domainEventHandlers[domainEventName].push domainEventHandler
     @
+
+  ###*
+  *
+  * @name subscribeToDomainEventWithAggregateId
+  *
+  ###
+  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn, options = {}) ->
+    domainEventHandler = () => handlerFn.apply @_di, arguments
+    @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler, options
 
 
   subscribeToDomainEvents: (domainEventHandlersObj) ->

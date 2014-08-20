@@ -5,7 +5,6 @@ class EventBus
 
 
   subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handler, options = {}) ->
-    @subscribeToDomainEvent eventName, handler, options
     @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handler, options
 
 
@@ -49,7 +48,8 @@ class EventBus
   _getRelevantHandlers: (domainEvent) ->
     handlers = @_handlers['DomainEvent'].concat @_handlers[domainEvent.name] || []
     if domainEvent.aggregate and domainEvent.aggregate.id
-      handlers.concat @_handlers["#{domainEvent.name}/#{domainEvent.aggregate.id}"] || []
+      eventName = "#{domainEvent.name}/#{domainEvent.aggregate.id}"
+      handlers = handlers.concat @_handlers[eventName] || []
     handlers
 
 

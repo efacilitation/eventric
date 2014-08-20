@@ -31,11 +31,19 @@ class Remote
     client.subscribe fullEventName, handlerFn
 
 
+  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn) ->
+    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn
+
+
   unsubscribeFromDomainEvent: (eventName, handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
     fullEventName = "#{@_contextName}/#{eventName}"
     client.unsubscribe fullEventName, handlerFn
+
+
+  unsubscribeFromDomainEventWithAggregateId: (eventName, aggregateId, handlerFn) ->
+    @unsubscribeFromDomainEvent "#{eventName}/#{aggregateId}", handlerFn
 
 
   _rpc: (method, params) ->

@@ -111,6 +111,10 @@ class Eventric
       eventName = "#{context.name}/#{domainEvent.name}"
       @_remoteEndpoints.forEach (remoteEndpoint) ->
         remoteEndpoint.publish eventName, domainEvent
+      if domainEvent.aggregate
+        eventNameWithAggregateId = "#{context.name}/#{domainEvent.name}/#{domainEvent.aggregate.id}"
+        @_remoteEndpoints.forEach (remoteEndpoint) ->
+          remoteEndpoint.publish eventNameWithAggregateId, domainEvent
 
   ###*
   *

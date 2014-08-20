@@ -7,20 +7,41 @@ describe 'Remote Feature', ->
     exampleContext = eventric.context 'Example'
     exampleContext.defineDomainEvents
       ExampleCreated: ->
+      ExampleModified: ->
 
     exampleContext.addCommandHandlers
       CreateExample: (params, callback) ->
         @$repository('Example').create()
         .then (exampleId) =>
           @$repository('Example').save exampleId
+        .then (exampleId) =>
+          callback null, exampleId
+        .catch (error) =>
+          callback error
+
+      ModifyExample: (params, callback) ->
+        @$repository('Example').findById params.id
+        .then (example) =>
+          example.modify()
+          @$repository('Example').save params.id
+        .then (id) =>
+          callback null, id
+        .catch (error) =>
+          callback error
+
       DoSomething: (params, callback) ->
         doSomethingStub()
-        callback()
+        callback null
 
     class Example
       create: (callback) ->
         @$emitDomainEvent 'ExampleCreated'
         callback()
+
+      modify: ->
+        @$emitDomainEvent 'ExampleModified'
+
+
     exampleContext.addAggregate 'Example', Example
 
     exampleContext.addQueryHandlers
@@ -59,6 +80,17 @@ describe 'Remote Feature', ->
 
       exampleRemote.command 'CreateExample', {}
       exampleRemote.command 'CreateExample', {}
+
+
+    it 'then it should be possible to subscribe to domain events for specific aggregate ids', (done) ->
+      exampleRemote = eventric.remote 'Example'
+
+      exampleRemote.command 'CreateExample'
+      .then (exampleId) ->
+        exampleRemote.subscribeToDomainEventWithAggregateId 'ExampleModified', exampleId, ->
+          done()
+        exampleRemote.command 'ModifyExample',
+          id: exampleId
 
 
     it 'then it should be possible to unsubscribe from domain events', (done) ->

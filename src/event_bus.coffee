@@ -4,49 +4,52 @@ class EventBus
     @_handlers = {DomainEvent: []}
 
 
-  subscribe: ([eventName, aggregateId]..., handler) ->
+  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handler, options = {}) ->
+    @subscribeToDomainEvent eventName, handler, options
+    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handler, options
+
+
+  subscribeToDomainEvent: (eventName, handler, options = {}) ->
+    if options.isAsync
+      handler.isAsync = true
     @_handlers[eventName] ?= []
     @_handlers[eventName].push handler
-    if aggregateId
-      eventToSubscribe = "#{eventName}/#{aggregateId}"
-      @_handlers[eventToSubscribe] ?= []
-      @_handlers[eventToSubscribe].push handler
 
 
   # TODO: Implement unsubscribe
   #unsubscribe: ([eventName, aggregateId]..., handler) ->
 
 
-  publish: (eventName, event, callback = ->) ->
-    handlers = @_getRelevantHandlers eventName, event
+  publishDomainEvent: (domainEvent, callback = ->) ->
+    handlers = @_getRelevantHandlers domainEvent
     executeNextHandler = ->
       if handlers.length is 0
         callback()
       else
-        handlers.shift() event, ->
+        handlers.shift() domainEvent, ->
         setTimeout executeNextHandler, 0
     setTimeout executeNextHandler, 0
 
 
-  publishAndWait: (eventName, event, callback = ->) ->
-    handlers = @_getRelevantHandlers eventName, event
+  publishDomainEventAndWait: (domainEvent, callback = ->) ->
+    handlers = @_getRelevantHandlers domainEvent
     executeNextHandler = ->
       if handlers.length is 0
         callback()
       else
         handler = handlers.shift()
-        if handler.length < 2
-          handler(event)
-          setTimeout executeNextHandler, 0
+        if handler.isAsync
+          handler domainEvent, -> setTimeout executeNextHandler, 0
         else
-          handler event, -> setTimeout executeNextHandler, 0
+          handler(domainEvent)
+          setTimeout executeNextHandler, 0
     setTimeout executeNextHandler, 0
 
 
-  _getRelevantHandlers: (eventName, event) ->
-    handlers = @_handlers['DomainEvent'].concat @_handlers[eventName] || []
-    if event.aggregate and event.aggregate.id
-      handlers.concat @_handlers["#{eventName}/#{event.aggregate.id}"] || []
+  _getRelevantHandlers: (domainEvent) ->
+    handlers = @_handlers['DomainEvent'].concat @_handlers[domainEvent.name] || []
+    if domainEvent.aggregate and domainEvent.aggregate.id
+      handlers.concat @_handlers["#{domainEvent.name}/#{domainEvent.aggregate.id}"] || []
     handlers
 
 

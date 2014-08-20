@@ -1,4 +1,4 @@
-describe 'Sync Command Aggregate Feature', ->
+describe 'Waiting Command Aggregate Feature', ->
 
   describe 'given we created and initialized a context with an aggregate', ->
     exampleContext = null
@@ -60,11 +60,12 @@ describe 'Sync Command Aggregate Feature', ->
 
       beforeEach (done) ->
         asyncOperation = sandbox.spy()
-        exampleContext.subscribeToDomainEvent 'ExampleCreated', (domainEvent, done) ->
+        handler = (domainEvent, done) ->
           setTimeout ->
             asyncOperation()
             done()
           , 500
+        exampleContext.subscribeToDomainEvent 'ExampleCreated', handler, isAsync: true
 
         exampleContext.initialize ->
           done()

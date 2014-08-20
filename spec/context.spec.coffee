@@ -6,8 +6,8 @@ describe 'Context', ->
 
   beforeEach ->
     eventBusStub =
-      subscribe: sandbox.stub()
-      publish: sandbox.stub()
+      subscribeToDomainEvent: sandbox.stub()
+      publishDomainEvent: sandbox.stub()
 
     mockery.registerMock './event_bus', sandbox.stub().returns eventBusStub
     mockery.registerMock 'eventric/src/event_bus', sandbox.stub().returns eventBusStub
@@ -126,4 +126,4 @@ describe 'Context', ->
 
 
     it 'should publish the DomainEvent on the EventBus', ->
-      expect(eventBusStub.publish).to.have.been.called
+      expect(eventBusStub.publishDomainEvent).to.have.been.called

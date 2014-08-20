@@ -102,14 +102,14 @@ class Repository
         else
           if not @_context.isWaitingModeEnabled()
             for domainEvent in domainEvents
-              @_context.getEventBus().publish domainEvent.name, domainEvent, ->
-              eventric.log.debug "Published DomainEvent", domainEvent
+              eventric.log.debug "Publishing DomainEvent", domainEvent
+              @_context.getEventBus().publishDomainEvent domainEvent, ->
             resolve aggregate.id
             callback null, aggregate.id
           else
             async.eachSeries domainEvents, (domainEvent, next) =>
               eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
-              @_context.getEventBus().publishAndWait domainEvent.name, domainEvent, next
+              @_context.getEventBus().publishDomainEventAndWait domainEvent, next
             , (err) =>
               if err
                 callback err, null

@@ -6,51 +6,51 @@ describe 'EventBus', ->
     eventBus = new EventBus
 
 
-  describe '#subscribe', ->
+  describe '#subscribeToDomainEvent', ->
     it 'should subscribe to the event with given event name', (done) ->
-      publishedEvent = {}
-      eventBus.subscribe 'SomeEvent', (event) ->
+      publishedEvent = name: 'SomeEvent'
+      eventBus.subscribeToDomainEvent 'SomeEvent', (event) ->
         expect(event).to.equal publishedEvent
         done()
-      eventBus.publish 'SomeEvent', publishedEvent, ->
+      eventBus.publishDomainEvent publishedEvent, ->
 
 
-  describe '#publish', ->
+  describe '#publishDomainEvent', ->
     it 'should always publish a generic "DomainEvent" event', (done) ->
-      publishedEvent = {}
-      eventBus.subscribe 'DomainEvent', (event) ->
+      publishedEvent = name: 'SomeEvent'
+      eventBus.subscribeToDomainEvent 'DomainEvent', (event) ->
         expect(event).to.equal publishedEvent
         done()
-      eventBus.publish 'SomeEvent', publishedEvent, ->
+      eventBus.publishDomainEvent publishedEvent, ->
 
 
     it 'should execute all subscribed handlers in registration order', (done) ->
       callCount = 0
-      eventBus.subscribe 'SomeEvent', ->
+      eventBus.subscribeToDomainEvent 'SomeEvent', ->
         callCount++
-      eventBus.subscribe 'SomeEvent', ->
+      eventBus.subscribeToDomainEvent 'SomeEvent', ->
         callCount++
         expect(callCount).to.equal 2
         done()
-      eventBus.publish 'SomeEvent', {}, ->
+      eventBus.publishDomainEvent name: 'SomeEvent', ->
 
 
-    it 'should immediately call back even though handlers may not be finished yet', (done) ->
+    it 'should immediately call back even though handlers may be asynchronous', (done) ->
       spy = sandbox.spy()
       handler1 = (event, done) -> setTimeout spy, 50
-      eventBus.subscribe 'SomeEvent', handler1
-      eventBus.publish 'SomeEvent', {}, ->
+      eventBus.subscribeToDomainEvent 'SomeEvent', handler1, isAsync: true
+      eventBus.publishDomainEvent ame: 'SomeEvent', ->
         expect(spy).not.to.have.been.called
         done()
 
 
-  describe '#publishAndWait', ->
+  describe '#publishDomainEventAndWait', ->
     it 'should always publish a generic "DomainEvent" event', (done) ->
-      publishedEvent = {}
-      eventBus.subscribe 'SomeEvent', (event) ->
+      publishedEvent = name: 'SomeEvent'
+      eventBus.subscribeToDomainEvent 'SomeEvent', (event) ->
         expect(event).to.equal publishedEvent
         done()
-      eventBus.publishAndWait 'SomeEvent', publishedEvent, ->
+      eventBus.publishDomainEventAndWait publishedEvent, ->
 
 
     it 'should wait for async handlers to invoke the done callback before executing the next handler', (done) ->
@@ -62,21 +62,21 @@ describe 'EventBus', ->
         , 50
       handler2 = ->
         greeting += 'World'
-      eventBus.subscribe 'SomeEvent', handler1
-      eventBus.subscribe 'SomeEvent', handler2
-      eventBus.publishAndWait 'SomeEvent', {}, ->
+      eventBus.subscribeToDomainEvent 'SomeEvent', handler1, isAsync: true
+      eventBus.subscribeToDomainEvent 'SomeEvent', handler2
+      eventBus.publishDomainEventAndWait name: 'SomeEvent', ->
         expect(greeting).to.equal 'Hello World'
         done()
 
 
-    it 'should assume handlers to be synchronous when they don´t expect a done callback argument', (done) ->
+    it 'should execute synchronous handlers in series', (done) ->
       spy1 = sandbox.spy()
       spy2 = sandbox.spy()
       handler1 = -> spy1()
       handler2 = -> spy2()
-      eventBus.subscribe 'SomeEvent', handler1
-      eventBus.subscribe 'SomeEvent', handler2
-      eventBus.publishAndWait 'SomeEvent', {}, ->
+      eventBus.subscribeToDomainEvent 'SomeEvent', handler1
+      eventBus.subscribeToDomainEvent 'SomeEvent', handler2
+      eventBus.publishDomainEventAndWait name: 'SomeEvent', ->
         expect(spy1).to.have.been.called
         expect(spy2).to.have.been.called
         done()
@@ -94,8 +94,8 @@ describe 'EventBus', ->
           callCount++
           done()
         , 25
-      eventBus.subscribe 'SomeEvent', handler1
-      eventBus.subscribe 'SomeEvent', handler2
-      eventBus.publishAndWait 'SomeEvent', {}, ->
+      eventBus.subscribeToDomainEvent 'SomeEvent', handler1, isAsync: true
+      eventBus.subscribeToDomainEvent 'SomeEvent', handler2, isAsync: true
+      eventBus.publishDomainEventAndWait name: 'SomeEvent', ->
         expect(callCount).to.equal 2
         done()

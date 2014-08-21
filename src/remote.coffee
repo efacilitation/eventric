@@ -1,8 +1,13 @@
+eventric = require 'eventric'
+log      = eventric.log
+
 class Remote
 
   constructor: (@_contextName) ->
     @_params = {}
     @_clients = {}
+    @_projectionClasses = {}
+    @_projectionInstances = {}
     @addClient 'inmemory', (require './remote_inmemory').client
     @set 'default client', 'inmemory'
 
@@ -68,6 +73,37 @@ class Remote
 
   getClient: (clientName) ->
     @_clients[clientName]
+
+
+  addProjection: (projectionName, projectionClass) ->
+    @_projectionClasses[projectionName] = projectionClass
+    @
+
+
+  initializeProjectionInstance: (projectionName, params) ->
+    new Promise (resolve, reject) =>
+      if @_projectionClasses[projectionName]
+        Projection = @_projectionClasses[projectionName]
+        projection = new Projection
+
+        for handlerFnName in Object.keys(Projection::)
+          continue unless handlerFnName.indexOf("handle") == 0
+          eventName = handlerFnName.replace /^handle/, ''
+          @subscribeToDomainEvent eventName, ->
+            projection[handlerFnName].apply projection, arguments
+
+        projectionId = eventric.generateUid()
+        @_projectionInstances[projectionId] = projection
+        resolve projectionId
+      else
+        err = "Given projection #{projectionName} not registered on remote"
+        log.error err
+        err = new Error err
+        reject err
+
+
+  getProjectionInstance: (projectionId) ->
+    @_projectionInstances[projectionId]
 
 
 module.exports = Remote

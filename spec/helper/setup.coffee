@@ -21,7 +21,7 @@ before ->
 
 
 beforeEach ->
-  root.eventric = require 'eventric'
+  root.eventric = require 'eventric/src'
 
 
 afterEach ->

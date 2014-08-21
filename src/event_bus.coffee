@@ -52,5 +52,4 @@ class EventBus
       handlers = handlers.concat @_handlers[eventName] || []
     handlers
 
-
 module.exports = EventBus

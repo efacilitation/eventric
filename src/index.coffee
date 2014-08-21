@@ -108,13 +108,10 @@ class Eventric
 
   _delegateAllDomainEventsToRemoteEndpoints: (context) ->
     context.subscribeToDomainEvent 'DomainEvent', (domainEvent) =>
-      eventName = "#{context.name}/#{domainEvent.name}"
       @_remoteEndpoints.forEach (remoteEndpoint) ->
-        remoteEndpoint.publish eventName, domainEvent
-      if domainEvent.aggregate
-        eventNameWithAggregateId = "#{context.name}/#{domainEvent.name}/#{domainEvent.aggregate.id}"
-        @_remoteEndpoints.forEach (remoteEndpoint) ->
-          remoteEndpoint.publish eventNameWithAggregateId, domainEvent
+        remoteEndpoint.publish context.name, domainEvent.name, domainEvent
+        if domainEvent.aggregate
+          remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
 
   ###*
   *

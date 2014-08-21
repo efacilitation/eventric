@@ -24,26 +24,34 @@ class Remote
     @_rpc 'query', arguments
 
 
-  subscribeToDomainEvent: (eventName, handlerFn) ->
+  subscribeToDomainEvent: ([domainEventName]..., handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
-    fullEventName = "#{@_contextName}/#{eventName}"
-    client.subscribe fullEventName, handlerFn
+    if domainEventName
+      client.subscribe @_contextName, domainEventName, handlerFn
+    else
+      client.subscribe @_contextName, handlerFn
 
 
-  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn) ->
-    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn
-
-
-  unsubscribeFromDomainEvent: (eventName, handlerFn) ->
+  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
-    fullEventName = "#{@_contextName}/#{eventName}"
-    client.unsubscribe fullEventName, handlerFn
+    client.subscribe @_contextName, domainEventName, aggregateId, handlerFn
 
 
-  unsubscribeFromDomainEventWithAggregateId: (eventName, aggregateId, handlerFn) ->
-    @unsubscribeFromDomainEvent "#{eventName}/#{aggregateId}", handlerFn
+  unsubscribeFromDomainEvent: ([domainEventName]..., handlerFn) ->
+    clientName = @get 'default client'
+    client = @getClient clientName
+    if domainEventName
+      client.unsubscribe @_contextName, domainEventName, handlerFn
+    else
+      client.unsubscribe @_contextName, handlerFn
+
+
+  unsubscribeFromDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
+    clientName = @get 'default client'
+    client = @getClient clientName
+    client.unsubscribe @_contextName, domainEventName, aggregateId, handlerFn
 
 
   _rpc: (method, params) ->

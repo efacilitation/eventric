@@ -12,9 +12,10 @@ class InMemoryRemoteEndpoint
   setRPCHandler: (@_handleRPCRequest) ->
 
 
-  publish: (eventName, payload) ->
-    if eventHandlers[eventName]
-      eventHandlers[eventName].forEach (handler) -> handler(payload)
+  publish: (context, [domainEventName, aggregateId]..., payload) ->
+    fullEventName = getFullEventName context, domainEventName, aggregateId
+    if eventHandlers[fullEventName]
+      eventHandlers[fullEventName].forEach (handler) -> handler(payload)
 
 
 module.exports.endpoint = new InMemoryRemoteEndpoint
@@ -23,7 +24,7 @@ module.exports.endpoint = new InMemoryRemoteEndpoint
 class InMemoryRemoteClient
   rpc: (rpcRequest, callback) ->
     if not customRemoteBridge
-      throw new Error 'No Remote Endpoint available for inmemory Client'
+      throw new Error 'No Remote Endpoint available for in memory client'
     customRemoteBridge rpcRequest
     .then (result) ->
       callback null, result
@@ -31,13 +32,24 @@ class InMemoryRemoteClient
       callback error
 
 
-  subscribe: (eventName, handlerFn) ->
-    eventHandlers[eventName] ?= []
-    eventHandlers[eventName].push handlerFn
+  subscribe: (context, [domainEventName, aggregateId]..., handlerFn) ->
+    fullEventName = getFullEventName context, domainEventName, aggregateId
+    eventHandlers[fullEventName] ?= []
+    eventHandlers[fullEventName].push handlerFn
 
 
-  unsubscribe: (eventName, handlerFn) ->
-    eventHandlers[eventName] = eventHandlers[eventName].filter (registeredHandler) -> registeredHandler isnt handlerFn
+  unsubscribe: (context, [domainEventName, aggregateId]..., handlerFn) ->
+    fullEventName = getFullEventName context, domainEventName, aggregateId
+    eventHandlers[fullEventName] =
+      eventHandlers[fullEventName].filter (registeredHandler) -> registeredHandler isnt handlerFn
 
 
 module.exports.client = new InMemoryRemoteClient
+
+getFullEventName = (context, domainEventName, aggregateId) ->
+  fullEventName = context
+  if domainEventName
+    fullEventName += "/#{domainEventName}"
+  if aggregateId
+    fullEventName += "/#{aggregateId}"
+  fullEventName

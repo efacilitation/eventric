@@ -8,6 +8,7 @@ class Remote
     @_clients = {}
     @_projectionClasses = {}
     @_projectionInstances = {}
+    @_handlerFunctions = {}
     @addClient 'inmemory', (require './remote_inmemory').client
     @set 'default client', 'inmemory'
 
@@ -86,13 +87,20 @@ class Remote
         Projection = @_projectionClasses[projectionName]
         projection = new Projection
 
+        projectionId = eventric.generateUid()
+
         for handlerFnName in Object.keys(Projection::)
           continue unless handlerFnName.indexOf("handle") == 0
           eventName = handlerFnName.replace /^handle/, ''
-          @subscribeToDomainEvent eventName, ->
+          handlerFn = ->
             projection[handlerFnName].apply projection, arguments
+          @subscribeToDomainEvent eventName, handlerFn
 
-        projectionId = eventric.generateUid()
+          @_handlerFunctions[projectionId] ?= []
+          @_handlerFunctions[projectionId].push
+            eventName: eventName
+            handlerFn: handlerFn
+
         @_projectionInstances[projectionId] = projection
         resolve projectionId
       else
@@ -104,6 +112,14 @@ class Remote
 
   getProjectionInstance: (projectionId) ->
     @_projectionInstances[projectionId]
+
+
+  destroyProjectionInstance: (projectionId) ->
+    for projectionHandlers in @_handlerFunctions[projectionId]
+      @unsubscribeFromDomainEvent projectionHandlers.eventName, projectionHandlers.handlerFn
+
+    delete @_handlerFunctions[projectionId]
+    delete @_projectionInstances[projectionId]
 
 
 module.exports = Remote

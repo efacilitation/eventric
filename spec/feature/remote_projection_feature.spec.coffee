@@ -49,9 +49,19 @@ describe 'Remote Projection Feature', ->
           done()
 
 
-      it.only 'then the projection should work as expected', (done) ->
+      it 'then the projection should work as expected', (done) ->
         exampleRemote.command 'CreateExample'
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           expect(exampleProjection.data).to.equal 'foo'
           done()
+
+
+      it 'then we should be able to remove it', ->
+        sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
+
+        exampleProjection = exampleRemote.getProjectionInstance projectionId
+        exampleRemote.destroyProjectionInstance projectionId
+
+        expect(exampleRemote.getProjectionInstance projectionId).to.be.undefined
+        expect(exampleRemote.unsubscribeFromDomainEvent).to.have.been.called

@@ -83,31 +83,41 @@ class Remote
 
   initializeProjectionInstance: (projectionName, params) ->
     new Promise (resolve, reject) =>
-      if @_projectionClasses[projectionName]
-        Projection = @_projectionClasses[projectionName]
-        projection = new Projection
-
-        projectionId = eventric.generateUid()
-
-        for handlerFnName in Object.keys(Projection::)
-          continue unless handlerFnName.indexOf("handle") == 0
-          eventName = handlerFnName.replace /^handle/, ''
-          handlerFn = ->
-            projection[handlerFnName].apply projection, arguments
-          @subscribeToDomainEvent eventName, handlerFn
-
-          @_handlerFunctions[projectionId] ?= []
-          @_handlerFunctions[projectionId].push
-            eventName: eventName
-            handlerFn: handlerFn
-
-        @_projectionInstances[projectionId] = projection
-        resolve projectionId
-      else
+      if not @_projectionClasses[projectionName]
         err = "Given projection #{projectionName} not registered on remote"
         log.error err
         err = new Error err
-        reject err
+        return reject err
+
+      Projection = @_projectionClasses[projectionName]
+      projection = new Projection
+
+      aggregateId = null
+      di =
+        $subscribeHandlersWithAggregateId: (_aggregateId) ->
+          aggregateId = _aggregateId
+      projection.initialize?.apply di, [params]
+
+      projectionId = eventric.generateUid()
+
+      for handlerFnName in Object.keys(Projection::)
+        continue unless handlerFnName.indexOf("handle") == 0
+        eventName = handlerFnName.replace /^handle/, ''
+        handlerFn = ->
+          projection[handlerFnName].apply projection, arguments
+        if aggregateId
+          @subscribeToDomainEventWithAggregateId eventName, aggregateId, handlerFn
+        else
+          @subscribeToDomainEvent eventName, handlerFn
+
+        @_handlerFunctions[projectionId] ?= []
+        @_handlerFunctions[projectionId].push
+          eventName: eventName
+          aggregateId: aggregateId
+          handlerFn: handlerFn
+
+      @_projectionInstances[projectionId] = projection
+      resolve projectionId
 
 
   getProjectionInstance: (projectionId) ->
@@ -116,7 +126,10 @@ class Remote
 
   destroyProjectionInstance: (projectionId) ->
     for projectionHandlers in @_handlerFunctions[projectionId]
-      @unsubscribeFromDomainEvent projectionHandlers.eventName, projectionHandlers.handlerFn
+      if projectionHandlers.aggregateId
+        @unsubscribeFromDomainEventWithAggregateId projectionHandlers.eventName, projectionHandlers.aggregateId, projectionHandlers.handlerFn
+      else
+        @unsubscribeFromDomainEvent projectionHandlers.eventName, projectionHandlers.handlerFn
 
     delete @_handlerFunctions[projectionId]
     delete @_projectionInstances[projectionId]

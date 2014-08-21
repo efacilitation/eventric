@@ -100,14 +100,14 @@ class Eventric
 
 
   _delegateAllDomainEventsToGlobalHandlers: (context) ->
-    context.subscribeToDomainEvent 'DomainEvent', (domainEvent) =>
+    context.subscribeToAllDomainEvents (domainEvent) =>
       eventHandlers = @getDomainEventHandlers context.name, domainEvent.name
       for eventHandler in eventHandlers
         eventHandler domainEvent
 
 
   _delegateAllDomainEventsToRemoteEndpoints: (context) ->
-    context.subscribeToDomainEvent 'DomainEvent', (domainEvent) =>
+    context.subscribeToAllDomainEvents (domainEvent) =>
       @_remoteEndpoints.forEach (remoteEndpoint) ->
         remoteEndpoint.publish context.name, domainEvent.name, domainEvent
         if domainEvent.aggregate

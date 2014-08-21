@@ -25,9 +25,9 @@ describe 'EventBus', ->
 
 
   describe '#publishDomainEvent', ->
-    it 'should always publish a generic "DomainEvent" event', (done) ->
+    it 'should always notify all subscribers registered via subscribeToAllDomainEvents()', (done) ->
       publishedEvent = name: 'SomeEvent'
-      eventBus.subscribeToDomainEvent 'DomainEvent', (event) ->
+      eventBus.subscribeToAllDomainEvents (event) ->
         expect(event).to.equal publishedEvent
         done()
       eventBus.publishDomainEvent publishedEvent, ->

@@ -1,7 +1,8 @@
 class EventBus
 
   constructor: ->
-    @_handlers = {DomainEvent: []}
+    @_handlers = {}
+    @_globalHandlers = []
 
 
   subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handler, options = {}) ->
@@ -13,6 +14,10 @@ class EventBus
       handler.isAsync = true
     @_handlers[eventName] ?= []
     @_handlers[eventName].push handler
+
+
+  subscribeToAllDomainEvents: (handler) ->
+    @_globalHandlers.push handler
 
 
   # TODO: Implement unsubscribe
@@ -46,10 +51,11 @@ class EventBus
 
 
   _getRelevantHandlers: (domainEvent) ->
-    handlers = @_handlers['DomainEvent'].concat @_handlers[domainEvent.name] || []
+    handlers = @_globalHandlers.concat @_handlers[domainEvent.name] || []
     if domainEvent.aggregate and domainEvent.aggregate.id
       eventName = "#{domainEvent.name}/#{domainEvent.aggregate.id}"
       handlers = handlers.concat @_handlers[eventName] || []
     handlers
+
 
 module.exports = EventBus

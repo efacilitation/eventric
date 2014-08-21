@@ -274,6 +274,12 @@ class Context
     @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler, options
 
 
+  subscribeToAllDomainEvents: (handlerFn, options = {}) ->
+    domainEventHandler = () => handlerFn.apply @_di, arguments
+    @_eventBus.subscribeToAllDomainEvents domainEventHandler, options
+
+
+
   subscribeToDomainEvents: (domainEventHandlersObj) ->
     @subscribeToDomainEvent domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
     @

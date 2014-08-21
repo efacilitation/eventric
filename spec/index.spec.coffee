@@ -6,7 +6,7 @@ describe 'Index', ->
 
     beforeEach ->
       contextInstance =
-        subscribeToDomainEvent: sandbox.stub()
+        subscribeToAllDomainEvents: sandbox.stub()
       contextStub = sandbox.stub().returns contextInstance
 
       mockery.registerMock './context', contextStub
@@ -24,7 +24,7 @@ describe 'Index', ->
 
     it 'should register global domain event handlers on the context', ->
       someContext = eventric.context 'someContext'
-      expect(contextInstance.subscribeToDomainEvent).to.have.been.calledWith 'DomainEvent'
+      expect(contextInstance.subscribeToAllDomainEvents).to.have.been.called
 
 
   describe '#set/#get', ->

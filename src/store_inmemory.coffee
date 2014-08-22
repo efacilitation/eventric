@@ -20,7 +20,6 @@ class InMemoryStore
 
 
   findAllDomainEvents: (callback) ->
-    events = []
     callback null, @_domainEvents[@_domainEventsCollectionName]
 
 
@@ -53,10 +52,10 @@ class InMemoryStore
   findDomainEventsByAggregateName: (aggregateName, callback) ->
     if aggregateName instanceof Array
       checkFn = (eventAggregateName) ->
-        (aggregateId.indexOf eventAggregateName) > -1
+        (aggregateName.indexOf eventAggregateName) > -1
     else
       checkFn = (eventAggregateName) ->
-        eventAggregateName == aggregateId
+        eventAggregateName == aggregateName
 
     events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
       checkFn event.aggregate?.name

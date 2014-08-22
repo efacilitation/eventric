@@ -588,6 +588,34 @@ class Context
     @_storeInstances[storeName]
 
 
+  findAllDomainEvents: ->
+    new Promise (resolve, reject) =>
+      @getDomainEventsStore().findAllDomainEvents (err, events) ->
+        return reject err if err
+        resolve events
+
+
+  findDomainEventsByName: (findArguments...) ->
+    new Promise (resolve, reject) =>
+      @getDomainEventsStore().findDomainEventsByName findArguments..., (err, events) ->
+        return reject err if err
+        resolve events
+
+
+  findDomainEventsByAggregateId: (findArguments...) ->
+    new Promise (resolve, reject) =>
+      @getDomainEventsStore().findDomainEventsByAggregateId findArguments..., (err, events) ->
+        return reject err if err
+        resolve events
+
+
+  findDomainEventsByAggregateName: (findArguments...) ->
+    new Promise (resolve, reject) =>
+      @getDomainEventsStore().findDomainEventsByAggregateName findArguments..., (err, events) ->
+        return reject err if err
+        resolve events
+
+
   getProjectionStore: (storeName, projectionName, callback) =>
     new Promise (resolve, reject) =>
       if not @_storeInstances[storeName]

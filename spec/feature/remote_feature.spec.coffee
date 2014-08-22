@@ -104,6 +104,44 @@ describe 'Remote Feature', ->
       exampleRemote.command 'CreateExample', {}
 
 
+    it 'then it should be possible to find all domain events', ->
+      exampleRemote = eventric.remote 'Example'
+      exampleRemote.command 'CreateExample', {}
+      .then (id) ->
+        exampleRemote.command 'ModifyExample', id: id
+      .then ->
+        exampleRemote.findAllDomainEvents()
+      .then (events) ->
+        expect(events.length).to.equal 2
+
+
+    it 'then it should be possible to find domain events by name', ->
+      exampleRemote = eventric.remote 'Example'
+      exampleRemote.command 'CreateExample', {}
+      .then ->
+        exampleRemote.findDomainEventsByName 'ExampleCreated'
+      .then (events) ->
+        expect(events.length).to.equal 1
+
+
+    it 'then it should be possible to find domain events by aggregate id', ->
+      exampleRemote = eventric.remote 'Example'
+      exampleRemote.command 'CreateExample', {}
+      .then (id) ->
+        exampleRemote.findDomainEventsByAggregateId id
+      .then (events) ->
+        expect(events.length).to.equal 1
+
+
+    it 'then it should be possible to find domain events by aggregate name', ->
+      exampleRemote = eventric.remote 'Example'
+      exampleRemote.command 'CreateExample', {}
+      .then ->
+        exampleRemote.findDomainEventsByAggregateName 'Example'
+      .then (events) ->
+        expect(events.length).to.equal 1
+
+
   describe 'given we created and initialized some example context with a custom remote endpoint', ->
     customRemoteBridge = null
     beforeEach ->

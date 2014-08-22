@@ -30,6 +30,22 @@ class Remote
     @_rpc 'query', arguments
 
 
+  findAllDomainEvents: ->
+    @_rpc 'findAllDomainEvents', arguments
+
+
+  findDomainEventsByName: ->
+    @_rpc 'findDomainEventsByName', arguments
+
+
+  findDomainEventsByAggregateId: ->
+    @_rpc 'findDomainEventsByAggregateId', arguments
+
+
+  findDomainEventsByAggregateName: ->
+    @_rpc 'findDomainEventsByAggregateName', arguments
+
+
   subscribeToDomainEvent: ([domainEventName]..., handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
@@ -110,6 +126,7 @@ class Remote
 
       for handlerFnName in Object.keys(Projection::)
         continue unless handlerFnName.indexOf("handle") == 0
+        # save all event names
         eventName = handlerFnName.replace /^handle/, ''
         handlerFn = ->
           projection[handlerFnName].apply projection, arguments
@@ -123,6 +140,10 @@ class Remote
           eventName: eventName
           aggregateId: aggregateId
           handlerFn: handlerFn
+
+      # retrieve all events the projection subscribed to from remote
+      # - what about too many events?
+      # - replaying events synchronously ok?
 
       @_projectionInstances[projectionId] = projection
       resolve projectionId

@@ -129,3 +129,109 @@ describe 'Remote Projection Feature', ->
           expect(exampleRemote.getProjectionInstance projectionId).to.be.undefined
           expect(exampleRemote.unsubscribeFromDomainEventWithAggregateId).to.have.been.called
           done()
+
+
+    describe 'when we add a remote projection and already have domain events for it', ->
+
+      exampleRemote = null
+
+      beforeEach ->
+        exampleRemote = eventric.remote 'Example'
+
+        class ExampleProjection
+
+          constructor: ->
+            @exampleCount = 0
+
+          handleExampleCreated: ->
+            @exampleCount++
+
+        exampleRemote.addProjection 'ExampleProjection', ExampleProjection
+
+
+      it 'then it should apply the already existing domain events immediately to the projection', ->
+        exampleContext.command 'CreateExample'
+        .then (id) ->
+          exampleRemote.initializeProjectionInstance 'ExampleProjection'
+        .then (projectionId) ->
+          projection = exampleRemote.getProjectionInstance projectionId
+          expect(projection.exampleCount).to.equal 1
+
+
+    describe 'when we add a remote projection for a specific aggregate id and have domain events for it', ->
+
+      exampleRemote = null
+
+      beforeEach ->
+        exampleRemote = eventric.remote 'Example'
+
+        class ExampleProjection
+
+          constructor: ->
+            @updated = false
+
+          initialize: (params) ->
+            @$subscribeHandlersWithAggregateId params.aggregateId
+
+          handleExampleUpdated: ->
+            @updated = true
+
+        exampleRemote.addProjection 'ExampleProjection', ExampleProjection
+
+
+      it 'then it should apply the already existing domain events immediately to the projection', ->
+        exampleContext.command 'CreateExample'
+        .then (exampleId) ->
+          exampleContext.command 'UpdateExample', id: exampleId
+        .then (exampleId) ->
+          exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: exampleId
+        .then (projectionId) ->
+          projection = exampleRemote.getProjectionInstance projectionId
+          expect(projection.updated).to.be.true
+
+
+      it 'then it should only apply the already existing domain events for the specific aggregate', ->
+        firstExampleId = null
+        exampleContext.command 'CreateExample'
+        .then (_firstExampleId) ->
+          firstExampleId = _firstExampleId
+          exampleContext.command 'CreateExample'
+        .then (secondExampleId) ->
+          exampleContext.command 'UpdateExample', id: secondExampleId
+        .then ->
+          exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: firstExampleId
+        .then (projectionId) ->
+          projection = exampleRemote.getProjectionInstance projectionId
+          expect(projection.updated).to.be.false
+
+
+    describe 'when we add a remote projection and already have multiple domain events for it', ->
+
+      exampleRemote = null
+
+      beforeEach ->
+        exampleRemote = eventric.remote 'Example'
+
+        class ExampleProjection
+
+          constructor: ->
+            @events = []
+
+          handleExampleCreated: (domainEvent) ->
+            @events.push domainEvent.name
+
+          handleExampleUpdated: (domainEvent) ->
+            @events.push domainEvent.name
+
+        exampleRemote.addProjection 'ExampleProjection', ExampleProjection
+
+
+      it 'then it should apply the already existing domain events in the correct order', ->
+        exampleContext.command 'CreateExample'
+        .then (id) ->
+          exampleContext.command 'UpdateExample', id: id
+        .then (id) ->
+          exampleRemote.initializeProjectionInstance 'ExampleProjection'
+        .then (projectionId) ->
+          projection = exampleRemote.getProjectionInstance projectionId
+          expect(projection.events).to.deep.equal ['ExampleCreated', 'ExampleUpdated']

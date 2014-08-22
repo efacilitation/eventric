@@ -46,6 +46,10 @@ class Remote
     @_rpc 'findDomainEventsByAggregateName', arguments
 
 
+  findDomainEventsByNameAndAggregateId: ->
+    @_rpc 'findDomainEventsByNameAndAggregateId', arguments
+
+
   subscribeToDomainEvent: ([domainEventName]..., handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
@@ -124,12 +128,17 @@ class Remote
 
       projectionId = eventric.generateUid()
 
+      eventNames = []
+      eventHandlers = {}
       for handlerFnName in Object.keys(Projection::)
         continue unless handlerFnName.indexOf("handle") == 0
-        # save all event names
         eventName = handlerFnName.replace /^handle/, ''
+        eventNames.push eventName
+
         handlerFn = ->
           projection[handlerFnName].apply projection, arguments
+        eventHandlers[eventName] = handlerFn
+
         if aggregateId
           @subscribeToDomainEventWithAggregateId eventName, aggregateId, handlerFn
         else
@@ -141,12 +150,18 @@ class Remote
           aggregateId: aggregateId
           handlerFn: handlerFn
 
-      # retrieve all events the projection subscribed to from remote
-      # - what about too many events?
-      # - replaying events synchronously ok?
+      if aggregateId
+        findEvents = @findDomainEventsByNameAndAggregateId eventNames, aggregateId
+      else
+        findEvents = @findDomainEventsByName eventNames
 
-      @_projectionInstances[projectionId] = projection
-      resolve projectionId
+      findEvents.then (domainEvents) =>
+        # TODO: performance optimizing, nextTick?
+        for domainEvent in domainEvents
+          eventHandlers[domainEvent.name] domainEvent
+
+        @_projectionInstances[projectionId] = projection
+        resolve projectionId
 
 
   getProjectionInstance: (projectionId) ->

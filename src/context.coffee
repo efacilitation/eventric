@@ -602,6 +602,13 @@ class Context
         resolve events
 
 
+  findDomainEventsByNameAndAggregateId: (findArguments...) ->
+    new Promise (resolve, reject) =>
+      @getDomainEventsStore().findDomainEventsByNameAndAggregateId findArguments..., (err, events) ->
+        return reject err if err
+        resolve events
+
+
   findDomainEventsByAggregateId: (findArguments...) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findDomainEventsByAggregateId findArguments..., (err, events) ->

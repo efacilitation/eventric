@@ -121,10 +121,9 @@ class Remote
       projection = new Projection
 
       aggregateId = null
-      di =
-        $subscribeHandlersWithAggregateId: (_aggregateId) ->
-          aggregateId = _aggregateId
-      projection.initialize?.apply di, [params]
+      projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
+        aggregateId = _aggregateId
+      projection.initialize? params
 
       projectionId = eventric.generateUid()
 

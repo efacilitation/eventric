@@ -21,7 +21,7 @@
     "server"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.0.94",
+  "version": "0.0.95",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"

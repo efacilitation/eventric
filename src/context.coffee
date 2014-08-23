@@ -437,8 +437,12 @@ class Context
       async.eachSeries @_projectionClasses, (projection, next) =>
         eventNames = null
         projectionName = projection.name
+        @log.debug "[#{@name}] Initializing Projection #{projectionName}"
         @_initializeProjection projection
         .then (projection) =>
+          @log.debug "[#{@name}] Finished initializing Projection #{projectionName}"
+
+          @log.debug "[#{@name}] Replaying DomainEvents against Projection #{projectionName}"
           eventNames = []
           for key, value of projection
             if (key.indexOf 'handle') is 0 and (typeof value is 'function')
@@ -447,6 +451,7 @@ class Context
 
           @_applyDomainEventsFromStoreToProjection projection, eventNames
         .then (projection) =>
+          @log.debug "[#{@name}] Finished Replaying DomainEvents against Projection #{projectionName}"
           @_subscribeProjectionToDomainEvents projection, eventNames
           @_projectionInstances[projectionName] = projection
           resolve()
@@ -472,27 +477,38 @@ class Context
 
       projection["$store"] ?= {}
 
+      @log.debug "[#{@name}] Clearing Projections"
       @_clearProjectionStores projection.stores, projectionName
       .then =>
+        @log.debug "[#{@name}] Finished clearing Projections"
         async.eachSeries projection.stores, (projectionStoreName, next) =>
-          @getProjectionStore projectionStoreName, projectionName, (err, projectionStore) ->
+          @log.debug "[#{@name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
+          @getProjectionStore projectionStoreName, projectionName, (err, projectionStore) =>
             if projectionStore
               projection["$store"][projectionStoreName] = projectionStore
+              @log.debug "[#{@name}] Finished Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
               next()
 
-        , (err) ->
-          resolve projection if not projection.initialize
+        , (err) =>
+          if not projection.initialize
+            @log.debug "[#{@name}] No initialize function on Projection #{projectionName} given, skipping"
+            return resolve projection
+
+          @log.debug "[#{@name}] Calling initialize on Projection #{projectionName}"
           projection.initialize ->
+            @log.debug "[#{@name}] Finished initialize call on Projection #{projectionName}"
             resolve projection
 
 
   _clearProjectionStores: (projectionStores, projectionName) ->
     new Promise (resolve, reject) =>
       async.eachSeries projectionStores, (projectionStoreName, next) =>
-          @clearProjectionStore projectionStoreName, projectionName, ->
-            next()
-        , (err) ->
-          resolve()
+        @log.debug "[#{@name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+        @clearProjectionStore projectionStoreName, projectionName, =>
+          @log.debug "[#{@name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+          next()
+      , (err) ->
+        resolve()
 
 
   _applyDomainEventsFromStoreToProjection: (projection, eventNames) ->

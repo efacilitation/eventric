@@ -87,6 +87,7 @@ class Context
     @_storeClasses[storeName] =
       Class: StoreClass
       options: storeOptions
+    @
 
 
   ###*

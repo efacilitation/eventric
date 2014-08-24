@@ -29,6 +29,9 @@ describe 'Remote Projection Feature', ->
         callback()
       update: ->
         @$emitDomainEvent 'ExampleUpdated'
+
+
+
     exampleContext.addAggregate 'Example', Example
 
     exampleContext.initialize ->
@@ -109,12 +112,15 @@ describe 'Remote Projection Feature', ->
             id: exampleId
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
+          exampleProjection.eventBus.emit = sandbox.stub()
+
           expect(exampleProjection.updated).not.to.be.true
           exampleRemote.command 'UpdateExample',
             id: testExampleId
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           expect(exampleProjection.updated).to.be.true
+          expect(exampleProjection.eventBus.emit).to.have.been.calledWith 'changed', exampleProjection
           done()
 
 

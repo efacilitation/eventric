@@ -1,5 +1,8 @@
-eventric = require 'eventric'
-log      = eventric.log
+eventric      = require 'eventric'
+log           = eventric.log
+EventEmitter2 = require('./helper/EventEmitter2').EventEmitter2
+_             = require './helper/underscore'
+
 
 class Remote
 
@@ -118,7 +121,9 @@ class Remote
         return reject err
 
       Projection = @_projectionClasses[projectionName]
+
       projection = new Projection
+      projection.eventBus = new EventEmitter2()
 
       aggregateId = null
       projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
@@ -136,6 +141,9 @@ class Remote
 
         handlerFn = ->
           projection[handlerFnName].apply projection, arguments
+          projection.eventBus.emit 'changed', projection
+
+
         eventHandlers[eventName] = handlerFn
 
         if aggregateId

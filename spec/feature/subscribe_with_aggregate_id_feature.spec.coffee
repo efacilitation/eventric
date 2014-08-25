@@ -1,4 +1,4 @@
-describe 'Subscribe to event with aggregate id', ->
+describe 'Subscribe to event with aggregate id Feature', ->
 
   describe 'given we created and initialized some example context including an aggregate', ->
     exampleContext = null

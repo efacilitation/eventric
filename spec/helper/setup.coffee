@@ -22,6 +22,7 @@ before ->
 
 beforeEach ->
   root.eventric = require 'eventric/src'
+  mockery.registerMock 'eventric', root.eventric
 
 
 afterEach ->

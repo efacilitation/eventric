@@ -1,110 +1,82 @@
 describe 'EventBus', ->
-  EventBus = require 'eventric/src/event_bus'
 
   eventBus = null
+  pubSubStub = null
   beforeEach ->
+    pubSubStub =
+      subscribe: sandbox.stub()
+      subscribeAsync: sandbox.stub()
+      publish: sandbox.stub()
+      publishAsync: sandbox.stub()
+    mockery.registerMock './pub_sub', sandbox.stub().returns pubSubStub
+    mockery.registerMock 'eventric/src/pub_sub', sandbox.stub().returns pubSubStub
+    EventBus = require 'eventric/src/event_bus'
     eventBus = new EventBus
 
 
   describe '#subscribeToDomainEvent', ->
-    it 'should subscribe to the event with given event name', (done) ->
-      publishedEvent = name: 'SomeEvent'
-      eventBus.subscribeToDomainEvent 'SomeEvent', (event) ->
-        expect(event).to.equal publishedEvent
-        done()
-      eventBus.publishDomainEvent publishedEvent, ->
+    it 'should subscribe to the event with given event name', ->
+      subscriberFn = ->
+      eventBus.subscribeToDomainEvent 'SomeEvent', subscriberFn
+      expect(pubSubStub.subscribe).to.have.been.calledWith 'SomeEvent', subscriberFn
 
 
   describe '#subscribeToDomainEventWithAggregateId', ->
-    it 'should subscribe to the event with given event name and aggregate id', (done) ->
-      publishedEvent = name: 'SomeEvent', aggregate: id: 12345
-      eventBus.subscribeToDomainEventWithAggregateId 'SomeEvent', 12345, (event) ->
-        expect(event).to.equal publishedEvent
-        done()
-      eventBus.publishDomainEvent publishedEvent, ->
+    it 'should subscribe to the event with given event name and aggregate id', ->
+      subscriberFn = ->
+      eventBus.subscribeToDomainEventWithAggregateId 'SomeEvent', 12345, subscriberFn
+      expect(pubSubStub.subscribe).to.have.been.calledWith 'SomeEvent/12345', subscriberFn
+
+
+  describe '#subscribeToAllDomainEvents', ->
+    it 'should subscribe to the generic event "DomainEvent"', ->
+      subscriberFn = ->
+      eventBus.subscribeToAllDomainEvents subscriberFn
+      expect(pubSubStub.subscribe).to.have.been.calledWith 'DomainEvent', subscriberFn
 
 
   describe '#publishDomainEvent', ->
-    it 'should always notify all subscribers registered via subscribeToAllDomainEvents()', (done) ->
-      publishedEvent = name: 'SomeEvent'
-      eventBus.subscribeToAllDomainEvents (event) ->
-        expect(event).to.equal publishedEvent
-        done()
-      eventBus.publishDomainEvent publishedEvent, ->
+    beforeEach ->
+
+    it 'should publish a generic "DomainEvent" event', ->
+      domainEvent = name: 'SomeEvent'
+      eventBus.publishDomainEvent domainEvent, ->
+      expect(pubSubStub.publish).to.have.been.calledWith 'DomainEvent', domainEvent
 
 
-    it 'should execute all subscribed handlers in registration order', (done) ->
-      callCount = 0
-      eventBus.subscribeToDomainEvent 'SomeEvent', ->
-        callCount++
-      eventBus.subscribeToDomainEvent 'SomeEvent', ->
-        callCount++
-        expect(callCount).to.equal 2
-        done()
-      eventBus.publishDomainEvent name: 'SomeEvent', ->
+    it 'should then publish the given event', ->
+      pubSubStub.publish.withArgs('DomainEvent').yields()
+      domainEvent = name: 'SomeEvent'
+      eventBus.publishDomainEvent domainEvent, ->
+      expect(pubSubStub.publish).to.have.been.calledWith 'SomeEvent', domainEvent
 
 
-    it 'should immediately call back even though handlers may be asynchronous', (done) ->
-      spy = sandbox.spy()
-      handler1 = (event, done) -> setTimeout spy, 50
-      eventBus.subscribeToDomainEvent 'SomeEvent', handler1, isAsync: true
-      eventBus.publishDomainEvent ame: 'SomeEvent', ->
-        expect(spy).not.to.have.been.called
-        done()
+    describe 'given an event with an aggregate id', ->
+      it 'should publish an aggregate id specific event', ->
+        pubSubStub.publish.withArgs('DomainEvent').yields()
+        pubSubStub.publish.withArgs('SomeEvent').yields()
+        domainEvent = name: 'SomeEvent', aggregate: id: 12345
+        eventBus.publishDomainEvent domainEvent, ->
+        expect(pubSubStub.publish).to.have.been.calledWith 'SomeEvent/12345', domainEvent
 
 
   describe '#publishDomainEventAndWait', ->
-    it 'should always publish a generic "DomainEvent" event', (done) ->
-      publishedEvent = name: 'SomeEvent'
-      eventBus.subscribeToDomainEvent 'SomeEvent', (event) ->
-        expect(event).to.equal publishedEvent
-        done()
-      eventBus.publishDomainEventAndWait publishedEvent, ->
+    it 'should publish a generic "DomainEvent" event asynchronously', ->
+      domainEvent = name: 'SomeEvent'
+      eventBus.publishDomainEventAndWait domainEvent, ->
+      expect(pubSubStub.publishAsync).to.have.been.calledWith 'DomainEvent', domainEvent
+
+    it 'should then publish the given event asynchronously', ->
+      pubSubStub.publishAsync.withArgs('DomainEvent').yields()
+      domainEvent = name: 'SomeEvent'
+      eventBus.publishDomainEventAndWait domainEvent, ->
+      expect(pubSubStub.publishAsync).to.have.been.calledWith 'SomeEvent', domainEvent
 
 
-    it 'should wait for async handlers to invoke the done callback before executing the next handler', (done) ->
-      greeting = ''
-      handler1 = (event, done) ->
-        setTimeout ->
-          greeting += 'Hello '
-          done()
-        , 50
-      handler2 = ->
-        greeting += 'World'
-      eventBus.subscribeToDomainEvent 'SomeEvent', handler1, isAsync: true
-      eventBus.subscribeToDomainEvent 'SomeEvent', handler2
-      eventBus.publishDomainEventAndWait name: 'SomeEvent', ->
-        expect(greeting).to.equal 'Hello World'
-        done()
-
-
-    it 'should execute synchronous handlers in series', (done) ->
-      spy1 = sandbox.spy()
-      spy2 = sandbox.spy()
-      handler1 = -> spy1()
-      handler2 = -> spy2()
-      eventBus.subscribeToDomainEvent 'SomeEvent', handler1
-      eventBus.subscribeToDomainEvent 'SomeEvent', handler2
-      eventBus.publishDomainEventAndWait name: 'SomeEvent', ->
-        expect(spy1).to.have.been.called
-        expect(spy2).to.have.been.called
-        done()
-
-
-    it 'should only call back when all handlers have finished', (done) ->
-      callCount = 0
-      handler1 = (event, done) ->
-        setTimeout ->
-          callCount++
-          done()
-        , 25
-      handler2 = (event, done) ->
-        setTimeout ->
-          callCount++
-          done()
-        , 25
-      eventBus.subscribeToDomainEvent 'SomeEvent', handler1, isAsync: true
-      eventBus.subscribeToDomainEvent 'SomeEvent', handler2, isAsync: true
-      eventBus.publishDomainEventAndWait name: 'SomeEvent', ->
-        expect(callCount).to.equal 2
-        done()
+    describe 'given an event with an aggregate id', ->
+      it 'should publish an aggregate id specific event', ->
+        pubSubStub.publishAsync.withArgs('DomainEvent').yields()
+        pubSubStub.publishAsync.withArgs('SomeEvent').yields()
+        domainEvent = name: 'SomeEvent', aggregate: id: 12345
+        eventBus.publishDomainEventAndWait domainEvent, ->
+        expect(pubSubStub.publishAsync).to.have.been.calledWith 'SomeEvent/12345', domainEvent

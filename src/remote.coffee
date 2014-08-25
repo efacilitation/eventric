@@ -68,19 +68,10 @@ class Remote
     client.subscribe @_contextName, domainEventName, aggregateId, handlerFn
 
 
-  unsubscribeFromDomainEvent: ([domainEventName]..., handlerFn) ->
+  unsubscribeFromDomainEvent: (subscriberId) ->
     clientName = @get 'default client'
     client = @getClient clientName
-    if domainEventName
-      client.unsubscribe @_contextName, domainEventName, handlerFn
-    else
-      client.unsubscribe @_contextName, handlerFn
-
-
-  unsubscribeFromDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
-    clientName = @get 'default client'
-    client = @getClient clientName
-    client.unsubscribe @_contextName, domainEventName, aggregateId, handlerFn
+    client.unsubscribe subscriberId
 
 
   _rpc: (method, params) ->
@@ -147,15 +138,12 @@ class Remote
         eventHandlers[eventName] = handlerFn
 
         if aggregateId
-          @subscribeToDomainEventWithAggregateId eventName, aggregateId, handlerFn
+          subscriberId = @subscribeToDomainEventWithAggregateId eventName, aggregateId, handlerFn
         else
-          @subscribeToDomainEvent eventName, handlerFn
+          subscriberId = @subscribeToDomainEvent eventName, handlerFn
 
         @_handlerFunctions[projectionId] ?= []
-        @_handlerFunctions[projectionId].push
-          eventName: eventName
-          aggregateId: aggregateId
-          handlerFn: handlerFn
+        @_handlerFunctions[projectionId].push subscriberId
 
       if aggregateId
         findEvents = @findDomainEventsByNameAndAggregateId eventNames, aggregateId
@@ -176,12 +164,8 @@ class Remote
 
 
   destroyProjectionInstance: (projectionId) ->
-    for projectionHandlers in @_handlerFunctions[projectionId]
-      if projectionHandlers.aggregateId
-        @unsubscribeFromDomainEventWithAggregateId projectionHandlers.eventName, projectionHandlers.aggregateId, projectionHandlers.handlerFn
-      else
-        @unsubscribeFromDomainEvent projectionHandlers.eventName, projectionHandlers.handlerFn
-
+    for subscriberId in @_handlerFunctions[projectionId]
+      @unsubscribeFromDomainEvent subscriberId
     delete @_handlerFunctions[projectionId]
     delete @_projectionInstances[projectionId]
 

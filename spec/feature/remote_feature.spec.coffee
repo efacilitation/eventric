@@ -96,8 +96,8 @@ describe 'Remote Feature', ->
     it 'then it should be possible to unsubscribe from domain events', (done) ->
       exampleRemote = eventric.remote 'Example'
       firstHandler = sandbox.stub()
-      exampleRemote.subscribeToDomainEvent 'ExampleCreated', firstHandler
-      exampleRemote.unsubscribeFromDomainEvent 'ExampleCreated', firstHandler
+      subscriberId = exampleRemote.subscribeToDomainEvent 'ExampleCreated', firstHandler
+      exampleRemote.unsubscribeFromDomainEvent subscriberId
       exampleRemote.subscribeToDomainEvent 'ExampleCreated', ->
         expect(firstHandler).not.to.have.been.called
         done()

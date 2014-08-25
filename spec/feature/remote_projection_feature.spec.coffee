@@ -3,7 +3,6 @@ describe 'Remote Projection Feature', ->
 
   beforeEach (done) ->
     exampleContext = eventric.context 'Example'
-    exampleContext.enableWaitingMode()
     exampleContext.defineDomainEvents
       ExampleCreated: ->
       ExampleUpdated: ->
@@ -30,11 +29,10 @@ describe 'Remote Projection Feature', ->
       update: ->
         @$emitDomainEvent 'ExampleUpdated'
 
-
-
     exampleContext.addAggregate 'Example', Example
 
     exampleContext.initialize ->
+      exampleContext.enableWaitingMode()
       done()
 
 
@@ -62,18 +60,17 @@ describe 'Remote Projection Feature', ->
           done()
 
 
-      it 'then the projection should update the projection as expected', (done) ->
+      it 'then the projection should update the projection as expected', ->
         exampleRemote.command 'CreateExample'
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           expect(exampleProjection.created).to.be.true
-          done()
 
 
       it 'then we should be able to remove it', ->
         sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
 
-        exampleProjection = exampleRemote.getProjectionInstance projectionId
+        exampleRemote.getProjectionInstance projectionId
         exampleRemote.destroyProjectionInstance projectionId
 
         expect(exampleRemote.getProjectionInstance projectionId).to.be.undefined
@@ -124,17 +121,16 @@ describe 'Remote Projection Feature', ->
           done()
 
 
-      it 'then we should be able to remove it', (done) ->
+      it 'then we should be able to remove it', ->
         exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: '123'
         .then (projectionId) ->
-          sandbox.spy exampleRemote, 'unsubscribeFromDomainEventWithAggregateId'
+          sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
 
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           exampleRemote.destroyProjectionInstance projectionId
 
           expect(exampleRemote.getProjectionInstance projectionId).to.be.undefined
-          expect(exampleRemote.unsubscribeFromDomainEventWithAggregateId).to.have.been.called
-          done()
+          expect(exampleRemote.unsubscribeFromDomainEvent).to.have.been.called
 
 
     describe 'when we add a remote projection and already have domain events for it', ->

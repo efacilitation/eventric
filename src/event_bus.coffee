@@ -1,61 +1,41 @@
+PubSub = require './pub_sub'
+
 class EventBus
 
   constructor: ->
-    @_handlers = {}
-    @_globalHandlers = []
+    @_pubSub = new PubSub()
 
 
-  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handler, options = {}) ->
-    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handler, options
+  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn, options = {}) ->
+    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn, options
 
 
-  subscribeToDomainEvent: (eventName, handler, options = {}) ->
+  subscribeToDomainEvent: (eventName, handlerFn, options = {}) ->
     if options.isAsync
-      handler.isAsync = true
-    @_handlers[eventName] ?= []
-    @_handlers[eventName].push handler
+      @_pubSub.subscribeAsync eventName, handlerFn
+    else
+      @_pubSub.subscribe eventName, handlerFn
 
 
-  subscribeToAllDomainEvents: (handler) ->
-    @_globalHandlers.push handler
-
-
-  # TODO: Implement unsubscribe
-  #unsubscribe: ([eventName, aggregateId]..., handler) ->
+  subscribeToAllDomainEvents: (handlerFn) ->
+    @_pubSub.subscribe 'DomainEvent', handlerFn
 
 
   publishDomainEvent: (domainEvent, callback = ->) ->
-    handlers = @_getRelevantHandlers domainEvent
-    executeNextHandler = ->
-      if handlers.length is 0
-        callback()
-      else
-        handlers.shift() domainEvent, ->
-        setTimeout executeNextHandler, 0
-    setTimeout executeNextHandler, 0
+    @_publish 'publish', domainEvent, callback
 
 
   publishDomainEventAndWait: (domainEvent, callback = ->) ->
-    handlers = @_getRelevantHandlers domainEvent
-    executeNextHandler = ->
-      if handlers.length is 0
-        callback()
-      else
-        handler = handlers.shift()
-        if handler.isAsync
-          handler domainEvent, -> setTimeout executeNextHandler, 0
+    @_publish 'publishAsync', domainEvent, callback
+
+
+  _publish: (publishMethod, domainEvent, callback = ->) ->
+    @_pubSub[publishMethod] 'DomainEvent', domainEvent, =>
+      @_pubSub[publishMethod] domainEvent.name, domainEvent, =>
+        if domainEvent.aggregate and domainEvent.aggregate.id
+          @_pubSub[publishMethod] "#{domainEvent.name}/#{domainEvent.aggregate.id}", domainEvent, callback
         else
-          handler(domainEvent)
-          setTimeout executeNextHandler, 0
-    setTimeout executeNextHandler, 0
-
-
-  _getRelevantHandlers: (domainEvent) ->
-    handlers = @_globalHandlers.concat @_handlers[domainEvent.name] || []
-    if domainEvent.aggregate and domainEvent.aggregate.id
-      eventName = "#{domainEvent.name}/#{domainEvent.aggregate.id}"
-      handlers = handlers.concat @_handlers[eventName] || []
-    handlers
+          callback()
 
 
 module.exports = EventBus

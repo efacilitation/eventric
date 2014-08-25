@@ -1,5 +1,7 @@
+PubSub = require './pub_sub'
+
 customRemoteBridge = null
-eventHandlers = {}
+pubSub = new PubSub
 
 class InMemoryRemoteEndpoint
   constructor: ->
@@ -14,8 +16,7 @@ class InMemoryRemoteEndpoint
 
   publish: (context, [domainEventName, aggregateId]..., payload) ->
     fullEventName = getFullEventName context, domainEventName, aggregateId
-    if eventHandlers[fullEventName]
-      eventHandlers[fullEventName].forEach (handler) -> handler(payload)
+    pubSub.publish fullEventName, payload, ->
 
 
 module.exports.endpoint = new InMemoryRemoteEndpoint
@@ -34,14 +35,11 @@ class InMemoryRemoteClient
 
   subscribe: (context, [domainEventName, aggregateId]..., handlerFn) ->
     fullEventName = getFullEventName context, domainEventName, aggregateId
-    eventHandlers[fullEventName] ?= []
-    eventHandlers[fullEventName].push handlerFn
+    pubSub.subscribe fullEventName, handlerFn
 
 
-  unsubscribe: (context, [domainEventName, aggregateId]..., handlerFn) ->
-    fullEventName = getFullEventName context, domainEventName, aggregateId
-    eventHandlers[fullEventName] =
-      eventHandlers[fullEventName].filter (registeredHandler) -> registeredHandler isnt handlerFn
+  unsubscribe: (subscriberId) ->
+    pubSub.unsubscribe subscriberId
 
 
 module.exports.client = new InMemoryRemoteClient

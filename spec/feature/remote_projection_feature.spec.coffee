@@ -76,7 +76,7 @@ describe 'Remote Projection Feature', ->
         expect(exampleRemote.unsubscribeFromDomainEvent).to.have.been.called
 
 
-    describe 'when we add a remote projection, which subscribes to a specific aggregate, to the remote', ->
+    describe 'when we add a remote projection to the remote which subscribes to a specific aggregate', ->
       exampleRemote = null
       projectionId  = null
 
@@ -94,7 +94,7 @@ describe 'Remote Projection Feature', ->
         exampleRemote.addProjection 'ExampleProjection', ExampleProjection
 
 
-      it 'then it should update the projection as expected', ->
+      it 'then should update the remote projection as expected', ->
         testExampleId = null
         exampleRemote.command 'CreateExample'
         .then (exampleId) ->
@@ -108,15 +108,26 @@ describe 'Remote Projection Feature', ->
             id: exampleId
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
-          exampleProjection.eventBus.emit = sandbox.stub()
-
           expect(exampleProjection.updated).not.to.be.true
           exampleRemote.command 'UpdateExample',
             id: testExampleId
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           expect(exampleProjection.updated).to.be.true
-          expect(exampleProjection.eventBus.emit).to.have.been.calledWith 'changed', exampleProjection
+
+
+      it 'then should publish an event whenever a remote projection is updated', (done) ->
+        testExampleId = null
+        exampleRemote.command 'CreateExample'
+        .then (exampleId) ->
+          testExampleId = exampleId
+          exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: exampleId
+        .then (projectionId) ->
+          exampleProjection = exampleRemote.getProjectionInstance projectionId
+          exampleProjection.eventBus.subscribe 'changed', ->
+            done()
+          exampleRemote.command 'UpdateExample',
+            id: testExampleId
 
 
       it 'then we should be able to remove it', ->

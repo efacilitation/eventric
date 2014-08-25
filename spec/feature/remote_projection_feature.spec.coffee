@@ -52,6 +52,10 @@ describe 'Remote Projection Feature', ->
           handleExampleCreated: (domainEvent) ->
             @created = true
 
+
+          handleToCheckCorrectFunctionCall: (domainEvent) ->
+
+
         exampleRemote.addProjection 'ExampleProjection', ExampleProjection
 
         exampleRemote.initializeProjectionInstance 'ExampleProjection'

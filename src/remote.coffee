@@ -124,8 +124,8 @@ class Remote
 
       eventNames = []
       eventHandlers = {}
-      for handlerFnName in Object.keys(Projection::)
-        continue unless handlerFnName.indexOf("handle") == 0
+      Object.keys(Projection::).forEach (handlerFnName) =>
+        return unless handlerFnName.indexOf("handle") == 0
         eventName = handlerFnName.replace /^handle/, ''
         eventNames.push eventName
 

@@ -42,7 +42,7 @@ describe 'Remote Projection Feature', ->
       projectionId = null
       exampleRemote = null
 
-      beforeEach (done) ->
+      beforeEach ->
         exampleRemote = eventric.remote 'Example'
 
         class ExampleProjection
@@ -57,7 +57,6 @@ describe 'Remote Projection Feature', ->
         exampleRemote.initializeProjectionInstance 'ExampleProjection'
         .then (_projectionId) ->
           projectionId = _projectionId
-          done()
 
 
       it 'then the projection should update the projection as expected', ->
@@ -95,7 +94,7 @@ describe 'Remote Projection Feature', ->
         exampleRemote.addProjection 'ExampleProjection', ExampleProjection
 
 
-      it 'then it should update the projection as expected', (done) ->
+      it 'then it should update the projection as expected', ->
         testExampleId = null
         exampleRemote.command 'CreateExample'
         .then (exampleId) ->
@@ -118,7 +117,6 @@ describe 'Remote Projection Feature', ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           expect(exampleProjection.updated).to.be.true
           expect(exampleProjection.eventBus.emit).to.have.been.calledWith 'changed', exampleProjection
-          done()
 
 
       it 'then we should be able to remove it', ->

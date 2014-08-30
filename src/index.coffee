@@ -8,6 +8,7 @@ class Eventric
     @_params = {}
     @_domainEventHandlers = {}
     @_domainEventHandlersAll = []
+    @_processManagerService = require './process_manager'
     @_processManagerInstances = {}
     @_storeClasses = {}
     @_remoteEndpoints = []
@@ -155,51 +156,7 @@ class Eventric
   * @param {Object} processManagerObject Object containing `initializeWhen` and `class`
   ###
   addProcessManager: (processManagerName, processManagerObj) ->
-    for contextName, domainEventNames of processManagerObj.initializeWhen
-      for domainEventName in domainEventNames
-        @subscribeToDomainEvent contextName, domainEventName, (domainEvent) =>
-          # TODO: make sure we dont spawn twice
-          @_spawnProcessManager processManagerName, processManagerObj.class, contextName, domainEvent
-
-
-  _spawnProcessManager: (processManagerName, ProcessManagerClass, contextName, domainEvent) ->
-    processManagerId = @generateUid()
-    processManager = new ProcessManagerClass
-
-    processManager.$endProcess = =>
-      @_endProcessManager processManagerName, processManagerId
-
-    handleContextDomainEventNames = []
-    for key, value of processManager
-      if (key.indexOf 'from') is 0 and (typeof value is 'function')
-        handleContextDomainEventNames.push key
-
-    @_subscribeProcessManagerToDomainEvents processManager, handleContextDomainEventNames
-
-    processManager.initialize domainEvent
-
-    @_processManagerInstances[processManagerName] ?= {}
-    @_processManagerInstances[processManagerName][processManagerId] ?= {}
-    @_processManagerInstances[processManagerName][processManagerId] = processManager
-
-
-  _endProcessManager: (processManagerName, processManagerId) ->
-    delete @_processManagerInstances[processManagerName][processManagerId]
-
-
-  _subscribeProcessManagerToDomainEvents: (processManager, handleContextDomainEventNames) ->
-    @subscribeToDomainEvent (domainEvent) =>
-      for handleContextDomainEventName in handleContextDomainEventNames
-        if "from#{domainEvent.context}_handle#{domainEvent.name}" == handleContextDomainEventName
-          @_applyDomainEventToProcessManager handleContextDomainEventName, domainEvent, processManager
-
-
-  _applyDomainEventToProcessManager: (handleContextDomainEventName, domainEvent, processManager) ->
-    if !processManager[handleContextDomainEventName]
-      err = new Error "Tried to apply DomainEvent '#{domainEventName}' to Projection without a matching handle method"
-
-    else
-      processManager[handleContextDomainEventName] domainEvent
+    @_processManagerService.add processManagerName, processManagerObj, @
 
 
   nextTick: (next) ->

@@ -10,7 +10,6 @@ describe 'Index', ->
       contextStub = sandbox.stub().returns contextInstance
 
       mockery.registerMock './context', contextStub
-      mockery.registerMock 'eventric/src/context', contextStub
 
 
     it 'should throw an error if no name given for the context', ->

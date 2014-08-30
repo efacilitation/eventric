@@ -1,11 +1,12 @@
 eventric = require 'eventric'
 
-_           = require './helper/underscore'
-async       = require './helper/async'
-Repository  = require './repository'
-EventBus    = require './event_bus'
-DomainEvent = require './domain_event'
-Clone       = require './helper/clone'
+_                 = require './helper/underscore'
+async             = require './helper/async'
+Repository        = require './repository'
+EventBus          = require './event_bus'
+DomainEvent       = require './domain_event'
+Clone             = require './helper/clone'
+projectionService = require './projection'
 
 
 class Context
@@ -22,7 +23,6 @@ class Context
     @_domainEventClasses = {}
     @_domainEventHandlers = {}
     @_projectionClasses = []
-    @_projectionInstances = {}
     @_repositoryInstances = {}
     @_domainServices = {}
     @_storeClasses = {}
@@ -438,8 +438,22 @@ class Context
 
 
   _initializeProjections: ->
-    projection = require './context_projection'
-    projection.initializeProjections @
+    new Promise (resolve, reject) =>
+      async.eachSeries @_projectionClasses, (projection, next) =>
+        eventNames = null
+        projectionName = projection.name
+        @log.debug "[#{@name}] Initializing Projection #{projectionName}"
+        projectionService.initializeInstance projection, {}, @
+        .then (projectionId) =>
+          @log.debug "[#{@name}] Finished initializing Projection #{projectionName}"
+          resolve projectionId
+
+        .catch (err) ->
+          reject err
+
+      , (err) =>
+        return reject err if err
+        resolve()
 
 
   _initializeAdapters: ->
@@ -460,8 +474,8 @@ class Context
   *
   * @param {String} projectionName Name of the Projection
   ###
-  getProjection: (projectionName) ->
-    @_projectionInstances[projectionName]
+  getProjection: (projectionId) ->
+    projectionService.getInstance projectionId
 
 
   ###*

@@ -1,11 +1,12 @@
-eventric      = require 'eventric'
-PubSub        = require './pub_sub'
-projection    = require './projection'
+eventric          = require 'eventric'
+PubSub            = require './pub_sub'
+projectionService = require './projection'
 
 
 class Remote
 
   constructor: (@_contextName) ->
+    @name = @_contextName
     @_params = {}
     @_clients = {}
     @_projectionClasses = {}
@@ -52,16 +53,19 @@ class Remote
     @_rpc 'findDomainEventsByNameAndAggregateId', arguments
 
 
-  subscribeToDomainEvent: ([domainEventName]..., handlerFn) ->
+  subscribeToAllDomainEvents: (handlerFn, options = {}) ->
     clientName = @get 'default client'
     client = @getClient clientName
-    if domainEventName
-      client.subscribe @_contextName, domainEventName, handlerFn
-    else
-      client.subscribe @_contextName, handlerFn
+    client.subscribe @_contextName, handlerFn
 
 
-  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
+  subscribeToDomainEvent: (domainEventName, handlerFn, options = {}) ->
+    clientName = @get 'default client'
+    client = @getClient clientName
+    client.subscribe @_contextName, domainEventName, handlerFn
+
+
+  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn, options = {}) ->
     clientName = @get 'default client'
     client = @getClient clientName
     client.subscribe @_contextName, domainEventName, aggregateId, handlerFn
@@ -109,15 +113,18 @@ class Remote
       err = new Error err
       return reject err
 
-    projection.initializeInstance @_projectionClasses[projectionName], params, @
+    projectionService.initializeInstance
+      name: projectionName
+      class: @_projectionClasses[projectionName]
+    , params, @
 
 
   getProjectionInstance: (projectionId) ->
-    projection.getInstance projectionId
+    projectionService.getInstance projectionId
 
 
   destroyProjectionInstance: (projectionId) ->
-    projection.destroyInstance projectionId, @
+    projectionService.destroyInstance projectionId, @
 
 
 module.exports = Remote

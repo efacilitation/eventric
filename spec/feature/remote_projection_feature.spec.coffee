@@ -47,7 +47,8 @@ describe 'Remote Projection Feature', ->
 
         class ExampleProjection
 
-          initialize: (params) ->
+          initialize: (params, done) ->
+            done()
 
           handleExampleCreated: (domainEvent) ->
             @created = true
@@ -89,8 +90,9 @@ describe 'Remote Projection Feature', ->
 
         class ExampleProjection
 
-          initialize: (params) ->
+          initialize: (params, done) ->
             @$subscribeHandlersWithAggregateId params.aggregateId
+            done()
 
           handleExampleUpdated: (domainEvent) ->
             @updated = true
@@ -185,8 +187,9 @@ describe 'Remote Projection Feature', ->
           constructor: ->
             @updated = false
 
-          initialize: (params) ->
+          initialize: (params, done) ->
             @$subscribeHandlersWithAggregateId params.aggregateId
+            done()
 
           handleExampleUpdated: ->
             @updated = true

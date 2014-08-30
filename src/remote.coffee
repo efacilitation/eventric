@@ -1,5 +1,4 @@
 eventric      = require 'eventric'
-log           = eventric.log
 PubSub        = require './pub_sub'
 projection    = require './projection'
 
@@ -106,7 +105,7 @@ class Remote
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on remote"
-      log.error err
+      eventric.log.error err
       err = new Error err
       return reject err
 

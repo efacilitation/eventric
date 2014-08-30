@@ -20,15 +20,15 @@ describe 'Context', ->
 
   describe '#initialize', ->
 
-    it 'should instantiate all registered projections', (done) ->
+    it 'should instantiate all registered projections', ->
       context = new Context 'exampleContext'
       class ProjectionStub
         stores: ['inmemory']
       context.addProjection 'SomeProjection', ProjectionStub
-      context.initialize =>
+      context.initialize()
+      .then ->
         context.getProjectionStore 'inmemory', 'SomeProjection', (err, projectionStore) ->
           expect(projectionStore).to.deep.equal {}
-          done()
 
 
     it 'should instantiate and initialize all registered adapters', (done) ->

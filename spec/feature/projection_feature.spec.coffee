@@ -2,7 +2,7 @@ describe 'Projection Feature', ->
 
   describe 'given we created and initialized some example context including a Projection', ->
     exampleContext = null
-    beforeEach (done) ->
+    beforeEach ->
       exampleContext = eventric.context 'exampleContext'
 
       exampleContext.defineDomainEvents
@@ -47,10 +47,9 @@ describe 'Projection Feature', ->
           .then =>
             callback()
 
-      exampleContext.initialize ->
-        done()
-
-      exampleContext.enableWaitingMode()
+      exampleContext.initialize()
+      .then ->
+        exampleContext.enableWaitingMode()
 
 
     describe 'when DomainEvents got emitted which the Projection subscribed to', ->

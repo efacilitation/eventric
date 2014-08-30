@@ -1,7 +1,7 @@
 describe 'Remote Projection Feature', ->
   exampleContext  = null
 
-  beforeEach (done) ->
+  beforeEach ->
     exampleContext = eventric.context 'Example'
     exampleContext.defineDomainEvents
       ExampleCreated: ->
@@ -31,9 +31,9 @@ describe 'Remote Projection Feature', ->
 
     exampleContext.addAggregate 'Example', Example
 
-    exampleContext.initialize ->
+    exampleContext.initialize()
+    .then ->
       exampleContext.enableWaitingMode()
-      done()
 
 
   describe 'given we created and initialized some example context', ->

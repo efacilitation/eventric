@@ -20,11 +20,6 @@ describe 'Context', ->
 
   describe '#initialize', ->
 
-    it 'should throw an error if neither a global nor a custom event store was configured', ->
-      context = new Context 'exampleContext'
-      expect(context.initialize).to.throw Error
-
-
     it 'should instantiate all registered projections', (done) ->
       context = new Context 'exampleContext'
       class ProjectionStub

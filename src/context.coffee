@@ -384,31 +384,33 @@ class Context
     })
     ```
   ###
-  initialize: (callback) ->
-    @log.debug "[#{@name}] Initializing"
-    @log.debug "[#{@name}] Initializing Store"
-    @_initializeStores()
-    .then =>
-      @log.debug "[#{@name}] Finished initializing Store"
-      @_di =
-        $adapter: => @getAdapter.apply @, arguments
-        $query: => @query.apply @, arguments
-        $domainService: =>
-          (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
-        $projectionStore: => @getProjectionStore.apply @, arguments
-        $emitDomainEvent: => @emitDomainEvent.apply @, arguments
+  initialize: (callback=->) ->
+    new Promise (resolve, reject) =>
+      @log.debug "[#{@name}] Initializing"
+      @log.debug "[#{@name}] Initializing Store"
+      @_initializeStores()
+      .then =>
+        @log.debug "[#{@name}] Finished initializing Store"
+        @_di =
+          $adapter: => @getAdapter.apply @, arguments
+          $query: => @query.apply @, arguments
+          $domainService: =>
+            (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
+          $projectionStore: => @getProjectionStore.apply @, arguments
+          $emitDomainEvent: => @emitDomainEvent.apply @, arguments
 
-      @log.debug "[#{@name}] Initializing Adapters"
-      @_initializeAdapters()
-    .then =>
-      @log.debug "[#{@name}] Finished initializing Adapters"
-      @log.debug "[#{@name}] Initializing Projections"
-      @_initializeProjections()
-    .then =>
-      @log.debug "[#{@name}] Finished initializing Projections"
-      @log.debug "[#{@name}] Finished initializing"
-      @_initialized = true
-      callback()
+        @log.debug "[#{@name}] Initializing Adapters"
+        @_initializeAdapters()
+      .then =>
+        @log.debug "[#{@name}] Finished initializing Adapters"
+        @log.debug "[#{@name}] Initializing Projections"
+        @_initializeProjections()
+      .then =>
+        @log.debug "[#{@name}] Finished initializing Projections"
+        @log.debug "[#{@name}] Finished initializing"
+        @_initialized = true
+        callback()
+        resolve()
 
 
   _initializeStores: ->

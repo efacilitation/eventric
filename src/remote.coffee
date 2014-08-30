@@ -1,6 +1,7 @@
 eventric      = require 'eventric'
 log           = eventric.log
 PubSub        = require './pub_sub'
+projection    = require './projection'
 
 
 class Remote
@@ -103,70 +104,21 @@ class Remote
 
 
   initializeProjectionInstance: (projectionName, params) ->
-    new Promise (resolve, reject) =>
-      if not @_projectionClasses[projectionName]
-        err = "Given projection #{projectionName} not registered on remote"
-        log.error err
-        err = new Error err
-        return reject err
+    if not @_projectionClasses[projectionName]
+      err = "Given projection #{projectionName} not registered on remote"
+      log.error err
+      err = new Error err
+      return reject err
 
-      Projection = @_projectionClasses[projectionName]
-
-      projection = new Projection
-      projection.eventBus = new PubSub()
-
-      aggregateId = null
-      projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
-        aggregateId = _aggregateId
-      projection.initialize? params
-
-      projectionId = eventric.generateUid()
-
-      eventNames = []
-      eventHandlers = {}
-      Object.keys(Projection::).forEach (handlerFnName) =>
-        return unless handlerFnName.indexOf("handle") == 0
-        eventName = handlerFnName.replace /^handle/, ''
-        eventNames.push eventName
-
-        handlerFn = ->
-          projection[handlerFnName].apply projection, arguments
-          projection.eventBus.publish 'changed', projection
-
-
-        eventHandlers[eventName] = handlerFn
-
-        if aggregateId
-          subscriberId = @subscribeToDomainEventWithAggregateId eventName, aggregateId, handlerFn
-        else
-          subscriberId = @subscribeToDomainEvent eventName, handlerFn
-
-        @_handlerFunctions[projectionId] ?= []
-        @_handlerFunctions[projectionId].push subscriberId
-
-      if aggregateId
-        findEvents = @findDomainEventsByNameAndAggregateId eventNames, aggregateId
-      else
-        findEvents = @findDomainEventsByName eventNames
-
-      findEvents.then (domainEvents) =>
-        # TODO: performance optimizing, nextTick?
-        for domainEvent in domainEvents
-          eventHandlers[domainEvent.name] domainEvent
-
-        @_projectionInstances[projectionId] = projection
-        resolve projectionId
+    projection.initializeInstance @_projectionClasses[projectionName], params, @
 
 
   getProjectionInstance: (projectionId) ->
-    @_projectionInstances[projectionId]
+    projection.getInstance projectionId
 
 
   destroyProjectionInstance: (projectionId) ->
-    for subscriberId in @_handlerFunctions[projectionId]
-      @unsubscribeFromDomainEvent subscriberId
-    delete @_handlerFunctions[projectionId]
-    delete @_projectionInstances[projectionId]
+    projection.destroyInstance projectionId, @
 
 
 module.exports = Remote

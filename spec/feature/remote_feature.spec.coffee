@@ -53,20 +53,18 @@ describe 'Remote Feature', ->
 
 
   describe 'given we created and initialized some example context', ->
-    it 'then it should be able to receive commands over a remote', (done) ->
+    it 'then it should be able to receive commands over a remote', ->
       exampleRemote = eventric.remote 'Example'
       exampleRemote.command 'DoSomething'
       .then ->
         expect(doSomethingStub).to.have.been.calledOnce
-        done()
 
 
-    it 'then it should be able to answer queries over a remote', (done) ->
+    it 'then it should be able to answer queries over a remote', ->
       exampleRemote = eventric.remote 'Example'
       exampleRemote.query 'getSomething'
       .then (result) ->
         expect(result).to.equal 'something'
-        done()
 
 
     it 'then it should be possible to subscribe to domain events and receive them', (done) ->

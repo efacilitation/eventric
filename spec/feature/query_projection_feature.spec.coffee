@@ -14,8 +14,7 @@ describe 'Query Projection Feature', ->
 
 
     describe 'when we query the context', ->
-      it 'then the query should return the correct result', (done) ->
+      it 'then the query should return the correct result', ->
         exampleContext.query 'getExample', id: 1
         .then (result) =>
           expect(result).to.deep.equal {}
-          done()

@@ -22,8 +22,6 @@ class Projection
 
       projectionId = eventric.generateUid()
 
-      projection.eventBus = new PubSub()
-
       aggregateId = null
       projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
         aggregateId = _aggregateId
@@ -46,10 +44,10 @@ class Projection
         @_applyDomainEventsFromStoreToProjection projection, eventNames, aggregateId, context
       .then (eventNames) =>
         @log.debug "[#{context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
-        @_subscribeProjectionToDomainEvents projectionId, projection, eventNames, aggregateId, context
+        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, context
       .then =>
         @_projectionInstances[projectionId] = projection
-        projection.eventBus.publish 'initialized', projection
+        context.publish "#{projectionName}:initialized", projection
         resolve projectionId
 
       .catch (err) ->
@@ -126,12 +124,12 @@ class Projection
       .catch (err) ->
         reject err
 
-  _subscribeProjectionToDomainEvents: (projectionId, projection, eventNames, aggregateId, context) ->
+  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, context) ->
     new Promise (resolve, reject) =>
       domainEventHandler = (domainEvent, done) =>
         @_applyDomainEventToProjection domainEvent, projection
         .then ->
-          projection.eventBus.publish 'changed', projection
+          context.publish "#{projectionName}:changed", projection
           done()
 
       for eventName in eventNames

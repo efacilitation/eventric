@@ -6,12 +6,14 @@ Repository        = require './repository'
 EventBus          = require './event_bus'
 DomainEvent       = require './domain_event'
 Clone             = require './helper/clone'
+PubSub            = require './pub_sub'
 projectionService = require './projection'
 
 
-class Context
+class Context extends PubSub
 
   constructor: (@name) ->
+    super
     @_initialized = false
     @_params = eventric.get()
     @_di = {}
@@ -705,5 +707,6 @@ class Context
 
   isWaitingModeEnabled: ->
     @get 'waiting mode'
+
 
 module.exports = Context

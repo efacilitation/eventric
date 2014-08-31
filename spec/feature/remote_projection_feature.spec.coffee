@@ -130,7 +130,7 @@ describe 'Remote Projection Feature', ->
           exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: exampleId
         .then (projectionId) ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
-          exampleProjection.eventBus.subscribe 'changed', ->
+          exampleRemote.subscribe 'ExampleProjection:changed', ->
             done()
           exampleRemote.command 'UpdateExample',
             id: testExampleId

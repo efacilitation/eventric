@@ -3,9 +3,10 @@ PubSub            = require './pub_sub'
 projectionService = require './projection'
 
 
-class Remote
+class Remote extends PubSub
 
   constructor: (@_contextName) ->
+    super
     @name = @_contextName
     @_params = {}
     @_clients = {}

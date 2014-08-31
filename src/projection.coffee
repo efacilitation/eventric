@@ -1,6 +1,5 @@
 eventric = require 'eventric'
 async    = require './helper/async'
-PubSub   = require './pub_sub'
 
 class Projection
 
@@ -47,7 +46,9 @@ class Projection
         @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, context
       .then =>
         @_projectionInstances[projectionId] = projection
-        context.publish "#{projectionName}:initialized", projection
+        context.publish "projection:#{projectionName}:initialized",
+          id: projectionId
+          projection: projection
         resolve projectionId
 
       .catch (err) ->
@@ -129,7 +130,9 @@ class Projection
       domainEventHandler = (domainEvent, done) =>
         @_applyDomainEventToProjection domainEvent, projection
         .then ->
-          context.publish "#{projectionName}:changed", projection
+          context.publish "projection:#{projectionName}:changed",
+            id: projectionId
+            projection: projection
           done()
 
       for eventName in eventNames

@@ -4,6 +4,7 @@ commonjs    = require 'gulp-wrap-commonjs'
 uglify      = require 'gulp-uglify'
 rimraf      = require 'rimraf'
 runSequence = require 'run-sequence'
+mergeStream = require 'merge-stream'
 
 module.exports = (gulp) ->
   gulp.task 'build', (next) ->
@@ -22,15 +23,19 @@ module.exports = (gulp) ->
       .pipe(gulp.dest('build/node'))
 
   gulp.task 'build:release', ->
-    gulp.src('build/node/**/*.js')
+    cjs = gulp.src('node_modules/commonjs-require/commonjs-require.js')
+
+    src = gulp.src('build/node/**/*.js')
       .pipe(commonjs(
         pathModifier: (path) ->
           path = path.replace "#{process.cwd()}/build/node", 'eventric'
           path = path.replace /.js$/, ''
           return path
         ))
+
+    mergeStream(cjs, src)
       .pipe(concat('eventric.js'))
-      .pipe(gulp.dest('build/release'))
+      .pipe(gulp.dest('.'))
       .pipe(uglify())
       .pipe(concat('eventric-min.js'))
-      .pipe(gulp.dest('build/release'))
+      .pipe(gulp.dest('.'))

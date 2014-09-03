@@ -1,6 +1,3 @@
-> Not released yet. This hint will disappear with version 0.1.0.
-
-
 ![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)

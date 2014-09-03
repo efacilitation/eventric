@@ -45,7 +45,7 @@ module.exports = (gulp) ->
 
     mergeStream cjs, src, nm
       .pipe(concat('eventric.js'))
-      .pipe(gulp.dest('.'))
+      .pipe(gulp.dest('build/release'))
       .pipe(uglify())
       .pipe(concat('eventric-min.js'))
-      .pipe(gulp.dest('.'))
+      .pipe(gulp.dest('build/release'))

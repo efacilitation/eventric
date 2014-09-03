@@ -6,7 +6,7 @@
     "efa GmbH <team@efa-gmbh.com>"
   ],
   "description": "Build JavaScript applications based on DDD, CQRS and EventSourcing",
-  "main": "eventric.js",
+  "main": "build/release/eventric.js",
   "moduleType": [
     "globals",
     "node"
@@ -37,6 +37,7 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
+    "build/node",
     "node_modules",
     "bower_components",
     "test",

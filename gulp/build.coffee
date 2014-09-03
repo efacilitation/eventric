@@ -8,14 +8,10 @@ mergeStream = require 'merge-stream'
 
 module.exports = (gulp) ->
   gulp.task 'build', (next) ->
-    runSequence 'build:clean', 'build:helper', 'build:src', 'build:dist', next
+    runSequence 'build:clean', 'build:src', 'build:dist', next
 
   gulp.task 'build:clean', (next) ->
     rimraf './build', next
-
-  gulp.task 'build:helper', ->
-    gulp.src('+(src)/+(helper)/*.js')
-      .pipe(gulp.dest('build/node'))
 
   gulp.task 'build:src', ->
     gulp.src(['index.coffee', '+(src)/*.coffee'])

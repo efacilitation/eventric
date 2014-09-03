@@ -63,7 +63,8 @@
     "run-sequence": "*",
     "sinon": "*",
     "sinon-chai": "*",
-    "lodash": "*"
+    "lodash": "*",
+    "merge-stream": "*"
   },
   "dependencies": {},
   "licenses": [

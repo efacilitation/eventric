@@ -8,7 +8,7 @@ module.exports = (config) ->
     # list of files / patterns to load in the browser
     files: [
       # source
-      'eventric.js'
+      'build/dist/eventric.js'
 
       # spec helper
       'build/spec/helper.js'

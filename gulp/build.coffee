@@ -8,7 +8,7 @@ mergeStream = require 'merge-stream'
 
 module.exports = (gulp) ->
   gulp.task 'build', (next) ->
-    runSequence 'build:clean', 'build:helper', 'build:src', 'build:release', next
+    runSequence 'build:clean', 'build:helper', 'build:src', 'build:dist', next
 
   gulp.task 'build:clean', (next) ->
     rimraf './build', next
@@ -22,7 +22,7 @@ module.exports = (gulp) ->
       .pipe(coffee({bare: true}))
       .pipe(gulp.dest('build/node'))
 
-  gulp.task 'build:release', ->
+  gulp.task 'build:dist', ->
     cjs = gulp.src('node_modules/commonjs-require/commonjs-require.js')
 
     src = gulp.src('build/node/**/*.js')
@@ -45,7 +45,7 @@ module.exports = (gulp) ->
 
     mergeStream cjs, src, nm
       .pipe(concat('eventric.js'))
-      .pipe(gulp.dest('build/release'))
+      .pipe(gulp.dest('build/dist'))
       .pipe(uglify())
       .pipe(concat('eventric-min.js'))
-      .pipe(gulp.dest('build/release'))
+      .pipe(gulp.dest('build/dist'))

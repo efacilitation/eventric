@@ -523,7 +523,7 @@ class Context extends PubSub
     @_storeInstances[storeName]
 
 
-  saveDomainEvent: (saveArguments..) ->
+  saveDomainEvent: (saveArguments...) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().saveDomainEvent saveArguments..., (err, events) ->
         return reject err if err

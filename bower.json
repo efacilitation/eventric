@@ -31,7 +31,8 @@
     "microservice",
     "shared",
     "client",
-    "server"
+    "server",
+    "eventric"
   ],
   "license": "MIT",
   "ignore": [

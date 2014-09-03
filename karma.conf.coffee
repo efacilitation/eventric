@@ -7,15 +7,11 @@ module.exports = (config) ->
 
     # list of files / patterns to load in the browser
     files: [
-      # commonjs require
-      'node_modules/commonjs-require/commonjs-require.js'
+      # source
+      'eventric.js'
 
       # spec helper
       'build/spec/helper.js'
-
-      # source
-      'index.coffee'
-      'src/**/*.+(coffee|js)'
 
       # specs
       'spec/helper/setup.coffee'
@@ -29,21 +25,11 @@ module.exports = (config) ->
 
     # compile coffee scripts and wrap into commonjs
     preprocessors:
-      'index.coffee': ['commonjs', 'coffee']
-      'src/**/*.coffee': ['commonjs', 'coffee']
-      'src/**/*.js': ['commonjs']
       'spec/**/*.coffee': ['coffee']
 
     coffeePreprocessor:
       options:
         sourceMap: true
-
-    commonjsPreprocessor:
-      options:
-        pathReplace: (path) ->
-          path = path.replace /^index/, 'eventric/index'
-          path = path.replace 'src', 'eventric/src'
-          path
 
     # web server port
     port: 9876
@@ -81,5 +67,4 @@ module.exports = (config) ->
       'karma-chrome-launcher'
       'karma-spec-reporter'
       'karma-coffee-preprocessor'
-      'karma-commonjs-preprocessor'
     ]

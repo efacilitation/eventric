@@ -1,5 +1,8 @@
 # polyfill promises
-require './helper/promise'
+promise = require('es6-promise')
+if (typeof module isnt 'undefined') and (typeof process isnt 'undefined')
+  global.Promise = promise.Promise
+
 
 class Eventric
 
@@ -163,6 +166,36 @@ class Eventric
     nextTick = process?.nextTick ? setTimeout
     nextTick ->
       next()
+
+
+  defaults: (options, optionDefaults) ->
+    allKeys = [].concat (Object.keys options), (Object.keys optionDefaults)
+    for key in allKeys when !options[key] and optionDefaults[key]
+      options[key] = optionDefaults[key]
+    options
+
+
+  eachSeries: (arr, iterator, callback) ->
+    # MIT https://github.com/jb55/async-each-series
+    callback = callback or ->
+
+    return callback()  if not Array.isArray(arr) or not arr.length
+    completed = 0
+    iterate = ->
+      iterator arr[completed], (err) ->
+        if err
+          callback err
+          callback = ->
+        else
+          ++completed
+          if completed >= arr.length
+            callback()
+          else
+            iterate()
+        return
+      return
+
+    iterate()
 
 
 module.exports = new Eventric

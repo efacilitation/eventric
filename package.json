@@ -54,7 +54,6 @@
     "karma": "*",
     "karma-coffee-preprocessor": "*",
     "karma-phantomjs-launcher": "*",
-    "karma-commonjs-preprocessor": "*",
     "karma-spec-reporter": "*",
     "karma-mocha": "*",
     "mockery": "*",
@@ -66,7 +65,9 @@
     "lodash": "*",
     "merge-stream": "*"
   },
-  "dependencies": {},
+  "dependencies": {
+    "es6-promise": "1.0.0"
+  },
   "licenses": [
     {
       "type": "MIT",

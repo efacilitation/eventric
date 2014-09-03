@@ -1,5 +1,4 @@
 eventric = require 'eventric'
-async    = require './helper/async'
 
 class Projection
 
@@ -73,7 +72,7 @@ class Projection
         return resolve()
 
       projection["$store"] ?= {}
-      async.eachSeries projection.stores, (projectionStoreName, next) =>
+      eventric.eachSeries projection.stores, (projectionStoreName, next) =>
         @log.debug "[#{context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
         context.getProjectionStore projectionStoreName, projectionName, (err, projectionStore) =>
           if projectionStore
@@ -91,7 +90,7 @@ class Projection
       if not projectionStores
         return resolve()
 
-      async.eachSeries projectionStores, (projectionStoreName, next) =>
+      eventric.eachSeries projectionStores, (projectionStoreName, next) =>
         @log.debug "[#{context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
         context.clearProjectionStore projectionStoreName, projectionName, =>
           @log.debug "[#{context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
@@ -113,7 +112,7 @@ class Projection
         if not domainEvents or domainEvents.length is 0
           return resolve eventNames
 
-        async.eachSeries domainEvents, (event, next) =>
+        eventric.eachSeries domainEvents, (event, next) =>
           @_applyDomainEventToProjection event, projection
           .then ->
             next()

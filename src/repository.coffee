@@ -1,7 +1,4 @@
-eventric = require 'eventric'
-
-_         = require './helper/underscore'
-async     = require './helper/async'
+eventric  = require 'eventric'
 Aggregate = require './aggregate'
 
 class Repository
@@ -90,7 +87,7 @@ class Repository
       eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
-      async.eachSeries domainEvents, (domainEvent, next) =>
+      eventric.eachSeries domainEvents, (domainEvent, next) =>
         domainEvent.command = @_command
         @_store.saveDomainEvent domainEvent, =>
           eventric.log.debug "Saved DomainEvent", domainEvent
@@ -107,7 +104,7 @@ class Repository
             resolve aggregate.id
             callback null, aggregate.id
           else
-            async.eachSeries domainEvents, (domainEvent, next) =>
+            eventric.eachSeries domainEvents, (domainEvent, next) =>
               eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
               @_context.getEventBus().publishDomainEventAndWait domainEvent, next
             , (err) =>

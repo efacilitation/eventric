@@ -1,11 +1,8 @@
 eventric = require 'eventric'
 
-_                 = require './helper/underscore'
-async             = require './helper/async'
 Repository        = require './repository'
 EventBus          = require './event_bus'
 DomainEvent       = require './domain_event'
-Clone             = require './helper/clone'
 PubSub            = require './pub_sub'
 projectionService = require './projection'
 
@@ -146,9 +143,12 @@ class Context extends PubSub
         name: commandHandlerName
         params: arguments[0] ? null
 
+      _di = {}
+      for diFnName, diFn of @_di
+        _di[diFnName] = diFn
+
       repositoryCache = null
-      new_di = Clone @_di
-      new_di.$repository = (aggregateName) =>
+      _di.$repository = (aggregateName) =>
 
         if not repositoryCache
           AggregateRoot = @_aggregateRootClasses[aggregateName]
@@ -164,7 +164,7 @@ class Context extends PubSub
 
         repositoryCache
 
-      commandHandlerFn.apply new_di, arguments
+      commandHandlerFn.apply _di, arguments
     @
 
 
@@ -421,13 +421,13 @@ class Context extends PubSub
   _initializeStores: ->
     new Promise (resolve, reject) =>
       stores = []
-      for storeName, store of (_.defaults @_storeClasses, eventric.getStores())
+      for storeName, store of (eventric.defaults @_storeClasses, eventric.getStores())
         stores.push
           name: storeName
           Class: store.Class
           options: store.options
 
-      async.eachSeries stores, (store, next) =>
+      eventric.eachSeries stores, (store, next) =>
         @log.debug "[#{@name}] Initializing Store #{store.name}"
         @_storeInstances[store.name] = new store.Class
         @_storeInstances[store.name].initialize @name, store.options, =>
@@ -441,7 +441,7 @@ class Context extends PubSub
 
   _initializeProjections: ->
     new Promise (resolve, reject) =>
-      async.eachSeries @_projectionClasses, (projection, next) =>
+      eventric.eachSeries @_projectionClasses, (projection, next) =>
         eventNames = null
         projectionName = projection.name
         @log.debug "[#{@name}] Initializing Projection #{projectionName}"

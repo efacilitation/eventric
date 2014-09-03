@@ -1,8 +1,5 @@
-eventric = require 'eventric'
-
-_               = require './helper/underscore'
-Clone           = require './helper/clone'
-DomainEvent     = require './domain_event'
+eventric    = require 'eventric'
+DomainEvent = require './domain_event'
 
 class Aggregate
 
@@ -87,10 +84,6 @@ class Aggregate
 
       catch e
         reject e
-
-
-  toJSON: ->
-    Clone @root
 
 
 module.exports = Aggregate

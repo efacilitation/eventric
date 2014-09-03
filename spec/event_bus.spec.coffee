@@ -1,4 +1,4 @@
-describe.only 'EventBus', ->
+describe 'EventBus', ->
 
   eventBus = null
   pubSubStub = null

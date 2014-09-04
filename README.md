@@ -38,6 +38,11 @@ Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 Please keep in mind that eventric.js supplies you only with a structure that has common-sense in the DDD+CQRS community. But you really should get to know the tactical side of DDD as well, which is at least as important (and fun!) as the technical BuildingBlocks.
 
 
+## API Docs
+
+The Docs are currently work in progress. [API.md](API.md) has the current state based on jsdoc / dgeni.
+
+
 ## Getting started
 
 Take a look at the [eventric TodoMVC](https://github.com/efacilitation/eventric-todoMVC) for a running example, or try it yourself:

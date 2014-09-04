@@ -452,7 +452,7 @@ class Context extends PubSub
         projectionService.initializeInstance projection, {}, @
         .then (projectionId) =>
           @log.debug "[#{@name}] Finished initializing Projection #{projectionName}"
-          resolve projectionId
+          next()
 
         .catch (err) ->
           reject err

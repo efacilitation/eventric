@@ -40,6 +40,8 @@ Please keep in mind that eventric.js supplies you only with a structure that has
 
 ## Getting started
 
+Take a look at the [eventric TodoMVC](https://github.com/efacilitation/eventric-todoMVC) for a running example, or try it yourself:
+
 We need to install eventric first.
 
 ```

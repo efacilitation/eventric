@@ -71,7 +71,11 @@ class Context extends PubSub
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @getDomainEventsStore().saveDomainEvent domainEvent, =>
-      @_eventBus.publishDomainEvent domainEvent, ->
+      @publishDomainEvent domainEvent, ->
+
+
+  publishDomainEvent: (domainEvent, callback=->) =>
+    @_eventBus.publishDomainEvent domainEvent, callback
 
 
   _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
@@ -430,7 +434,7 @@ class Context extends PubSub
       eventric.eachSeries stores, (store, next) =>
         @log.debug "[#{@name}] Initializing Store #{store.name}"
         @_storeInstances[store.name] = new store.Class
-        @_storeInstances[store.name].initialize @name, store.options, =>
+        @_storeInstances[store.name].initialize @, store.options, =>
           @log.debug "[#{@name}] Finished initializing Store #{store.name}"
           next()
 
@@ -523,9 +527,10 @@ class Context extends PubSub
     @_storeInstances[storeName]
 
 
-  saveDomainEvent: (saveArguments...) ->
+  saveDomainEvent: (domainEvent) ->
     new Promise (resolve, reject) =>
-      @getDomainEventsStore().saveDomainEvent saveArguments..., (err, events) ->
+      @getDomainEventsStore().saveDomainEvent domainEvent, (err, events) =>
+        @publishDomainEvent domainEvent
         return reject err if err
         resolve events
 

@@ -6,6 +6,7 @@ class Projection
     @log = eventric.log
     @_handlerFunctions    = {}
     @_projectionInstances = {}
+    @_domainEventsApplied = {}
 
 
   initializeInstance: (projectionObj, params, context) ->
@@ -39,7 +40,7 @@ class Projection
             eventName = key.replace /^handle/, ''
             eventNames.push eventName
 
-        @_applyDomainEventsFromStoreToProjection projection, eventNames, aggregateId, context
+        @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId, context
       .then (eventNames) =>
         @log.debug "[#{context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
         @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, context
@@ -99,8 +100,9 @@ class Projection
         resolve()
 
 
-  _applyDomainEventsFromStoreToProjection: (projection, eventNames, aggregateId, context) ->
+  _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventNames, aggregateId, context) ->
     new Promise (resolve, reject) =>
+      @_domainEventsApplied[projectionId] = {}
 
       if aggregateId
         findEvents = context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
@@ -112,9 +114,11 @@ class Projection
         if not domainEvents or domainEvents.length is 0
           return resolve eventNames
 
-        eventric.eachSeries domainEvents, (event, next) =>
-          @_applyDomainEventToProjection event, projection
-          .then ->
+        eventric.eachSeries domainEvents, (domainEvent, next) =>
+          @_applyDomainEventToProjection domainEvent, projection
+          .then =>
+
+            @_domainEventsApplied[projectionId][domainEvent.id] = true
             next()
 
         , (err) =>
@@ -127,8 +131,12 @@ class Projection
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, context) ->
     new Promise (resolve, reject) =>
       domainEventHandler = (domainEvent, done) =>
+        if @_domainEventsApplied[projectionId][domainEvent.id]
+          return done()
+
         @_applyDomainEventToProjection domainEvent, projection
-        .then ->
+        .then =>
+          @_domainEventsApplied[projectionId][domainEvent.id] = true
           context.publish "projection:#{projectionName}:changed",
             id: projectionId
             projection: projection

@@ -53,7 +53,6 @@ describe 'Remote Projection Feature', ->
           handleExampleCreated: (domainEvent) ->
             @created = true
 
-
           handleToCheckCorrectFunctionCall: (domainEvent) ->
 
 
@@ -74,7 +73,6 @@ describe 'Remote Projection Feature', ->
       it 'then we should be able to remove it', ->
         sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
 
-        exampleRemote.getProjectionInstance projectionId
         exampleRemote.destroyProjectionInstance projectionId
 
         expect(exampleRemote.getProjectionInstance projectionId).to.be.undefined
@@ -141,7 +139,6 @@ describe 'Remote Projection Feature', ->
         .then (projectionId) ->
           sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
 
-          exampleProjection = exampleRemote.getProjectionInstance projectionId
           exampleRemote.destroyProjectionInstance projectionId
 
           expect(exampleRemote.getProjectionInstance projectionId).to.be.undefined

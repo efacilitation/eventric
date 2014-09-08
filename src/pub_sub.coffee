@@ -2,7 +2,7 @@ class PubSub
 
   constructor: ->
     @_subscribers = []
-    @_subsrciberId = 0
+    @_subscriberId = 0
     @_nextTick = (args...) -> setTimeout args...
 
 
@@ -63,7 +63,7 @@ class PubSub
 
 
   _getNextSubscriberId: ->
-    @_subsrciberId++
+    @_subscriberId++
 
 
 module.exports = PubSub

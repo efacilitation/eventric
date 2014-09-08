@@ -176,6 +176,8 @@ class Projection
 
 
   destroyInstance: (projectionId, context) ->
+    return unless @_handlerFunctions[projectionId]
+    
     for subscriberId in @_handlerFunctions[projectionId]
       context.unsubscribeFromDomainEvent subscriberId
     delete @_handlerFunctions[projectionId]

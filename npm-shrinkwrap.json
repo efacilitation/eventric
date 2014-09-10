@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "dependencies": {
     "es6-promise": {
       "version": "1.0.0",

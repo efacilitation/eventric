@@ -110,7 +110,6 @@ class Projection
         findEvents = context.findDomainEventsByName eventNames
 
       findEvents.then (domainEvents) =>
-
         if not domainEvents or domainEvents.length is 0
           return resolve eventNames
 
@@ -125,8 +124,9 @@ class Projection
           return reject err if err
           resolve eventNames
 
-      .catch (err) ->
+      findEvents.catch (err) ->
         reject err
+
 
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, context) ->
     new Promise (resolve, reject) =>
@@ -177,7 +177,7 @@ class Projection
 
   destroyInstance: (projectionId, context) ->
     return unless @_handlerFunctions[projectionId]
-    
+
     for subscriberId in @_handlerFunctions[projectionId]
       context.unsubscribeFromDomainEvent subscriberId
     delete @_handlerFunctions[projectionId]

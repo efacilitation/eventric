@@ -1,7 +1,0 @@
-## eventric
-
-### API
-
-
-{{content}}
-

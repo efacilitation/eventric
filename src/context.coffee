@@ -35,6 +35,8 @@ class Context extends PubSub
   ###*
   * @name set
   *
+  * @module Context
+  *
   * @description
   * > Use as: set(key, value)
   * Configure settings for the `context`.
@@ -58,6 +60,8 @@ class Context extends PubSub
 
   ###*
   * @name emitDomainEvent
+  *
+  * @module Context
   *
   * @description emit Domain Event in the context
   *
@@ -96,6 +100,8 @@ class Context extends PubSub
   ###*
   * @name defineDomainEvent
   *
+  * @module Context
+  *
   * @description
   * Adds a DomainEvent Class which will be used when emitting or handling DomainEvents inside of Aggregates, Projectionpr or ProcessManagers
   *
@@ -114,6 +120,8 @@ class Context extends PubSub
 
   ###*
   * @name addCommandHandler
+  *
+  * @module Context
   *
   * @dscription
   * Use as: addCommandHandler(commandName, commandFunction)
@@ -180,6 +188,8 @@ class Context extends PubSub
   ###*
   * @name addQueryHandler
   *
+  * @module Context
+  *
   * @dscription
   * Use as: addQueryHandler(queryHandler, queryFunction)
   *
@@ -208,6 +218,8 @@ class Context extends PubSub
 
   ###*
   * @name addAggregate
+  *
+  * @module Context
   *
   * @description
   *
@@ -245,8 +257,9 @@ class Context extends PubSub
 
 
   ###*
-  *
   * @name subscribeToDomainEvent
+  *
+  * @module Context
   *
   * @description
   * Use as: subscribeToDomainEvent(domainEventName, domainEventHandlerFunction)
@@ -272,8 +285,9 @@ class Context extends PubSub
     @
 
   ###*
-  *
   * @name subscribeToDomainEventWithAggregateId
+  *
+  * @module Context
   *
   ###
   subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn, options = {}) ->
@@ -293,8 +307,9 @@ class Context extends PubSub
 
 
   ###*
-  *
   * @name addDomainService
+  *
+  * @module Context
   *
   * @description
   * Use as: addDomainService(domainServiceName, domainServiceFunction)
@@ -323,8 +338,9 @@ class Context extends PubSub
 
 
   ###*
-  *
   * @name addAdapter
+  *
+  * @module Context
   *
   * @description
   * Use as: addAdapter(adapterName, AdapterClass)
@@ -355,6 +371,8 @@ class Context extends PubSub
   ###*
   * @name addProjection
   *
+  * @module Context
+  *
   * @description
   * Add Projection that can subscribe to and handle DomainEvents
   *
@@ -377,6 +395,8 @@ class Context extends PubSub
 
   ###*
   * @name initialize
+  *
+  * @module Context
   *
   * @description
   * Use as: initialize()
@@ -476,6 +496,8 @@ class Context extends PubSub
   ###*
   * @name getProjection
   *
+  * @module Context
+  *
   * @description Get a Projection Instance after initialize()
   *
   * @param {String} projectionName Name of the Projection
@@ -486,6 +508,8 @@ class Context extends PubSub
 
   ###*
   * @name getAdapter
+  *
+  * @module Context
   *
   * @description Get a Adapter Instance after initialize()
   *
@@ -498,6 +522,8 @@ class Context extends PubSub
   ###*
   * @name getDomainEvent
   *
+  * @module Context
+  *
   * @description Get a DomainEvent Class after initialize()
   *
   * @param {String} domainEventName Name of the DomainEvent
@@ -509,6 +535,8 @@ class Context extends PubSub
   ###*
   * @name getDomainService
   *
+  * @module Context
+  *
   * @description Get a DomainService after initialize()
   *
   * @param {String} domainServiceName Name of the DomainService
@@ -519,6 +547,8 @@ class Context extends PubSub
 
   ###*
   * @name getDomainEventsStore
+  *
+  * @module Context
   *
   * @description Get the DomainEventsStore after initialization
   ###
@@ -601,6 +631,8 @@ class Context extends PubSub
   ###*
   * @name getEventBus
   *
+  * @module Context
+  *
   * @description Get the EventBus after initialization
   ###
   getEventBus: ->
@@ -609,6 +641,8 @@ class Context extends PubSub
 
   ###*
   * @name command
+  *
+  * @module Context
   *
   * @description
   *
@@ -658,6 +692,8 @@ class Context extends PubSub
 
   ###*
   * @name query
+  *
+  * @module Context
   *
   * @description
   *

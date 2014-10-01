@@ -26,7 +26,7 @@ head
       .row.row-offcanvas.row-offcanvas-right
         #sidebar.col-xs-6.col-sm-4.sidebar-offcanvas(role='navigation')
           .list-group
-            a.list-group-item(ui-sref="docs({ 'functionName' : page.name, 'moduleName' : page.module })", ng-repeat="page in NG_PAGES") {{page.module}} - {{page.name}}
+            a.list-group-item(ui-sref="docs({ 'functionName' : page.name, 'moduleName' : page.module })", ng-repeat="page in DOC_PAGES") {{page.module}} - {{page.name}}
 
         .col-xs-12.col-sm-8
           div(ui-view="")

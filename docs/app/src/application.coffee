@@ -23,7 +23,7 @@ EventricDocs = angular.module("EventricDocs", [
 angular.module("EventricDocs.Controller.ApplicationCtrl", [])
 
 .controller "ApplicationCtrl", [
-  "$scope", "NG_PAGES"
-  ($scope, NG_PAGES) ->
-    $scope.NG_PAGES = NG_PAGES
+  "$scope", "DOC_PAGES"
+  ($scope, DOC_PAGES) ->
+    $scope.DOC_PAGES = DOC_PAGES
 ]

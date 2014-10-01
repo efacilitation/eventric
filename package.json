@@ -63,7 +63,10 @@
     "sinon": "*",
     "sinon-chai": "*",
     "lodash": "*",
-    "merge-stream": "*"
+    "merge-stream": "*",
+    "gulp-jade": "~0.8.0",
+    "gulp-webserver": "~0.8.2",
+    "gulp-sass": "~1.0.0"
   },
   "dependencies": {
     "es6-promise": "1.0.0"

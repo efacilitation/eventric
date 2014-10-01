@@ -42,5 +42,10 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "devDependencies": {
+    "angularjs": "~1.2.25",
+    "bootstrap": "~3.2.0",
+    "angular-ui-router": "~0.2.11"
+  }
 }

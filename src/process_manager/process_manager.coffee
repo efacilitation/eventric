@@ -4,6 +4,9 @@ class ProcessManagerService
     @_processManagerInstances = {}
 
   ###*
+  * @name add
+  *
+  * @module ProcessManagerService
   *
   * @description Process Manager
   *

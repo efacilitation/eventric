@@ -14,7 +14,11 @@ class Aggregate
 
     @root.$emitDomainEvent = @emitDomainEvent
 
-
+  ###*
+  * @name emitDomainEvent
+  *
+  * @module Aggregate
+  ###
   emitDomainEvent: (domainEventName, domainEventPayload) =>
     DomainEventClass = @_context.getDomainEvent domainEventName
     if !DomainEventClass
@@ -48,7 +52,11 @@ class Aggregate
     else
       eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
-
+  ###*
+  * @name getDomainEvents
+  *
+  * @module Aggregate
+  ###
   getDomainEvents: =>
     @_domainEvents
 
@@ -60,7 +68,11 @@ class Aggregate
   _applyDomainEvent: (domainEvent) ->
     @_handleDomainEvent domainEvent.name, domainEvent
 
-
+  ###*
+  * @name create
+  *
+  * @module Aggregate
+  ###
   create: =>
     params = arguments
     new Promise (resolve, reject) =>

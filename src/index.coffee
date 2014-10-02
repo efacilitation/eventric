@@ -21,10 +21,20 @@ class Eventric
     @set 'default domain events store', 'inmemory'
 
 
+  ###*
+  * @name set
+  *
+  * @module Eventric
+  ###
   set: (key, value) ->
     @_params[key] = value
 
 
+  ###*
+  * @name get
+  *
+  * @module Eventric
+  ###
   get: (key) ->
     if not key
       @_params
@@ -32,17 +42,30 @@ class Eventric
       @_params[key]
 
 
+  ###*
+  * @name addStore
+  *
+  * @module Eventric
+  ###
   addStore: (storeName, StoreClass, storeOptions={}) ->
     @_storeClasses[storeName] =
       Class: StoreClass
       options: storeOptions
 
 
+  ###*
+  * @name getStores
+  *
+  * @module Eventric
+  ###
   getStores: ->
     @_storeClasses
 
 
   ###*
+  * @name context
+  * 
+  * @module Eventric
   *
   * @description Get a new context instance.
   *
@@ -64,10 +87,20 @@ class Eventric
     context
 
 
+  ###*
+  * @name getContext
+  *
+  * @module Eventric
+  ###
   getContext: (name) ->
     @_contexts[name]
 
 
+  ###*
+  * @name remote
+  *
+  * @module Eventric
+  ###
   remote: (contextName) ->
     if !contextName
       err = 'Missing context name'
@@ -78,6 +111,11 @@ class Eventric
     remote
 
 
+  ###*
+  * @name addRemoteEndpoint
+  *
+  * @module Eventric
+  ###
   addRemoteEndpoint: (remoteName, remoteEndpoint) ->
     @_remoteEndpoints.push remoteEndpoint
     remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
@@ -118,6 +156,9 @@ class Eventric
           remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
 
   ###*
+  * @name subscribeToDomainEvent
+  *
+  * @module Eventric
   *
   * @description Global DomainEvent Handlers
   *
@@ -137,12 +178,22 @@ class Eventric
       @_domainEventHandlers[contextName][eventName].push eventHandler
 
 
+  ###*
+  * @name getDomainEventHandlers
+  *
+  * @module Eventric
+  ###
   getDomainEventHandlers: (contextName, domainEventName) ->
     [].concat (@_domainEventHandlers[contextName]?[domainEventName] ? []),
               (@_domainEventHandlers[contextName]?.all ? []),
               (@_domainEventHandlersAll ? [])
 
 
+  ###*
+  * @name generateUid
+  *
+  * @module Eventric
+  ###
   generateUid: (separator) ->
     # http://stackoverflow.com/a/12223573
     S4 = ->
@@ -162,12 +213,22 @@ class Eventric
     @_processManagerService.add processManagerName, processManagerObj, @
 
 
+  ###*
+  * @name nextTick
+  *
+  * @module Eventric
+  ###
   nextTick: (next) ->
     nextTick = process?.nextTick ? setTimeout
     nextTick ->
       next()
 
 
+  ###*
+  * @name defaults
+  *
+  * @module Eventric
+  ###
   defaults: (options, optionDefaults) ->
     allKeys = [].concat (Object.keys options), (Object.keys optionDefaults)
     for key in allKeys when !options[key] and optionDefaults[key]
@@ -175,6 +236,11 @@ class Eventric
     options
 
 
+  ###*
+  * @name eachSeries
+  *
+  * @module Eventric
+  ###
   eachSeries: (arr, iterator, callback) ->
     # MIT https://github.com/jb55/async-each-series
     callback = callback or ->

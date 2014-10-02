@@ -6,10 +6,20 @@ class EventBus
     @_pubSub = new PubSub()
 
 
+  ###*
+  * @name subscribeToDomainEventWithAggregateId
+  *
+  * @module EventBus
+  ###
   subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn, options = {}) ->
     @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn, options
 
 
+  ###*
+  * @name subscribeToDomainEvent
+  *
+  * @module EventBus
+  ###
   subscribeToDomainEvent: (eventName, handlerFn, options = {}) ->
     if options.isAsync
       @_pubSub.subscribeAsync eventName, handlerFn
@@ -17,14 +27,29 @@ class EventBus
       @_pubSub.subscribe eventName, handlerFn
 
 
+  ###*
+  * @name subscribeToAllDomainEvents
+  *
+  * @module EventBus
+  ###
   subscribeToAllDomainEvents: (handlerFn) ->
     @_pubSub.subscribe 'DomainEvent', handlerFn
 
 
+  ###*
+  * @name publishDomainEvent
+  *
+  * @module EventBus
+  ###
   publishDomainEvent: (domainEvent, callback = ->) ->
     @_publish 'publish', domainEvent, callback
 
 
+  ###*
+  * @name publishDomainEventAndWait
+  *
+  * @module EventBus
+  ###
   publishDomainEventAndWait: (domainEvent, callback = ->) ->
     @_publish 'publishAsync', domainEvent, callback
 

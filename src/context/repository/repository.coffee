@@ -13,6 +13,11 @@ class Repository
     @_store = @_context.getDomainEventsStore()
 
 
+  ###*
+  * @name findById
+  *
+  * @module Repository
+  ###
   findById: (aggregateId, callback = ->) =>
     new Promise (resolve, reject) =>
       @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
@@ -47,6 +52,11 @@ class Repository
       callback null, domainEvents
 
 
+  ###*
+  * @name create
+  *
+  * @module Repository
+  ###
   create: =>
     params = arguments
     if typeof params[params.length-1] is 'function'
@@ -63,6 +73,11 @@ class Repository
         resolve aggregate.id
 
 
+  ###*
+  * @name save
+  *
+  * @module Repository
+  ###
   save: (aggregateId, callback=->) =>
     new Promise (resolve, reject) =>
       commandId = @_command.id ? 'nocommand'
@@ -117,8 +132,11 @@ class Repository
 
 
 
-
-
+  ###*
+  * @name setCommand
+  *
+  * @module Repository
+  ###
   setCommand: (command) ->
     @_command = command
 

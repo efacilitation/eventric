@@ -6,6 +6,11 @@ class PubSub
     @_nextTick = (args...) -> setTimeout args...
 
 
+  ###*
+  * @name subscribe
+  *
+  * @module PubSub
+  ###
   subscribe: (eventName, subscriberFn) ->
     subscriber =
       eventName: eventName
@@ -15,6 +20,11 @@ class PubSub
     subscriber.subscriberId
 
 
+  ###*
+  * @name subscribeAsync
+  *
+  * @module PubSub
+  ###
   subscribeAsync: (eventName, subscriberFn) ->
     subscriber =
       eventName: eventName
@@ -25,6 +35,11 @@ class PubSub
     subscriber.subscriberId
 
 
+  ###*
+  * @name publish
+  *
+  * @module PubSub
+  ###
   publish: (eventName, payload, callback = ->) ->
     subscribers = @_getRelevantSubscribers eventName
     executeNextHandler = =>
@@ -36,6 +51,11 @@ class PubSub
     @_nextTick executeNextHandler, 0
 
 
+  ###*
+  * @name publishAsync
+  *
+  * @module PubSub
+  ###
   publishAsync: (eventName, payload, callback = ->) ->
     subscribers = @_getRelevantSubscribers eventName
     executeNextHandler = =>
@@ -58,6 +78,11 @@ class PubSub
       @_subscribers
 
 
+  ###*
+  * @name unsubscribe
+  *
+  * @module PubSub
+  ###
   unsubscribe: (subscriberId) ->
     @_subscribers = @_subscribers.filter (x) -> x.subscriberId isnt subscriberId
 

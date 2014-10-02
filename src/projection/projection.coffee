@@ -9,6 +9,11 @@ class Projection
     @_domainEventsApplied = {}
 
 
+  ###*
+  * @name initializeInstance
+  *
+  * @module Projection
+  ###
   initializeInstance: (projectionName, Projection, params, context) ->
     new Promise (resolve, reject) =>
 
@@ -191,10 +196,20 @@ class Projection
       callback()
 
 
+  ###*
+  * @name getInstance
+  *
+  * @module Projection
+  ###
   getInstance: (projectionId) ->
     @_projectionInstances[projectionId]
 
 
+  ###*
+  * @name destroyInstance
+  *
+  * @module Projection
+  ###
   destroyInstance: (projectionId, context) ->
     if not @_handlerFunctions[projectionId]
       return eventric.log.error 'Missing attribute projectionId'

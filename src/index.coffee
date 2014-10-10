@@ -15,9 +15,9 @@ class Eventric
     @_processManagerInstances = {}
     @_storeClasses = {}
     @_remoteEndpoints = []
-    @log = require './logger'
-    @addRemoteEndpoint 'inmemory', (require './remote/inmemory').endpoint
-    @addStore 'inmemory', require './store_inmemory'
+    @log = require 'eventric/src/logger'
+    @addRemoteEndpoint 'inmemory', (require 'eventric/src/remote/inmemory').endpoint
+    @addStore 'inmemory', require 'eventric/src/store_inmemory'
     @set 'default domain events store', 'inmemory'
 
 

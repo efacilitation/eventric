@@ -112,7 +112,7 @@ class Remote extends PubSub
       err = "Given projection #{projectionName} not registered on remote"
       eventric.log.error err
       err = new Error err
-      return reject err
+      return err
 
     projectionService.initializeInstance
       name: projectionName

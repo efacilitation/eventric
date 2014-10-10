@@ -5,7 +5,7 @@
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-Build JS applications using Behaviour-driven Domain Modelling - based on DDD, BDD, CQRS and EventSourcing. Runs on NodeJS and modern Browsers.
+Build JS applications using Behaviour-driven Domain Design - based on DDD, BDD, CQRS and EventSourcing. Runs on NodeJS and modern Browsers.
 
 
 ### Why?

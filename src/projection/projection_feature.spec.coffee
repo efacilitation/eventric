@@ -44,7 +44,7 @@ describe 'Projection Feature', ->
           .then (example) =>
             example.doSomething()
             @$repository('Example').save params.id
-          .then =>
+          .then ->
             callback()
 
       exampleContext.initialize()

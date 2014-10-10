@@ -120,7 +120,7 @@ class Projection
             @_domainEventsApplied[projectionId][domainEvent.id] = true
             next()
 
-        , (err) =>
+        , (err) ->
           return reject err if err
           resolve eventNames
 
@@ -176,7 +176,8 @@ class Projection
 
 
   destroyInstance: (projectionId, context) ->
-    return unless @_handlerFunctions[projectionId]
+    if not @_handlerFunctions[projectionId]
+      return eventric.log.error 'Missing attribute projectionId'
 
     for subscriberId in @_handlerFunctions[projectionId]
       context.unsubscribeFromDomainEvent subscriberId

@@ -5,9 +5,7 @@
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-Build JavaScript applications based on DDD, CQRS and EventSourcing
-
-Runs on NodeJS and modern Browsers. Therefore it's easy to share code between Server and Client.
+Build JS applications using Behaviour-driven Domain Modelling - based on DDD, BDD, CQRS and EventSourcing. Runs on NodeJS and modern Browsers.
 
 
 ### Why?
@@ -29,7 +27,7 @@ Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 
 ## Philosophy
 
-* Emphasize [Domain-driven design](https://www.goodreads.com/book/show/179133.Domain_Driven_Design), [Event-driven architecture](https://www.goodreads.com/book/show/12369902-event-centric) and [Task-based UIs](http://cqrs.wordpress.com/documents/task-based-ui).
+* Emphasize [Domain-driven design](https://www.goodreads.com/book/show/179133.Domain_Driven_Design), [Behaviour-driven development](http://dannorth.net/introducing-bdd/), [Event-driven architecture](https://www.goodreads.com/book/show/12369902-event-centric) and [Task-based UIs](http://cqrs.wordpress.com/documents/task-based-ui).
 * Put the the Domain Model in the very center of your Layered Architecture ([Onion](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/) / [Hexagonal](http://alistair.cockburn.us/Hexagonal+architecture))
 * Explicitly set boundaries for parts of your application ([BoundedContexts](https://en.wikipedia.org/wiki/Domain-driven_design#Bounded_context) / [MicroServices](http://martinfowler.com/articles/microservices.html))
 * Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx))

@@ -14,7 +14,7 @@ module.exports = (gulp) ->
     rimraf './build', next
 
   gulp.task 'build:src', ->
-    gulp.src(['index.coffee', '+(src)/*.coffee'])
+    gulp.src(['index.coffee', '+(src)/**/*.coffee'])
       .pipe(coffee({bare: true}))
       .pipe(gulp.dest('build/node'))
 

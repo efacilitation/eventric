@@ -1,6 +1,6 @@
 eventric          = require 'eventric'
-PubSub            = require './pub_sub'
-projectionService = require './projection'
+PubSub            = require 'eventric/src/pub_sub'
+projectionService = require 'eventric/src/projection'
 
 
 class Remote extends PubSub
@@ -13,7 +13,7 @@ class Remote extends PubSub
     @_projectionClasses = {}
     @_projectionInstances = {}
     @_handlerFunctions = {}
-    @addClient 'inmemory', (require './remote_inmemory').client
+    @addClient 'inmemory', (require 'eventric/src/remote/inmemory').client
     @set 'default client', 'inmemory'
 
 

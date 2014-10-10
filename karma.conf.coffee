@@ -16,6 +16,7 @@ module.exports = (config) ->
       # specs
       'spec/helper/setup.coffee'
       'spec/**/*.spec.coffee'
+      'src/**/*.spec.coffee'
     ]
 
     # list of files to exclude
@@ -26,6 +27,7 @@ module.exports = (config) ->
     # compile coffee scripts and wrap into commonjs
     preprocessors:
       'spec/**/*.coffee': ['coffee']
+      'src/**/*.coffee': ['coffee']
 
     coffeePreprocessor:
       options:

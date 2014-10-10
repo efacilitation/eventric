@@ -11,12 +11,12 @@ class Eventric
     @_params = {}
     @_domainEventHandlers = {}
     @_domainEventHandlersAll = []
-    @_processManagerService = require './process_manager'
+    @_processManagerService = require 'eventric/src/process_manager'
     @_processManagerInstances = {}
     @_storeClasses = {}
     @_remoteEndpoints = []
     @log = require './logger'
-    @addRemoteEndpoint 'inmemory', (require './remote_inmemory').endpoint
+    @addRemoteEndpoint 'inmemory', (require './remote/inmemory').endpoint
     @addStore 'inmemory', require './store_inmemory'
     @set 'default domain events store', 'inmemory'
 
@@ -53,7 +53,7 @@ class Eventric
       err = 'Contexts must have a name'
       @log.error err
       throw new Error err
-    Context = require './context'
+    Context = require 'eventric/src/context'
     context = new Context name
 
     @_delegateAllDomainEventsToGlobalHandlers context
@@ -73,7 +73,7 @@ class Eventric
       err = 'Missing context name'
       @log.error err
       throw new Error err
-    Remote = require './remote'
+    Remote = require 'eventric/src/remote'
     remote = new Remote contextName
     remote
 

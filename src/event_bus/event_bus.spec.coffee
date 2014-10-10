@@ -8,7 +8,7 @@ describe 'EventBus', ->
       subscribeAsync: sandbox.stub()
       publish: sandbox.stub()
       publishAsync: sandbox.stub()
-    mockery.registerMock './pub_sub', sandbox.stub().returns pubSubStub
+    mockery.registerMock 'eventric/src/pub_sub', sandbox.stub().returns pubSubStub
     EventBus = require 'eventric/src/event_bus'
     eventBus = new EventBus
 

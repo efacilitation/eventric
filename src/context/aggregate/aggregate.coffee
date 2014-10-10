@@ -1,5 +1,6 @@
 eventric    = require 'eventric'
-DomainEvent = require './domain_event'
+# TODO: replace with eventric api call getDomainEventClass() or property access?
+DomainEvent = require 'eventric/src/context/domain_event'
 
 class Aggregate
 

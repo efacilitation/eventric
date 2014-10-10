@@ -1,10 +1,10 @@
 eventric = require 'eventric'
 
-Repository        = require './repository'
-EventBus          = require './event_bus'
-DomainEvent       = require './domain_event'
-PubSub            = require './pub_sub'
-projectionService = require './projection'
+Repository        = require 'eventric/src/context/repository'
+DomainEvent       = require 'eventric/src/context/domain_event'
+EventBus          = require 'eventric/src/event_bus'
+PubSub            = require 'eventric/src/pub_sub'
+projectionService = require 'eventric/src/projection'
 
 
 class Context extends PubSub

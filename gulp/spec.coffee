@@ -25,6 +25,7 @@ module.exports = (gulp) ->
     gulp.src([
       'spec/helper/setup.coffee'
       'spec/**/*.coffee'
+      'src/**/*.coffee'
       ])
       .pipe mocha(reporter: 'spec')
         .on('error', growl.specsError)

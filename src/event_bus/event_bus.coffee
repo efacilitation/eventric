@@ -1,4 +1,4 @@
-PubSub = require './pub_sub'
+PubSub = require 'eventric/src/pub_sub'
 
 class EventBus
 

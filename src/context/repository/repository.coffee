@@ -1,5 +1,5 @@
 eventric  = require 'eventric'
-Aggregate = require './aggregate'
+Aggregate = require 'eventric/src/context/aggregate'
 
 class Repository
 

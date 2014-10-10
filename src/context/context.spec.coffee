@@ -10,8 +10,8 @@ describe 'Context', ->
       subscribeToDomainEventWithAggregateId: sandbox.stub()
       publishDomainEvent: sandbox.stub()
 
-    mockery.registerMock './event_bus', sandbox.stub().returns eventBusStub
-    mockery.registerMock './repository', RepositoryMock
+    mockery.registerMock 'eventric/src/event_bus', sandbox.stub().returns eventBusStub
+    mockery.registerMock 'eventric/src/context/repository', RepositoryMock
 
     Context = require 'eventric/src/context'
 

@@ -206,6 +206,8 @@ class Eventric
   *
   * @description Global Process Manager
   *
+  * @module Eventric
+  *
   * @param {String} processManagerName Name of the ProcessManager
   * @param {Object} processManagerObject Object containing `initializeWhen` and `class`
   ###

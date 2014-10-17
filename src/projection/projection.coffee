@@ -114,9 +114,7 @@ class Projection
           return resolve eventNames
 
         eventric.eachSeries domainEvents, (domainEvent, next) =>
-          @_applyDomainEventToProjection domainEvent, projection
-          .then =>
-
+          @_applyDomainEventToProjection domainEvent, projection, =>
             @_domainEventsApplied[projectionId][domainEvent.id] = true
             next()
 
@@ -134,8 +132,7 @@ class Projection
         if @_domainEventsApplied[projectionId][domainEvent.id]
           return done()
 
-        @_applyDomainEventToProjection domainEvent, projection
-        .then =>
+        @_applyDomainEventToProjection domainEvent, projection, =>
           @_domainEventsApplied[projectionId][domainEvent.id] = true
           context.publish "projection:#{projectionName}:changed",
             id: projectionId
@@ -154,21 +151,19 @@ class Projection
       resolve()
 
 
-  _applyDomainEventToProjection: (domainEvent, projection) =>
-    new Promise (resolve, reject) =>
-      if !projection["handle#{domainEvent.name}"]
-        @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
-        return resolve()
+  _applyDomainEventToProjection: (domainEvent, projection, callback) =>
+    if !projection["handle#{domainEvent.name}"]
+      @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
+      return callback()
 
-      if projection["handle#{domainEvent.name}"].length == 2
-        # done callback defined inside the handler
-        projection["handle#{domainEvent.name}"] domainEvent, ->
-          resolve()
+    if projection["handle#{domainEvent.name}"].length == 2
+      # done callback defined inside the handler
+      projection["handle#{domainEvent.name}"] domainEvent, callback
 
-      else
-        # no callback defined inside the handler
-        projection["handle#{domainEvent.name}"] domainEvent
-        resolve()
+    else
+      # no callback defined inside the handler
+      projection["handle#{domainEvent.name}"] domainEvent
+      callback()
 
 
   getInstance: (projectionId) ->

@@ -15,7 +15,6 @@ module.exports = (config) ->
 
       # specs
       'spec/helper/setup.coffee'
-      'spec/**/*.spec.coffee'
       'src/**/*.spec.coffee'
     ]
 

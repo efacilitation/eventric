@@ -12,9 +12,17 @@ class Projection
   initializeInstance: (projectionObj, params, context) ->
     new Promise (resolve, reject) =>
 
-      projectionName = projectionObj.name
-      ProjectionClass = projectionObj.class
-      projection = new ProjectionClass
+      projectionName = 'whoami'
+      if projectionObj.name
+        projectionName = projectionObj.name
+
+      if projectionObj.class
+        ProjectionClass = projectionObj.class
+        projection = new ProjectionClass
+
+      if projectionObj.object
+        projection = projectionObj.object
+
       if context._di
         for diName, diFn of context._di
           projection[diName] = diFn

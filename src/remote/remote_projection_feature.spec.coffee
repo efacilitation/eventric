@@ -38,7 +38,7 @@ describe 'Remote Projection Feature', ->
 
   describe 'given we created and initialized some example context', ->
 
-    describe 'when we add a remote projection to the remote', ->
+    describe 'when we add a projection to the remote', ->
       projectionId = null
       exampleRemote = null
 
@@ -63,7 +63,7 @@ describe 'Remote Projection Feature', ->
           projectionId = _projectionId
 
 
-      it 'then the projection should update the projection as expected', ->
+      it 'then the projection should update its state as expected', ->
         exampleRemote.command 'CreateExample'
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
@@ -77,6 +77,32 @@ describe 'Remote Projection Feature', ->
 
         expect(exampleRemote.getProjectionInstance projectionId).to.be.undefined
         expect(exampleRemote.unsubscribeFromDomainEvent).to.have.been.called
+
+
+    describe 'when we initialize a projection as object on the remote', ->
+      projectionId = null
+      exampleRemote = null
+
+      beforeEach ->
+        exampleRemote = eventric.remote 'Example'
+        exampleRemote.initializeProjection
+          initialize: (params, done) ->
+            done()
+
+          handleExampleCreated: (domainEvent) ->
+            @created = true
+
+          handleToCheckCorrectFunctionCall: (domainEvent) ->
+
+        .then (_projectionId) ->
+          projectionId = _projectionId
+
+
+      it 'then the projection should update its state as expected', ->
+        exampleRemote.command 'CreateExample'
+        .then ->
+          exampleProjection = exampleRemote.getProjectionInstance projectionId
+          expect(exampleProjection.created).to.be.true
 
 
     describe 'when we add a remote projection to the remote which subscribes to a specific aggregate', ->

@@ -107,6 +107,12 @@ class Remote extends PubSub
     @
 
 
+  initializeProjection: (projectionObject) ->
+    projectionService.initializeInstance
+      object: projectionObject
+    , null, @
+
+
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on remote"

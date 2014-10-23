@@ -136,7 +136,7 @@ class Projection
 
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, context) ->
     new Promise (resolve, reject) =>
-      domainEventHandler = (domainEvent, done) =>
+      domainEventHandler = (domainEvent, done = ->) =>
         if @_domainEventsApplied[projectionId][domainEvent.id]
           return done()
 

@@ -21,7 +21,9 @@ class Context extends PubSub
     @_queryHandlers = {}
     @_domainEventClasses = {}
     @_domainEventHandlers = {}
-    @_projectionClasses = []
+    @_projectionClasses = {}
+    @_domainEventStreamClasses = {}
+    @_domainEventStreamInstances = {}
     @_repositoryInstances = {}
     @_domainServices = {}
     @_storeClasses = {}
@@ -300,10 +302,61 @@ class Context extends PubSub
     @_eventBus.subscribeToAllDomainEvents domainEventHandler, options
 
 
-
   subscribeToDomainEvents: (domainEventHandlersObj) ->
     @subscribeToDomainEvent domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
     @
+
+
+  subscribeToDomainEventStream: (domainEventStreamName, handlerFn, options = {}) ->
+    if not @_domainEventStreamClasses[domainEventStreamName]
+      err = "DomainEventStream Class with name #{domainEventStreamName} not added"
+      return @log.error err
+
+    domainEventStream = new @_domainEventStreamClasses[domainEventStreamName]
+    domainEventStream._domainEventsPublished = {}
+    domainEventStreamId = eventric.generateUid()
+    @_domainEventStreamInstances[domainEventStreamId] = domainEventStream
+
+    domainEventNames = []
+    for functionName, functionValue of domainEventStream
+      if (functionName.indexOf 'filter') is 0 and (typeof functionValue is 'function')
+        domainEventName = functionName.replace /^filter/, ''
+        domainEventNames.push domainEventName
+
+    @_applyDomainEventsFromStoreToDomainEventStream domainEventNames, domainEventStream, handlerFn
+    .then =>
+      for domainEventName in domainEventNames
+        @subscribeToDomainEvent domainEventName, (domainEvent) ->
+          if domainEventStream._domainEventsPublished[domainEvent.id]
+            return
+
+          if (domainEventStream["filter#{domainEvent.name}"] domainEvent) is true
+            handlerFn domainEvent, ->
+
+        , options
+
+    domainEventStreamId
+
+
+  _applyDomainEventsFromStoreToDomainEventStream: (eventNames, domainEventStream) ->
+    new Promise (resolve, reject) =>
+      @findDomainEventsByName eventNames
+      .then (domainEvents) =>
+        if not domainEvents or domainEvents.length is 0
+          return resolve eventNames
+
+        eventric.eachSeries domainEvents, (domainEvent, next) =>
+          if (domainEventStream["filter#{domainEvent.name}"] domainEvent) is true
+            handlerFn domainEvent, ->
+            domainEventStream._domainEventsPublished[domainEvent.id] = true
+            next()
+
+        , (err) ->
+          return reject err if err
+          resolve eventNames
+
+      .catch (err) ->
+        reject err
 
 
   ###*
@@ -370,11 +423,8 @@ class Context extends PubSub
 
   ###*
   * @name addProjection
-  *
   * @module Context
-  *
-  * @description
-  * Add Projection that can subscribe to and handle DomainEvents
+  * @description Add Projection that can subscribe to and handle DomainEvents
   *
   * @param {string} projectionName Name of the Projection
   * @param {Function} The Projection Class definition
@@ -382,15 +432,67 @@ class Context extends PubSub
   * - define handle Funtions for DomainEvents by convention: "handleDomainEventName"
   ###
   addProjection: (projectionName, ProjectionClass) ->
-    @_projectionClasses.push
-      name: projectionName
-      class: ProjectionClass
+    @_projectionClasses[projectionName] = ProjectionClass
     @
 
 
+  ###*
+  * @name addProjections
+  * @module Context
+  * @description Add multiple Projections at once
+  *
+  * @param {object} Projections key projectionName, value ProjectionClass
+  ###
   addProjections: (viewsObj) ->
     @addProjection projectionName, ProjectionClass for projectionName, ProjectionClass of viewsObj
     @
+
+
+  ###*
+  * @name addDomainEventStream
+  * @module Context
+  * @description Add DomainEventStream which projections can subscribe to
+  *
+  * @param {string} domainEventStreamName Name of the Stream
+  * @param {Function} The DomainEventStream Class definition
+  ###
+  addDomainEventStream: (domainEventStreamName, DomainEventStreamClass) ->
+    @_domainEventStreamClasses[domainEventStreamName] = DomainEventStreamClass
+    @
+
+
+  ###*
+  * @name addDomainEventStreams
+  * @module Context
+  * @description Add multiple DomainEventStreams at once
+  *
+  * @param {object} DomainEventStreams key domainEventStreamName, value DomainEventStreamClass
+  ###
+  addDomainEventStreams: (viewsObj) ->
+    @addDomainEventStream domainEventStreamName, DomainEventStreamClass for domainEventStreamName, DomainEventStreamClass of viewsObj
+    @
+
+
+
+
+  getProjectionInstance: (projectionId) ->
+    projectionService.getInstance projectionId
+
+
+  destroyProjectionInstance: (projectionId) ->
+    projectionService.destroyInstance projectionId, @
+
+
+
+  initializeProjectionInstance: (projectionName, params) ->
+    if not @_projectionClasses[projectionName]
+      err = "Given projection #{projectionName} not registered on context"
+      eventric.log.error err
+      err = new Error err
+      return err
+
+    projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
+
 
 
   ###*
@@ -465,13 +567,18 @@ class Context extends PubSub
 
   _initializeProjections: ->
     new Promise (resolve, reject) =>
-      eventric.eachSeries @_projectionClasses, (projection, next) =>
+      projections = []
+      for projectionName, ProjectionClass of @_projectionClasses
+        projections.push
+          name: projectionName
+          class: ProjectionClass
+
+      eventric.eachSeries projections, (projection, next) =>
         eventNames = null
-        projectionName = projection.name
-        @log.debug "[#{@name}] Initializing Projection #{projectionName}"
-        projectionService.initializeInstance projection, {}, @
+        @log.debug "[#{@name}] Initializing Projection #{projection.name}"
+        projectionService.initializeInstance projection.name, projection.class, {}, @
         .then (projectionId) =>
-          @log.debug "[#{@name}] Finished initializing Projection #{projectionName}"
+          @log.debug "[#{@name}] Finished initializing Projection #{projection.name}"
           next()
 
         .catch (err) ->

@@ -9,19 +9,13 @@ class Projection
     @_domainEventsApplied = {}
 
 
-  initializeInstance: (projectionObj, params, context) ->
+  initializeInstance: (projectionName, Projection, params, context) ->
     new Promise (resolve, reject) =>
 
-      projectionName = 'whoami'
-      if projectionObj.name
-        projectionName = projectionObj.name
-
-      if projectionObj.class
-        ProjectionClass = projectionObj.class
-        projection = new ProjectionClass
-
-      if projectionObj.object
-        projection = projectionObj.object
+      if typeof Projection is 'function'
+        projection = new Projection
+      else
+        projection = Projection
 
       if context._di
         for diName, diFn of context._di
@@ -33,6 +27,10 @@ class Projection
       projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
         aggregateId = _aggregateId
 
+      domainEventStreamName = null
+      projection.$subscribeToDomainEventStream = (_domainEventStreamName) ->
+        domainEventStreamName = _domainEventStreamName
+
       @log.debug "[#{context.name}] Clearing Projections"
       @_clearProjectionStores projection.stores, projectionName, context
       .then =>
@@ -42,21 +40,20 @@ class Projection
         @_callInitializeOnProjection projectionName, projection, params, context
       .then =>
         @log.debug "[#{context.name}] Replaying DomainEvents against Projection #{projectionName}"
-        eventNames = []
-        for key, value of projection
-          if (key.indexOf 'handle') is 0 and (typeof value is 'function')
-            eventName = key.replace /^handle/, ''
-            eventNames.push eventName
-
+        @_parseEventNamesFromProjection projection
+      .then (eventNames) =>
         @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId, context
       .then (eventNames) =>
         @log.debug "[#{context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
-        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, context
+        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName, context
       .then =>
         @_projectionInstances[projectionId] = projection
-        context.publish "projection:#{projectionName}:initialized",
+        event =
           id: projectionId
           projection: projection
+        context.publish "projection:#{projectionName}:initialized", event
+        context.publish "projection:#{projectionId}:initialized", event
+
         resolve projectionId
 
       .catch (err) ->
@@ -108,6 +105,16 @@ class Projection
         resolve()
 
 
+  _parseEventNamesFromProjection: (projection) ->
+    new Promise (resolve, reject) =>
+      eventNames = []
+      for key, value of projection
+        if (key.indexOf 'handle') is 0 and (typeof value is 'function')
+          eventName = key.replace /^handle/, ''
+          eventNames.push eventName
+      resolve eventNames
+
+
   _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventNames, aggregateId, context) ->
     new Promise (resolve, reject) =>
       @_domainEventsApplied[projectionId] = {}
@@ -134,7 +141,7 @@ class Projection
         reject err
 
 
-  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, context) ->
+  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName, context) ->
     new Promise (resolve, reject) =>
       domainEventHandler = (domainEvent, done = ->) =>
         if @_domainEventsApplied[projectionId][domainEvent.id]
@@ -142,19 +149,29 @@ class Projection
 
         @_applyDomainEventToProjection domainEvent, projection, =>
           @_domainEventsApplied[projectionId][domainEvent.id] = true
-          context.publish "projection:#{projectionName}:changed",
+          event =
             id: projectionId
             projection: projection
+            domainEvent: domainEvent
+          context.publish "projection:#{projectionName}:changed", event
+          context.publish "projection:#{projectionId}:changed", event
+
           done()
 
-      for eventName in eventNames
-        if aggregateId
-          subscriberId = context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
-        else
-          subscriberId = context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
-
+      if domainEventStreamName
+        subscriberId = context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler, isAsync: true
         @_handlerFunctions[projectionId] ?= []
         @_handlerFunctions[projectionId].push subscriberId
+
+      else
+        for eventName in eventNames
+          if aggregateId
+            subscriberId = context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
+          else
+            subscriberId = context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
+
+          @_handlerFunctions[projectionId] ?= []
+          @_handlerFunctions[projectionId].push subscriberId
 
       resolve()
 

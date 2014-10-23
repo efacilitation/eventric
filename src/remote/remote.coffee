@@ -107,10 +107,8 @@ class Remote extends PubSub
     @
 
 
-  initializeProjection: (projectionObject) ->
-    projectionService.initializeInstance
-      object: projectionObject
-    , null, @
+  initializeProjection: (projectionObject, params) ->
+    projectionService.initializeInstance '', projectionObject, params, @
 
 
   initializeProjectionInstance: (projectionName, params) ->
@@ -120,10 +118,7 @@ class Remote extends PubSub
       err = new Error err
       return err
 
-    projectionService.initializeInstance
-      name: projectionName
-      class: @_projectionClasses[projectionName]
-    , params, @
+    projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
 
 
   getProjectionInstance: (projectionId) ->

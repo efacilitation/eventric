@@ -4,8 +4,6 @@ describe 'Command Aggregate Feature', ->
     exampleContext = null
     beforeEach (done) ->
       exampleContext = eventric.context 'exampleContext'
-      exampleContext.addAggregate 'Example', class Example
-
       exampleContext.defineDomainEvent 'ExampleCreated', ->
       exampleContext.defineDomainEvent 'SomethingHappened', (params) ->
         @someId   = params.someId
@@ -21,9 +19,6 @@ describe 'Command Aggregate Feature', ->
           @$emitDomainEvent 'SomethingHappened',
             someId: someId
             someProp: 'foo'
-
-        handleExampleCreated: ->
-          @entities = []
 
         handleSomethingHappened: (domainEvent) ->
           @someId = domainEvent.payload.someId

@@ -6,9 +6,9 @@ class InMemoryStore
   _domainEvents: {}
   _projections: {}
 
-  initialize: (@_contextName, [options]..., callback) ->
-    @_domainEventsCollectionName = "#{@_contextName}.DomainEvents"
-    @_projectionCollectionName   = "#{@_contextName}.Projections"
+  initialize: (@_context, [options]..., callback) ->
+    @_domainEventsCollectionName = "#{@_context.name}.DomainEvents"
+    @_projectionCollectionName   = "#{@_context.name}.Projections"
 
     @_domainEvents[@_domainEventsCollectionName] = []
     callback()

@@ -1,7 +1,7 @@
 {
   "name": "{{ doc.codeName | linebreak }}",
   "source": "{{ doc.outputPath }}",
-  "description": "{{doc.description}}",
+  "description": "{{doc.description | escape}}",
   {% if doc.params %}
   "params": [
     {% for param in doc.params %}

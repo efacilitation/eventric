@@ -1,8 +1,7 @@
-EventricDocs = angular.module("EventricDocs", [
-  
-  'EventricDocs.Controller.DocsPageCtrl'
+
+EventricDocs = angular.module('EventricDocs', [
+  require 'eventric/docs/app/src/api/api.ng'
   'EventricDocs.Controller.ApplicationCtrl'
-  
   'pagesData'
   'ui.router'
 ])
@@ -10,20 +9,23 @@ EventricDocs = angular.module("EventricDocs", [
 
 .config ($stateProvider, $urlRouterProvider) ->
   # Now set up the states
-  $stateProvider.state "docs",
-    url: "/docs/:moduleName/:functionName"
-    templateUrl: 'src/docs_page/docs_page.ng.html'
-    controller: 'DocsPageCtrl'
+  $stateProvider.state 'home',
+    url: '/home'
+    templateUrl: 'src/home/home.ng.html'
+    controller: 'HomeCtrl'
 
-  $urlRouterProvider.otherwise("/")
+  $stateProvider.state 'api',
+    url: '/api/:moduleName/:functionName'
+    templateUrl: 'src/api/api.ng.html'
+    controller: 'ApiCtrl'
+
   return
 
 
+angular.module('EventricDocs.Controller.ApplicationCtrl', [])
 
-angular.module("EventricDocs.Controller.ApplicationCtrl", [])
-
-.controller "ApplicationCtrl", [
-  "$scope", "DOC_PAGES"
-  ($scope, DOC_PAGES) ->
-    $scope.DOC_PAGES = DOC_PAGES
+.controller 'ApplicationCtrl', [
+  '$scope', 'API_OVERVIEW'
+  ($scope, API_OVERVIEW) ->
+    $scope.API_OVERVIEW = API_OVERVIEW
 ]

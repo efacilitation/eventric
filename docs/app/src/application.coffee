@@ -12,7 +12,6 @@ EventricDocs = angular.module('EventricDocs', [
   $stateProvider.state 'home',
     url: '/home'
     templateUrl: 'src/home/home.ng.html'
-    controller: 'HomeCtrl'
 
   $stateProvider.state 'api',
     url: '/api/:moduleName/:functionName'

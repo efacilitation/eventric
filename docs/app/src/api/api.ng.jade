@@ -6,12 +6,7 @@
     li(ng-repeat="api in apis | filter:searchText", ui-sref-active="active")
       a(ui-sref="api({ 'functionName' : api.name, 'moduleName' : api.module })") {{api.name}}
 .col-sm-9.col-sm-offset-3.col-md-9.col-md-offset-3.main
-
-  div(ng-hide="api")
-    h1 EventricJS API Docs
-    span Welcome to the EventricJS API Docs page.
-
-  div(ng-show="api")
+  .eventric-api--detail(ng-show="api.name")
     h1 {{api.name}}
 
     .eventric-api--missing(ng-hide="api.description") Missing Description

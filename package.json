@@ -56,7 +56,7 @@
     "merge-stream": "*",
     "gulp-jade": "*",
     "gulp-webserver": "*",
-    "gulp-sass": "*",
+    "gulp-sass": "1.0.3",
     "gulp-filter": "*",
     "protractor": "*",
     "main-bower-files": "*"

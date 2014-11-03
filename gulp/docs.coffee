@@ -1,30 +1,73 @@
-gulp        = require 'gulp'
-Dgeni       = require 'dgeni'
-runSequence = require 'run-sequence'
-coffee      = require 'gulp-coffee'
-jade        = require 'gulp-jade'
-path        = require 'canonical-path'
-webserver   = require 'gulp-webserver'
-gutil       = require 'gulp-util'
-scss        = require 'gulp-sass'
-concat      = require 'gulp-concat'
-
+gulp            = require 'gulp'
+Dgeni           = require 'dgeni'
+runSequence     = require 'run-sequence'
+coffee          = require 'gulp-coffee'
+jade            = require 'gulp-jade'
+path            = require 'canonical-path'
+webserver       = require 'gulp-webserver'
+gutil           = require 'gulp-util'
+scss            = require 'gulp-sass'
+concat          = require 'gulp-concat'
+commonjsWrap    = require 'gulp-wrap-commonjs'
+filter          = require 'gulp-filter'
+mainBowerFiles  = require 'main-bower-files'
 
 module.exports = (gulp) ->
 
   outputFolder = 'build/docs'
   bowerFolder = 'bower_components'
 
-  copyComponent = (component, pattern, sourceFolder, packageFile) ->
+  copyComponent = (component, pattern, sourceFolder) ->
     pattern = pattern or "/**/*"
     sourceFolder = sourceFolder or bowerFolder
-    packageFile = packageFile or "bower.json"
-    version = require(path.resolve(sourceFolder, component, packageFile)).version
-    gulp.src(sourceFolder + "/" + component + pattern).pipe gulp.dest(outputFolder + "/components/" + component + "-" + version)
+    gulp.src(sourceFolder + "/" + component + pattern)
+    .pipe commonjsWrap
+      pathModifier: (filePath) ->
+        matches = filePath.match /(bower_components|node_modules)\/(.*?)\//
+        moduleName = matches[2]
+        moduleName
+
+    .pipe gulp.dest(outputFolder + "/components/" + component)
 
 
   gulp.task 'docs:build', (next) ->
-    runSequence 'build', 'docs:generate:dgeni', 'docs:generate:jade', 'docs:generate:coffee', 'docs:generate:scss', 'docs:assets', 'docs:webserver:start', next
+    runSequence 'build', 'spec:client:helper', 'docs:generate:dgeni', 'docs:generate:jade', 'docs:generate:coffee',
+                'docs:generate:scss', 'docs:build:bower', 'docs:webserver:start', 'docs:copy:eventric', next
+
+
+
+
+
+  filterByExtension = (extension) ->
+    filter (file) ->
+      file.path.match new RegExp("." + extension + "$")
+
+
+  gulp.task "docs:build:bower", ->
+    mainFiles = mainBowerFiles
+      includeDev: true
+    console.log mainFiles
+    return unless mainFiles.length
+
+    gulp.src mainFiles
+    .pipe filterByExtension("js")
+    .pipe commonjsWrap
+      pathModifier: (filePath) ->
+        matches = filePath.match /(bower_components|node_modules)\/(.*?)\//
+        moduleName = matches[2]
+        moduleName
+    .pipe concat("vendor.js")
+    .pipe gulp.dest("build/docs/scripts")
+
+
+    gulp.src(mainFiles)
+    .pipe filterByExtension("css")
+    .pipe concat("vendor.css")
+    .pipe gulp.dest("build/docs/styles")
+    return
+
+
+
 
 
   gulp.task 'docs:watch', (next) ->
@@ -37,9 +80,13 @@ module.exports = (gulp) ->
     ], ['docs:generate:jade']
 
     gulp.watch [
-      "docs/app/**/*.coffee"
+      "docs/app/**/!(*.spec)*.coffee"
     ], ['docs:generate:coffee']
-    
+
+    gulp.watch [
+      "docs/app/**/*.spec.coffee"
+    ], ['spec:client:run']
+
     gulp.watch [
       "docs/app/**/*.scss"
     ], ['docs:generate:scss']
@@ -56,6 +103,12 @@ module.exports = (gulp) ->
     copyComponent 'angularjs', '/*'
     copyComponent 'bootstrap', '/dist/**/*'
     copyComponent 'angular-ui-router', '/release/*'
+    copyComponent 'angular-mocks', '/*'
+
+
+  gulp.task 'docs:copy:eventric', ->
+    gulp.src('build/dist/eventric.js')
+    .pipe(gulp.dest('build/docs/scripts'))
 
 
   gulp.task 'docs:generate:jade', ->
@@ -65,8 +118,16 @@ module.exports = (gulp) ->
 
 
   gulp.task 'docs:generate:coffee', ->
-    gulp.src(['docs/app/src/**/*.coffee'])
+    gulp.src([
+      'docs/app/src/**/*.coffee'
+      '!./**/*.spec.coffee'
+      ])
       .pipe(coffee({bare: true}))
+      .pipe commonjsWrap
+        pathModifier: (filePath) ->
+          filePath = filePath.replace process.cwd(), 'eventric'
+          filePath = filePath.replace /.js$/, ''
+
       .pipe(concat('application.js'))
       .pipe(gulp.dest('build/docs/scripts'))
 

@@ -1,0 +1,25 @@
+.api.col-sm-3.col-md-3.sidebar(ng-controller="ApiCtrl")
+  input.eventric-api--search(ng-model="searchText", placeholder="Search API")
+  ul.nav.nav-sidebar(ng-repeat="(moduleName, apis) in API_OVERVIEW", ng-show="(apis| filter:searchText).length")
+    li.module
+      a {{moduleName}}
+    li(ng-repeat="api in apis | filter:searchText", ui-sref-active="active")
+      a(ui-sref="api({ 'functionName' : api.name, 'moduleName' : api.module })") {{api.name}}
+.col-sm-9.col-sm-offset-3.col-md-9.col-md-offset-3.main
+
+  div(ng-hide="api")
+    h1 EventricJS API Docs
+    span Welcome to the EventricJS API Docs page.
+
+  div(ng-show="api")
+    h1 {{api.name}}
+
+    .eventric-api--missing(ng-hide="api.description") Missing Description
+    .eventric-api--description(ng-show="api.description")
+      blockquote
+        p {{api.description}}
+
+    .eventric-api--missing(ng-hide="api.description") Missing Example Code
+    .eventric-api--example-code(ng-show="api.example")
+      strong Example
+      pre {{api.example}}

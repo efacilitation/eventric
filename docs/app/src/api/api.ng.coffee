@@ -1,5 +1,12 @@
 docsModule = angular.module("EventricDocs.Controller.ApiCtrl", [])
 
+.filter 'unsafe', ($sce) ->
+  return (
+    (val) ->
+      return $sce.trustAsHtml val if val
+  )
+
+
 .controller "ApiCtrl", [
   "$scope", "$stateParams", "$http"
   ($scope, $stateParams, $http) ->

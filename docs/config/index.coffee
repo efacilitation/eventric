@@ -14,14 +14,11 @@ module.exports = new Package('eventric', [
 .processor(require('./processors/pages-data'))
 
 .config (templateEngine) ->
-
   linebreak =
     name: 'linebreak'
     process:  (string) ->
-      string = string.replace /(?:\r\n|\r|\n)/g, '<br>'
-
-  console.log templateEngine.filters.push linebreak
-
+      return string.replace /(?:\r\n|\r|\n)/g, '<br>' if string
+  templateEngine.filters.push linebreak
   return
 
 .config (log, readFilesProcessor, templateFinder, computePathsProcessor, writeFilesProcessor) ->

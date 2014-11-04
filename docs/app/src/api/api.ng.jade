@@ -12,9 +12,9 @@
     .eventric-api--missing(ng-hide="api.description") Missing Description
     .eventric-api--description(ng-show="api.description")
       blockquote
-        p {{api.description}}
+        p(ng-bind-html="api.description | unsafe")
 
     .eventric-api--missing(ng-hide="api.description") Missing Example Code
     .eventric-api--example-code(ng-show="api.example")
       strong Example
-      pre {{api.example}}
+      pre(ng-bind-html="api.example | unsafe")

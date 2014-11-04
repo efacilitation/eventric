@@ -1,13 +1,13 @@
 {
   "name": "{{ doc.codeName | linebreak }}",
   "source": "{{ doc.outputPath }}",
-  "description": "{{doc.description | escape}}",
+  "description": "{{doc.description | linebreak}}",
   {% if doc.params %}
   "params": [
     {% for param in doc.params %}
       {
-        "name": "{{param.name | replace('`','')}}",
-        "description": "{{param.description | replace('`','')}}",
+        "name": "{{param.name}}",
+        "description": "{{param.description | linebreak}}",
         "typeList": "{{param.typeList}}"
       }{% if loop.last != true %},{% endif %}
     {% endfor %}
@@ -15,7 +15,7 @@
   {% endif %}
   "returns": {
     "typeList": "{{doc.returns.typeList}}",
-    "description": "{{doc.returns.description}}"
+    "description": "{{doc.returns.description | linebreak}}"
   },
   "example": "{{doc.example}}"
 }

@@ -14,7 +14,7 @@ module.exports = (name, command, callback = ->) ->
         gutil.log gutil.colors.red error
         gutil.log gutil.colors.red customError.message
         gutil.beep()
-        if process.env.NODE_ENV isnt 'workstation'
+        if process.env.CI
           process.exit 1
         else
           callback()

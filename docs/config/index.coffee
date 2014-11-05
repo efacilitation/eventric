@@ -14,11 +14,12 @@ module.exports = new Package('eventric', [
 .processor(require('./processors/pages-data'))
 
 .config (templateEngine) ->
-  linebreak =
-    name: 'linebreak'
+  prepareForJSON =
+    name: 'prepareForJSON'
     process:  (string) ->
-      return string.replace /(?:\r\n|\r|\n)/g, '<br>' if string
-  templateEngine.filters.push linebreak
+      string = string.replace /(?:\r\n|\r|\n)/g, '<br>' if string
+      string = string.replace /"/g, "'" if string
+  templateEngine.filters.push prepareForJSON
   return
 
 .config (log, readFilesProcessor, templateFinder, computePathsProcessor, writeFilesProcessor) ->

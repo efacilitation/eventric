@@ -59,8 +59,7 @@
     "gulp-sass": "~1.0.0",
     "gulp-filter": "*",
     "protractor": "*",
-    "main-bower-files": "*",
-    "through2": "*"
+    "main-bower-files": "*"
   },
   "dependencies": {
     "es6-promise": "1.0.0"

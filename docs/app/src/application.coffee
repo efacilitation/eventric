@@ -18,6 +18,8 @@ EventricDocs = angular.module('EventricDocs', [
     templateUrl: 'src/api/api.ng.html'
     controller: 'ApiCtrl'
 
+  $locationProvider.hashPrefix '!'
+
   return
 
 

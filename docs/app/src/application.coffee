@@ -7,7 +7,8 @@ EventricDocs = angular.module('EventricDocs', [
 ])
 
 
-.config ($stateProvider, $urlRouterProvider) ->
+.config ($stateProvider, $urlRouterProvider, $locationProvider) ->
+
   # Now set up the states
   $stateProvider.state 'home',
     url: '/home'

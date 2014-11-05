@@ -18,3 +18,9 @@
     .eventric-api--example-code(ng-show="api.example")
       strong Example
       pre(ng-bind-html="api.example | unsafe")
+
+    comment-section(
+      disqus-shortname="EventricJS"
+      disqus-identifier="{{api.source}}"
+      disqus-title="{{api.name}}"
+    )

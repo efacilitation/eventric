@@ -1,6 +1,7 @@
 
 EventricDocs = angular.module('EventricDocs', [
   require 'eventric/docs/app/src/api/api.ng'
+  require 'eventric/docs/app/src/api/comment_section/comment_section.ng'
   'EventricDocs.Controller.ApplicationCtrl'
   'pagesData'
   'ui.router'

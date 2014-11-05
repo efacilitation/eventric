@@ -1,13 +1,14 @@
 {
-  "name": "{{ doc.codeName | linebreak }}",
+  "name": "{{ doc.codeName | prepareForJSON }}",
+  "module": "{{doc.module}}",
   "source": "{{ doc.outputPath }}",
-  "description": "{{doc.description | linebreak}}",
+  "description": "{{doc.description | prepareForJSON}}",
   {% if doc.params %}
   "params": [
     {% for param in doc.params %}
       {
         "name": "{{param.name}}",
-        "description": "{{param.description | linebreak}}",
+        "description": "{{param.description | prepareForJSON}}",
         "typeList": "{{param.typeList}}"
       }{% if loop.last != true %},{% endif %}
     {% endfor %}
@@ -15,7 +16,7 @@
   {% endif %}
   "returns": {
     "typeList": "{{doc.returns.typeList}}",
-    "description": "{{doc.returns.description | linebreak}}"
+    "description": "{{doc.returns.description | prepareForJSON}}"
   },
   "example": "{{doc.example}}"
 }

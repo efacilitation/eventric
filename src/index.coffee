@@ -64,7 +64,7 @@ class Eventric
 
   ###*
   * @name context
-  * 
+  *
   * @module Eventric
   *
   * @description Get a new context instance.

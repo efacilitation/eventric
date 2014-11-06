@@ -8,10 +8,19 @@ module.exports = (config) ->
     # list of files / patterns to load in the browser
     files: [
       # source
-      'build/dist/eventric.js'
+      'build/docs/scripts/eventric.js'
 
       # spec helper
       'build/spec/helper.js'
+
+      # vendor files
+      'build/docs/scripts/vendor.js'
+
+      # app
+      'build/docs/scripts/application.js'
+
+      # templates
+      'build/docs/templatecache/templates.js'
 
       # specs
       'spec/helper/setup.coffee'

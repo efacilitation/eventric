@@ -10,6 +10,7 @@ scss            = require 'gulp-sass'
 concat          = require 'gulp-concat'
 commonjsWrap    = require 'gulp-wrap-commonjs'
 filter          = require 'gulp-filter'
+templateCache   = require 'gulp-angular-templatecache'
 mainBowerFiles  = require 'main-bower-files'
 
 module.exports = (gulp) ->
@@ -31,11 +32,9 @@ module.exports = (gulp) ->
 
 
   gulp.task 'docs:build', (next) ->
-    runSequence 'build', 'spec:client:helper', 'docs:generate:dgeni', 'docs:generate:jade', 'docs:generate:coffee',
-                'docs:generate:scss', 'docs:build:bower', 'docs:webserver:start', 'docs:copy:eventric', next
-
-
-
+    runSequence 'docs:generate:dgeni', 'docs:generate:jade', 'docs:generate:coffee',
+                'docs:generate:scss', 'docs:build:bower', 'docs:build:src', 'docs:webserver:start', 'docs:copy:eventric',
+                'docs:generate:templatecache', 'spec:client:helper', next
 
 
   filterByExtension = (extension) ->
@@ -43,10 +42,15 @@ module.exports = (gulp) ->
       file.path.match new RegExp("." + extension + "$")
 
 
+  gulp.task 'docs:build:src', ->
+    gulp.src(['../index.coffee', '../+(src)/**/*.coffee'])
+      .pipe(coffee({bare: true}))
+      .pipe(gulp.dest('build/node'))
+
+
   gulp.task "docs:build:bower", ->
     mainFiles = mainBowerFiles
       includeDev: true
-    console.log mainFiles
     return unless mainFiles.length
 
     gulp.src mainFiles
@@ -67,28 +71,25 @@ module.exports = (gulp) ->
     return
 
 
-
-
-
   gulp.task 'docs:watch', (next) ->
     gulp.run [
       "docs:build"
     ]
 
     gulp.watch [
-      "docs/app/**/*.jade"
+      "src/**/*.jade"
     ], ['docs:generate:jade']
 
     gulp.watch [
-      "docs/app/**/!(*.spec)*.coffee"
+      "src/**/!(*.spec)*.coffee"
     ], ['docs:generate:coffee']
 
     gulp.watch [
-      "docs/app/**/*.spec.coffee"
+      "src/**/*.spec.coffee"
     ], ['spec:client:run']
 
     gulp.watch [
-      "docs/app/**/*.scss"
+      "src/**/*.scss"
     ], ['docs:generate:scss']
 
 
@@ -107,25 +108,38 @@ module.exports = (gulp) ->
 
 
   gulp.task 'docs:copy:eventric', ->
-    gulp.src('build/dist/eventric.js')
+    gulp.src('../build/dist/eventric.js')
     .pipe(gulp.dest('build/docs/scripts'))
 
 
   gulp.task 'docs:generate:jade', ->
-    gulp.src(['docs/app/**/*.jade'])
+    gulp.src(['src/**/*.jade'])
       .pipe(jade())
       .pipe(gulp.dest('build/docs'))
 
 
+  gulp.task 'docs:generate:templatecache', ->
+    gulp.src 'build/docs/**/*.html'
+      .pipe(templateCache
+        module: "eventric.app.templates"
+        standalone: true
+      )
+      .pipe(commonjsWrap(
+        pathModifier: ->
+          "eventric-app/templates"
+      ))
+      .pipe(gulp.dest('build/docs/templatecache'))
+
+
   gulp.task 'docs:generate:coffee', ->
     gulp.src([
-      'docs/app/src/**/*.coffee'
+      'src/**/*.coffee'
       '!./**/*.spec.coffee'
       ])
       .pipe(coffee({bare: true}))
       .pipe commonjsWrap
         pathModifier: (filePath) ->
-          filePath = filePath.replace process.cwd(), 'eventric'
+          filePath = filePath.replace process.cwd(), 'eventric-app'
           filePath = filePath.replace /.js$/, ''
 
       .pipe(concat('application.js'))
@@ -133,7 +147,7 @@ module.exports = (gulp) ->
 
 
   gulp.task 'docs:generate:scss', ->
-    gulp.src(['docs/app/src/**/*.scss'])
+    gulp.src(['src/**/*.scss'])
       .pipe(scss())
       .pipe(concat('application.css'))
       .pipe(gulp.dest('build/docs/styles'))
@@ -141,7 +155,7 @@ module.exports = (gulp) ->
 
   gulp.task 'docs:generate:dgeni', ->
     try
-      dgeni = new Dgeni [require('../docs/config')]
+      dgeni = new Dgeni [require('../dgeni')]
       dgeni.generate();
     catch e
       throw e
@@ -151,3 +165,35 @@ module.exports = (gulp) ->
     gulp.src("build/docs").pipe webserver
       livereload: true
     return
+
+
+  gulp.task 'spec:client:helper', ->
+    gulp.src([
+      'node_modules/chai/chai.js'
+      'node_modules/async/lib/async.js'
+      'node_modules/mockery/mockery.js'
+      'node_modules/sinon/lib/**/*.js'
+      'node_modules/sinon-chai/lib/sinon-chai.js'
+    ])
+      .pipe(commonjsWrap(
+        pathModifier: (path) ->
+          path = path.replace process.cwd(), ''
+          path = path.replace /.js$/, ''
+          sinonPath = '/node_modules/sinon/lib/'
+          if (path.indexOf sinonPath) is 0
+            path = path.replace sinonPath, ''
+          else
+            path = path.replace /.*\//, ''
+          path
+      ))
+      .pipe(concat('helper.js'))
+      .pipe(gulp.dest('build/spec/'))
+
+
+  gulp.task 'spec:client:run', (next) ->
+    executeChildProcess = require './helper/child_process'
+    executeChildProcess(
+      'Karma specs'
+      'node_modules/karma/bin/karma start'
+      next
+    )

@@ -1,14 +1,15 @@
 document
-html(ng-app='EventricDocs' lang='en')
+html(ng-app='eventric.app' lang='en')
 head
     meta(charset='UTF-8')
-    title Eventric Documentation
+    title eventric app
     link(href='/styles/vendor.css', rel='stylesheet')
     link(href='/styles/application.css', rel='stylesheet')
 
     script(src='/scripts/eventric.js')
     script(src='/scripts/vendor.js')
     script(src='/scripts/pages-data.js')
+    script(src='/templatecache/templates.js')
   body
     .navbar.navbar-inverse.navbar-fixed-top(role='navigation')
       .container-fluid
@@ -28,7 +29,7 @@ head
               a(ui-sref="api()") API
             li
               a(href="http://sixsteps.ghost.io/", target="_blank") Blog
-    .container-fluid(ng-controller="ApplicationCtrl")
+    .container-fluid
       .row
         div(ui-view="" autoscroll="false")
     script(type='text/javascript', src='/scripts/application.js')
@@ -38,7 +39,8 @@ head
       require('angularjs');
       require('angular-ui-router');
       require('bootstrap');
-      require('eventric/docs/app/src/application');
+      require('eventric-app/templates');
+      require('eventric-app/src/app');
 
 
 

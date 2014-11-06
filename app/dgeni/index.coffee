@@ -28,7 +28,7 @@ module.exports = new Package('eventric', [
 
 
   # Define
-  readFilesProcessor.basePath = path.resolve __dirname, '../..'
+  readFilesProcessor.basePath = path.resolve __dirname, '..'
   readFilesProcessor.sourceFiles = [
     {
       include: 'build/node/src/**/*.js'

@@ -1,18 +1,19 @@
-docsModule = angular.module("EventricDocs.Controller.ApiCtrl", [])
-
+apiModule = angular.module("eventric.app.api", [
+  'eventric.app.templates'
+])
 .filter 'unsafe', ($sce) ->
   return (
     (val) ->
       return $sce.trustAsHtml val if val
   )
 
-
-.controller "ApiCtrl", [
-  "$scope", "$stateParams", "$http"
-  ($scope, $stateParams, $http) ->
+.controller "ApiController", [
+  "$scope", "$stateParams", "$http", "API_OVERVIEW"
+  ($scope, $stateParams, $http, API_OVERVIEW) ->
 
     # Define API Scope
     $scope.api = {}
+    $scope.API_OVERVIEW = API_OVERVIEW
 
     # Load JSON-file
     if $stateParams.functionName and $stateParams.moduleName
@@ -22,4 +23,4 @@ docsModule = angular.module("EventricDocs.Controller.ApiCtrl", [])
         false
 ]
 
-module.exports = docsModule.name
+module.exports = apiModule.name

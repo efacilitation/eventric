@@ -1,0 +1,33 @@
+{
+  "name": "eventric-app",
+  "version": "0.0.1",
+  "homepage": "https://github.com/efacilitation/eventric-app",
+  "authors": [
+    "efa GmbH <team@efa-gmbh.com>"
+  ],
+  "description": "eventric app",
+  "keywords": [
+    "bdd",
+    "bddd",
+    "cqrs",
+    "ddd",
+    "dddd",
+    "eventsourcing",
+    "eventric"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "build/node",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angularjs": "*",
+    "bootstrap": "*",
+    "angular-ui-router": "*",
+    "angular-mocks": "*"
+  }
+}

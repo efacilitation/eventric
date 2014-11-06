@@ -4,6 +4,16 @@ else
   root = global
 
 if !root._spec_setup
+  root.$ = root.jQuery = require 'jquery'
+  require 'angular'
+  require 'angular-mocks'
+  require 'angular-ui-router'
+  require 'bootstrap'
+
+  angular.module 'mock-module', []
+
+  require 'eventric-app/templates'
+
   root.sinon    = require 'sinon'
   root.mockery  = require 'mockery'
   root.chai     = require 'chai'

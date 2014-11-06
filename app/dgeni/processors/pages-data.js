@@ -4,7 +4,7 @@ module.exports = function generatePageData() {
   return {
     $runAfter: ['paths-computed'],
     $runBefore: ['rendering-docs'],
-    $process: function(docs) { 
+    $process: function(docs) {
 
       var pageData = {}
 

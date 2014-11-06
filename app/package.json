@@ -1,6 +1,6 @@
 {
-  "name": "eventric",
-  "description": "Build JavaScript applications with Behaviour-driven Domain Design. Based on DDD, BDD, CQRS and EventSourcing.",
+  "name": "eventric-app",
+  "description": "eventric app",
   "url": "http://eventricjs.org",
   "keywords": [
     "bdd",
@@ -12,21 +12,18 @@
     "eventric"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.1.10",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/efacilitation/eventric.git"
-  },
-  "main": "build/node/index.js",
-  "scripts": {
-    "test": "node_modules/.bin/gulp spec",
-    "prepublish": "node_modules/.bin/gulp build"
+    "url": "https://github.com/efacilitation/eventric-app.git"
   },
   "devDependencies": {
     "canonical-path": "*",
     "chai": "*",
     "coffee-script": "*",
     "commonjs-require": "*",
+    "dgeni": "*",
+    "dgeni-packages": "*",
     "growler": "*",
     "gulp": "*",
     "gulp-util": "*",
@@ -39,6 +36,7 @@
     "gulp-wrap-commonjs": "*",
     "gulp-uglify": "*",
     "gulp-bump": "*",
+    "gulp-angular-templatecache": "*",
     "karma": "*",
     "karma-coffee-preprocessor": "*",
     "karma-phantomjs-launcher": "*",
@@ -51,7 +49,13 @@
     "sinon": "*",
     "sinon-chai": "*",
     "lodash": "*",
-    "merge-stream": "*"
+    "merge-stream": "*",
+    "gulp-jade": "*",
+    "gulp-webserver": "*",
+    "gulp-sass": "~1.0.0",
+    "gulp-filter": "*",
+    "protractor": "*",
+    "main-bower-files": "*"
   },
   "dependencies": {
     "es6-promise": "1.0.0"

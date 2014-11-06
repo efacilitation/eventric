@@ -1,6 +1,6 @@
-commentSection = angular.module("EventricDocs.Directive.CommentSection", [])
+commentsModule = angular.module("eventric.app.api.comments", [])
 
-.directive "commentSection", ($window, $location) ->
+.directive "comments", ($window, $location) ->
   restrict: "E"
   scope:
     disqus_shortname: "@disqusShortname"
@@ -36,6 +36,4 @@ commentSection = angular.module("EventricDocs.Directive.CommentSection", [])
     return
 
 
-
-
-module.exports = commentSection.name
+module.exports = commentsModule.name

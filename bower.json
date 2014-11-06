@@ -28,11 +28,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "devDependencies": {
-    "angularjs": "*",
-    "bootstrap": "*",
-    "angular-ui-router": "*",
-    "angular-mocks": "*"
-  }
+  ]
 }

@@ -1,26 +1,27 @@
-.api.col-sm-3.col-md-3.sidebar(ng-controller="ApiController")
-  input.eventric-api--search(ng-model="searchText", placeholder="Search API")
-  ul.nav.nav-sidebar(ng-repeat="(moduleName, apis) in API_OVERVIEW", ng-show="(apis| filter:searchText).length")
-    li.module
-      a {{moduleName}}
-    li(ng-repeat="api in apis | filter:searchText", ui-sref-active="active")
-      a(ui-sref="api({ 'functionName' : api.name, 'moduleName' : api.module })") {{api.name}}
-.col-sm-9.col-sm-offset-3.col-md-9.col-md-offset-3.main
-  .eventric-api--detail(ng-show="api.name")
-    h1 {{api.name}}
+.api-container
+  .api.col-sm-3.col-md-3.sidebar(ng-controller="ApiController")
+    input.eventric-api--search(ng-model="searchText", placeholder="Search API")
+    ul.nav.nav-sidebar(ng-repeat="(moduleName, apis) in API_OVERVIEW", ng-show="(apis| filter:searchText).length")
+      li.module
+        a {{moduleName}}
+      li(ng-repeat="api in apis | filter:searchText", ui-sref-active="active")
+        a(ui-sref="api({ 'functionName' : api.name, 'moduleName' : api.module })") {{api.name}}
+  .col-sm-9.col-sm-offset-3.col-md-9.col-md-offset-3.main
+    .eventric-api--detail(ng-show="api.name")
+      h1 {{api.name}}
 
-    .eventric-api--missing(ng-hide="api.description") Missing Description
-    .eventric-api--description(ng-show="api.description")
-      blockquote
-        p(ng-bind-html="api.description | unsafe")
+      .eventric-api--missing(ng-hide="api.description") Missing Description
+      .eventric-api--description(ng-show="api.description")
+        blockquote
+          p(ng-bind-html="api.description | unsafe")
 
-    .eventric-api--missing(ng-hide="api.description") Missing Example Code
-    .eventric-api--example-code(ng-show="api.example")
-      strong Example
-      pre(ng-bind-html="api.example | unsafe")
+      .eventric-api--missing(ng-hide="api.description") Missing Example Code
+      .eventric-api--example-code(ng-show="api.example")
+        strong Example
+        pre(ng-bind-html="api.example | unsafe")
 
-    comments(
-      disqus-shortname="EventricJS"
-      disqus-identifier="{{api.source}}"
-      disqus-title="{{api.name}}"
-    )
+      comments(
+        disqus-shortname="EventricJS"
+        disqus-identifier="{{api.source}}"
+        disqus-title="{{api.name}}"
+      )

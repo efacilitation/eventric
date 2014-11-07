@@ -12,6 +12,7 @@ commonjsWrap    = require 'gulp-wrap-commonjs'
 filter          = require 'gulp-filter'
 templateCache   = require 'gulp-angular-templatecache'
 mainBowerFiles  = require 'main-bower-files'
+spawn           = require('child_process').spawn
 
 module.exports = (gulp) ->
 
@@ -31,10 +32,14 @@ module.exports = (gulp) ->
     .pipe gulp.dest(outputFolder + "/components/" + component)
 
 
+  gulp.task 'default', (next) ->
+    runSequence 'docs:build', 'docs:watch', next
+
+
   gulp.task 'docs:build', (next) ->
     runSequence 'docs:generate:dgeni', 'docs:generate:jade', 'docs:generate:coffee',
                 'docs:generate:scss', 'docs:build:bower', 'docs:build:src', 'docs:webserver:start', 'docs:copy:eventric',
-                'docs:generate:templatecache', 'spec:client:helper', next
+                'docs:generate:templatecache', 'spec:client:helper', 'specs:client:startKarma', next
 
 
   filterByExtension = (extension) ->
@@ -71,11 +76,7 @@ module.exports = (gulp) ->
     return
 
 
-  gulp.task 'docs:watch', (next) ->
-    gulp.run [
-      "docs:build"
-    ]
-
+  gulp.task 'docs:watch', ->
     gulp.watch [
       "src/**/*.jade"
     ], ['docs:generate:jade']
@@ -91,6 +92,7 @@ module.exports = (gulp) ->
     gulp.watch [
       "src/**/*.scss"
     ], ['docs:generate:scss']
+    return
 
 
   gulp.task 'docs', ->
@@ -167,6 +169,25 @@ module.exports = (gulp) ->
     return
 
 
+  karmaProcess = null
+  gulp.task 'specs:client:startKarma', (callback) ->
+    if karmaProcess
+      return callback()
+
+    spawnWithLogging = require './helper/spawn_process'
+    karmaProcess = spawnWithLogging(
+      'Karma start'
+      'node_modules/karma/bin/karma'
+      ['start']
+    )
+
+    karmaProcess.stdout.on 'data', (data) ->
+      data = data + ''
+      if (data.indexOf 'Connected on socket') > -1
+        callback()
+    return
+
+
   gulp.task 'spec:client:helper', ->
     gulp.src([
       'node_modules/chai/chai.js'
@@ -194,6 +215,6 @@ module.exports = (gulp) ->
     executeChildProcess = require './helper/child_process'
     executeChildProcess(
       'Karma specs'
-      'node_modules/karma/bin/karma start'
+      'node_modules/karma/bin/karma run'
       next
     )

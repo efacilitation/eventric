@@ -65,7 +65,7 @@ module.exports = (config) ->
 
     # Continuous Integration mode
     # if true, it capture browsers, run tests and exit
-    singleRun: yes
+    singleRun: no
 
     reporters: ['spec']
 

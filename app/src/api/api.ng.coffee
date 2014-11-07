@@ -20,7 +20,7 @@ apiModule = angular.module("eventric.app.api", [
       $http.get '/apis/' + $stateParams.moduleName + '/' + $stateParams.functionName + '.json'
       .success (JSON_CONTENT) ->
         $scope.api = JSON_CONTENT
-        false
+        return
 ]
 
 module.exports = apiModule.name

@@ -26,6 +26,6 @@ describe 'App', ->
             resolve()
 
 
-  it 'should load the api template if we change the state', ->
+  it 'should load the API template if we change the state to API', ->
     goToApi()
     expect($viewElement.find('.api').length).to.equal 1

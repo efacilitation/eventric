@@ -1,9 +1,12 @@
 eventricApp = angular.module('eventric.app', [
   require 'eventric-app/src/api/api.ng'
   require 'eventric-app/src/api/comments/comments.ng'
+  require 'eventric-app/src/api/navigation/navigation.ng'
+  require 'eventric-app/src/api/details/details.ng'
   'pagesData'
   'ui.router'
 ])
+
 .config ($stateProvider, $urlRouterProvider, $locationProvider) ->
 
   # Now set up the states

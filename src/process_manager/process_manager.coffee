@@ -1,17 +1,23 @@
+###*
+* @name ProcessManager
+* @module ProcessManager
+* @description
+*
+* ProcessManagers can handle multiple DomainEvents and have correlation and causation features
+###
 class ProcessManagerService
 
   constructor: ->
     @_processManagerInstances = {}
 
+
   ###*
   * @name add
-  *
-  * @module ProcessManagerService
-  *
-  * @description Process Manager
+  * @module ProcessManager
+  * @description Add a ProcessManager
   *
   * @param {String} processManagerName Name of the ProcessManager
-  * @param {Object} processManagerObject Object containing `initializeWhen` and `class`
+  * @param {Object} processManagerObject Object containing the ProcessManagerDefinition
   ###
   add: (processManagerName, processManagerObj, index) ->
     for contextName, domainEventNames of processManagerObj.initializeWhen

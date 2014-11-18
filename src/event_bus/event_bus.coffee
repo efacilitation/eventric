@@ -1,5 +1,12 @@
 PubSub = require 'eventric/src/pub_sub'
 
+###*
+* @name EventBus
+* @module EventBus
+* @description
+*
+* The EventBus handles subscribing and publishing DomainEvents
+###
 class EventBus
 
   constructor: ->
@@ -7,18 +14,12 @@ class EventBus
 
 
   ###*
-  * @name subscribeToDomainEventWithAggregateId
-  *
-  * @module EventBus
-  ###
-  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn, options = {}) ->
-    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn, options
-
-
-  ###*
   * @name subscribeToDomainEvent
-  *
   * @module EventBus
+  * @description Subscribe to DomainEvents
+  *
+  * @param {String} eventName The Name of DomainEvent to subscribe to
+  * @param {Function} handlerFn Function to handle the DomainEvent
   ###
   subscribeToDomainEvent: (eventName, handlerFn, options = {}) ->
     if options.isAsync
@@ -28,9 +29,24 @@ class EventBus
 
 
   ###*
-  * @name subscribeToAllDomainEvents
-  *
+  * @name subscribeToDomainEventWithAggregateId
   * @module EventBus
+  * @description Subscribe to DomainEvents by AggregateId
+  *
+  * @param {String} eventName The Name of DomainEvent to subscribe to
+  * @param {String} aggregateId The AggregateId to subscribe to
+  * @param {Function} handlerFn Function to handle the DomainEvent
+  ###
+  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn, options = {}) ->
+    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn, options
+
+
+  ###*
+  * @name subscribeToAllDomainEvents
+  * @module EventBus
+  * @description Subscribe to all DomainEvents
+  *
+  * @param {Function} handlerFn Function to handle the DomainEvent
   ###
   subscribeToAllDomainEvents: (handlerFn) ->
     @_pubSub.subscribe 'DomainEvent', handlerFn
@@ -38,8 +54,8 @@ class EventBus
 
   ###*
   * @name publishDomainEvent
-  *
   * @module EventBus
+  * @description Publish a DomainEvent on the Bus
   ###
   publishDomainEvent: (domainEvent, callback = ->) ->
     @_publish 'publish', domainEvent, callback
@@ -47,8 +63,8 @@ class EventBus
 
   ###*
   * @name publishDomainEventAndWait
-  *
   * @module EventBus
+  * @description Publish a DomainEvent on the Bus and wait for all Projections to call their callback-Handler
   ###
   publishDomainEventAndWait: (domainEvent, callback = ->) ->
     @_publish 'publishAsync', domainEvent, callback

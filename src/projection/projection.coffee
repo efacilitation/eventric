@@ -1,5 +1,12 @@
 eventric = require 'eventric'
 
+###*
+* @name Projection
+* @module Projection
+* @description
+*
+* Projections can handle muliple DomainEvents and built a denormalized state based on them
+###
 class Projection
 
   constructor: ->
@@ -11,8 +18,11 @@ class Projection
 
   ###*
   * @name initializeInstance
-  *
   * @module Projection
+  * @description Initialize a ProjectionInstance
+  *
+  * @param {String} projectionName Name of the Projection
+  * @param {Function|Object} Projection Function or Object containing a ProjectionDefinition
   ###
   initializeInstance: (projectionName, Projection, params, context) ->
     new Promise (resolve, reject) =>
@@ -198,8 +208,10 @@ class Projection
 
   ###*
   * @name getInstance
-  *
   * @module Projection
+  * @description Get a ProjectionInstance
+  *
+  * @param {String} projectionId ProjectionId
   ###
   getInstance: (projectionId) ->
     @_projectionInstances[projectionId]
@@ -207,8 +219,11 @@ class Projection
 
   ###*
   * @name destroyInstance
-  *
   * @module Projection
+  * @description Destroy a ProjectionInstance
+  *
+  * @param {String} projectionId ProjectionId
+  * @param {Object} context Context Instance so we can automatically unsubscribe the Projection from DomainEvents
   ###
   destroyInstance: (projectionId, context) ->
     if not @_handlerFunctions[projectionId]

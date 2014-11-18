@@ -6,7 +6,15 @@ EventBus          = require 'eventric/src/event_bus'
 PubSub            = require 'eventric/src/pub_sub'
 projectionService = require 'eventric/src/projection'
 
-
+###*
+* @name Context
+* @module Context
+* @description
+*
+* Contexts give you boundaries for parts of your application. You can choose
+* the size of such Contexts as you like. Anything from a MicroService to a complete
+* application.
+###
 class Context extends PubSub
 
   constructor: (@name) ->
@@ -36,36 +44,42 @@ class Context extends PubSub
 
   ###*
   * @name set
-  *
   * @module Context
-  *
-  * @description
-  * > Use as: set(key, value)
-  * Configure settings for the `context`.
+  * @description Configure Context parameters
   *
   * @example
 
      exampleContext.set 'store', StoreAdapter
 
   *
-  * @param {Object} key
-  * Available keys are: `store` Eventric Store Adapter
+  * @param {String} key Name of the key
+  * @param {Mixed} value Value to be set
   ###
   set: (key, value) ->
     @_params[key] = value
     @
 
 
+  ###*
+  * @name get
+  * @module Context
+  * @description Get configured Context parameters
+  *
+  * @example
+
+     exampleContext.set 'store', StoreAdapter
+
+  *
+  * @param {String} key Name of the Key
+  ###
   get: (key) ->
     @_params[key]
 
 
   ###*
   * @name emitDomainEvent
-  *
   * @module Context
-  *
-  * @description emit Domain Event in the context
+  * @description Emit Domain Event in the context
   *
   * @param {String} domainEventName Name of the DomainEvent
   * @param {Object} domainEventPayload payload for the DomainEvent
@@ -80,6 +94,13 @@ class Context extends PubSub
       @publishDomainEvent domainEvent, ->
 
 
+  ###*
+  * @name publishDomainEvent
+  * @module Context
+  * @description Publish a DomainEvent in the Context
+  *
+  * @param {Object} domainEvent Instance of a DomainEvent
+  ###
   publishDomainEvent: (domainEvent, callback=->) =>
     @_eventBus.publishDomainEvent domainEvent, callback
 
@@ -92,6 +113,15 @@ class Context extends PubSub
       payload: new DomainEventClass domainEventPayload
 
 
+  ###*
+  * @name addStore
+  * @module Context
+  * @description Add Store to the Context
+  *
+  * @param {string} storeName Name of the store
+  * @param {Function} StoreClass Class of the store
+  * @param {Object} Options to be passed to the store on initialize
+  ###
   addStore: (storeName, StoreClass, storeOptions={}) ->
     @_storeClasses[storeName] =
       Class: StoreClass
@@ -101,11 +131,10 @@ class Context extends PubSub
 
   ###*
   * @name defineDomainEvent
-  *
   * @module Context
-  *
   * @description
-  * Adds a DomainEvent Class which will be used when emitting or handling DomainEvents inside of Aggregates, Projectionpr or ProcessManagers
+  * Add a DomainEvent Class which will be used when emitting or
+  * handling DomainEvents inside of the Context
   *
   * @param {String} domainEventName Name of the DomainEvent
   * @param {Function} DomainEventClass DomainEventClass
@@ -115,6 +144,13 @@ class Context extends PubSub
     @
 
 
+  ###*
+  * @name defineDomainEvents
+  * @module Context
+  * @description Define multiple DomainEvents at once
+  *
+  * @param {Object} domainEventClassesObj Object containing multiple DomainEventsDefinitions "name: class"
+  ###
   defineDomainEvents: (domainEventClassesObj) ->
     @defineDomainEvent domainEventName, DomainEventClass for domainEventName, DomainEventClass of domainEventClassesObj
     @
@@ -122,13 +158,11 @@ class Context extends PubSub
 
   ###*
   * @name addCommandHandler
-  *
   * @module Context
-  *
   * @dscription
-  * Use as: addCommandHandler(commandName, commandFunction)
   *
-  * Add Commands to the `context`. These will be available to the `command` method after calling `initialize`.
+  * Add CommandHandlers to the `context`. These will be available to the `command` method
+  * after calling `initialize`.
   *
   * @example
     ```javascript
@@ -136,19 +170,8 @@ class Context extends PubSub
       // ...
     });
     ```
-
   * @param {String} commandName Name of the command
-  *
-  * @param {String} commandFunction Gets `this.aggregate` dependency injected
-  * `this.aggregate.command(params)` Execute command on Aggregate
-  *  * `params.name` Name of the Aggregate
-  *  * `params.id` Id of the Aggregate
-  *  * `params.methodName` MethodName inside the Aggregate
-  *  * `params.methodParams` Array of params which the specified AggregateMethod will get as function signature using a [splat](http://stackoverflow.com/questions/6201657/what-does-splats-mean-in-the-coffeescript-tutorial)
-  *
-  * `this.aggregate.create(params)` Execute command on Aggregate
-  *  * `params.name` Name of the Aggregate to be created
-  *  * `params.props` Initial properties so be set on the Aggregate or handed to the Aggregates create() method
+  * @param {String} commandFunction The CommandHandler Function
   ###
   addCommandHandler: (commandHandlerName, commandHandlerFn) ->
     @_commandHandlers[commandHandlerName] = =>
@@ -182,6 +205,13 @@ class Context extends PubSub
     @
 
 
+  ###*
+  * @name addCommandHandlers
+  * @module Context
+  * @dscription Add multiple CommandHandlers at once
+  *
+  * @param {Object} commandObj Object containing multiple CommandHandlers "name: class"
+  ###
   addCommandHandlers: (commandObj) ->
     @addCommandHandler commandHandlerName, commandFunction for commandHandlerName, commandFunction of commandObj
     @
@@ -189,13 +219,8 @@ class Context extends PubSub
 
   ###*
   * @name addQueryHandler
-  *
   * @module Context
-  *
-  * @dscription
-  * Use as: addQueryHandler(queryHandler, queryFunction)
-  *
-  * Add Commands to the `context`. These will be available to the `query` method after calling `initialize`.
+  * @description Add QueryHandler to the `context`
   *
   * @example
     ```javascript
@@ -205,7 +230,6 @@ class Context extends PubSub
     ```
 
   * @param {String} queryHandler Name of the query
-  *
   * @param {String} queryFunction Function to execute on query
   ###
   addQueryHandler: (queryHandlerName, queryHandlerFn) ->
@@ -213,46 +237,38 @@ class Context extends PubSub
     @
 
 
-  addQueryHandlers: (commandObj) ->
-    @addQueryHandler queryHandlerName, queryFunction for queryHandlerName, queryFunction of commandObj
+  ###*
+  * @name addQueryHandlers
+  * @module Context
+  * @dscription Add multiple QueryHandlers at once
+  *
+  * @param {Object} queryObj Object containing multiple QueryHandlers "name: class"
+  ###
+  addQueryHandlers: (queryObj) ->
+    @addQueryHandler queryHandlerName, queryFunction for queryHandlerName, queryFunction of queryObj
     @
 
 
   ###*
   * @name addAggregate
-  *
   * @module Context
-  *
-  * @description
-  *
-  * Use as: addAggregate(aggregateName, aggregateDefinition)
-  *
-  * Add [Aggregates](https://github.com/efacilitation/eventric/wiki/BuildingBlocks#aggregateroot) to the `context`. It takes an AggregateDefinition as argument. The AggregateDefinition must at least consists of one AggregateRoot and can optionally have multiple named AggregateEntities. The Root and Entities itself are completely vanilla since eventric follows the philosophy that your DomainModel-Code should be technology-agnostic.
-  *
-  * @example
-
-  ```javascript
-  exampleContext.addAggregate('Example', {
-    root: function(){
-      this.doSomething = function(description) {
-        // ...
-      }
-    },
-    entities: {
-      'ExampleEntityOne': function() {},
-      'ExampleEntityTwo': function() {}
-    }
-  });
-  ```
+  * @description Add Aggregates to the `context`
   *
   * @param {String} aggregateName Name of the Aggregate
-  * @param {String} aggregateDefinition Definition containing root and entities
+  * @param {Function} AggregateRootClass AggregateRootClass
   ###
   addAggregate: (aggregateName, AggregateRootClass) ->
     @_aggregateRootClasses[aggregateName] = AggregateRootClass
     @
 
 
+  ###*
+  * @name addAggregates
+  * @module Context
+  * @dscription Add multiple Aggregates at once
+  *
+  * @param {Object} aggregatesObj Object containing multiple Aggregates "name: class"
+  ###
   addAggregates: (aggregatesObj) ->
     @addAggregate aggregateName, AggregateRootClass for aggregateName, AggregateRootClass of aggregatesObj
     @
@@ -260,53 +276,75 @@ class Context extends PubSub
 
   ###*
   * @name subscribeToDomainEvent
-  *
   * @module Context
-  *
-  * @description
-  * Use as: subscribeToDomainEvent(domainEventName, domainEventHandlerFunction)
-  *
-  * Add handler function which gets called when a specific `DomainEvent` gets triggered
+  * @description Add handler function which gets called when a specific `DomainEvent` gets triggered
   *
   * @example
     ```javascript
-    exampleContext.subscribeToDomainEvent('Example:create', function(domainEvent) {
+    exampleContext.subscribeToDomainEvent('SomethingHappened', function(domainEvent) {
       // ...
     });
     ```
   *
   * @param {String} domainEventName Name of the `DomainEvent`
-  *
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * - `domainEvent` Instance of [[DomainEvent]]
-  *
+  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
   subscribeToDomainEvent: (domainEventName, handlerFn, options = {}) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler, options
     @
 
+
+  ###*
+  * @name subscribeToDomainEvents
+  * @module Context
+  * @dscription Add multiple DomainEventSubscribers at once
+  *
+  * @param {Object} domainEventHandlersObj Object containing multiple Subscribers "name: handlerFn"
+  ###
+  subscribeToDomainEvents: (domainEventHandlersObj) ->
+    @subscribeToDomainEvent domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
+    @
+
+
   ###*
   * @name subscribeToDomainEventWithAggregateId
-  *
   * @module Context
+  * @description Add handler function which gets called when a specific `DomainEvent` containing a specific AggregateId gets triggered
   *
+  * @param {String} domainEventName Name of the `DomainEvent`
+  * @param {String} aggregateId AggregateId
+  * @param {Function} Function which gets called with `domainEvent` as argument
+  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
   subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn, options = {}) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler, options
 
 
+  ###*
+  * @name subscribeToAllDomainEvents
+  * @module Context
+  * @description Add handler function which gets called when any `DomainEvent` gets triggered
+  *
+  * @param {Function} Function which gets called with `domainEvent` as argument
+  * @param {Object} options Options to set on the EventBus ("async: false" is default)
+  ###
   subscribeToAllDomainEvents: (handlerFn, options = {}) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToAllDomainEvents domainEventHandler, options
 
 
-  subscribeToDomainEvents: (domainEventHandlersObj) ->
-    @subscribeToDomainEvent domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
-    @
-
-
+  ###*
+  * @name subscribeToDomainEventStream
+  * @module Context
+  * @description Add DomainEventStream Definition
+  *
+  * @param {String} domainEventStreamName Name of the DomainEventStream
+  * @param {Function} DomainEventStream Definition
+  * @param {Object} Options to be used when initializing the DomainEventStream
+  ###
   subscribeToDomainEventStream: (domainEventStreamName, handlerFn, options = {}) ->
     if not @_domainEventStreamClasses[domainEventStreamName]
       err = "DomainEventStream Class with name #{domainEventStreamName} not added"
@@ -361,13 +399,8 @@ class Context extends PubSub
 
   ###*
   * @name addDomainService
-  *
   * @module Context
-  *
-  * @description
-  * Use as: addDomainService(domainServiceName, domainServiceFunction)
-  *
-  * Add function which gets called when called using $domainService
+  * @description Add function which gets called when called using $domainService
   *
   * @example
     ```javascript
@@ -377,7 +410,6 @@ class Context extends PubSub
     ```
   *
   * @param {String} domainServiceName Name of the `DomainService`
-  *
   * @param {Function} Function which gets called with params as argument
   ###
   addDomainService: (domainServiceName, domainServiceFn) ->
@@ -385,6 +417,13 @@ class Context extends PubSub
     @
 
 
+  ###*
+  * @name addDomainServices
+  * @module Context
+  * @dscription Add multiple DomainServices at once
+  *
+  * @param {Object} domainServiceObjs Object containing multiple DomainEventStreamDefinitions "name: definition"
+  ###
   addDomainServices: (domainServiceObjs) ->
     @addDomainService domainServiceName, domainServiceFn for domainServiceName, domainServiceFn of domainServiceObjs
     @
@@ -392,13 +431,8 @@ class Context extends PubSub
 
   ###*
   * @name addAdapter
-  *
   * @module Context
-  *
-  * @description
-  * Use as: addAdapter(adapterName, AdapterClass)
-  *
-  * Add adapter which get can be used inside of `CommandHandlers`
+  * @description Add adapter
   *
   * @example
     ```javascript
@@ -408,7 +442,6 @@ class Context extends PubSub
     ```
   *
   * @param {String} adapterName Name of Adapter
-  *
   * @param {Function} Adapter Class
   ###
   addAdapter: (adapterName, adapterClass) ->
@@ -416,8 +449,15 @@ class Context extends PubSub
     @
 
 
-  addAdapters: (adapterObj) ->
-    @addAdapter adapterName, fn for adapterName, fn of adapterObj
+  ###*
+  * @name addAdapters
+  * @module Context
+  * @dscription Add multiple Adapters at once
+  *
+  * @param {Object} adaptersObj Object containing multiple Adapters "name: function"
+  ###
+  addAdapters: (adaptersObj) ->
+    @addAdapter adapterName, fn for adapterName, fn of adaptersObj
     @
 
 
@@ -428,8 +468,6 @@ class Context extends PubSub
   *
   * @param {string} projectionName Name of the Projection
   * @param {Function} The Projection Class definition
-  * - define `subscribeToDomainEvents` as Array of DomainEventName Strings
-  * - define handle Funtions for DomainEvents by convention: "handleDomainEventName"
   ###
   addProjection: (projectionName, ProjectionClass) ->
     @_projectionClasses[projectionName] = ProjectionClass
@@ -473,17 +511,36 @@ class Context extends PubSub
     @
 
 
-
-
+  ###*
+  * @name getProjectionInstance
+  * @module Context
+  * @description Get ProjectionInstance
+  *
+  * @param {String} projectionId ProjectionId
+  ###
   getProjectionInstance: (projectionId) ->
     projectionService.getInstance projectionId
 
 
+  ###*
+  * @name destroyProjectionInstance
+  * @module Context
+  * @description Destroy a ProjectionInstance
+  *
+  * @param {String} projectionId ProjectionId
+  ###
   destroyProjectionInstance: (projectionId) ->
     projectionService.destroyInstance projectionId, @
 
 
-
+  ###*
+  * @name initializeProjectionInstance
+  * @module Context
+  * @description Initialize a ProjectionInstance
+  *
+  * @param {String} projectionName Name of the Projection
+  * @param {Object} params Object containing Projection Parameters
+  ###
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on context"
@@ -494,16 +551,10 @@ class Context extends PubSub
     projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
 
 
-
   ###*
   * @name initialize
-  *
   * @module Context
-  *
-  * @description
-  * Use as: initialize()
-  *
-  * Initializes the `context` after the `add*` Methods
+  * @description Initialize the Context
   *
   * @example
     ```javascript
@@ -602,9 +653,7 @@ class Context extends PubSub
 
   ###*
   * @name getProjection
-  *
   * @module Context
-  *
   * @description Get a Projection Instance after initialize()
   *
   * @param {String} projectionName Name of the Projection
@@ -615,9 +664,7 @@ class Context extends PubSub
 
   ###*
   * @name getAdapter
-  *
   * @module Context
-  *
   * @description Get a Adapter Instance after initialize()
   *
   * @param {String} adapterName Name of the Adapter
@@ -628,9 +675,7 @@ class Context extends PubSub
 
   ###*
   * @name getDomainEvent
-  *
   * @module Context
-  *
   * @description Get a DomainEvent Class after initialize()
   *
   * @param {String} domainEventName Name of the DomainEvent
@@ -641,9 +686,7 @@ class Context extends PubSub
 
   ###*
   * @name getDomainService
-  *
   * @module Context
-  *
   * @description Get a DomainService after initialize()
   *
   * @param {String} domainServiceName Name of the DomainService
@@ -654,16 +697,21 @@ class Context extends PubSub
 
   ###*
   * @name getDomainEventsStore
-  *
   * @module Context
-  *
-  * @description Get the DomainEventsStore after initialization
+  * @description Get the current default DomainEventsStore
   ###
   getDomainEventsStore: ->
     storeName = @get 'default domain events store'
     @_storeInstances[storeName]
 
 
+  ###*
+  * @name saveDomainEvent
+  * @module Context
+  * @description Save a DomainEvent to the default DomainEventStore
+  *
+  * @param {Object} domainEvent Instance of a DomainEvent
+  ###
   saveDomainEvent: (domainEvent) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().saveDomainEvent domainEvent, (err, events) =>
@@ -672,6 +720,11 @@ class Context extends PubSub
         resolve events
 
 
+  ###*
+  * @name findAllDomainEvents
+  * @module Context
+  * @description Return all DomainEvents from the default DomainEventStore
+  ###
   findAllDomainEvents: ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findAllDomainEvents (err, events) ->
@@ -679,6 +732,13 @@ class Context extends PubSub
         resolve events
 
 
+  ###*
+  * @name findDomainEventsByName
+  * @module Context
+  * @description Return DomainEvents from the default DomainEventStore which match the given DomainEventName
+  *
+  * @param {String} domainEventName Name of the DomainEvent to be returned
+  ###
   findDomainEventsByName: (findArguments...) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findDomainEventsByName findArguments..., (err, events) ->
@@ -686,13 +746,13 @@ class Context extends PubSub
         resolve events
 
 
-  findDomainEventsByNameAndAggregateId: (findArguments...) ->
-    new Promise (resolve, reject) =>
-      @getDomainEventsStore().findDomainEventsByNameAndAggregateId findArguments..., (err, events) ->
-        return reject err if err
-        resolve events
-
-
+  ###*
+  * @name findDomainEventsByAggregateId
+  * @module Context
+  * @description Return DomainEvents from the default DomainEventStore which match the given AggregateId
+  *
+  * @param {String} aggregateId AggregateId of the DomainEvents to be found
+  ###
   findDomainEventsByAggregateId: (findArguments...) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findDomainEventsByAggregateId findArguments..., (err, events) ->
@@ -700,6 +760,28 @@ class Context extends PubSub
         resolve events
 
 
+  ###*
+  * @name findDomainEventsByNameAndAggregateId
+  * @module Context
+  * @description Return DomainEvents from the default DomainEventStore which match the given DomainEventName and AggregateId
+  *
+  * @param {String} domainEventName Name of the DomainEvents to be found
+  * @param {String} aggregateId AggregateId of the DomainEvents to be found
+  ###
+  findDomainEventsByNameAndAggregateId: (findArguments...) ->
+    new Promise (resolve, reject) =>
+      @getDomainEventsStore().findDomainEventsByNameAndAggregateId findArguments..., (err, events) ->
+        return reject err if err
+        resolve events
+
+
+  ###*
+  * @name findDomainEventsByAggregateName
+  * @module Context
+  * @description Return DomainEvents from the default DomainEventStore which match the given AggregateName
+  *
+  * @param {String} aggregateName AggregateName of the DomainEvents to be found
+  ###
   findDomainEventsByAggregateName: (findArguments...) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findDomainEventsByAggregateName findArguments..., (err, events) ->
@@ -707,6 +789,14 @@ class Context extends PubSub
         resolve events
 
 
+  ###*
+  * @name getProjectionStore
+  * @module Context
+  * @description Get a specific ProjectionStore Instance
+  *
+  * @param {String} storeName Name of the Store
+  * @param {String} projectionName Name of the Projection
+  ###
   getProjectionStore: (storeName, projectionName, callback) =>
     new Promise (resolve, reject) =>
       if not @_storeInstances[storeName]
@@ -721,6 +811,14 @@ class Context extends PubSub
         resolve projectionStore
 
 
+  ###*
+  * @name clearProjectionStore
+  * @module Context
+  * @description Clear the ProjectionStore
+  *
+  * @param {String} storeName Name of the Store
+  * @param {String} projectionName Name of the Projection
+  ###
   clearProjectionStore: (storeName, projectionName, callback) =>
     new Promise (resolve, reject) =>
       if not @_storeInstances[storeName]
@@ -737,10 +835,8 @@ class Context extends PubSub
 
   ###*
   * @name getEventBus
-  *
   * @module Context
-  *
-  * @description Get the EventBus after initialization
+  * @description Get the EventBus
   ###
   getEventBus: ->
     @_eventBus
@@ -748,28 +844,16 @@ class Context extends PubSub
 
   ###*
   * @name command
-  *
   * @module Context
-  *
-  * @description
-  *
-  * Use as: command(command, callback)
-  *
-  * Execute previously added `commands`
+  * @description Execute previously added CommandHandlers
   *
   * @example
     ```javascript
-    exampleContext.command('doSomething',
-    function(err, result) {
-      // callback
-    });
+    exampleContext.command('doSomething');
     ```
   *
   * @param {String} `commandName` Name of the CommandHandler to be executed
   * @param {Object} `commandParams` Parameters for the CommandHandler function
-  * @param {Function} callback Gets called after the command got executed with the arguments:
-  * - `err` null if successful
-  * - `result` Set by the `command`
   ###
   command: (commandName, commandParams) ->
     @log.debug 'Got Command', commandName
@@ -799,31 +883,16 @@ class Context extends PubSub
 
   ###*
   * @name query
-  *
   * @module Context
-  *
-  * @description
-  *
-  * Use as: query(query, callback)
-  *
-  * Execute previously added `QueryHandler`
+  * @description Execute previously added QueryHandler
   *
   * @example
     ```javascript
-    exampleContext.query('Example', {
-        foo: 'bar'
-      }
-    },
-    function(err, result) {
-      // callback
-    });
+    exampleContext.query('getSomething');
     ```
   *
   * @param {String} `queryName` Name of the QueryHandler to be executed
   * @param {Object} `queryParams` Parameters for the QueryHandler function
-  * @param {Function} `callback` Callback which gets called after query
-  * - `err` null if successful
-  * - `result` Set by the `query`
   ###
   query: (queryName, queryParams) ->
     @log.debug 'Got Query', queryName
@@ -852,14 +921,29 @@ class Context extends PubSub
         reject err
 
 
+  ###*
+  * @name enableWaitingMode
+  * @module Context
+  * @description Enables the WaitingMode
+  ###
   enableWaitingMode: ->
     @set 'waiting mode', true
 
 
+  ###*
+  * @name disableWaitingMode
+  * @module Context
+  * @description Disables the WaitingMode
+  ###
   disableWaitingMode: ->
     @set 'waiting mode', false
 
 
+  ###*
+  * @name isWaitingModeEnabled
+  * @module Context
+  * @description Returns if the WaitingMode is enabled
+  ###
   isWaitingModeEnabled: ->
     @get 'waiting mode'
 

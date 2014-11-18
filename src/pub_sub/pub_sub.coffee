@@ -1,3 +1,10 @@
+###*
+* @name PubSub
+* @module PubSub
+* @description
+*
+* Publish and Subscribe to arbitrary Events
+###
 class PubSub
 
   constructor: ->
@@ -8,8 +15,11 @@ class PubSub
 
   ###*
   * @name subscribe
-  *
   * @module PubSub
+  * @description Subscribe to an Event
+  *
+  * @param {String} eventName Name of the Event to subscribe to
+  * @param {Function} subscriberFn Function to call when Event gets published
   ###
   subscribe: (eventName, subscriberFn) ->
     subscriber =
@@ -21,9 +31,12 @@ class PubSub
 
 
   ###*
-  * @name subscribeAsync
-  *
+  * @name subscribe
   * @module PubSub
+  * @description Subscribe asynchronously to an Event
+  *
+  * @param {String} eventName Name of the Event to subscribe to
+  * @param {Function} subscriberFn Function to call when Event gets published
   ###
   subscribeAsync: (eventName, subscriberFn) ->
     subscriber =
@@ -37,8 +50,11 @@ class PubSub
 
   ###*
   * @name publish
-  *
   * @module PubSub
+  * @description Publish an Event
+  *
+  * @param {String} eventName Name of the Event
+  * @param {Object} payload The Event payload to be published
   ###
   publish: (eventName, payload, callback = ->) ->
     subscribers = @_getRelevantSubscribers eventName
@@ -52,9 +68,12 @@ class PubSub
 
 
   ###*
-  * @name publishAsync
-  *
+  * @name publish
   * @module PubSub
+  * @description Publish an Event
+  *
+  * @param {String} eventName Name of the Event
+  * @param {Object} payload The Event payload to asynchronously be published
   ###
   publishAsync: (eventName, payload, callback = ->) ->
     subscribers = @_getRelevantSubscribers eventName
@@ -80,8 +99,10 @@ class PubSub
 
   ###*
   * @name unsubscribe
-  *
   * @module PubSub
+  * @description Unscribe from an Event
+  *
+  * @param {String} subscriberId SubscriberId
   ###
   unsubscribe: (subscriberId) ->
     @_subscribers = @_subscribers.filter (x) -> x.subscriberId isnt subscriberId

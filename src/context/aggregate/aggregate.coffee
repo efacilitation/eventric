@@ -2,6 +2,14 @@ eventric    = require 'eventric'
 # TODO: replace with eventric api call getDomainEventClass() or property access?
 DomainEvent = require 'eventric/src/context/domain_event'
 
+###*
+* @name Aggregate
+* @module Aggregate
+* @description
+*
+* Aggregates live inside a Context and give you basically transactional boundaries
+* for your Behaviors and DomainEvents.
+###
 class Aggregate
 
   constructor: (@_context, @_name, Root) ->
@@ -14,10 +22,14 @@ class Aggregate
 
     @root.$emitDomainEvent = @emitDomainEvent
 
+
   ###*
   * @name emitDomainEvent
-  *
   * @module Aggregate
+  * @description Emit DomainEvent
+  *
+  * @param {String} domainEventName Name of the DomainEvent
+  * @param {Object} domainEventPayload Object containing the payload of the DomainEvent
   ###
   emitDomainEvent: (domainEventName, domainEventPayload) =>
     DomainEventClass = @_context.getDomainEvent domainEventName
@@ -54,13 +66,20 @@ class Aggregate
 
   ###*
   * @name getDomainEvents
-  *
   * @module Aggregate
+  * @description Get all emitted DomainEvents
   ###
   getDomainEvents: =>
     @_domainEvents
 
 
+  ###*
+  * @name applyDomainEvents
+  * @module Context
+  * @description Apply DomainEvents to the Aggregate
+  *
+  * @param {Array} domainEvents Array containing DomainEvents
+  ###
   applyDomainEvents: (domainEvents) ->
     @_applyDomainEvent domainEvent for domainEvent in domainEvents
 
@@ -68,10 +87,11 @@ class Aggregate
   _applyDomainEvent: (domainEvent) ->
     @_handleDomainEvent domainEvent.name, domainEvent
 
+
   ###*
   * @name create
-  *
   * @module Aggregate
+  * @description Calls the create Function on your AggregateDefinition
   ###
   create: =>
     params = arguments

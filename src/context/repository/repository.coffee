@@ -1,6 +1,13 @@
 eventric  = require 'eventric'
 Aggregate = require 'eventric/src/context/aggregate'
 
+###*
+* @name Repository
+* @module Repository
+* @description
+*
+* The Repository is responsible for creating, saving and finding Aggregates
+###
 class Repository
 
   constructor: (params) ->
@@ -15,8 +22,10 @@ class Repository
 
   ###*
   * @name findById
-  *
   * @module Repository
+  * @description Find an aggregate by its id
+  *
+  * @param {String} aggregateId The AggregateId of the Aggregate to be found
   ###
   findById: (aggregateId, callback = ->) =>
     new Promise (resolve, reject) =>
@@ -54,8 +63,8 @@ class Repository
 
   ###*
   * @name create
-  *
   * @module Repository
+  * @description Create an Aggregate
   ###
   create: =>
     params = arguments
@@ -75,8 +84,10 @@ class Repository
 
   ###*
   * @name save
-  *
   * @module Repository
+  * @description Save the Aggregate
+  *
+  * @param {String} aggregateId The AggregateId of the Aggregate to be saved
   ###
   save: (aggregateId, callback=->) =>
     new Promise (resolve, reject) =>
@@ -134,8 +145,10 @@ class Repository
 
   ###*
   * @name setCommand
-  *
   * @module Repository
+  * @description Set the command which is currently processed
+  *
+  * @param {Object} command The command Object
   ###
   setCommand: (command) ->
     @_command = command

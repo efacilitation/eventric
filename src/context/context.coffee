@@ -193,7 +193,6 @@ class Context extends PubSub
           repository = @_getAggregateRepository aggregateName, command
           repository.findById aggregateId
 
-
       commandHandlerFn.apply _di, arguments
     @
 
@@ -206,12 +205,9 @@ class Context extends PubSub
         aggregateName: aggregateName
         AggregateRoot: AggregateRoot
         context: @
-      #repository.addMiddlewares @_repositoryMiddlewares()
       repositoriesCache[aggregateName] = repository
 
     repositoriesCache[aggregateName].setCommand command
-    #repository.setUser user
-
     repositoriesCache[aggregateName]
 
 

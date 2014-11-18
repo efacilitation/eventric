@@ -154,7 +154,6 @@ class Remote extends PubSub
   * @param {Function} Function which gets called with `domainEvent` as argument
   * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-
   subscribeToAllDomainEvents: (handlerFn, options = {}) ->
     clientName = @get 'default client'
     client = @getClient clientName
@@ -197,6 +196,19 @@ class Remote extends PubSub
     clientName = @get 'default client'
     client = @getClient clientName
     client.subscribe @_contextName, domainEventName, aggregateId, handlerFn
+
+
+  ###*
+  * @name subscribeToDomainEventWithAggregateId
+  * @module Remote
+  * @description Add handler function which gets called when a specific `DomainEvent` containing a specific AggregateId gets triggered
+  *
+  * @param {String} domainEventStreamName Name of the `DomainEvent`
+  * @param {Function} Function which gets called with `domainEvent` as argument
+  * @param {Object} options Options to set on the EventBus ("async: false" is default)
+  ###
+  subscribeToDomainEventStream: ->
+    @_rpc 'subscribeToDomainEventStream', arguments
 
 
   ###*

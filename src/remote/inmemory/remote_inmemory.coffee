@@ -24,8 +24,8 @@ class InMemoryRemoteEndpoint
   *
   * @module InMemoryRemoteEndpoint
   ###
-  publish: (context, [domainEventName, aggregateId]..., payload) ->
-    fullEventName = getFullEventName context, domainEventName, aggregateId
+  publish: (contextName, [domainEventName, aggregateId]..., payload) ->
+    fullEventName = getFullEventName contextName, domainEventName, aggregateId
     pubSub.publish fullEventName, payload, ->
 
 
@@ -54,8 +54,8 @@ class InMemoryRemoteClient
   *
   * @module InMemoryRemoteClient
   ###
-  subscribe: (context, [domainEventName, aggregateId]..., handlerFn) ->
-    fullEventName = getFullEventName context, domainEventName, aggregateId
+  subscribe: (contextName, [domainEventName, aggregateId]..., handlerFn) ->
+    fullEventName = getFullEventName contextName, domainEventName, aggregateId
     pubSub.subscribe fullEventName, handlerFn
 
 
@@ -70,8 +70,8 @@ class InMemoryRemoteClient
 
 module.exports.client = new InMemoryRemoteClient
 
-getFullEventName = (context, domainEventName, aggregateId) ->
-  fullEventName = context
+getFullEventName = (contextName, domainEventName, aggregateId) ->
+  fullEventName = contextName
   if domainEventName
     fullEventName += "/#{domainEventName}"
   if aggregateId

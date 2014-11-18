@@ -10,13 +10,13 @@ describe 'Remote Projection Feature', ->
     exampleContext.addCommandHandlers
       CreateExample: (params, callback) ->
         @$aggregate.create 'Example'
-        .then (example) =>
+        .then (example) ->
           example.$save()
         .then (exampleId) ->
           callback null, exampleId
       UpdateExample: (params, callback) ->
         @$aggregate.load 'Example', params.id
-        .then (example) =>
+        .then (example) ->
           example.update()
           example.$save()
         .then (exampleId) ->

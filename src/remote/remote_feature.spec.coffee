@@ -12,21 +12,21 @@ describe 'Remote Feature', ->
     exampleContext.addCommandHandlers
       CreateExample: (params, callback) ->
         @$aggregate.create 'Example'
-        .then (example) =>
+        .then (example) ->
           example.$save()
-        .then (exampleId) =>
+        .then (exampleId) ->
           callback null, exampleId
-        .catch (error) =>
+        .catch (error) ->
           callback error
 
       ModifyExample: (params, callback) ->
         @$aggregate.load 'Example', params.id
-        .then (example) =>
+        .then (example) ->
           example.modify()
           example.$save()
-        .then (id) =>
+        .then (id) ->
           callback null, id
-        .catch (error) =>
+        .catch (error) ->
           callback error
 
       DoSomething: (params, callback) ->

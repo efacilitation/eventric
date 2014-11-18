@@ -40,14 +40,14 @@ describe 'ProcessManager', ->
 
       exampleContext.addCommandHandler 'CreateExample', (params, callback) ->
         @$aggregate.create 'Example'
-        .then (example) =>
+        .then (example) ->
           example.$save()
-        .then =>
+        .then ->
           callback()
 
       exampleContext.addCommandHandler 'ChangeExample', (params, callback) ->
         @$aggregate.load 'Example', params.id
-        .then (example) =>
+        .then (example) ->
           example.doSomething()
           example.$save()
         .then (exampleId) ->

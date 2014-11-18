@@ -19,7 +19,7 @@ describe 'Create Aggregate Feature', ->
 
         exampleContext.addCommandHandler 'CreateExample', (params, done) ->
           @$aggregate.create 'Example', params.name, params.email
-          .then (example) =>
+          .then (example) ->
             example.$save()
           .then ->
             done()

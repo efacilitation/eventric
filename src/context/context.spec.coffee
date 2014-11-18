@@ -33,7 +33,7 @@ describe 'Context', ->
       context = new Context 'exampleContext'
       AdapterFactory = sandbox.stub()
       context.addAdapter 'Adapter', AdapterFactory
-      context.initialize =>
+      context.initialize ->
         expect(AdapterFactory).to.have.been.calledWithNew
         done()
 
@@ -51,7 +51,7 @@ describe 'Context', ->
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', (done) ->
         someContext = new Context 'exampleContext'
-        someContext.initialize =>
+        someContext.initialize ->
 
           callback = sinon.spy()
 
@@ -67,7 +67,7 @@ describe 'Context', ->
       it 'should execute the command handler', (done) ->
         commandStub = sandbox.stub()
         someContext = new Context 'exampleContext'
-        someContext.initialize =>
+        someContext.initialize ->
           someContext.addCommandHandler 'doSomething', commandStub
 
           params = foo: 'bar'
@@ -91,7 +91,7 @@ describe 'Context', ->
 
     describe 'given the query has no matching queryhandler', ->
       it 'should callback with an error', (done) ->
-        someContext.initialize =>
+        someContext.initialize ->
           someContext.query 'getSomething'
           .catch (error) ->
             expect(error).to.be.an.instanceOf Error
@@ -102,7 +102,7 @@ describe 'Context', ->
       it 'should call the queryhandler function', (done) ->
         queryStub = sandbox.stub().yields null, 'result'
         someContext.addQueryHandler 'getSomething', queryStub
-        someContext.initialize =>
+        someContext.initialize ->
           someContext.query 'getSomething'
           .then (result) ->
             expect(result).to.equal 'result'
@@ -114,7 +114,7 @@ describe 'Context', ->
     beforeEach (done) ->
       someContext = new Context 'ExampleContext'
       someContext.defineDomainEvent 'WhatSoEver', ->
-      someContext.initialize =>
+      someContext.initialize ->
         someContext.emitDomainEvent 'WhatSoEver'
         done()
 

@@ -29,14 +29,14 @@ describe 'Command Aggregate Feature', ->
         CreateExample: (params, callback) ->
           exampleId = null
           @$aggregate.create 'Example'
-          .then (example) =>
+          .then (example) ->
             example.$save()
           .then (exampleId) ->
             callback null, exampleId
 
         DoSomething: (params, callback) ->
           @$aggregate.load 'Example', params.id
-          .then (example) =>
+          .then (example) ->
             example.doSomething [1]
             example.$save()
           .then ->

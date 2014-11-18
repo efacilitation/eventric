@@ -9,12 +9,12 @@ describe 'Query Projection Feature', ->
         @$projectionStore 'inmemory', 'ExampleProjection', (err, projectionStore) ->
           callback null, projectionStore
 
-      exampleContext.initialize =>
+      exampleContext.initialize ->
         done()
 
 
     describe 'when we query the context', ->
       it 'then the query should return the correct result', ->
         exampleContext.query 'getExample', id: 1
-        .then (result) =>
+        .then (result) ->
           expect(result).to.deep.equal {}

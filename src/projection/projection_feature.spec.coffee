@@ -34,14 +34,14 @@ describe 'Projection Feature', ->
         CreateExample: (params, callback) ->
           exampleId = null
           @$aggregate.create 'Example'
-          .then (example) =>
+          .then (example) ->
             example.$save()
           .then (exampleId) ->
             callback null, exampleId
 
         doSomethingWithExample: (params, callback) ->
           @$aggregate.load 'Example', params.id
-          .then (example) =>
+          .then (example) ->
             example.doSomething()
             example.$save()
           .then ->

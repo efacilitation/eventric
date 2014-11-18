@@ -24,7 +24,7 @@ describe 'Global Domain Event Handler Feature', ->
 
       exampleContext.addCommandHandler 'createExample', (params, done) ->
         @$aggregate.create 'Example'
-        .then (example) =>
+        .then (example) ->
           example.$save()
         .then (exampleId) ->
           done null, exampleId
@@ -33,7 +33,7 @@ describe 'Global Domain Event Handler Feature', ->
     describe 'when DomainEvents got emitted which the handler subscribed to', ->
 
       it 'then it should execute the registered global domain event handler', (done) ->
-        exampleContext.initialize =>
+        exampleContext.initialize ->
           exampleContext.subscribeToDomainEvent 'ExampleCreated', ->
             expect(specificOncontextHandlerStub).to.have.been.called
             expect(allOncontextHandlerStub).to.have.been.called

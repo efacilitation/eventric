@@ -20,7 +20,7 @@ describe 'Adapter Feature', ->
 
 
       it 'then it should have called the adapter function', ->
-        exampleContext.initialize =>
+        exampleContext.initialize ->
           exampleContext.command 'doSomething'
           .then ->
             expect(ExampleAdapter::someAdapterFunction).to.have.been.calledOnce

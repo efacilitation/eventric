@@ -25,7 +25,7 @@ describe 'Remote Domain Event Stream Feature', ->
         CreateExample: (params, callback) ->
           exampleId = null
           @$aggregate.create 'Example'
-          .then (example) =>
+          .then (example) ->
             example.$save()
           .then (exampleId) ->
             callback null, exampleId
@@ -33,7 +33,7 @@ describe 'Remote Domain Event Stream Feature', ->
         CreateAnotherExample: (params, callback) ->
           anotherExampleId = null
           @$aggregate.create 'AnotherExample'
-          .then (anotherExample) =>
+          .then (anotherExample) ->
             anotherExample.$save()
           .then (anotherExampleId) ->
             callback null, anotherExampleId

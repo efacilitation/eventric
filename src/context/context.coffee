@@ -184,25 +184,35 @@ class Context extends PubSub
       for diFnName, diFn of @_di
         _di[diFnName] = diFn
 
-      repositoryCache = null
-      _di.$repository = (aggregateName) =>
+      _di.$aggregate =
+        create: (aggregateName, aggregateParams...) =>
+          repository = @_getAggregateRepository aggregateName, command
+          repository.create aggregateParams...
 
-        if not repositoryCache
-          AggregateRoot = @_aggregateRootClasses[aggregateName]
-          repository = new Repository
-            aggregateName: aggregateName
-            AggregateRoot: AggregateRoot
-            context: @
-          #repository.addMiddlewares @_repositoryMiddlewares()
-          repositoryCache = repository
+        load: (aggregateName, aggregateId) =>
+          repository = @_getAggregateRepository aggregateName, command
+          repository.findById aggregateId
 
-        repositoryCache.setCommand command
-        #repository.setUser user
-
-        repositoryCache
 
       commandHandlerFn.apply _di, arguments
     @
+
+
+  _getAggregateRepository: (aggregateName, command) ->
+    repositoriesCache = {} if not repositoriesCache
+    if not repositoriesCache[aggregateName]
+      AggregateRoot = @_aggregateRootClasses[aggregateName]
+      repository = new Repository
+        aggregateName: aggregateName
+        AggregateRoot: AggregateRoot
+        context: @
+      #repository.addMiddlewares @_repositoryMiddlewares()
+      repositoriesCache[aggregateName] = repository
+
+    repositoriesCache[aggregateName].setCommand command
+    #repository.setUser user
+
+    repositoriesCache[aggregateName]
 
 
   ###*

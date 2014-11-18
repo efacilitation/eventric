@@ -16,9 +16,9 @@ describe 'Waiting Command Aggregate Feature', ->
       exampleContext.addCommandHandlers
         CreateExample: (params, callback) ->
           exampleId = null
-          @$repository('Example').create()
-          .then (exampleId) =>
-            @$repository('Example').save exampleId
+          @$aggregate.create 'Example'
+          .then (example) =>
+            example.$save()
           .then (exampleId) ->
             callback null, exampleId
 

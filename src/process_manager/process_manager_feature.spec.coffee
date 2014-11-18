@@ -39,19 +39,19 @@ describe 'ProcessManager', ->
       exampleContext.addAggregate 'Example', ExampleAggregateRoot
 
       exampleContext.addCommandHandler 'CreateExample', (params, callback) ->
-        @$repository('Example').create()
-        .then (exampleId) =>
-          @$repository('Example').save exampleId
+        @$aggregate.create 'Example'
+        .then (example) =>
+          example.$save()
         .then =>
           callback()
 
       exampleContext.addCommandHandler 'ChangeExample', (params, callback) ->
-        @$repository('Example').findById params.id
+        @$aggregate.load 'Example', params.id
         .then (example) =>
           example.doSomething()
-          @$repository('Example').save params.id
-        .then =>
-          callback()
+          example.$save()
+        .then (exampleId) ->
+          callback null, exampleId
 
       exampleContext.initialize()
 

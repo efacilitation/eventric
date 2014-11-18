@@ -18,9 +18,9 @@ describe 'Create Aggregate Feature', ->
         exampleContext.addAggregate 'Example', Example
 
         exampleContext.addCommandHandler 'CreateExample', (params, done) ->
-          @$repository('Example').create params.name, params.email
-          .then (exampleId) =>
-            @$repository('Example').save exampleId
+          @$aggregate.create 'Example', params.name, params.email
+          .then (example) =>
+            example.$save()
           .then ->
             done()
 

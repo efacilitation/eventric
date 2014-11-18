@@ -11,19 +11,19 @@ describe 'Remote Feature', ->
 
     exampleContext.addCommandHandlers
       CreateExample: (params, callback) ->
-        @$repository('Example').create()
-        .then (exampleId) =>
-          @$repository('Example').save exampleId
+        @$aggregate.create 'Example'
+        .then (example) =>
+          example.$save()
         .then (exampleId) =>
           callback null, exampleId
         .catch (error) =>
           callback error
 
       ModifyExample: (params, callback) ->
-        @$repository('Example').findById params.id
+        @$aggregate.load 'Example', params.id
         .then (example) =>
           example.modify()
-          @$repository('Example').save params.id
+          example.$save()
         .then (id) =>
           callback null, id
         .catch (error) =>

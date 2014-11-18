@@ -33,17 +33,17 @@ describe 'Projection Feature', ->
       exampleContext.addCommandHandlers
         CreateExample: (params, callback) ->
           exampleId = null
-          @$repository('Example').create()
-          .then (exampleId) =>
-            @$repository('Example').save exampleId
+          @$aggregate.create 'Example'
+          .then (example) =>
+            example.$save()
           .then (exampleId) ->
             callback null, exampleId
 
         doSomethingWithExample: (params, callback) ->
-          @$repository('Example').findById params.id
+          @$aggregate.load 'Example', params.id
           .then (example) =>
             example.doSomething()
-            @$repository('Example').save params.id
+            example.$save()
           .then ->
             callback()
 

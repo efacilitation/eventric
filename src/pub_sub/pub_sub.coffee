@@ -31,7 +31,7 @@ class PubSub
 
 
   ###*
-  * @name subscribe
+  * @name subscribeAsync
   * @module PubSub
   * @description Subscribe asynchronously to an Event
   *
@@ -68,7 +68,7 @@ class PubSub
 
 
   ###*
-  * @name publish
+  * @name publishAsync
   * @module PubSub
   * @description Publish an Event
   *

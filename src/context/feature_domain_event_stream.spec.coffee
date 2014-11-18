@@ -24,17 +24,17 @@ describe 'Domain Event Stream Feature', ->
       exampleContext.addCommandHandlers
         CreateExample: (params, callback) ->
           exampleId = null
-          @$repository('Example').create()
-          .then (exampleId) =>
-            @$repository('Example').save exampleId
+          @$aggregate.create 'Example'
+          .then (example) =>
+            example.$save()
           .then (exampleId) ->
             callback null, exampleId
 
         CreateAnotherExample: (params, callback) ->
           anotherExampleId = null
-          @$repository('AnotherExample').create()
-          .then (anotherExampleId) =>
-            @$repository('AnotherExample').save anotherExampleId
+          @$aggregate.create 'AnotherExample'
+          .then (anotherExample) =>
+            anotherExample.$save()
           .then (anotherExampleId) ->
             callback null, anotherExampleId
 

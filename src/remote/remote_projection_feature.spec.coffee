@@ -9,18 +9,18 @@ describe 'Remote Projection Feature', ->
 
     exampleContext.addCommandHandlers
       CreateExample: (params, callback) ->
-        @$repository('Example').create()
-        .then (exampleId) =>
-          @$repository('Example').save exampleId
+        @$aggregate.create 'Example'
+        .then (example) =>
+          example.$save()
         .then (exampleId) ->
           callback null, exampleId
       UpdateExample: (params, callback) ->
-        @$repository('Example').findById params.id
+        @$aggregate.load 'Example', params.id
         .then (example) =>
           example.update()
-          @$repository('Example').save params.id
-        .then ->
-          callback()
+          example.$save()
+        .then (exampleId) ->
+          callback null, exampleId
 
     class Example
       create: (callback) ->

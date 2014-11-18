@@ -45,6 +45,9 @@ class Repository
         aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
         aggregate.applyDomainEvents domainEvents
         aggregate.id = aggregateId
+        aggregate.root.$id = aggregateId
+        aggregate.root.$save = =>
+          @save aggregate.id
 
         commandId = @_command.id ? 'nocommand'
         @_aggregateInstances[commandId] ?= {}
@@ -75,11 +78,14 @@ class Repository
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
       aggregate.create params...
       .then (aggregate) =>
+        aggregate.root.$id = aggregate.id
+        aggregate.root.$save = =>
+          @save aggregate.id
         commandId = @_command.id ? 'nocommand'
         @_aggregateInstances[commandId] ?= {}
         @_aggregateInstances[commandId][aggregate.id] = aggregate
-        callback? null, aggregate.id
-        resolve aggregate.id
+        callback? null, aggregate.root
+        resolve aggregate.root
 
 
   ###*

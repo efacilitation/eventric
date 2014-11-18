@@ -15,7 +15,6 @@ describe 'Global Domain Event Handler Feature', ->
       eventric.subscribeToDomainEvent allHandlerStub
 
       exampleContext = eventric.context 'exampleContext'
-
       exampleContext.defineDomainEvent 'ExampleCreated', ->
 
       exampleContext.addAggregate 'Example', ->
@@ -24,11 +23,11 @@ describe 'Global Domain Event Handler Feature', ->
           callback()
 
       exampleContext.addCommandHandler 'createExample', (params, done) ->
-        @$repository('Example').create()
-        .then (exampleId) =>
-          @$repository('Example').save exampleId
-        .then =>
-          done null
+        @$aggregate.create 'Example'
+        .then (example) =>
+          example.$save()
+        .then (exampleId) ->
+          done null, exampleId
 
 
     describe 'when DomainEvents got emitted which the handler subscribed to', ->

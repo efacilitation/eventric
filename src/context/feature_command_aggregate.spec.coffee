@@ -28,17 +28,17 @@ describe 'Command Aggregate Feature', ->
       exampleContext.addCommandHandlers
         CreateExample: (params, callback) ->
           exampleId = null
-          @$repository('Example').create()
-          .then (exampleId) =>
-            @$repository('Example').save exampleId
+          @$aggregate.create 'Example'
+          .then (example) =>
+            example.$save()
           .then (exampleId) ->
             callback null, exampleId
 
         DoSomething: (params, callback) ->
-          @$repository('Example').findById params.id
+          @$aggregate.load 'Example', params.id
           .then (example) =>
             example.doSomething [1]
-            @$repository('Example').save params.id
+            example.$save()
           .then ->
             callback()
 

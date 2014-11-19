@@ -1,4 +1,4 @@
-> Not production ready. API might change heavily. First public release will be 0.2.0
+> Not production ready. API might change heavily. First public release will be [0.2.0](https://github.com/efacilitation/eventric/milestones/0.2.0)
 
 
 ![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)

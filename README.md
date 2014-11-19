@@ -102,7 +102,7 @@ It would be nice if we could change the description of the `Todo`, so let's add 
 
 ```javascript
 todoContext.addCommandHandler('ChangeTodoDescription', function(params, done) {
-  this.aggregate.load('Todo', params.id)
+  this.$aggregate.load('Todo', params.id)
     .then(function (todo) {
       todo.changeDescription(params.description);
       return todo.$save();

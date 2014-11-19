@@ -50,7 +50,7 @@
     "mocha": "*",
     "rimraf": "*",
     "run-sequence": "*",
-    "sinon": "*",
+    "sinon": "1.20.1",
     "sinon-chai": "*",
     "lodash": "*",
     "merge-stream": "*"

@@ -91,7 +91,7 @@ class Context extends PubSub
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @getDomainEventsStore().saveDomainEvent domainEvent, =>
-      @publishDomainEvent domainEvent, ->
+      @publishDomainEvent domainEvent
 
 
   ###*
@@ -101,8 +101,8 @@ class Context extends PubSub
   *
   * @param {Object} domainEvent Instance of a DomainEvent
   ###
-  publishDomainEvent: (domainEvent, callback=->) =>
-    @_eventBus.publishDomainEvent domainEvent, callback
+  publishDomainEvent: (domainEvent) =>
+    @_eventBus.publishDomainEvent domainEvent
 
 
   _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
@@ -299,7 +299,6 @@ class Context extends PubSub
   subscribeToDomainEvent: (domainEventName, handlerFn, options = {}) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler, options
-    @
 
 
   ###*
@@ -311,7 +310,6 @@ class Context extends PubSub
   ###
   subscribeToDomainEvents: (domainEventHandlersObj) ->
     @subscribeToDomainEvent domainEventName, handlerFn for domainEventName, handlerFn of domainEventHandlersObj
-    @
 
 
   ###*

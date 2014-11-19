@@ -8,11 +8,19 @@ describe 'PubSub', ->
 
   describe '#subscribe', ->
     it 'should return an unique subscriber id', ->
-      subscriberId1 = pubSub.subscribe 'SomeEvent', ->
-      subscriberId2 = pubSub.subscribe 'SomeEvent', ->
-      expect(subscriberId1).to.be.a 'number'
-      expect(subscriberId2).to.be.a 'number'
-      expect(subscriberId1).not.to.equal subscriberId2
+      subscriberId1 = null
+      subscriberId2 = null
+      pubSub.subscribe('SomeEvent', ->)
+      .then (_subscriberId1) ->
+        subscriberId1 = _subscriberId1
+        expect(subscriberId1).to.be.a 'number'
+
+      pubSub.subscribe('SomeEvent', ->)
+      .then (_subscriberId2) ->
+        subscriberId2 = _subscriberId2
+        expect(subscriberId2).to.be.a 'number'
+
+        expect(subscriberId1).not.to.equal subscriberId2
 
 
     it 'should subscribe to the event with given name', (done) ->
@@ -25,11 +33,19 @@ describe 'PubSub', ->
 
   describe '#subscribeAsync', ->
     it 'should return an unique subscriber id', ->
-      subscriberId1 = pubSub.subscribeAsync 'SomeEvent', ->
-      subscriberId2 = pubSub.subscribeAsync 'SomeEvent', ->
-      expect(subscriberId1).to.be.a 'number'
-      expect(subscriberId2).to.be.a 'number'
-      expect(subscriberId1).not.to.equal subscriberId2
+      subscriberId1 = null
+      subscriberId2 = null
+      pubSub.subscribeAsync('SomeEvent', ->)
+      .then (_subscriberId1) ->
+        subscriberId1 = _subscriberId1
+        expect(subscriberId1).to.be.a 'number'
+
+      pubSub.subscribeAsync('SomeEvent', ->)
+      .then (_subscriberId2) ->
+        subscriberId2 = _subscriberId2
+        expect(subscriberId2).to.be.a 'number'
+
+        expect(subscriberId1).not.to.equal subscriberId2
 
 
     it 'should subscribe to the event with given name', (done) ->
@@ -56,7 +72,8 @@ describe 'PubSub', ->
       spy = sandbox.spy()
       handler = (event, done) -> setTimeout spy, 50
       pubSub.subscribeAsync 'SomeEvent', handler
-      pubSub.publish 'SomeEvent', {}, ->
+      pubSub.publish 'SomeEvent', {}
+      .then ->
         expect(spy).not.to.have.been.called
         done()
 
@@ -73,7 +90,8 @@ describe 'PubSub', ->
         greeting += 'World'
       pubSub.subscribeAsync 'SomeEvent', handler1
       pubSub.subscribe 'SomeEvent', handler2
-      pubSub.publishAsync 'SomeEvent', {}, ->
+      pubSub.publishAsync 'SomeEvent', {}
+      .then ->
         expect(greeting).to.equal 'Hello World'
         done()
 
@@ -85,7 +103,8 @@ describe 'PubSub', ->
       handler2 = -> spy2()
       pubSub.subscribeAsync 'SomeEvent', handler1
       pubSub.subscribeAsync 'SomeEvent', handler2
-      pubSub.publish 'SomeEvent', {}, ->
+      pubSub.publish 'SomeEvent', {}
+      .then ->
         expect(spy1).to.have.been.called
         expect(spy2).to.have.been.called
         done()
@@ -105,7 +124,8 @@ describe 'PubSub', ->
         , 25
       pubSub.subscribeAsync 'SomeEvent', handler1
       pubSub.subscribeAsync 'SomeEvent', handler2
-      pubSub.publishAsync 'SomeEvent', {}, ->
+      pubSub.publishAsync 'SomeEvent', {}
+      .then ->
         expect(callCount).to.equal 2
         done()
 
@@ -114,8 +134,11 @@ describe 'PubSub', ->
     it 'should unsubscribe the subscriber and not notify it anymore', (done) ->
       publishedEvent = {}
       subscriberFn = sandbox.spy()
-      subscriberId = pubSub.subscribe 'SomeEvent', subscriberFn
-      pubSub.unsubscribe subscriberId
-      pubSub.publishAsync 'SomeEvent', publishedEvent, ->
+      pubSub.subscribe 'SomeEvent', subscriberFn
+      .then (subscriberId) ->
+        pubSub.unsubscribe subscriberId
+      .then ->
+        pubSub.publishAsync 'SomeEvent', publishedEvent
+      .then ->
         expect(subscriberFn).not.to.have.been.called
         done()

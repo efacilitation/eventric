@@ -22,12 +22,13 @@ class PubSub
   * @param {Function} subscriberFn Function to call when Event gets published
   ###
   subscribe: (eventName, subscriberFn) ->
-    subscriber =
-      eventName: eventName
-      subscriberFn: subscriberFn
-      subscriberId: @_getNextSubscriberId()
-    @_subscribers.push subscriber
-    subscriber.subscriberId
+    new Promise (resolve, reject) =>
+      subscriber =
+        eventName: eventName
+        subscriberFn: subscriberFn
+        subscriberId: @_getNextSubscriberId()
+      @_subscribers.push subscriber
+      resolve subscriber.subscriberId
 
 
   ###*
@@ -39,13 +40,14 @@ class PubSub
   * @param {Function} subscriberFn Function to call when Event gets published
   ###
   subscribeAsync: (eventName, subscriberFn) ->
-    subscriber =
-      eventName: eventName
-      subscriberFn: subscriberFn
-      subscriberId: @_getNextSubscriberId()
-      isAsync: true
-    @_subscribers.push subscriber
-    subscriber.subscriberId
+    new Promise (resolve, reject) =>
+      subscriber =
+        eventName: eventName
+        subscriberFn: subscriberFn
+        subscriberId: @_getNextSubscriberId()
+        isAsync: true
+      @_subscribers.push subscriber
+      resolve subscriber.subscriberId
 
 
   ###*
@@ -56,15 +58,16 @@ class PubSub
   * @param {String} eventName Name of the Event
   * @param {Object} payload The Event payload to be published
   ###
-  publish: (eventName, payload, callback = ->) ->
-    subscribers = @_getRelevantSubscribers eventName
-    executeNextHandler = =>
-      if subscribers.length is 0
-        callback()
-      else
-        subscribers.shift().subscriberFn payload, ->
-        @_nextTick executeNextHandler, 0
-    @_nextTick executeNextHandler, 0
+  publish: (eventName, payload) ->
+    new Promise (resolve, reject) =>
+      subscribers = @_getRelevantSubscribers eventName
+      executeNextHandler = =>
+        if subscribers.length is 0
+          resolve()
+        else
+          subscribers.shift().subscriberFn payload, ->
+          @_nextTick executeNextHandler, 0
+      @_nextTick executeNextHandler, 0
 
 
   ###*
@@ -75,19 +78,20 @@ class PubSub
   * @param {String} eventName Name of the Event
   * @param {Object} payload The Event payload to asynchronously be published
   ###
-  publishAsync: (eventName, payload, callback = ->) ->
-    subscribers = @_getRelevantSubscribers eventName
-    executeNextHandler = =>
-      if subscribers.length is 0
-        callback()
-      else
-        subscriber = subscribers.shift()
-        if subscriber.isAsync
-          subscriber.subscriberFn payload, -> setTimeout executeNextHandler, 0
+  publishAsync: (eventName, payload) ->
+    new Promise (resolve, reject) =>
+      subscribers = @_getRelevantSubscribers eventName
+      executeNextHandler = =>
+        if subscribers.length is 0
+          resolve()
         else
-          subscriber.subscriberFn payload
-          @_nextTick executeNextHandler, 0
-    @_nextTick executeNextHandler, 0
+          subscriber = subscribers.shift()
+          if subscriber.isAsync
+            subscriber.subscriberFn payload, -> setTimeout executeNextHandler, 0
+          else
+            subscriber.subscriberFn payload
+            @_nextTick executeNextHandler, 0
+      @_nextTick executeNextHandler, 0
 
 
   _getRelevantSubscribers: (eventName) ->
@@ -105,7 +109,9 @@ class PubSub
   * @param {String} subscriberId SubscriberId
   ###
   unsubscribe: (subscriberId) ->
-    @_subscribers = @_subscribers.filter (x) -> x.subscriberId isnt subscriberId
+    new Promise (resolve, reject) =>
+      @_subscribers = @_subscribers.filter (x) -> x.subscriberId isnt subscriberId
+      resolve()
 
 
   _getNextSubscriberId: ->

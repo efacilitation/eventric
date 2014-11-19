@@ -57,26 +57,31 @@ class EventBus
   * @module EventBus
   * @description Publish a DomainEvent on the Bus
   ###
-  publishDomainEvent: (domainEvent, callback = ->) ->
-    @_publish 'publish', domainEvent, callback
+  publishDomainEvent: (domainEvent) ->
+    @_publish 'publish', domainEvent
 
 
   ###*
   * @name publishDomainEventAndWait
   * @module EventBus
-  * @description Publish a DomainEvent on the Bus and wait for all Projections to call their callback-Handler
+  * @description Publish a DomainEvent on the Bus and wait for all Projections to call their promise.resolve
   ###
-  publishDomainEventAndWait: (domainEvent, callback = ->) ->
-    @_publish 'publishAsync', domainEvent, callback
+  publishDomainEventAndWait: (domainEvent) ->
+    @_publish 'publishAsync', domainEvent
 
 
-  _publish: (publishMethod, domainEvent, callback = ->) ->
-    @_pubSub[publishMethod] 'DomainEvent', domainEvent, =>
-      @_pubSub[publishMethod] domainEvent.name, domainEvent, =>
+  _publish: (publishMethod, domainEvent) ->
+    new Promise (resolve, reject) =>
+      @_pubSub[publishMethod] 'DomainEvent', domainEvent
+      .then =>
+        @_pubSub[publishMethod] domainEvent.name, domainEvent
+      .then =>
         if domainEvent.aggregate and domainEvent.aggregate.id
-          @_pubSub[publishMethod] "#{domainEvent.name}/#{domainEvent.aggregate.id}", domainEvent, callback
+          @_pubSub[publishMethod] "#{domainEvent.name}/#{domainEvent.aggregate.id}", domainEvent
+          .then ->
+            resolve()
         else
-          callback()
+          resolve()
 
 
 module.exports = EventBus

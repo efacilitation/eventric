@@ -4,13 +4,14 @@
   "url": "http://eventricjs.org",
   "keywords": [
     "behavior-first",
+    "ddd",
     "bdd",
     "cqrs",
-    "ddd",
-    "dddd",
     "eventsourcing",
-    "eventric",
-    "reactive"
+    "offline-first",
+    "nobackend",
+    "reactive",
+    "eventric"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
   "version": "0.1.11",

@@ -1,7 +1,0 @@
-.eventric-api--navigation
-  input.eventric-api--search(ng-model="searchText", placeholder="Search API")
-  ul.nav.nav-sidebar(ng-repeat="(moduleName, apis) in API_OVERVIEW", ng-show="(apis| filter:searchText).length")
-    li.module
-      a {{moduleName}}
-    li(ng-repeat="api in apis | filter:searchText", ui-sref-active="active")
-      a(ui-sref="api({ 'functionName' : api.name, 'moduleName' : api.module })") {{api.name}}

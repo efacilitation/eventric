@@ -23,6 +23,7 @@ Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 * Explicitly set boundaries for parts of your application ([BoundedContexts](https://en.wikipedia.org/wiki/Domain-driven_design#Bounded_context) / [MicroServices](http://martinfowler.com/articles/microservices.html))
 * Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx))
 * Capture all changes to your application state as a sequence of [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/) ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html))
+* Support occasionally connected clients ([offline-first](http://offlinefirst.org) / [nobackend](https://github.com/noBackend/nobackend.org))
 * Be reactive ([Manifesto](http://www.reactivemanifesto.org))
 
 

@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "description": "Behavior-first application development. Based on DDD, BDD, CQRS and EventSourcing.",
+  "description": "behavior-first application development",
   "url": "http://eventricjs.org",
   "keywords": [
     "behavior-first",

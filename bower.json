@@ -5,19 +5,22 @@
   "authors": [
     "efa GmbH <team@efa-gmbh.com>"
   ],
-  "description": "Build JavaScript applications with Behaviour-driven Domain Design. Based on DDD, BDD, CQRS and EventSourcing.",
-  "main": "build/release/eventric.js",
+  "description": "behavior-first application development",
+  "main": "build/dist/eventric.js",
   "moduleType": [
     "globals",
     "node"
   ],
   "keywords": [
-    "bdd",
-    "bddd",
-    "cqrs",
+    "behavior-first",
     "ddd",
-    "dddd",
+    "bdd",
+    "cqrs",
     "eventsourcing",
+    "offline-first",
+    "nobackend",
+    "reactive",
+    "model by example",
     "eventric"
   ],
   "license": "MIT",

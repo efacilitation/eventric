@@ -21,7 +21,7 @@ Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 * Start with the Behavior of your application and go from there ([BDD](http://dannorth.net/introducing-bdd/))
 * Put the the Domain Model in the very center of your Layered Architecture ([Onion](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/) / [Hexagonal](http://alistair.cockburn.us/Hexagonal+architecture))
 * Explicitly set boundaries for parts of your application ([BoundedContexts](https://en.wikipedia.org/wiki/Domain-driven_design#Bounded_context) / [MicroServices](http://martinfowler.com/articles/microservices.html))
-* Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx))
+* Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx) / [Flux](https://facebook.github.io/flux))
 * Capture all changes to your application state as a sequence of [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/) ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html))
 * Support occasionally connected clients ([offline-first](http://offlinefirst.org) / [nobackend](https://github.com/noBackend/nobackend.org))
 * Be reactive ([Manifesto](http://www.reactivemanifesto.org))

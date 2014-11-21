@@ -5,7 +5,7 @@
 
 ## eventric.js [![Build Status](https://travis-ci.org/efacilitation/eventric.svg?branch=master)](https://travis-ci.org/efacilitation/eventric)
 
-Behavior-first application development. Based on DDD, BDD, CQRS and EventSourcing. Runs on NodeJS and modern Browsers.
+Behavior-first application development. Runs on NodeJS and modern Browsers.
 
 
 ### Why?

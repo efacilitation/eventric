@@ -1,3 +1,4 @@
+coffee      = require 'gulp-coffee'
 karma       = require 'gulp-karma'
 mocha       = require 'gulp-mocha'
 commonjs    = require 'gulp-wrap-commonjs'
@@ -19,12 +20,8 @@ module.exports = (gulp) ->
 
 
   gulp.task 'spec:server', =>
-    if !fs.existsSync 'node_modules/eventric'
-      fs.symlinkSync '..', 'node_modules/eventric', 'dir'
-
     gulp.src([
       'spec/helper/setup.coffee'
-      'spec/**/*.coffee'
       'src/**/*.coffee'
       ])
       .pipe mocha(reporter: 'spec')
@@ -32,10 +29,10 @@ module.exports = (gulp) ->
 
 
   gulp.task 'spec:client', (next) ->
-    runSequence 'build', 'spec:client:helper', 'spec:client:run', next
+    runSequence 'build', 'spec:client:vendor', 'spec:client:src', 'spec:client:run', next
 
 
-  gulp.task 'spec:client:helper', ->
+  gulp.task 'spec:client:vendor', ->
     gulp.src([
       'node_modules/chai/chai.js'
       'node_modules/async/lib/async.js'
@@ -54,9 +51,24 @@ module.exports = (gulp) ->
             path = path.replace /.*\//, ''
           path
       ))
-      .pipe(newer('build/spec/helper.js'))
-      .pipe(concat('helper.js'))
+      .pipe(newer('build/spec/vendor.js'))
+      .pipe(concat('vendor.js'))
       .pipe(gulp.dest('build/spec/'))
+
+
+  gulp.task 'spec:client:src', (next) ->
+    gulp.src([
+      'src/**/*.spec.coffee'
+    ])
+      .pipe(coffee({bare: true}))
+      .pipe(commonjs(
+        autoRequire: true
+        pathModifier: (path) ->
+          path = path.replace "#{process.cwd()}/src", 'eventric'
+          path = path.replace /.js$/, ''
+          return path
+      ))
+      .pipe(gulp.dest('build/node/'))
 
 
   gulp.task 'spec:client:run', (next) ->

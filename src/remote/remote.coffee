@@ -1,7 +1,3 @@
-eventric          = require 'eventric'
-PubSub            = require 'eventric/src/pub_sub'
-projectionService = require 'eventric/src/projection'
-
 ###*
 * @name Remote
 * @module Remote
@@ -9,17 +5,19 @@ projectionService = require 'eventric/src/projection'
 *
 * Remotes let you remotely use Contexts
 ###
-class Remote extends PubSub
+class Remote
 
-  constructor: (@_contextName) ->
-    super
+  constructor: (@_contextName, @_eventric) ->
     @name = @_contextName
+
+    @InMemoryRemote = require './inmemory'
+
     @_params = {}
     @_clients = {}
     @_projectionClasses = {}
     @_projectionInstances = {}
     @_handlerFunctions = {}
-    @addClient 'inmemory', (require 'eventric/src/remote/inmemory').client
+    @addClient 'inmemory', @InMemoryRemote.client
     @set 'default client', 'inmemory'
 
 
@@ -285,7 +283,7 @@ class Remote extends PubSub
   * @param {Object} params Object containing Projection Parameters
   ###
   initializeProjection: (projectionObject, params) ->
-    projectionService.initializeInstance '', projectionObject, params, @
+    @_eventric.projectionService.initializeInstance '', projectionObject, params, @
 
 
   ###*
@@ -299,11 +297,11 @@ class Remote extends PubSub
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on remote"
-      eventric.log.error err
+      @_eventric.log.error err
       err = new Error err
       return err
 
-    projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
+    @_eventric.projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
 
 
   ###*
@@ -314,7 +312,7 @@ class Remote extends PubSub
   * @param {String} projectionId ProjectionId
   ###
   getProjectionInstance: (projectionId) ->
-    projectionService.getInstance projectionId
+    @_eventric.projectionService.getInstance projectionId
 
 
   ###*
@@ -326,7 +324,7 @@ class Remote extends PubSub
   ###
 
   destroyProjectionInstance: (projectionId) ->
-    projectionService.destroyInstance projectionId, @
+    @_eventric.projectionService.destroyInstance projectionId, @
 
 
 module.exports = Remote

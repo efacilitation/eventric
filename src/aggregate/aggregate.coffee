@@ -1,7 +1,3 @@
-eventric    = require 'eventric'
-# TODO: replace with eventric api call getDomainEventClass() or property access?
-DomainEvent = require 'eventric/src/context/domain_event'
-
 ###*
 * @name Aggregate
 * @module Aggregate
@@ -12,7 +8,7 @@ DomainEvent = require 'eventric/src/context/domain_event'
 ###
 class Aggregate
 
-  constructor: (@_context, @_name, Root) ->
+  constructor: (@_context, @_eventric, @_name, Root) ->
     @_domainEvents = []
 
     if !Root
@@ -35,20 +31,20 @@ class Aggregate
     DomainEventClass = @_context.getDomainEvent domainEventName
     if !DomainEventClass
       err = "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
-      eventric.log.error err
+      @_eventric.log.error err
       throw new Error err
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
-    eventric.log.debug "Created and Handled DomainEvent in Aggregate", domainEvent
+    @_eventric.log.debug "Created and Handled DomainEvent in Aggregate", domainEvent
     # TODO: do a rollback if something goes wrong inside the handle function
 
 
   _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
-    new DomainEvent
-      id: eventric.generateUid()
+    new @_eventric.DomainEvent
+      id: @_eventric.generateUid()
       name: domainEventName
       aggregate:
         id: @id
@@ -62,7 +58,7 @@ class Aggregate
       @root["handle#{domainEventName}"] domainEvent, ->
 
     else
-      eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
+      @_eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
   ###*
   * @name getDomainEvents
@@ -96,10 +92,10 @@ class Aggregate
   create: =>
     params = arguments
     new Promise (resolve, reject) =>
-      @id = eventric.generateUid()
+      @id = @_eventric.generateUid()
       if typeof @root.create isnt 'function'
         err = "No create function on aggregate"
-        eventric.log.error err
+        @_eventric.log.error err
         throw new Error err
 
       try

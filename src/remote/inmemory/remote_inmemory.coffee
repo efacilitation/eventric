@@ -1,4 +1,4 @@
-PubSub = require 'eventric/src/pub_sub'
+PubSub = require '../../pub_sub'
 
 customRemoteBridge = null
 pubSub = new PubSub

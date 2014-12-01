@@ -1,6 +1,6 @@
-describe 'Aggregate', ->
-  Aggregate   = require 'eventric/src/context/aggregate'
-  DomainEvent = require 'eventric/src/context/domain_event'
+describe.skip 'Aggregate', ->
+  Aggregate   = require './'
+  DomainEvent = require '../domain_event'
 
   it 'should inject the $emitDomainEvent method into the aggregate root', ->
     exampleRoot = {}

@@ -7,17 +7,32 @@ if (typeof module isnt 'undefined') and (typeof process isnt 'undefined')
 class Eventric
 
   constructor: ->
-    @_contexts = {}
-    @_params = {}
-    @_domainEventHandlers = {}
-    @_domainEventHandlersAll = []
-    @_processManagerService = require 'eventric/src/process_manager'
+    @PubSub          = require './pub_sub'
+    @EventBus        = require './event_bus'
+    @Remote          = require './remote'
+    @Context         = require './context'
+    @DomainEvent     = require './domain_event'
+    @Aggregate       = require './aggregate'
+    @Repository      = require './repository'
+    @Projection      = require './projection'
+    @ProcessManager  = require './process_manager'
+    @Logger          = require './logger'
+    @RemoteInMemory  = require './remote/inmemory'
+    @StoreInMemory   = require './store_inmemory'
+
+    @log                      = @Logger
+    @projectionService        = new @Projection @
+    @_contexts                = {}
+    @_params                  = {}
     @_processManagerInstances = {}
-    @_storeClasses = {}
-    @_remoteEndpoints = []
-    @log = require 'eventric/src/logger'
-    @addRemoteEndpoint 'inmemory', (require 'eventric/src/remote/inmemory').endpoint
-    @addStore 'inmemory', require 'eventric/src/store_inmemory'
+    @_processManagerService   = @ProcessManager
+    @_domainEventHandlers     = {}
+    @_domainEventHandlersAll  = []
+    @_storeClasses            = {}
+    @_remoteEndpoints         = []
+
+    @addRemoteEndpoint 'inmemory', @RemoteInMemory.endpoint
+    @addStore 'inmemory', @StoreInMemory
     @set 'default domain events store', 'inmemory'
 
 
@@ -83,8 +98,9 @@ class Eventric
       err = 'Contexts must have a name'
       @log.error err
       throw new Error err
-    Context = require 'eventric/src/context'
-    context = new Context name
+    pubsub = new @PubSub
+    context = new @Context name, @
+    @mixin context, pubsub
 
     @_delegateAllDomainEventsToGlobalHandlers context
     @_delegateAllDomainEventsToRemoteEndpoints context
@@ -115,8 +131,9 @@ class Eventric
       err = 'Missing context name'
       @log.error err
       throw new Error err
-    Remote = require 'eventric/src/remote'
-    remote = new Remote contextName
+    pubsub = new @PubSub
+    remote = new @Remote contextName, @
+    @mixin remote, pubsub
     remote
 
 
@@ -282,6 +299,11 @@ class Eventric
       return
 
     iterate()
+
+
+  mixin: (destination, source) ->
+    for prop of source
+      destination[prop] = source[prop]
 
 
 module.exports = new Eventric

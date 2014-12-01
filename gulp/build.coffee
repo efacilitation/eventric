@@ -14,7 +14,10 @@ module.exports = (gulp) ->
     rimraf './build', next
 
   gulp.task 'build:src', ->
-    gulp.src(['index.coffee', '+(src)/**/*.coffee'])
+    gulp.src([
+      'src/**/*.coffee'
+      '!**/*.spec.coffee'
+    ])
       .pipe(coffee({bare: true}))
       .pipe(gulp.dest('build/node'))
 
@@ -27,7 +30,7 @@ module.exports = (gulp) ->
           path = path.replace "#{process.cwd()}/build/node", 'eventric'
           path = path.replace /.js$/, ''
           return path
-        ))
+      ))
 
     nm = gulp.src([
       'node_modules/es6-promise/dist/promise-1.0.0.js'

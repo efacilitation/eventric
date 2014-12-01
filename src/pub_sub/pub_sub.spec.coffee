@@ -1,5 +1,5 @@
 describe 'PubSub', ->
-  PubSub = require 'eventric/src/pub_sub'
+  PubSub = require './'
 
   pubSub = null
   beforeEach ->

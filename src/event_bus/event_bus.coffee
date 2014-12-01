@@ -1,5 +1,3 @@
-PubSub = require 'eventric/src/pub_sub'
-
 ###*
 * @name EventBus
 * @module EventBus
@@ -9,8 +7,8 @@ PubSub = require 'eventric/src/pub_sub'
 ###
 class EventBus
 
-  constructor: ->
-    @_pubSub = new PubSub()
+  constructor: (@_eventric) ->
+    @_pubSub = new @_eventric.PubSub()
 
 
   ###*

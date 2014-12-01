@@ -1,5 +1,3 @@
-eventric = require 'eventric'
-
 ###*
 * @name Projection
 * @module Projection
@@ -9,8 +7,8 @@ eventric = require 'eventric'
 ###
 class Projection
 
-  constructor: ->
-    @log = eventric.log
+  constructor: (@_eventric) ->
+    @log = @_eventric.log
     @_handlerFunctions    = {}
     @_projectionInstances = {}
     @_domainEventsApplied = {}
@@ -24,7 +22,7 @@ class Projection
   * @param {String} projectionName Name of the Projection
   * @param {Function|Object} Projection Function or Object containing a ProjectionDefinition
   ###
-  initializeInstance: (projectionName, Projection, params, context) ->
+  initializeInstance: (projectionName, Projection, params, @_context) ->
     new Promise (resolve, reject) =>
 
       if typeof Projection is 'function'
@@ -32,11 +30,11 @@ class Projection
       else
         projection = Projection
 
-      if context._di
-        for diName, diFn of context._di
+      if @_context._di
+        for diName, diFn of @_context._di
           projection[diName] = diFn
 
-      projectionId = eventric.generateUid()
+      projectionId = @_eventric.generateUid()
 
       aggregateId = null
       projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
@@ -46,28 +44,29 @@ class Projection
       projection.$subscribeToDomainEventStream = (_domainEventStreamName) ->
         domainEventStreamName = _domainEventStreamName
 
-      @log.debug "[#{context.name}] Clearing Projections"
-      @_clearProjectionStores projection.stores, projectionName, context
+      @log.debug "[#{@_context.name}] Clearing ProjectionStores of #{projectionName}"
+      @_clearProjectionStores projection.stores, projectionName
       .then =>
-        @log.debug "[#{context.name}] Finished clearing Projections"
-        @_injectStoresIntoProjection projectionName, projection, context
+        @log.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"
+        @_injectStoresIntoProjection projectionName, projection
       .then =>
-        @_callInitializeOnProjection projectionName, projection, params, context
+        @_callInitializeOnProjection projectionName, projection, params
       .then =>
-        @log.debug "[#{context.name}] Replaying DomainEvents against Projection #{projectionName}"
+        @log.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
         @_parseEventNamesFromProjection projection
       .then (eventNames) =>
-        @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId, context
+        @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
       .then (eventNames) =>
-        @log.debug "[#{context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
-        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName, context
+        @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
+        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName
       .then =>
         @_projectionInstances[projectionId] = projection
         event =
           id: projectionId
           projection: projection
-        context.publish "projection:#{projectionName}:initialized", event
-        context.publish "projection:#{projectionId}:initialized", event
+
+        @_context.publish "projection:#{projectionName}:initialized", event
+        @_context.publish "projection:#{projectionId}:initialized", event
 
         resolve projectionId
 
@@ -75,30 +74,30 @@ class Projection
         reject err
 
 
-  _callInitializeOnProjection: (projectionName, projection, params, context) ->
+  _callInitializeOnProjection: (projectionName, projection, params) ->
     new Promise (resolve, reject) =>
       if not projection.initialize
-        @log.debug "[#{context.name}] No initialize function on Projection #{projectionName} given, skipping"
+        @log.debug "[#{@_context.name}] No initialize function on Projection #{projectionName} given, skipping"
         return resolve projection
 
-      @log.debug "[#{context.name}] Calling initialize on Projection #{projectionName}"
+      @log.debug "[#{@_context.name}] Calling initialize on Projection #{projectionName}"
       projection.initialize params, =>
-        @log.debug "[#{context.name}] Finished initialize call on Projection #{projectionName}"
+        @log.debug "[#{@_context.name}] Finished initialize call on Projection #{projectionName}"
         resolve projection
 
 
-  _injectStoresIntoProjection: (projectionName, projection, context) ->
+  _injectStoresIntoProjection: (projectionName, projection) ->
     new Promise (resolve, reject) =>
       if not projection.stores
         return resolve()
 
       projection["$store"] ?= {}
-      eventric.eachSeries projection.stores, (projectionStoreName, next) =>
-        @log.debug "[#{context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
-        context.getProjectionStore projectionStoreName, projectionName, (err, projectionStore) =>
+      @_eventric.eachSeries projection.stores, (projectionStoreName, next) =>
+        @log.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
+        @_context.getProjectionStore projectionStoreName, projectionName, (err, projectionStore) =>
           if projectionStore
             projection["$store"][projectionStoreName] = projectionStore
-            @log.debug "[#{context.name}] Finished Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
+            @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
             next()
 
       , (err) ->
@@ -106,15 +105,15 @@ class Projection
         resolve()
 
 
-  _clearProjectionStores: (projectionStores, projectionName, context) ->
+  _clearProjectionStores: (projectionStores, projectionName) ->
     new Promise (resolve, reject) =>
       if not projectionStores
         return resolve()
 
-      eventric.eachSeries projectionStores, (projectionStoreName, next) =>
-        @log.debug "[#{context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
-        context.clearProjectionStore projectionStoreName, projectionName, =>
-          @log.debug "[#{context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+      @_eventric.eachSeries projectionStores, (projectionStoreName, next) =>
+        @log.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+        @_context.clearProjectionStore projectionStoreName, projectionName, =>
+          @log.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
           next()
       , (err) ->
         resolve()
@@ -130,20 +129,20 @@ class Projection
       resolve eventNames
 
 
-  _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventNames, aggregateId, context) ->
+  _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventNames, aggregateId) ->
     new Promise (resolve, reject) =>
       @_domainEventsApplied[projectionId] = {}
 
       if aggregateId
-        findEvents = context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
+        findEvents = @_context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
       else
-        findEvents = context.findDomainEventsByName eventNames
+        findEvents = @_context.findDomainEventsByName eventNames
 
       findEvents.then (domainEvents) =>
         if not domainEvents or domainEvents.length is 0
           return resolve eventNames
 
-        eventric.eachSeries domainEvents, (domainEvent, next) =>
+        @_eventric.eachSeries domainEvents, (domainEvent, next) =>
           @_applyDomainEventToProjection domainEvent, projection, =>
             @_domainEventsApplied[projectionId][domainEvent.id] = true
             next()
@@ -156,7 +155,7 @@ class Projection
         reject err
 
 
-  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName, context) ->
+  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName) ->
     new Promise (resolve, reject) =>
       domainEventHandler = (domainEvent, done = ->) =>
         if @_domainEventsApplied[projectionId][domainEvent.id]
@@ -168,22 +167,22 @@ class Projection
             id: projectionId
             projection: projection
             domainEvent: domainEvent
-          context.publish "projection:#{projectionName}:changed", event
-          context.publish "projection:#{projectionId}:changed", event
+          @_context.publish "projection:#{projectionName}:changed", event
+          @_context.publish "projection:#{projectionId}:changed", event
 
           done()
 
       if domainEventStreamName
-        subscriberId = context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler, isAsync: true
+        subscriberId = @_context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler, isAsync: true
         @_handlerFunctions[projectionId] ?= []
         @_handlerFunctions[projectionId].push subscriberId
 
       else
         for eventName in eventNames
           if aggregateId
-            subscriberId = context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
+            subscriberId = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
           else
-            subscriberId = context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
+            subscriberId = @_context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
 
           @_handlerFunctions[projectionId] ?= []
           @_handlerFunctions[projectionId].push subscriberId
@@ -225,14 +224,14 @@ class Projection
   * @param {String} projectionId ProjectionId
   * @param {Object} context Context Instance so we can automatically unsubscribe the Projection from DomainEvents
   ###
-  destroyInstance: (projectionId, context) ->
+  destroyInstance: (projectionId) ->
     if not @_handlerFunctions[projectionId]
-      return eventric.log.error 'Missing attribute projectionId'
+      return @_eventric.log.error 'Missing attribute projectionId'
 
     for subscriberId in @_handlerFunctions[projectionId]
-      context.unsubscribeFromDomainEvent subscriberId
+      @_context.unsubscribeFromDomainEvent subscriberId
     delete @_handlerFunctions[projectionId]
     delete @_projectionInstances[projectionId]
 
 
-module.exports = new Projection
+module.exports = Projection

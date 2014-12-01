@@ -10,12 +10,12 @@ module.exports = (config) ->
       # source
       'build/dist/eventric.js'
 
-      # spec helper
-      'build/spec/helper.js'
+      # spec vendor files
+      'build/spec/vendor.js'
 
-      # specs
-      'spec/helper/setup.coffee'
-      'src/**/*.spec.coffee'
+      # custom specs
+      'build/node/setup.spec.js'
+      'build/node/**/*.spec.js'
     ]
 
     # list of files to exclude

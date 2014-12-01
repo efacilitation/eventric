@@ -1,6 +1,3 @@
-eventric  = require 'eventric'
-Aggregate = require 'eventric/src/context/aggregate'
-
 ###*
 * @name Repository
 * @module Repository
@@ -10,10 +7,11 @@ Aggregate = require 'eventric/src/context/aggregate'
 ###
 class Repository
 
-  constructor: (params) ->
+  constructor: (params, @_eventric) ->
     @_aggregateName  = params.aggregateName
     @_AggregateRoot  = params.AggregateRoot
     @_context        = params.context
+    @_eventric       = params.eventric
 
     @_command = {}
     @_aggregateInstances = {}
@@ -42,7 +40,7 @@ class Repository
           reject err
           return
 
-        aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
+        aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
         aggregate.applyDomainEvents domainEvents
         aggregate.id = aggregateId
         aggregate.root.$id = aggregateId
@@ -75,7 +73,7 @@ class Repository
       callback = params.pop()
 
     new Promise (resolve, reject) =>
-      aggregate = new Aggregate @_context, @_aggregateName, @_AggregateRoot
+      aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
       aggregate.create params...
       .then (aggregate) =>
         aggregate.root.$id = aggregate.id

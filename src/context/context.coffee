@@ -1,11 +1,3 @@
-eventric = require 'eventric'
-
-Repository        = require 'eventric/src/context/repository'
-DomainEvent       = require 'eventric/src/context/domain_event'
-EventBus          = require 'eventric/src/event_bus'
-PubSub            = require 'eventric/src/pub_sub'
-projectionService = require 'eventric/src/projection'
-
 ###*
 * @name Context
 * @module Context
@@ -15,12 +7,11 @@ projectionService = require 'eventric/src/projection'
 * the size of such Contexts as you like. Anything from a MicroService to a complete
 * application.
 ###
-class Context extends PubSub
+class Context
 
-  constructor: (@name) ->
-    super
+  constructor: (@name, @_eventric) ->
     @_initialized = false
-    @_params = eventric.get()
+    @_params = @_eventric.get()
     @_di = {}
     @_aggregateRootClasses = {}
     @_adapterClasses = {}
@@ -36,10 +27,9 @@ class Context extends PubSub
     @_domainServices = {}
     @_storeClasses = {}
     @_storeInstances = {}
-    @_eventBus = new EventBus
-
-
-  log: eventric.log
+    @_eventBus = new @_eventric.EventBus @_eventric
+    @projectionService = @_eventric.projectionService
+    @log = @_eventric.log
 
 
   ###*
@@ -106,8 +96,8 @@ class Context extends PubSub
 
 
   _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
-    new DomainEvent
-      id: eventric.generateUid()
+    new @_eventric.DomainEvent
+      id: @_eventric.generateUid()
       name: domainEventName
       context: @name
       payload: new DomainEventClass domainEventPayload
@@ -159,7 +149,7 @@ class Context extends PubSub
   ###*
   * @name addCommandHandler
   * @module Context
-  * @dscription
+  * @description
   *
   * Add CommandHandlers to the `context`. These will be available to the `command` method
   * after calling `initialize`.
@@ -176,7 +166,7 @@ class Context extends PubSub
   addCommandHandler: (commandHandlerName, commandHandlerFn) ->
     @_commandHandlers[commandHandlerName] = =>
       command =
-        id: eventric.generateUid()
+        id: @_eventric.generateUid()
         name: commandHandlerName
         params: arguments[0] ? null
 
@@ -197,14 +187,15 @@ class Context extends PubSub
     @
 
 
-  _getAggregateRepository: (aggregateName, command) ->
+  _getAggregateRepository: (aggregateName, command) =>
     repositoriesCache = {} if not repositoriesCache
     if not repositoriesCache[aggregateName]
       AggregateRoot = @_aggregateRootClasses[aggregateName]
-      repository = new Repository
+      repository = new @_eventric.Repository
         aggregateName: aggregateName
         AggregateRoot: AggregateRoot
         context: @
+        eventric: @_eventric
       repositoriesCache[aggregateName] = repository
 
     repositoriesCache[aggregateName].setCommand command
@@ -214,7 +205,7 @@ class Context extends PubSub
   ###*
   * @name addCommandHandlers
   * @module Context
-  * @dscription Add multiple CommandHandlers at once
+  * @description Add multiple CommandHandlers at once
   *
   * @param {Object} commandObj Object containing multiple CommandHandlers "name: class"
   ###
@@ -246,7 +237,7 @@ class Context extends PubSub
   ###*
   * @name addQueryHandlers
   * @module Context
-  * @dscription Add multiple QueryHandlers at once
+  * @description Add multiple QueryHandlers at once
   *
   * @param {Object} queryObj Object containing multiple QueryHandlers "name: class"
   ###
@@ -271,7 +262,7 @@ class Context extends PubSub
   ###*
   * @name addAggregates
   * @module Context
-  * @dscription Add multiple Aggregates at once
+  * @description Add multiple Aggregates at once
   *
   * @param {Object} aggregatesObj Object containing multiple Aggregates "name: class"
   ###
@@ -304,7 +295,7 @@ class Context extends PubSub
   ###*
   * @name subscribeToDomainEvents
   * @module Context
-  * @dscription Add multiple DomainEventSubscribers at once
+  * @description Add multiple DomainEventSubscribers at once
   *
   * @param {Object} domainEventHandlersObj Object containing multiple Subscribers "name: handlerFn"
   ###
@@ -353,10 +344,9 @@ class Context extends PubSub
     if not @_domainEventStreamClasses[domainEventStreamName]
       err = "DomainEventStream Class with name #{domainEventStreamName} not added"
       return @log.error err
-
     domainEventStream = new @_domainEventStreamClasses[domainEventStreamName]
     domainEventStream._domainEventsPublished = {}
-    domainEventStreamId = eventric.generateUid()
+    domainEventStreamId = @_eventric.generateUid()
     @_domainEventStreamInstances[domainEventStreamId] = domainEventStream
 
     domainEventNames = []
@@ -387,7 +377,7 @@ class Context extends PubSub
         if not domainEvents or domainEvents.length is 0
           return resolve eventNames
 
-        eventric.eachSeries domainEvents, (domainEvent, next) =>
+        @_eventric.eachSeries domainEvents, (domainEvent, next) =>
           if (domainEventStream["filter#{domainEvent.name}"] domainEvent) is true
             handlerFn domainEvent, ->
             domainEventStream._domainEventsPublished[domainEvent.id] = true
@@ -424,7 +414,7 @@ class Context extends PubSub
   ###*
   * @name addDomainServices
   * @module Context
-  * @dscription Add multiple DomainServices at once
+  * @description Add multiple DomainServices at once
   *
   * @param {Object} domainServiceObjs Object containing multiple DomainEventStreamDefinitions "name: definition"
   ###
@@ -456,7 +446,7 @@ class Context extends PubSub
   ###*
   * @name addAdapters
   * @module Context
-  * @dscription Add multiple Adapters at once
+  * @description Add multiple Adapters at once
   *
   * @param {Object} adaptersObj Object containing multiple Adapters "name: function"
   ###
@@ -523,7 +513,7 @@ class Context extends PubSub
   * @param {String} projectionId ProjectionId
   ###
   getProjectionInstance: (projectionId) ->
-    projectionService.getInstance projectionId
+    @projectionService.getInstance projectionId
 
 
   ###*
@@ -534,7 +524,7 @@ class Context extends PubSub
   * @param {String} projectionId ProjectionId
   ###
   destroyProjectionInstance: (projectionId) ->
-    projectionService.destroyInstance projectionId, @
+    @projectionService.destroyInstance projectionId, @
 
 
   ###*
@@ -548,11 +538,11 @@ class Context extends PubSub
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on context"
-      eventric.log.error err
+      @_eventric.log.error err
       err = new Error err
       return err
 
-    projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
+    @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
 
 
   ###*
@@ -602,13 +592,13 @@ class Context extends PubSub
   _initializeStores: ->
     new Promise (resolve, reject) =>
       stores = []
-      for storeName, store of (eventric.defaults @_storeClasses, eventric.getStores())
+      for storeName, store of (@_eventric.defaults @_storeClasses, @_eventric.getStores())
         stores.push
           name: storeName
           Class: store.Class
           options: store.options
 
-      eventric.eachSeries stores, (store, next) =>
+      @_eventric.eachSeries stores, (store, next) =>
         @log.debug "[#{@name}] Initializing Store #{store.name}"
         @_storeInstances[store.name] = new store.Class
         @_storeInstances[store.name].initialize @, store.options, =>
@@ -628,10 +618,10 @@ class Context extends PubSub
           name: projectionName
           class: ProjectionClass
 
-      eventric.eachSeries projections, (projection, next) =>
+      @_eventric.eachSeries projections, (projection, next) =>
         eventNames = null
         @log.debug "[#{@name}] Initializing Projection #{projection.name}"
-        projectionService.initializeInstance projection.name, projection.class, {}, @
+        @projectionService.initializeInstance projection.name, projection.class, {}, @
         .then (projectionId) =>
           @log.debug "[#{@name}] Finished initializing Projection #{projection.name}"
           next()
@@ -663,7 +653,7 @@ class Context extends PubSub
   * @param {String} projectionName Name of the Projection
   ###
   getProjection: (projectionId) ->
-    projectionService.getInstance projectionId
+    @projectionService.getInstance projectionId
 
 
   ###*
@@ -872,7 +862,7 @@ class Context extends PubSub
       if @_commandHandlers[commandName]
         @_commandHandlers[commandName] commandParams, (err, result) =>
           @log.debug 'Completed Command', commandName
-          eventric.nextTick =>
+          @_eventric.nextTick =>
             if err
               reject err
             else
@@ -912,7 +902,7 @@ class Context extends PubSub
       if @_queryHandlers[queryName]
         @_queryHandlers[queryName] queryParams, (err, result) =>
           @log.debug 'Completed Query', queryName
-          eventric.nextTick =>
+          @_eventric.nextTick =>
             if err
               reject err
             else

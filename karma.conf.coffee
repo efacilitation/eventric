@@ -11,26 +11,19 @@ module.exports = (config) ->
       'build/dist/eventric.js'
 
       # spec vendor files
-      'build/spec/vendor.js'
+      'build/helper/spec/vendor.js'
 
-      # custom specs
-      'build/node/setup.spec.js'
-      'build/node/**/*.spec.js'
+      # spec setup
+      'build/src/setup.spec.js'
+
+      # specs
+      'build/src/**/*.spec.js'
     ]
 
     # list of files to exclude
     exclude: [
 
     ]
-
-    # compile coffee scripts and wrap into commonjs
-    preprocessors:
-      'spec/**/*.coffee': ['coffee']
-      'src/**/*.coffee': ['coffee']
-
-    coffeePreprocessor:
-      options:
-        sourceMap: true
 
     # web server port
     port: 9876
@@ -66,5 +59,4 @@ module.exports = (config) ->
       'karma-mocha'
       'karma-phantomjs-launcher'
       'karma-spec-reporter'
-      'karma-coffee-preprocessor'
     ]

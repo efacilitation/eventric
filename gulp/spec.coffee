@@ -4,6 +4,7 @@ mocha       = require 'gulp-mocha'
 commonjs    = require 'gulp-wrap-commonjs'
 newer       = require 'gulp-newer'
 concat      = require 'gulp-concat'
+gutil       = require 'gulp-util'
 runSequence = require 'run-sequence'
 fs          = require 'fs'
 spawn       = require('child_process').spawn
@@ -32,8 +33,6 @@ module.exports = (gulp) ->
       'coffee:coffee-script/register'
       '--reporter'
       'spec'
-      '--timeout',
-      '5000'
     ]
     if mochaProcess and mochaProcess.kill
       mochaProcess.kill()
@@ -41,12 +40,23 @@ module.exports = (gulp) ->
       'node_modules/.bin/mocha'
       options.concat(glob)
       {}
-      next
     )
     mochaProcess.stdout.on 'data', (data) ->
       process.stdout.write data.toString()
     mochaProcess.stderr.on 'data', (data) ->
       process.stderr.write data.toString()
+    mochaProcess.on 'close', (code) ->
+      if code is 0
+        gutil.log gutil.colors.green "Finished: mocha server"
+        next()
+      else
+        errorMessage = "Failed: mocha server"
+        gutil.log gutil.colors.red errorMessage
+        gutil.beep()
+        if process.env.CI
+          process.exit 1
+        else
+          next()
 
 
   gulp.task 'spec:client', (next) ->

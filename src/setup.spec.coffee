@@ -3,7 +3,7 @@ if typeof window isnt 'undefined'
 else
   root = global
 
-if !root._spec_setup
+if not root._spec_setup
   root.sinon    = require 'sinon'
   root.mockery  = require 'mockery'
   root.chai     = require 'chai'
@@ -12,25 +12,27 @@ if !root._spec_setup
 
   sinonChai = require 'sinon-chai'
   chai.use sinonChai
-
   root._spec_setup = true
 
 
-before ->
+root.before ->
   mockery.enable useCleanCache: true
   mockery.warnOnUnregistered false
   mockery.warnOnReplace false
 
 
-beforeEach ->
-  root.eventric = require './'
+root.beforeEach ->
+  root.eventric     = require './'
+  root.eventricStub = sinon.createStubInstance (require './eventric')
+  #eventric.log.setLogLevel 'debug'
 
-
-afterEach ->
+root.afterEach ->
+  delete root.eventric
+  delete root.eventricStub
   mockery.resetCache()
   mockery.deregisterAll()
   sandbox.restore()
 
 
-after ->
+root.after ->
   mockery.disable()

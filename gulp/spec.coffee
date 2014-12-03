@@ -6,6 +6,7 @@ newer       = require 'gulp-newer'
 concat      = require 'gulp-concat'
 runSequence = require 'run-sequence'
 fs          = require 'fs'
+spawn       = require('child_process').spawn
 
 growl = require './helper/growl'
 growl.initialize()
@@ -19,13 +20,33 @@ module.exports = (gulp) ->
       next()
 
 
-  gulp.task 'spec:server', =>
-    gulp.src([
+  mochaProcess = null
+  gulp.task 'spec:server', (next) ->
+    glob = [
       'src/setup.spec.coffee'
       'src/**/*.coffee'
-      ])
-      .pipe mocha(reporter: 'spec')
-        .on('error', growl.specsError)
+      ]
+
+    options = [
+      '--compilers'
+      'coffee:coffee-script/register'
+      '--reporter'
+      'spec'
+      '--timeout',
+      '5000'
+    ]
+    if mochaProcess and mochaProcess.kill
+      mochaProcess.kill()
+    mochaProcess = spawn(
+      'node_modules/.bin/mocha'
+      options.concat(glob)
+      {}
+      next
+    )
+    mochaProcess.stdout.on 'data', (data) ->
+      process.stdout.write data.toString()
+    mochaProcess.stderr.on 'data', (data) ->
+      process.stderr.write data.toString()
 
 
   gulp.task 'spec:client', (next) ->

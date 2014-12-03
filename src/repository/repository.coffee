@@ -35,7 +35,7 @@ class Repository
 
         if not domainEvents.length
           err = "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
-          eventric.log.error err
+          @_eventric.log.error err
           callback err, null
           reject err
           return
@@ -99,7 +99,7 @@ class Repository
       aggregate = @_aggregateInstances[commandId][aggregateId]
       if not aggregate
         err = "Tried to save unknown aggregate #{@_aggregateName}"
-        eventric.log.error err
+        @_eventric.log.error err
         err = new Error err
         callback? err, null
         reject err
@@ -108,19 +108,19 @@ class Repository
       domainEvents   = aggregate.getDomainEvents()
       if domainEvents.length < 1
         err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
-        eventric.log.debug err, @_command
+        @_eventric.log.debug err, @_command
         err = new Error err
         callback? err, null
         reject err
         return
 
-      eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
+      @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
-      eventric.eachSeries domainEvents, (domainEvent, next) =>
+      @_eventric.eachSeries domainEvents, (domainEvent, next) =>
         domainEvent.command = @_command
         @_store.saveDomainEvent domainEvent, =>
-          eventric.log.debug "Saved DomainEvent", domainEvent
+          @_eventric.log.debug "Saved DomainEvent", domainEvent
           next null
       , (err) =>
         if err
@@ -129,13 +129,13 @@ class Repository
         else
           if not @_context.isWaitingModeEnabled()
             for domainEvent in domainEvents
-              eventric.log.debug "Publishing DomainEvent", domainEvent
+              @_eventric.log.debug "Publishing DomainEvent", domainEvent
               @_context.getEventBus().publishDomainEvent domainEvent
             resolve aggregate.id
             callback null, aggregate.id
           else
-            eventric.eachSeries domainEvents, (domainEvent, next) =>
-              eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
+            @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+              @_eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
               @_context.getEventBus().publishDomainEventAndWait domainEvent
               .then ->
                 next()

@@ -16,6 +16,8 @@ if not root._spec_setup
 
 
 root.before ->
+  root.eventricStub = sandbox.stub (new (require './eventric'))
+
   mockery.enable useCleanCache: true
   mockery.warnOnUnregistered false
   mockery.warnOnReplace false
@@ -23,12 +25,11 @@ root.before ->
 
 root.beforeEach ->
   root.eventric     = require './'
-  root.eventricStub = sinon.createStubInstance (require './eventric')
+
   #eventric.log.setLogLevel 'debug'
 
 root.afterEach ->
   delete root.eventric
-  delete root.eventricStub
   mockery.resetCache()
   mockery.deregisterAll()
   sandbox.restore()

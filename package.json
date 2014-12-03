@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"
   },
-  "main": "build/node/index.js",
+  "main": "build/src/index.js",
   "scripts": {
     "test": "node_modules/.bin/gulp spec",
     "prepublish": "node_modules/.bin/gulp build"

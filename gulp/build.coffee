@@ -35,17 +35,15 @@ module.exports = (gulp) ->
           return path
       ))
 
-    nm = gulp.src([
+    es6 = gulp.src([
       'node_modules/es6-promise/dist/es6-promise.js'
     ])
       .pipe(commonjs(
         pathModifier: (filePath) ->
-          matches = filePath.match /(bower_components|node_modules)\/(.*?)\//
-          moduleName = matches[2]
-          moduleName
+          'es6-promise'
       ))
 
-    mergeStream cjs, src, nm
+    mergeStream cjs, es6, src
       .pipe(concat('eventric.js'))
       .pipe(gulp.dest('build/dist'))
       .pipe(uglify())

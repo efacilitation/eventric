@@ -27,8 +27,8 @@ class Context
     @_domainServices = {}
     @_storeClasses = {}
     @_storeInstances = {}
-    @_eventBus = new @_eventric.EventBus @_eventric
-    @projectionService = @_eventric.projectionService
+    @_eventBus         = new @_eventric.EventBus @_eventric
+    @projectionService = new @_eventric.Projection @_eventric
     @log = @_eventric.log
 
 

@@ -17,6 +17,7 @@ class Remote
     @_projectionClasses = {}
     @_projectionInstances = {}
     @_handlerFunctions = {}
+    @projectionService = new @_eventric.Projection @_eventric
     @addClient 'inmemory', @InMemoryRemote.client
     @set 'default client', 'inmemory'
 
@@ -283,7 +284,7 @@ class Remote
   * @param {Object} params Object containing Projection Parameters
   ###
   initializeProjection: (projectionObject, params) ->
-    @_eventric.projectionService.initializeInstance '', projectionObject, params, @
+    @projectionService.initializeInstance '', projectionObject, params, @
 
 
   ###*
@@ -301,7 +302,7 @@ class Remote
       err = new Error err
       return err
 
-    @_eventric.projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
+    @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
 
 
   ###*
@@ -312,7 +313,7 @@ class Remote
   * @param {String} projectionId ProjectionId
   ###
   getProjectionInstance: (projectionId) ->
-    @_eventric.projectionService.getInstance projectionId
+    @projectionService.getInstance projectionId
 
 
   ###*
@@ -324,7 +325,7 @@ class Remote
   ###
 
   destroyProjectionInstance: (projectionId) ->
-    @_eventric.projectionService.destroyInstance projectionId, @
+    @projectionService.destroyInstance projectionId, @
 
 
 module.exports = Remote

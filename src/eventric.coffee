@@ -15,7 +15,6 @@ class Eventric
     @StoreInMemory   = require './store/inmemory'
 
     @log                      = @Logger
-    @projectionService        = new @Projection @
     @_contexts                = {}
     @_params                  = {}
     @_processManagerInstances = {}
@@ -282,7 +281,6 @@ class Eventric
       iterator arr[completed], (err) ->
         if err
           callback err
-          callback = ->
         else
           ++completed
           if completed >= arr.length

@@ -44,7 +44,7 @@ class Projection
       projection.$subscribeToDomainEventStream = (_domainEventStreamName) ->
         domainEventStreamName = _domainEventStreamName
 
-      @log.debug "[#{@_context.name}] Clearing ProjectionStores of #{projectionName}"
+      @log.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
       @_clearProjectionStores projection.stores, projectionName
       .then =>
         @log.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"

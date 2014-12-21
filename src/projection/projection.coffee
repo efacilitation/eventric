@@ -173,21 +173,22 @@ class Projection
           done()
 
       if domainEventStreamName
-        subscriberId = @_context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler, isAsync: true
-        @_handlerFunctions[projectionId] ?= []
-        @_handlerFunctions[projectionId].push subscriberId
+        @_context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler, isAsync: true
+        .then (subscriberId) =>
+          @_handlerFunctions[projectionId] ?= []
+          @_handlerFunctions[projectionId].push subscriberId
+        resolve()
 
       else
         for eventName in eventNames
           if aggregateId
-            subscriberId = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
+            subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
           else
-            subscriberId = @_context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
-
-          @_handlerFunctions[projectionId] ?= []
-          @_handlerFunctions[projectionId].push subscriberId
-
-      resolve()
+            subscriberPromise = @_context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
+          subscriberPromise.then (subscriberId) =>
+            @_handlerFunctions[projectionId] ?= []
+            @_handlerFunctions[projectionId].push subscriberId
+        resolve()
 
 
   _applyDomainEventToProjection: (domainEvent, projection, callback) =>

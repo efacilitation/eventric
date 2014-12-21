@@ -341,33 +341,35 @@ class Context
   * @param {Object} Options to be used when initializing the DomainEventStream
   ###
   subscribeToDomainEventStream: (domainEventStreamName, handlerFn, options = {}) ->
-    if not @_domainEventStreamClasses[domainEventStreamName]
-      err = "DomainEventStream Class with name #{domainEventStreamName} not added"
-      return @log.error err
-    domainEventStream = new @_domainEventStreamClasses[domainEventStreamName]
-    domainEventStream._domainEventsPublished = {}
-    domainEventStreamId = @_eventric.generateUid()
-    @_domainEventStreamInstances[domainEventStreamId] = domainEventStream
+    new Promise (resolve, reject) =>
+      if not @_domainEventStreamClasses[domainEventStreamName]
+        err = new Error "DomainEventStream Class with name #{domainEventStreamName} not added"
+        @log.error err
+        return reject err
+      domainEventStream = new @_domainEventStreamClasses[domainEventStreamName]
+      domainEventStream._domainEventsPublished = {}
+      domainEventStreamId = @_eventric.generateUid()
+      @_domainEventStreamInstances[domainEventStreamId] = domainEventStream
 
-    domainEventNames = []
-    for functionName, functionValue of domainEventStream
-      if (functionName.indexOf 'filter') is 0 and (typeof functionValue is 'function')
-        domainEventName = functionName.replace /^filter/, ''
-        domainEventNames.push domainEventName
+      domainEventNames = []
+      for functionName, functionValue of domainEventStream
+        if (functionName.indexOf 'filter') is 0 and (typeof functionValue is 'function')
+          domainEventName = functionName.replace /^filter/, ''
+          domainEventNames.push domainEventName
 
-    @_applyDomainEventsFromStoreToDomainEventStream domainEventNames, domainEventStream, handlerFn
-    .then =>
-      for domainEventName in domainEventNames
-        @subscribeToDomainEvent domainEventName, (domainEvent) ->
-          if domainEventStream._domainEventsPublished[domainEvent.id]
-            return
+      @_applyDomainEventsFromStoreToDomainEventStream domainEventNames, domainEventStream, handlerFn
+      .then =>
+        for domainEventName in domainEventNames
+          @subscribeToDomainEvent domainEventName, (domainEvent) ->
+            if domainEventStream._domainEventsPublished[domainEvent.id]
+              return
 
-          if (domainEventStream["filter#{domainEvent.name}"] domainEvent) is true
-            handlerFn domainEvent, ->
+            if (domainEventStream["filter#{domainEvent.name}"] domainEvent) is true
+              handlerFn domainEvent, ->
 
-        , options
+          , options
 
-    domainEventStreamId
+      resolve domainEventStreamId
 
 
   _applyDomainEventsFromStoreToDomainEventStream: (eventNames, domainEventStream) ->

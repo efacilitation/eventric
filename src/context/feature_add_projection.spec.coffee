@@ -14,6 +14,7 @@ describe 'Add Projection Feature', ->
     describe 'when we initialize the context', ->
 
       it 'then the initialize method of the projection should have been called', (done) ->
-        exampleContext.initialize ->
+        exampleContext.initialize()
+        .then ->
           expect(ProjectionStub::initialize).to.have.been.called
           done()

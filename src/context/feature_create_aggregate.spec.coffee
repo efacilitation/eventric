@@ -8,17 +8,20 @@ describe 'Create Aggregate Feature', ->
         exampleContext = eventric.context 'Examplecontext'
 
         exampleContext.defineDomainEvent 'ExampleCreated', (params) ->
+          expect(params.name).to.equal 'John'
+          expect(params.email).to.equal 'some@where'
 
+        createCalled = false
         class Example
-          create: (name, email, callback) ->
-            @$emitDomainEvent 'ExampleCreated'
-            callback()
-        sandbox.spy Example::, 'create'
+          create: (params, promise) ->
+            createCalled = true
+            @$emitDomainEvent 'ExampleCreated', params
+            promise.resolve()
 
         exampleContext.addAggregate 'Example', Example
 
         exampleContext.addCommandHandler 'CreateExample', (params) ->
-          @$aggregate.create 'Example', params.name, params.email
+          @$aggregate.create 'Example', name: 'John', email: 'some@where'
           .then (example) ->
             example.$save()
 
@@ -28,5 +31,6 @@ describe 'Create Aggregate Feature', ->
             name: 'MyName'
             email: 'MyEmail'
           .then ->
-            expect(Example::create).to.have.been.calledWith 'MyName', 'MyEmail', sinon.match.func
+            expect(createCalled).to.be.true
             done()
+

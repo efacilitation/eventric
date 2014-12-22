@@ -29,9 +29,8 @@ describe 'ProcessManager', ->
         ExampleChanged: ->
 
       class ExampleAggregateRoot
-        create: (callback) ->
+        create: ->
           @$emitDomainEvent 'ExampleCreated'
-          callback()
 
         doSomething: ->
           @$emitDomainEvent 'ExampleChanged'

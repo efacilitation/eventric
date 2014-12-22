@@ -4,9 +4,8 @@ describe 'Waiting Command Aggregate Feature', ->
     exampleContext = null
     beforeEach ->
       class Example
-        create: (callback) ->
-          @$emitDomainEvent 'ExampleCreated', {}
-          callback()
+        create: ->
+          @$emitDomainEvent 'ExampleCreated'
         handleExampleCreated: (domainEvent) ->
 
       exampleContext = eventric.context 'exampleContext'

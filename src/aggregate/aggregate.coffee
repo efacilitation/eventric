@@ -84,35 +84,4 @@ class Aggregate
     @_handleDomainEvent domainEvent.name, domainEvent
 
 
-  ###*
-  * @name create
-  * @module Aggregate
-  * @description Calls the create Function on your AggregateDefinition
-  ###
-  create: =>
-    params = arguments
-    new Promise (resolve, reject) =>
-      @id = @_eventric.generateUid()
-      if typeof @root.create isnt 'function'
-        err = "No create function on aggregate"
-        @_eventric.log.error err
-        throw new Error err
-
-      try
-        check = @root.create params..., (err) =>
-          if err
-            reject err
-          else
-            resolve @
-
-        if check instanceof Promise
-          check.then =>
-            resolve @
-          check.catch (err) =>
-            reject err
-
-      catch e
-        reject e
-
-
 module.exports = Aggregate

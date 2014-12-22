@@ -67,23 +67,39 @@ class Repository
   * @module Repository
   * @description Create an Aggregate
   ###
-  create: =>
-    params = arguments
-    if typeof params[params.length-1] is 'function'
-      callback = params.pop()
+  create: (params) =>  new Promise (resolve, reject) =>
+    aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
+    aggregate.id = @_eventric.generateUid()
 
-    new Promise (resolve, reject) =>
-      aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
-      aggregate.create params...
-      .then (aggregate) =>
-        aggregate.root.$id = aggregate.id
-        aggregate.root.$save = =>
-          @save aggregate.id
-        commandId = @_command.id ? 'nocommand'
-        @_aggregateInstances[commandId] ?= {}
-        @_aggregateInstances[commandId][aggregate.id] = aggregate
-        callback? null, aggregate.root
-        resolve aggregate.root
+    if typeof aggregate.root.create isnt 'function'
+      err = "No create function on aggregate"
+      @_eventric.log.error err
+      reject new Error err
+
+    aggregate.root.$id = aggregate.id
+    aggregate.root.$save = =>
+      @save aggregate.id
+
+    # TODO: needs refactoring
+    commandId = @_command.id ? 'nocommand'
+    @_aggregateInstances[commandId] ?= {}
+    @_aggregateInstances[commandId][aggregate.id] = aggregate
+
+    createPromise = new Promise (resolve, reject) =>
+      if aggregate.root.create.length <= 1
+        aggregate.root.create params
+        resolve()
+
+      else
+        aggregate.root.create params,
+          resolve: resolve
+          reject: reject
+
+    createPromise
+    .then ->
+      resolve aggregate.root
+    .catch (err) ->
+      reject err
 
 
   ###*

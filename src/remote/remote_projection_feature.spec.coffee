@@ -19,9 +19,8 @@ describe 'Remote Projection Feature', ->
           example.$save()
 
     class Example
-      create: (callback) ->
+      create: ->
         @$emitDomainEvent 'ExampleCreated'
-        callback()
       update: ->
         @$emitDomainEvent 'ExampleUpdated'
 

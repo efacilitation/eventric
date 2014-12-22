@@ -11,9 +11,8 @@ describe 'Command Aggregate Feature', ->
         @entity   = params.entity
 
       class Example
-        create: (callback) ->
+        create: ->
           @$emitDomainEvent 'ExampleCreated'
-          callback()
 
         doSomething: (someId) ->
           @$emitDomainEvent 'SomethingHappened',

@@ -9,9 +9,8 @@ describe 'Subscribe to event with aggregate id Feature', ->
       exampleContext.defineDomainEvent 'ExampleCreated', ->
       exampleContext.defineDomainEvent 'SomethingHappened', ->
       class Example
-        create: (callback) ->
+        create: ->
           @$emitDomainEvent 'ExampleCreated'
-          callback()
 
         doSomething: ->
           @$emitDomainEvent 'SomethingHappened'

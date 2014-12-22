@@ -26,9 +26,8 @@ describe 'Remote Feature', ->
         promise.resolve null
 
     class Example
-      create: (callback) ->
+      create: ->
         @$emitDomainEvent 'ExampleCreated'
-        callback()
 
       modify: ->
         @$emitDomainEvent 'ExampleModified'

@@ -4,14 +4,12 @@ describe 'Remote Domain Event Stream Feature', ->
     exampleContext = null
     beforeEach ->
       class Example
-        create: (callback) ->
+        create: ->
           @$emitDomainEvent 'ExampleCreated', {}
-          callback()
 
       class AnotherExample
-        create: (callback) ->
+        create: ->
           @$emitDomainEvent 'AnotherExampleCreated', {}
-          callback()
 
       exampleContext = eventric.context 'ExampleContext'
         .defineDomainEvents

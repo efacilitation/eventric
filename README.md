@@ -69,9 +69,8 @@ Now we need an Aggregate which actually raises this DomainEvents.
 
 ```javascript
 todoContext.addAggregate('Todo', function() {
-  this.create = function(callback) {
+  this.create = function() {
     this.$emitDomainEvent('TodoCreated');
-    callback();
   }
   this.changeDescription = function(description) {
     this.$emitDomainEvent('TodoDescriptionChanged', {description: description});
@@ -79,6 +78,7 @@ todoContext.addAggregate('Todo', function() {
 });
 ```
 > Hint: `this.create` is called by convention when you create an aggregate using `this.$aggregate.create`
+
 > Hint: `this.$emitDomainEvent` is dependency injected
 
 
@@ -89,9 +89,9 @@ To actually work with the `Context` from the outside world we need `CommandHandl
 ```javascript
 todoContext.addCommandHandler('CreateTodo', function(params) {
   this.$aggregate.create('Todo')
-    .then(function (todo) {
-      return todo.$save();
-    });
+  .then(function (todo) {
+    return todo.$save();
+  });
 });
 ```
 > Hint: `this.$aggregate` is dependency injected
@@ -101,10 +101,10 @@ It would be nice if we could change the description of the `Todo`, so let's add 
 ```javascript
 todoContext.addCommandHandler('ChangeTodoDescription', function(params) {
   this.$aggregate.load('Todo', params.id)
-    .then(function (todo) {
-      todo.changeDescription(params.description);
-      return todo.$save();
-    });
+  .then(function (todo) {
+    todo.changeDescription(params.description);
+    return todo.$save();
+  });
 });
 ```
 
@@ -131,8 +131,8 @@ todoContext.initialize()
 })
 .then(function(todoId) {
   todoContext.command('ChangeTodoDescription', {
-      id: todoId,
-      description: 'Do something'
+    id: todoId,
+    description: 'Do something'
   });
 });
 ```

@@ -4,14 +4,12 @@ describe 'Domain Event Stream Feature', ->
     exampleContext = null
     beforeEach ->
       class Example
-        create: (callback) ->
-          @$emitDomainEvent 'ExampleCreated', {}
-          callback()
+        create: ->
+          @$emitDomainEvent 'ExampleCreated'
 
       class AnotherExample
-        create: (callback) ->
-          @$emitDomainEvent 'AnotherExampleCreated', {}
-          callback()
+        create: ->
+          @$emitDomainEvent 'AnotherExampleCreated'
 
       exampleContext = eventric.context 'exampleContext'
         .defineDomainEvents

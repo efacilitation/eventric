@@ -19,9 +19,8 @@ describe 'Projection Feature', ->
           promise.resolve()
 
       exampleContext.addAggregate 'Example', ->
-        create: (callback) ->
+        create: ->
           @$emitDomainEvent 'ExampleCreated'
-          callback()
         handleExampleCreated: (domainEvent) ->
           @whatever = 'bar'
         doSomething: ->

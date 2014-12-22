@@ -60,7 +60,7 @@ module.exports = (gulp) ->
 
 
   gulp.task 'spec:client', (next) ->
-    runSequence 'build', 'build:spec', 'spec:client:run', next
+    runSequence 'build:spec', 'spec:client:run', next
 
 
   gulp.task 'spec:client:run', (next) ->

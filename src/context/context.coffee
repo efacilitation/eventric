@@ -211,7 +211,7 @@ class Context
   * @param {String} queryFunction Function to execute on query
   ###
   addQueryHandler: (queryHandlerName, queryHandlerFn) ->
-    @_queryHandlers[queryHandlerName] = => queryHandlerFn.apply @_di, arguments
+    @_queryHandlers[queryHandlerName] = queryHandlerFn
     @
 
 
@@ -870,11 +870,10 @@ class Context
         return reject err
     else
       commandPromise = new Promise (resolve, reject) =>
-        commandHandlerFn.apply _di, [
-          commandParams,
-            resolve: resolve
-            reject: reject
-          ]
+        commandHandlerFn.apply _di, [commandParams,
+          resolve: resolve
+          reject: reject
+        ]
 
     commandPromise
     .then (result) =>
@@ -898,31 +897,41 @@ class Context
   * @param {String} `queryName` Name of the QueryHandler to be executed
   * @param {Object} `queryParams` Parameters for the QueryHandler function
   ###
-  query: (queryName, queryParams) ->
+  query: (queryName, queryParams) ->  new Promise (resolve, reject) =>
     @log.debug 'Got Query', queryName
 
-    new Promise (resolve, reject) =>
-      if not @_initialized
-        err = 'Context not initialized yet'
-        @log.error err
-        err = new Error err
-        reject err
-        return
+    if not @_initialized
+      err = 'Context not initialized yet'
+      @log.error err
+      err = new Error err
+      reject err
+      return
 
-      if @_queryHandlers[queryName]
-        @_queryHandlers[queryName] queryParams, (err, result) =>
-          @log.debug 'Completed Query', queryName
-          @_eventric.nextTick =>
-            if err
-              reject err
-            else
-              resolve result
+    if not @_queryHandlers[queryName]
+      err = "Given query #{queryName} not registered on context"
+      @log.error err
+      err = new Error err
+      return reject err
 
-      else
-        err = "Given query #{queryName} not registered on context"
-        @log.error err
-        err = new Error err
-        reject err
+    if @_queryHandlers[queryName].length <= 1
+      queryPromise = @_queryHandlers[queryName].apply @_di, [queryParams]
+
+    else
+      queryPromise = new Promise (resolve, reject) =>
+        @_queryHandlers[queryName].apply @_di, [queryParams,
+          resolve: resolve
+          reject: reject
+        ]
+
+    queryPromise
+    .then (result) =>
+      @log.debug "Completed Query #{queryName} with Result #{result}"
+      resolve result
+
+    .catch (err) ->
+      reject err
+
+
 
 
   ###*

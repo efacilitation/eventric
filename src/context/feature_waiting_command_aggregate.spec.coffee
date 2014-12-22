@@ -34,10 +34,8 @@ describe 'Waiting Command Aggregate Feature', ->
               promise.resolve()
             , 500
 
-        exampleContext.addQueryHandler 'getExample', (params, callback) ->
+        exampleContext.addQueryHandler 'getExample', (params) ->
           @$projectionStore 'inmemory', 'ExampleProjection'
-          .then (projectionStore) ->
-            callback null, projectionStore
         exampleContext.initialize()
         .then ->
           done()

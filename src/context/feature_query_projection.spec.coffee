@@ -5,10 +5,10 @@ describe 'Query Projection Feature', ->
     beforeEach (done) ->
       exampleContext = eventric.context 'exampleContext'
 
-      exampleContext.addQueryHandler 'getExample', (params, callback) ->
+      exampleContext.addQueryHandler 'getExample', (params, promise) ->
         @$projectionStore 'inmemory', 'ExampleProjection'
         .then (projectionStore) ->
-          callback null, projectionStore
+          promise.resolve projectionStore
 
       exampleContext.initialize()
       .then ->

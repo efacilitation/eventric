@@ -37,8 +37,8 @@ describe 'Remote Feature', ->
     exampleContext.addAggregate 'Example', Example
 
     exampleContext.addQueryHandlers
-      getSomething: (params, callback) ->
-        callback null, 'something'
+      getSomething: (params, promise) ->
+        promise.resolve 'something'
 
     exampleContext.initialize()
     .then ->

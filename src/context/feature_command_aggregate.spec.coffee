@@ -26,21 +26,21 @@ describe 'Command Aggregate Feature', ->
       exampleContext.addAggregate 'Example', Example
 
       exampleContext.addCommandHandlers
-        CreateExample: (params, callback) ->
+        CreateExample: (params, promise) ->
           exampleId = null
           @$aggregate.create 'Example'
           .then (example) ->
             example.$save()
           .then (exampleId) ->
-            callback null, exampleId
+            promise.resolve exampleId
 
-        DoSomething: (params, callback) ->
+          return
+
+        DoSomething: (params) ->
           @$aggregate.load 'Example', params.id
           .then (example) ->
             example.doSomething [1]
             example.$save()
-          .then ->
-            callback()
 
       exampleContext.initialize()
       .then ->

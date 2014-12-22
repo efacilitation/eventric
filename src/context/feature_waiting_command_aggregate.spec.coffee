@@ -14,13 +14,11 @@ describe 'Waiting Command Aggregate Feature', ->
       exampleContext.addAggregate 'Example', Example
 
       exampleContext.addCommandHandlers
-        CreateExample: (params, callback) ->
+        CreateExample: (params) ->
           exampleId = null
           @$aggregate.create 'Example'
           .then (example) =>
             example.$save()
-          .then (exampleId) ->
-            callback null, exampleId
 
       exampleContext.enableWaitingMode()
 

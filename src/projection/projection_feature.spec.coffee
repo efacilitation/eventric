@@ -31,21 +31,17 @@ describe 'Projection Feature', ->
           @whatever = domainEvent.payload.whateverFoo
 
       exampleContext.addCommandHandlers
-        CreateExample: (params, callback) ->
+        CreateExample: (params) ->
           exampleId = null
           @$aggregate.create 'Example'
           .then (example) ->
             example.$save()
-          .then (exampleId) ->
-            callback null, exampleId
 
-        doSomethingWithExample: (params, callback) ->
+        doSomethingWithExample: (params) ->
           @$aggregate.load 'Example', params.id
           .then (example) ->
             example.doSomething()
             example.$save()
-          .then ->
-            callback()
 
       exampleContext.initialize()
       .then ->

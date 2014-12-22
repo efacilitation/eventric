@@ -22,21 +22,17 @@ describe 'Domain Event Stream Feature', ->
           AnotherExample: AnotherExample
 
       exampleContext.addCommandHandlers
-        CreateExample: (params, callback) ->
+        CreateExample: (params) ->
           exampleId = null
           @$aggregate.create 'Example'
           .then (example) ->
             example.$save()
-          .then (exampleId) ->
-            callback null, exampleId
 
-        CreateAnotherExample: (params, callback) ->
+        CreateAnotherExample: (params) ->
           anotherExampleId = null
           @$aggregate.create 'AnotherExample'
           .then (anotherExample) ->
             anotherExample.$save()
-          .then (anotherExampleId) ->
-            callback null, anotherExampleId
 
 
     describe 'and an according domain event stream and projection', ->

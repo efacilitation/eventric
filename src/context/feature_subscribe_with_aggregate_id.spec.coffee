@@ -18,21 +18,17 @@ describe 'Subscribe to event with aggregate id Feature', ->
       exampleContext.addAggregate 'Example', Example
 
       exampleContext.addCommandHandlers
-        CreateExample: (params, callback) ->
+        CreateExample: (params) ->
           exampleId = null
           @$aggregate.create 'Example'
           .then (example) ->
             example.$save()
-          .then (exampleId) ->
-            callback null, exampleId
 
-        DoSomething: (params, callback) ->
+        DoSomething: (params) ->
           @$aggregate.load 'Example', params.id
           .then (example) ->
             example.doSomething()
             example.$save()
-          .then (exampleId) ->
-            callback null, exampleId
 
       exampleContext.initialize()
       .then ->

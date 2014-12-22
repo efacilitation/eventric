@@ -8,19 +8,15 @@ describe 'Remote Projection Feature', ->
       ExampleUpdated: ->
 
     exampleContext.addCommandHandlers
-      CreateExample: (params, callback) ->
+      CreateExample: (params) ->
         @$aggregate.create 'Example'
         .then (example) ->
           example.$save()
-        .then (exampleId) ->
-          callback null, exampleId
-      UpdateExample: (params, callback) ->
+      UpdateExample: (params) ->
         @$aggregate.load 'Example', params.id
         .then (example) ->
           example.update()
           example.$save()
-        .then (exampleId) ->
-          callback null, exampleId
 
     class Example
       create: (callback) ->
@@ -203,7 +199,6 @@ describe 'Remote Projection Feature', ->
       exampleRemote = null
 
       beforeEach ->
-        #eventric.log.setLogLevel 'debug'
         exampleRemote = eventric.remote 'Example'
 
         class ExampleProjection

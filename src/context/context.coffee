@@ -164,26 +164,7 @@ class Context
   * @param {String} commandFunction The CommandHandler Function
   ###
   addCommandHandler: (commandHandlerName, commandHandlerFn) ->
-    @_commandHandlers[commandHandlerName] = =>
-      command =
-        id: @_eventric.generateUid()
-        name: commandHandlerName
-        params: arguments[0] ? null
-
-      _di = {}
-      for diFnName, diFn of @_di
-        _di[diFnName] = diFn
-
-      _di.$aggregate =
-        create: (aggregateName, aggregateParams...) =>
-          repository = @_getAggregateRepository aggregateName, command
-          repository.create aggregateParams...
-
-        load: (aggregateName, aggregateId) =>
-          repository = @_getAggregateRepository aggregateName, command
-          repository.findById aggregateId
-
-      commandHandlerFn.apply _di, arguments
+    @_commandHandlers[commandHandlerName] = commandHandlerFn
     @
 
 
@@ -844,30 +825,64 @@ class Context
   * @param {String} `commandName` Name of the CommandHandler to be executed
   * @param {Object} `commandParams` Parameters for the CommandHandler function
   ###
-  command: (commandName, commandParams) ->
-    @log.debug 'Got Command', commandName
+  command: (commandName, commandParams) ->  new Promise (resolve, reject) =>
+    command =
+      id: @_eventric.generateUid()
+      name: commandName
+      params: commandParams
+    @log.debug 'Got Command', command
 
-    new Promise (resolve, reject) =>
-      if not @_initialized
-        err = 'Context not initialized yet'
+    if not @_initialized
+      err = 'Context not initialized yet'
+      @log.error err
+      err = new Error err
+      return reject err
+
+    if not @_commandHandlers[commandName]
+      err = "Given command #{commandName} not registered on context"
+      @log.error err
+      err = new Error err
+      return reject err
+
+
+    # TODO: extract to "injected services"
+    _di = {}
+    for diFnName, diFn of @_di
+      _di[diFnName] = diFn
+
+    _di.$aggregate =
+      create: (aggregateName, aggregateParams...) =>
+        repository = @_getAggregateRepository aggregateName, command
+        repository.create aggregateParams...
+
+      load: (aggregateName, aggregateId) =>
+        repository = @_getAggregateRepository aggregateName, command
+        repository.findById aggregateId
+
+
+    commandPromise = null
+    commandHandlerFn = @_commandHandlers[commandName]
+    if commandHandlerFn.length <= 1
+      commandPromise = commandHandlerFn.apply _di, [commandParams]
+      if commandPromise not instanceof Promise
+        err = "CommandHandler #{commandName} didnt return a promise and no promise argument defined."
         @log.error err
-        err = new Error err
         return reject err
+    else
+      commandPromise = new Promise (resolve, reject) =>
+        commandHandlerFn.apply _di, [
+          commandParams,
+            resolve: resolve
+            reject: reject
+          ]
 
-      if @_commandHandlers[commandName]
-        @_commandHandlers[commandName] commandParams, (err, result) =>
-          @log.debug 'Completed Command', commandName
-          @_eventric.nextTick =>
-            if err
-              reject err
-            else
-              resolve result
+    commandPromise
+    .then (result) =>
+      @log.debug 'Completed Command', commandName
+      resolve result
 
-      else
-        err = "Given command #{commandName} not registered on context"
-        @log.error err
-        err = new Error err
-        reject err
+    .catch (err) ->
+      reject err
 
 
   ###*

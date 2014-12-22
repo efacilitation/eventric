@@ -7,14 +7,15 @@ describe 'DomainService Feature', ->
       exampleContext = eventric.context 'exampleContext'
 
       exampleContext.defineDomainEvent 'SomethingHappened', ->
-      exampleContext.addCommandHandler 'DoSomething', (params, callback) ->
-      	@$domainService 'DoSomethingSpecial', params, callback
+      exampleContext.addCommandHandler 'DoSomething', (params, promise) ->
+      	@$domainService 'DoSomethingSpecial', params, ->
+          promise.resolve()
 
       specialStub = sandbox.stub()
       exampleContext.addDomainService 'DoSomethingSpecial', (params, callback) ->
         specialStub params.special
         @$emitDomainEvent 'SomethingHappened'
-        callback null, true
+        callback()
 
 
     describe 'when we call the command', ->
@@ -22,9 +23,9 @@ describe 'DomainService Feature', ->
         exampleContext.initialize()
         .then ->
           exampleContext.command 'DoSomething', special: 'awesome'
-          .then ->
-            expect(specialStub).to.have.been.calledWith 'awesome'
-            done()
+        .then ->
+          expect(specialStub).to.have.been.calledWith 'awesome'
+          done()
 
 
       it 'then should have emitted the correct domain event', (done) ->

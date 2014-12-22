@@ -10,28 +10,20 @@ describe 'Remote Feature', ->
       ExampleModified: ->
 
     exampleContext.addCommandHandlers
-      CreateExample: (params, callback) ->
+      CreateExample: (params) ->
         @$aggregate.create 'Example'
         .then (example) ->
           example.$save()
-        .then (exampleId) ->
-          callback null, exampleId
-        .catch (error) ->
-          callback error
 
-      ModifyExample: (params, callback) ->
+      ModifyExample: (params) ->
         @$aggregate.load 'Example', params.id
         .then (example) ->
           example.modify()
           example.$save()
-        .then (id) ->
-          callback null, id
-        .catch (error) ->
-          callback error
 
-      DoSomething: (params, callback) ->
+      DoSomething: (params, promise) ->
         doSomethingStub()
-        callback null
+        promise.resolve null
 
     class Example
       create: (callback) ->

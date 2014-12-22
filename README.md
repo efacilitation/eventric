@@ -87,13 +87,10 @@ todoContext.addAggregate('Todo', function() {
 To actually work with the `Context` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
 
 ```javascript
-todoContext.addCommandHandler('CreateTodo', function(params, done) {
+todoContext.addCommandHandler('CreateTodo', function(params) {
   this.$aggregate.create('Todo')
     .then(function (todo) {
       return todo.$save();
-    })
-    .then(function(todoId) {
-      done(null, todoId);
     });
 });
 ```
@@ -102,14 +99,11 @@ todoContext.addCommandHandler('CreateTodo', function(params, done) {
 It would be nice if we could change the description of the `Todo`, so let's add this `CommandHandler` too.
 
 ```javascript
-todoContext.addCommandHandler('ChangeTodoDescription', function(params, done) {
+todoContext.addCommandHandler('ChangeTodoDescription', function(params) {
   this.$aggregate.load('Todo', params.id)
     .then(function (todo) {
       todo.changeDescription(params.description);
       return todo.$save();
-    })
-    .then(function() {
-      done();
     });
 });
 ```
@@ -131,20 +125,18 @@ todoContext.subscribeToDomainEvent('TodoDescriptionChanged', function(domainEven
 Initialize the Context, create a `Todo` and tell the `Todo` to change its description.
 
 ```javascript
-todoContext.initialize(function() {
-  todoContext.command('CreateTodo')
-  .then(function(todoId) {
-    todoContext.command('ChangeTodoDescription', {
-        id: todoId,
-        description: 'Do something'
-      }
-    );
+todoContext.initialize()
+.then(function() {
+  todoContext.command('CreateTodo');
+})
+.then(function(todoId) {
+  todoContext.command('ChangeTodoDescription', {
+      id: todoId,
+      description: 'Do something'
   });
 });
 ```
 After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing into the `InMemory Store`.
-
-Congratulations, you have successfully applied DDD and CQRS! :)
 
 
 ## Running Tests

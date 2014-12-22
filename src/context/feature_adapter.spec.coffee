@@ -14,9 +14,9 @@ describe 'Adapter Feature', ->
           someAdapterFunction: sandbox.stub()
         exampleContext.addAdapter 'exampleAdapter', ExampleAdapter
 
-        exampleContext.addCommandHandler 'doSomething', (params, callback) ->
+        exampleContext.addCommandHandler 'doSomething', (params, promise) ->
           @$adapter('exampleAdapter').someAdapterFunction()
-          callback()
+          promise.resolve()
 
 
       it 'then it should have called the adapter function', ->

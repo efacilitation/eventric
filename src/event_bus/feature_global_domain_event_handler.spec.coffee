@@ -22,12 +22,10 @@ describe 'Global Domain Event Handler Feature', ->
           @$emitDomainEvent 'ExampleCreated'
           callback()
 
-      exampleContext.addCommandHandler 'createExample', (params, done) ->
+      exampleContext.addCommandHandler 'createExample', (params) ->
         @$aggregate.create 'Example'
         .then (example) ->
           example.$save()
-        .then (exampleId) ->
-          done null, exampleId
 
 
     describe 'when DomainEvents got emitted which the handler subscribed to', ->

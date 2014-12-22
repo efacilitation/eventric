@@ -203,6 +203,7 @@ describe 'Remote Projection Feature', ->
       exampleRemote = null
 
       beforeEach ->
+        #eventric.log.setLogLevel 'debug'
         exampleRemote = eventric.remote 'Example'
 
         class ExampleProjection

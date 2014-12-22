@@ -48,7 +48,8 @@ describe 'Remote Feature', ->
       getSomething: (params, callback) ->
         callback null, 'something'
 
-    exampleContext.initialize ->
+    exampleContext.initialize()
+    .then ->
       done()
 
 

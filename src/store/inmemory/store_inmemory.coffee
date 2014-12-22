@@ -6,12 +6,12 @@ class InMemoryStore
   _domainEvents: {}
   _projections: {}
 
-  initialize: (@_context, [options]..., callback) ->
+  initialize: (@_context, [options]...) ->  new Promise (resolve, reject) =>
     @_domainEventsCollectionName = "#{@_context.name}.DomainEvents"
     @_projectionCollectionName   = "#{@_context.name}.Projections"
 
     @_domainEvents[@_domainEventsCollectionName] = []
-    callback()
+    resolve()
 
 
   ###*
@@ -116,10 +116,10 @@ class InMemoryStore
   *
   * @module InMemoryStore
   ###
-  getProjectionStore: (projectionName, callback) ->
+  getProjectionStore: (projectionName) -> new Promise (resolve, reject) =>
     @_projections[@_projectionCollectionName] ?= {}
     @_projections[@_projectionCollectionName][projectionName] ?= {}
-    callback null, @_projections[@_projectionCollectionName][projectionName]
+    resolve @_projections[@_projectionCollectionName][projectionName]
 
 
   ###*
@@ -127,11 +127,11 @@ class InMemoryStore
   *
   * @module InMemoryStore
   ###
-  clearProjectionStore: (projectionName, callback) ->
+  clearProjectionStore: (projectionName) -> new Promise (resolve, reject) =>
     @_projections[@_projectionCollectionName] ?= {}
     @_projections[@_projectionCollectionName][projectionName] ?= {}
     delete @_projections[@_projectionCollectionName][projectionName]
-    callback null, null
+    resolve()
 
 
   ###*

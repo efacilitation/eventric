@@ -33,7 +33,8 @@ describe 'Global Domain Event Handler Feature', ->
     describe 'when DomainEvents got emitted which the handler subscribed to', ->
 
       it 'then it should execute the registered global domain event handler', (done) ->
-        exampleContext.initialize ->
+        exampleContext.initialize()
+        .then ->
           exampleContext.subscribeToDomainEvent 'ExampleCreated', ->
             expect(specificOncontextHandlerStub).to.have.been.called
             expect(allOncontextHandlerStub).to.have.been.called

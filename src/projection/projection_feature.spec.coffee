@@ -14,9 +14,9 @@ describe 'Projection Feature', ->
       exampleContext.addProjection 'ExampleProjection', ->
         stores: ['inmemory']
 
-        handleSomethingHappened: (domainEvent, done) ->
+        handleSomethingHappened: (domainEvent, promise) ->
           @$store.inmemory.totallyDenormalized = domainEvent.payload.specific
-          done()
+          promise.resolve()
 
       exampleContext.addAggregate 'Example', ->
         create: (callback) ->
@@ -58,5 +58,6 @@ describe 'Projection Feature', ->
         .then (exampleId) ->
           exampleContext.command 'doSomethingWithExample', id: exampleId
         .then ->
-          exampleContext.getProjectionStore 'inmemory', 'ExampleProjection', (err, projectionStore) ->
+          exampleContext.getProjectionStore 'inmemory', 'ExampleProjection'
+          .then (projectionStore) ->
             expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'

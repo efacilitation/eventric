@@ -34,7 +34,8 @@ describe 'Subscribe to event with aggregate id Feature', ->
           .then (exampleId) ->
             callback null, exampleId
 
-      exampleContext.initialize ->
+      exampleContext.initialize()
+      .then ->
         exampleContext.enableWaitingMode()
         done()
 

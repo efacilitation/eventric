@@ -156,7 +156,7 @@ class Context
   *
   * @example
     ```javascript
-    exampleContext.addCommandHandler('someCommand', function(params, callback) {
+    exampleContext.addCommandHandler('someCommand', function(params) {
       // ...
     });
     ```
@@ -221,7 +221,7 @@ class Context
   *
   * @example
     ```javascript
-    exampleContext.addQueryHandler('SomeQuery', function(params, callback) {
+    exampleContext.addQueryHandler('SomeQuery', function(params) {
       // ...
     });
     ```
@@ -400,7 +400,7 @@ class Context
   *
   * @example
     ```javascript
-    exampleContext.addDomainService('DoSomethingSpecial', function(params, callback) {
+    exampleContext.addDomainService('DoSomethingSpecial', function(params) {
       // ...
     });
     ```
@@ -559,7 +559,7 @@ class Context
     })
     ```
   ###
-  initialize: (callback=->) ->
+  initialize: ->
     new Promise (resolve, reject) =>
       @log.debug "[#{@name}] Initializing"
       @log.debug "[#{@name}] Initializing Store"
@@ -584,10 +584,8 @@ class Context
         @log.debug "[#{@name}] Finished initializing Projections"
         @log.debug "[#{@name}] Finished initializing"
         @_initialized = true
-        callback()
         resolve()
       .catch (err) ->
-        callback err
         reject err
 
 
@@ -603,7 +601,8 @@ class Context
       @_eventric.eachSeries stores, (store, next) =>
         @log.debug "[#{@name}] Initializing Store #{store.name}"
         @_storeInstances[store.name] = new store.Class
-        @_storeInstances[store.name].initialize @, store.options, =>
+        @_storeInstances[store.name].initialize @, store.options
+        .then =>
           @log.debug "[#{@name}] Finished initializing Store #{store.name}"
           next()
 
@@ -793,18 +792,15 @@ class Context
   * @param {String} storeName Name of the Store
   * @param {String} projectionName Name of the Projection
   ###
-  getProjectionStore: (storeName, projectionName, callback) =>
-    new Promise (resolve, reject) =>
-      if not @_storeInstances[storeName]
-        err = "Requested Store with name #{storeName} not found"
-        @log.error err
-        callback? err, null
-        return reject err
+  getProjectionStore: (storeName, projectionName) =>  new Promise (resolve, reject) =>
+    if not @_storeInstances[storeName]
+      err = "Requested Store with name #{storeName} not found"
+      @log.error err
+      return reject err
 
-      @_storeInstances[storeName].getProjectionStore projectionName, (err, projectionStore) =>
-        callback? err, projectionStore
-        return reject err if err
-        resolve projectionStore
+    @_storeInstances[storeName].getProjectionStore projectionName
+    .then (projectionStore) ->
+      resolve projectionStore
 
 
   ###*
@@ -815,18 +811,15 @@ class Context
   * @param {String} storeName Name of the Store
   * @param {String} projectionName Name of the Projection
   ###
-  clearProjectionStore: (storeName, projectionName, callback) =>
-    new Promise (resolve, reject) =>
-      if not @_storeInstances[storeName]
-        err = "Requested Store with name #{storeName} not found"
-        @log.error err
-        callback? err, null
-        return reject err
+  clearProjectionStore: (storeName, projectionName) =>  new Promise (resolve, reject) =>
+    if not @_storeInstances[storeName]
+      err = "Requested Store with name #{storeName} not found"
+      @log.error err
+      return reject err
 
-      @_storeInstances[storeName].clearProjectionStore projectionName, (err, done) =>
-        callback? err, done
-        return reject err if err
-        resolve done
+    @_storeInstances[storeName].clearProjectionStore projectionName
+    .then ->
+      resolve()
 
 
   ###*

@@ -94,7 +94,8 @@ class Projection
       projection["$store"] ?= {}
       @_eventric.eachSeries projection.stores, (projectionStoreName, next) =>
         @log.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
-        @_context.getProjectionStore projectionStoreName, projectionName, (err, projectionStore) =>
+        @_context.getProjectionStore projectionStoreName, projectionName
+        .then (projectionStore) =>
           if projectionStore
             projection["$store"][projectionStoreName] = projectionStore
             @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
@@ -112,7 +113,8 @@ class Projection
 
       @_eventric.eachSeries projectionStores, (projectionStoreName, next) =>
         @log.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
-        @_context.clearProjectionStore projectionStoreName, projectionName, =>
+        @_context.clearProjectionStore projectionStoreName, projectionName
+        .then =>
           @log.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
           next()
       , (err) ->
@@ -143,7 +145,8 @@ class Projection
           return resolve eventNames
 
         @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-          @_applyDomainEventToProjection domainEvent, projection, =>
+          @_applyDomainEventToProjection domainEvent, projection
+          .then =>
             @_domainEventsApplied[projectionId][domainEvent.id] = true
             next()
 
@@ -161,7 +164,8 @@ class Projection
         if @_domainEventsApplied[projectionId][domainEvent.id]
           return done()
 
-        @_applyDomainEventToProjection domainEvent, projection, =>
+        @_applyDomainEventToProjection domainEvent, projection
+        .then =>
           @_domainEventsApplied[projectionId][domainEvent.id] = true
           event =
             id: projectionId
@@ -180,7 +184,7 @@ class Projection
         resolve()
 
       else
-        for eventName in eventNames
+        eventric.eachSeries eventNames, (eventName, done) =>
           if aggregateId
             subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
           else
@@ -188,22 +192,27 @@ class Projection
           subscriberPromise.then (subscriberId) =>
             @_handlerFunctions[projectionId] ?= []
             @_handlerFunctions[projectionId].push subscriberId
+            done()
+        , ->
+          resolve()
+
+
+  _applyDomainEventToProjection: (domainEvent, projection) =>
+    new Promise (resolve, reject) =>
+      if !projection["handle#{domainEvent.name}"]
+        @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
+        return resolve()
+
+      if projection["handle#{domainEvent.name}"].length == 2
+        # promise defined inside the handler
+        projection["handle#{domainEvent.name}"] domainEvent,
+          resolve: resolve
+          reject: reject
+
+      else
+        # no promise defined inside the handler
+        projection["handle#{domainEvent.name}"] domainEvent
         resolve()
-
-
-  _applyDomainEventToProjection: (domainEvent, projection, callback) =>
-    if !projection["handle#{domainEvent.name}"]
-      @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
-      return callback()
-
-    if projection["handle#{domainEvent.name}"].length == 2
-      # done callback defined inside the handler
-      projection["handle#{domainEvent.name}"] domainEvent, callback
-
-    else
-      # no callback defined inside the handler
-      projection["handle#{domainEvent.name}"] domainEvent
-      callback()
 
 
   ###*

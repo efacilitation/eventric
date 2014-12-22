@@ -19,7 +19,8 @@ describe 'DomainService Feature', ->
 
     describe 'when we call the command', ->
       it 'then the domain service should be executed correctly', (done) ->
-        exampleContext.initialize ->
+        exampleContext.initialize()
+        .then ->
           exampleContext.command 'DoSomething', special: 'awesome'
           .then ->
             expect(specialStub).to.have.been.calledWith 'awesome'
@@ -31,5 +32,6 @@ describe 'DomainService Feature', ->
           expect(domainEvent.name).to.be.ok
           done()
 
-        exampleContext.initialize ->
+        exampleContext.initialize()
+        .then ->
           exampleContext.command 'DoSomething', special: 'awesome'

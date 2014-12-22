@@ -42,7 +42,8 @@ describe 'Command Aggregate Feature', ->
           .then ->
             callback()
 
-      exampleContext.initialize ->
+      exampleContext.initialize()
+      .then ->
         done()
 
 

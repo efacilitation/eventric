@@ -30,16 +30,19 @@ describe 'Waiting Command Aggregate Feature', ->
         exampleContext.addProjection 'ExampleProjection', ->
           stores: ['inmemory']
 
-          handleExampleCreated: (domainEvent, done) ->
+          handleExampleCreated: (domainEvent, promise) ->
             setTimeout =>
               @$store.inmemory.exampleCreated = true
-              done()
+              promise.resolve()
             , 500
 
         exampleContext.addQueryHandler 'getExample', (params, callback) ->
-          @$projectionStore 'inmemory', 'ExampleProjection', (err, projectionStore) ->
+          @$projectionStore 'inmemory', 'ExampleProjection'
+          .then (projectionStore) ->
             callback null, projectionStore
-        exampleContext.initialize -> done()
+        exampleContext.initialize()
+        .then ->
+          done()
 
 
       describe 'when we enable waiting mode and send a command', ->
@@ -67,7 +70,8 @@ describe 'Waiting Command Aggregate Feature', ->
           , 500
         exampleContext.subscribeToDomainEvent 'ExampleCreated', handler, isAsync: true
 
-        exampleContext.initialize ->
+        exampleContext.initialize()
+        .then ->
           done()
 
 

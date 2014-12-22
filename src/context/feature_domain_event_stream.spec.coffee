@@ -60,7 +60,8 @@ describe 'Domain Event Stream Feature', ->
           handleAnotherExampleCreated: ->
             @anotherCreated = true
 
-        exampleContext.initialize ->
+        exampleContext.initialize()
+        .then ->
           exampleContext.initializeProjectionInstance 'ExampleProjection'
           .then (_projectionId) ->
             projectionId = _projectionId

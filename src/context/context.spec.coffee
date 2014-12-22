@@ -26,7 +26,8 @@ describe 'Context', ->
     describe 'given the command has no registered handler', ->
       it 'should call the callback with a command not found error', (done) ->
         someContext = new Context 'exampleContext', eventricStub
-        someContext.initialize ->
+        someContext.initialize()
+        .then ->
 
           callback = sinon.spy()
 
@@ -53,7 +54,8 @@ describe 'Context', ->
 
     describe 'given the query has no matching queryhandler', ->
       it 'should callback with an error', (done) ->
-        someContext.initialize ->
+        someContext.initialize()
+        .then ->
           someContext.query 'getSomething'
           .catch (error) ->
             expect(error).to.be.an.instanceOf Error

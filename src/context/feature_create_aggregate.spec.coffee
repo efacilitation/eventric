@@ -24,7 +24,8 @@ describe 'Create Aggregate Feature', ->
           .then ->
             done()
 
-        exampleContext.initialize ->
+        exampleContext.initialize()
+        .then ->
           exampleContext.command 'CreateExample',
             name: 'MyName'
             email: 'MyEmail'

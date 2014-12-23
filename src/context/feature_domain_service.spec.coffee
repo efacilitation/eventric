@@ -8,14 +8,14 @@ describe 'DomainService Feature', ->
 
       exampleContext.defineDomainEvent 'SomethingHappened', ->
       exampleContext.addCommandHandler 'DoSomething', (params, promise) ->
-      	@$domainService 'DoSomethingSpecial', params, ->
+      	@$domainService 'DoSomethingSpecial', params
+        .then ->
           promise.resolve()
 
       specialStub = sandbox.stub()
-      exampleContext.addDomainService 'DoSomethingSpecial', (params, callback) ->
+      exampleContext.addDomainService 'DoSomethingSpecial', (params) ->
         specialStub params.special
         @$emitDomainEvent 'SomethingHappened'
-        callback()
 
 
     describe 'when we call the command', ->

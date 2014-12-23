@@ -81,5 +81,8 @@ class EventBus
         else
           resolve()
 
+      .catch (err) ->
+        reject err
+
 
 module.exports = EventBus

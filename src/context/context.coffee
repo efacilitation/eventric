@@ -80,8 +80,9 @@ class Context
       throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
     domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
-    @getDomainEventsStore().saveDomainEvent domainEvent, =>
-      @publishDomainEvent domainEvent
+    @saveAndPublishDomainEvent domainEvent
+    .then =>
+      @_eventric.log.debug "Created and Handled DomainEvent in Context", domainEvent
 
 
   ###*
@@ -323,6 +324,7 @@ class Context
   ###
   subscribeToDomainEventStream: (domainEventStreamName, handlerFn, options = {}) ->
     new Promise (resolve, reject) =>
+      # TODO: extract to initializeDomainEventStream()
       if not @_domainEventStreamClasses[domainEventStreamName]
         err = new Error "DomainEventStream Class with name #{domainEventStreamName} not added"
         @log.error err
@@ -340,6 +342,7 @@ class Context
 
       @_applyDomainEventsFromStoreToDomainEventStream domainEventNames, domainEventStream, handlerFn
       .then =>
+        # TODO: async each
         for domainEventName in domainEventNames
           @subscribeToDomainEvent domainEventName, (domainEvent) ->
             if domainEventStream._domainEventsPublished[domainEvent.id]
@@ -349,6 +352,9 @@ class Context
               handlerFn domainEvent, ->
 
           , options
+
+      .catch (err) ->
+        reject err
 
       resolve domainEventStreamId
 
@@ -587,6 +593,9 @@ class Context
           @log.debug "[#{@name}] Finished initializing Store #{store.name}"
           next()
 
+        .catch (err) ->
+          next err
+
       , (err) ->
         return reject err if err
         resolve()
@@ -682,18 +691,19 @@ class Context
 
 
   ###*
-  * @name saveDomainEvent
+  * @name saveAndPublishDomainEvent
   * @module Context
   * @description Save a DomainEvent to the default DomainEventStore
   *
   * @param {Object} domainEvent Instance of a DomainEvent
   ###
-  saveDomainEvent: (domainEvent) ->
-    new Promise (resolve, reject) =>
-      @getDomainEventsStore().saveDomainEvent domainEvent, (err, events) =>
-        @publishDomainEvent domainEvent
-        return reject err if err
-        resolve events
+  saveAndPublishDomainEvent: (domainEvent) ->  new Promise (resolve, reject) =>
+    @getDomainEventsStore().saveDomainEvent domainEvent
+    .then =>
+      @publishDomainEvent domainEvent
+    .then (err) ->
+      return reject err if err
+      resolve domainEvent
 
 
   ###*
@@ -783,6 +793,9 @@ class Context
     .then (projectionStore) ->
       resolve projectionStore
 
+    .catch (err) ->
+      reject err
+
 
   ###*
   * @name clearProjectionStore
@@ -801,6 +814,9 @@ class Context
     @_storeInstances[storeName].clearProjectionStore projectionName
     .then ->
       resolve()
+
+    .catch (err) ->
+      reject err
 
 
   ###*

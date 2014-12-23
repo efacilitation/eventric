@@ -19,9 +19,9 @@ class InMemoryStore
   *
   * @module InMemoryStore
   ###
-  saveDomainEvent: (domainEvent, callback) ->
+  saveDomainEvent: (domainEvent, callback) ->  new Promise (resolve, reject) =>
     @_domainEvents[@_domainEventsCollectionName].push domainEvent
-    callback null, domainEvent
+    resolve domainEvent
 
 
   ###*

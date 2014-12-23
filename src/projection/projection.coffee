@@ -101,6 +101,9 @@ class Projection
             @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
             next()
 
+        .catch (err) ->
+          next err
+
       , (err) ->
         return reject err if err
         resolve()
@@ -117,6 +120,8 @@ class Projection
         .then =>
           @log.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
           next()
+        .catch (err) ->
+          next err
       , (err) ->
         resolve()
 
@@ -140,7 +145,8 @@ class Projection
       else
         findEvents = @_context.findDomainEventsByName eventNames
 
-      findEvents.then (domainEvents) =>
+      findEvents
+      .then (domainEvents) =>
         if not domainEvents or domainEvents.length is 0
           return resolve eventNames
 
@@ -154,7 +160,7 @@ class Projection
           return reject err if err
           resolve eventNames
 
-      findEvents.catch (err) ->
+      .catch (err) ->
         reject err
 
 
@@ -173,15 +179,19 @@ class Projection
             domainEvent: domainEvent
           @_context.publish "projection:#{projectionName}:changed", event
           @_context.publish "projection:#{projectionId}:changed", event
-
           done()
+
+        .catch (err) ->
+          done err
 
       if domainEventStreamName
         @_context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler, isAsync: true
         .then (subscriberId) =>
           @_handlerFunctions[projectionId] ?= []
           @_handlerFunctions[projectionId].push subscriberId
-        resolve()
+          resolve()
+        .catch (err) ->
+          reject err
 
       else
         eventric.eachSeries eventNames, (eventName, done) =>
@@ -189,30 +199,33 @@ class Projection
             subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
           else
             subscriberPromise = @_context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
-          subscriberPromise.then (subscriberId) =>
+          subscriberPromise
+          .then (subscriberId) =>
             @_handlerFunctions[projectionId] ?= []
             @_handlerFunctions[projectionId].push subscriberId
             done()
-        , ->
+          .catch (err) ->
+            done err
+        , (err) ->
+          return reject err if err
           resolve()
 
 
-  _applyDomainEventToProjection: (domainEvent, projection) =>
-    new Promise (resolve, reject) =>
-      if !projection["handle#{domainEvent.name}"]
-        @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
-        return resolve()
+  _applyDomainEventToProjection: (domainEvent, projection) =>  new Promise (resolve, reject) =>
+    if !projection["handle#{domainEvent.name}"]
+      @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
+      return resolve()
 
-      if projection["handle#{domainEvent.name}"].length == 2
-        # promise defined inside the handler
-        projection["handle#{domainEvent.name}"] domainEvent,
-          resolve: resolve
-          reject: reject
+    if projection["handle#{domainEvent.name}"].length == 2
+      # promise defined inside the handler
+      projection["handle#{domainEvent.name}"] domainEvent,
+        resolve: resolve
+        reject: reject
 
-      else
-        # no promise defined inside the handler
-        projection["handle#{domainEvent.name}"] domainEvent
-        resolve()
+    else
+      # no promise defined inside the handler
+      projection["handle#{domainEvent.name}"] domainEvent
+      resolve()
 
 
   ###*

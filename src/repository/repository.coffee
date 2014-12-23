@@ -25,34 +25,33 @@ class Repository
   *
   * @param {String} aggregateId The AggregateId of the Aggregate to be found
   ###
-  findById: (aggregateId, callback = ->) =>
-    new Promise (resolve, reject) =>
-      @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
-        if err
-          callback err, null
-          reject err
-          return
+  findById: (aggregateId, callback = ->) =>  new Promise (resolve, reject) =>
+    @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
+      if err
+        callback err, null
+        reject err
+        return
 
-        if not domainEvents.length
-          err = "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
-          @_eventric.log.error err
-          callback err, null
-          reject err
-          return
+      if not domainEvents.length
+        err = "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
+        @_eventric.log.error err
+        callback err, null
+        reject err
+        return
 
-        aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
-        aggregate.applyDomainEvents domainEvents
-        aggregate.id = aggregateId
-        aggregate.root.$id = aggregateId
-        aggregate.root.$save = =>
-          @save aggregate.id
+      aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
+      aggregate.applyDomainEvents domainEvents
+      aggregate.id = aggregateId
+      aggregate.root.$id = aggregateId
+      aggregate.root.$save = =>
+        @save aggregate.id
 
-        commandId = @_command.id ? 'nocommand'
-        @_aggregateInstances[commandId] ?= {}
-        @_aggregateInstances[commandId][aggregateId] = aggregate
+      commandId = @_command.id ? 'nocommand'
+      @_aggregateInstances[commandId] ?= {}
+      @_aggregateInstances[commandId][aggregateId] = aggregate
 
-        callback null, aggregate.root
-        resolve aggregate.root
+      callback null, aggregate.root
+      resolve aggregate.root
 
 
   _findDomainEventsForAggregate: (aggregateId, callback) ->
@@ -109,59 +108,59 @@ class Repository
   *
   * @param {String} aggregateId The AggregateId of the Aggregate to be saved
   ###
-  save: (aggregateId, callback=->) =>
-    new Promise (resolve, reject) =>
-      commandId = @_command.id ? 'nocommand'
-      aggregate = @_aggregateInstances[commandId][aggregateId]
-      if not aggregate
-        err = "Tried to save unknown aggregate #{@_aggregateName}"
-        @_eventric.log.error err
-        err = new Error err
-        callback? err, null
+  save: (aggregateId, callback=->) =>  new Promise (resolve, reject) =>
+    commandId = @_command.id ? 'nocommand'
+    aggregate = @_aggregateInstances[commandId][aggregateId]
+    if not aggregate
+      err = "Tried to save unknown aggregate #{@_aggregateName}"
+      @_eventric.log.error err
+      err = new Error err
+      callback? err, null
+      reject err
+      return
+
+    domainEvents   = aggregate.getDomainEvents()
+    if domainEvents.length < 1
+      err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
+      @_eventric.log.debug err, @_command
+      err = new Error err
+      callback? err, null
+      reject err
+      return
+
+    @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
+
+    # TODO: this should be an transaction to guarantee consistency
+    @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+      domainEvent.command = @_command
+      @_store.saveDomainEvent domainEvent
+      .then =>
+        @_eventric.log.debug "Saved DomainEvent", domainEvent
+        next null
+    , (err) =>
+      if err
+        callback err, null
         reject err
-        return
-
-      domainEvents   = aggregate.getDomainEvents()
-      if domainEvents.length < 1
-        err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
-        @_eventric.log.debug err, @_command
-        err = new Error err
-        callback? err, null
-        reject err
-        return
-
-      @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
-
-      # TODO: this should be an transaction to guarantee consistency
-      @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-        domainEvent.command = @_command
-        @_store.saveDomainEvent domainEvent, =>
-          @_eventric.log.debug "Saved DomainEvent", domainEvent
-          next null
-      , (err) =>
-        if err
-          callback err, null
-          reject err
+      else
+        if not @_context.isWaitingModeEnabled()
+          for domainEvent in domainEvents
+            @_eventric.log.debug "Publishing DomainEvent", domainEvent
+            @_context.getEventBus().publishDomainEvent domainEvent
+          resolve aggregate.id
+          callback null, aggregate.id
         else
-          if not @_context.isWaitingModeEnabled()
-            for domainEvent in domainEvents
-              @_eventric.log.debug "Publishing DomainEvent", domainEvent
-              @_context.getEventBus().publishDomainEvent domainEvent
-            resolve aggregate.id
-            callback null, aggregate.id
-          else
-            @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-              @_eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
-              @_context.getEventBus().publishDomainEventAndWait domainEvent
-              .then ->
-                next()
-            , (err) =>
-              if err
-                callback err, null
-                reject err
-              else
-                resolve aggregate.id
-                callback null, aggregate.id
+          @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+            @_eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
+            @_context.getEventBus().publishDomainEventAndWait domainEvent
+            .then ->
+              next()
+          , (err) =>
+            if err
+              callback err, null
+              reject err
+            else
+              resolve aggregate.id
+              callback null, aggregate.id
 
 
 

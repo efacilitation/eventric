@@ -1,4 +1,4 @@
-describe.only 'Global Projection Feature', ->
+describe 'Global Projection Feature', ->
 
   describe 'given we created and initialized some example contexts then create a Global Projection', ->
     exampleContext1 = null
@@ -45,11 +45,13 @@ describe.only 'Global Projection Feature', ->
         stores: ['inmemory']
 
         fromContext1_handleSomethingHappened: (domainEvent, promise) ->
-          @$store.inmemory.totallyDenormalized = domainEvent.payload.specific
+          console.log '1'
+          @$store.inmemory.totallyDenormalizedc1 = domainEvent.payload.specific
           promise.resolve()
           
         fromContext2_handleSomethingHappened: (domainEvent, promise) ->
-          @$store.inmemory.totallyDenormalized = domainEvent.payload.specific
+          console.log '2'
+          @$store.inmemory.totallyDenormalizedc2 = domainEvent.payload.specific
           promise.resolve()
     
     
@@ -61,5 +63,4 @@ describe.only 'Global Projection Feature', ->
         .then ->
           eventric.getContext('GlobalProjectionsContext').getProjectionStore 'inmemory', 'ExampleProjection'
           .then (projectionStore) ->
-            console.log('??')
-            expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'
+            expect(projectionStore).to.deep.equal totallyDenormalizedc1: 'foo'

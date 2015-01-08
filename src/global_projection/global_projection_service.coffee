@@ -26,13 +26,17 @@ class GlobalProjectionService
           subProjection = {}
           
           for eventName in contextEvents
-            subProjection['handle'+eventName] = projection["from#{contextName}_handle#{eventName}"].bind(projection)
+            subProjection['handle'+eventName] = this._eventHandler projection, contextName, eventName
               
           subProjectionName = "_globalProjection_#{name}"
           subContext.addProjection subProjectionName, subProjection
           
           if subContext._initialized then subContext.initializeProjectionInstance subProjectionName, params
           
+    
+  _eventHandler: (projection, contextName, eventName) ->
+    return ->
+      projection["from#{contextName}_handle#{eventName}"].apply(projection, arguments)
     
   _getGlobalContext: () ->
     new Promise (resolve, reject) =>

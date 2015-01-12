@@ -1,24 +1,26 @@
 class Eventric
 
   constructor: ->
-    @PubSub          = require './pub_sub'
-    @EventBus        = require './event_bus'
-    @Remote          = require './remote'
-    @Context         = require './context'
-    @DomainEvent     = require './domain_event'
-    @Aggregate       = require './aggregate'
-    @Repository      = require './repository'
-    @Projection      = require './projection'
-    @ProcessManager  = require './process_manager'
-    @Logger          = require './logger'
-    @RemoteInMemory  = require './remote/inmemory'
-    @StoreInMemory   = require './store/inmemory'
+    @PubSub           = require './pub_sub'
+    @EventBus         = require './event_bus'
+    @Remote           = require './remote'
+    @Context          = require './context'
+    @DomainEvent      = require './domain_event'
+    @Aggregate        = require './aggregate'
+    @Repository       = require './repository'
+    @Projection       = require './projection'
+    @GlobalProjection = require './global_projection'
+    @ProcessManager   = require './process_manager'
+    @Logger           = require './logger'
+    @RemoteInMemory   = require './remote/inmemory'
+    @StoreInMemory    = require './store/inmemory'
 
     @log                      = @Logger
     @_contexts                = {}
     @_params                  = {}
     @_processManagerInstances = {}
     @_processManagerService   = @ProcessManager
+    @_globalProjectionService = new @GlobalProjection(@)
     @_domainEventHandlers     = {}
     @_domainEventHandlersAll  = []
     @_storeClasses            = {}
@@ -232,6 +234,17 @@ class Eventric
   ###
   addProcessManager: (processManagerName, processManagerObj) ->
     @_processManagerService.add processManagerName, processManagerObj, @
+
+  ###*
+  * @name addGlobalProjection
+  * @module eventric
+  * @description Add a Global Projection
+  *
+  * @param {String} globalProjectionName Name of the Projection
+  * @param {Object} globalProjectionObj Object containing `class`
+  ###
+  addGlobalProjection: (globalProjectionName, globalProjectionObj) ->
+    @_globalProjectionService.add globalProjectionName, globalProjectionObj
 
 
   ###*

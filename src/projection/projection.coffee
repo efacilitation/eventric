@@ -194,7 +194,7 @@ class Projection
           reject err
 
       else
-        eventric.eachSeries eventNames, (eventName, done) =>
+        @_eventric.eachSeries eventNames, (eventName, done) =>
           if aggregateId
             subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
           else

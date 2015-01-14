@@ -204,7 +204,7 @@ class Projection
             domainEvents = domainEvents.concat value
         
         resolvePromise = =>
-          value.promise.resolve(eventsMap) for key, value of initials when typeof value.promise isnt 'undefined'
+          value.promise.resolve() for key, value of initials when typeof value.promise isnt 'undefined'
           resolve eventsMap[@_context.name]
           
         rejectPromise = (err) =>

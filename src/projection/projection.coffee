@@ -54,7 +54,7 @@ class Projection
         @log.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
         @_parseEventsMapFromProjection projection
       .then (eventsMap) =>
-        @_applyDomainEventsFromStoreToProjection projectionId, projection, eventsMap, aggregateId
+        @_applyDomainEventsFromStoreToProjection projectionId, projectionName, projection, eventsMap, aggregateId
       .then (eventNames) =>
         @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
         @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName
@@ -152,13 +152,21 @@ class Projection
             resolve: resolve
             reject: reject
 
-  _subContextDomainEventHandler: (projection) ->
-    return (dE, p) =>
-      @_applyDomainEventToProjection dE, projection
-      .then resolve
+  _subContextDomainEventHandler: (projectionId, projectionName, projection) ->
+    return (domainEvent, p) =>
+      @_applyDomainEventToProjection domainEvent, projection
+      .then =>
+        @_domainEventsApplied[projectionId][domainEvent.id] = true
+        event =
+          id: projectionId
+          projection: projection
+          domainEvent: domainEvent
+        @_context.publish "projection:#{projectionName}:changed", event
+        @_context.publish "projection:#{projectionId}:changed", event
+        resolve()
       .catch reject
   
-  _createSubProjection: (projectionId, projection, contextName, eventNames) ->
+  _createSubProjection: (projectionId, projectionName, projection, contextName, eventNames) ->
     new Promise (resolve, reject) =>
       remote = false
       subContext = @_eventric.getContext contextName
@@ -176,7 +184,7 @@ class Projection
       }
       
       for eventName in eventNames
-        subProjection["handle#{eventName}"] = @_subContextDomainEventHandler(projection)
+        subProjection["handle#{eventName}"] = @_subContextDomainEventHandler projectionId, projectionName, projection
         
       subProjectionName = "_globalProjection_#{projectionId}"
       subContext.addProjection subProjectionName, subProjection
@@ -186,11 +194,11 @@ class Projection
       projection.$subProjections[contextName] = subProjection
 
 
-  _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventsMap, aggregateId) ->
+  _applyDomainEventsFromStoreToProjection: (projectionId, projectionName, projection, eventsMap, aggregateId) ->
     @_domainEventsApplied[projectionId] = {}
     promises = []
     for contextName, eventNames of eventsMap when contextName isnt @_context.name
-      promises.push @_createSubProjection(projectionId, projection, contextName, eventNames)
+      promises.push @_createSubProjection projectionId, projectionName, projection, contextName, eventNames
       
     if eventsMap[@_context.name]
       if aggregateId
@@ -203,17 +211,17 @@ class Projection
       new Promise (resolve, reject) =>
         domainEvents = []
         for key, value of initials
-          if typeof value.domainEvents isnt 'undefined'
+          if value.domainEvents?
             domainEvents = domainEvents.concat value.domainEvents
           else 
             domainEvents = domainEvents.concat value
         
         resolvePromise = =>
-          value.promise.resolve() for key, value of initials when typeof value.promise isnt 'undefined'
+          value.promise.resolve() for key, value of initials when value.promise?
           resolve eventsMap[@_context.name]
           
         rejectPromise = (err) =>
-          value.promise.reject(err) for key, value of initials when typeof value.promise isnt 'undefined'
+          value.promise.reject(err) for key, value of initials when value.promise?
           resolve err
           
         domainEvents.sort (a, b) ->

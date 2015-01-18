@@ -152,7 +152,12 @@ class Projection
             resolve: resolve
             reject: reject
 
-      
+  _subContextDomainEventHandler: (projection) ->
+    return (dE, p) =>
+      @_applyDomainEventToProjection dE, projection
+      .then resolve
+      .catch reject
+  
   _createSubProjection: (projectionId, projection, contextName, eventNames) ->
     new Promise (resolve, reject) =>
       remote = false
@@ -171,7 +176,7 @@ class Projection
       }
       
       for eventName in eventNames
-        subProjection["handle#{eventName}"] = projection["from#{contextName}_handle#{eventName}"].bind(projection)
+        subProjection["handle#{eventName}"] = @_subContextDomainEventHandler(projection)
         
       subProjectionName = "_globalProjection_#{projectionId}"
       subContext.addProjection subProjectionName, subProjection

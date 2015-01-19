@@ -251,10 +251,14 @@ class Projection
     if not @_handlerFunctions[projectionId]
       return @_eventric.log.error 'Missing attribute projectionId'
 
+    unsubscribePromises = []
     for subscriberId in @_handlerFunctions[projectionId]
-      @_context.unsubscribeFromDomainEvent subscriberId
+      unsubscribePromises.push @_context.unsubscribeFromDomainEvent subscriberId
+
     delete @_handlerFunctions[projectionId]
     delete @_projectionInstances[projectionId]
+
+    Promise.all unsubscribePromises
 
 
 module.exports = Projection

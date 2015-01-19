@@ -163,8 +163,7 @@ git commit -m"$VERSION"
 git push
 npm publish
 git checkout -b release master
-gulp dist
-git add .
+git add build -f
 git commit -m"$VERSION"
 git tag $VERSION
 git push --tags

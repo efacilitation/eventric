@@ -150,9 +150,8 @@ describe 'Remote Feature', ->
 
     it 'then it should be able to receive commands over the custom remote client', (done) ->
       class CustomRemoteClient
-        rpc: (rpcRequest, callback) ->
+        rpc: (rpcRequest) ->
           customRemoteBridge rpcRequest
-          callback()
 
       exampleRemote = eventric.remote 'Example'
       exampleRemote.addClient 'custom', new CustomRemoteClient

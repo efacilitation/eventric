@@ -6,10 +6,7 @@ pubSub = new PubSub
 class InMemoryRemoteEndpoint
   constructor: ->
     customRemoteBridge = (rpcRequest) =>
-      new Promise (resolve, reject) =>
-        @_handleRPCRequest rpcRequest, (error, result) ->
-          return reject error if error
-          resolve result
+      @_handleRPCRequest rpcRequest
 
   ###*
   * @name setRPCHandler
@@ -39,14 +36,10 @@ class InMemoryRemoteClient
   *
   * @module InMemoryRemoteClient
   ###
-  rpc: (rpcRequest, callback) ->
+  rpc: (rpcRequest) ->
     if not customRemoteBridge
       throw new Error 'No Remote Endpoint available for in memory client'
     customRemoteBridge rpcRequest
-    .then (result) ->
-      callback null, result
-    .catch (error) ->
-      callback error
 
 
   ###*

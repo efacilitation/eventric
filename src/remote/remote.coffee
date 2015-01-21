@@ -151,12 +151,9 @@ class Remote
   * @description Add handler function which gets called when any `DomainEvent` gets triggered
   *
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToAllDomainEvents: (handlerFn, options = {}) ->
-    clientName = @get 'default client'
-    client = @getClient clientName
-    client.subscribe @_contextName, handlerFn
+  subscribeToAllDomainEvents: (handlerFn) ->
+    @_rps 'subscribeToAllDomainEvents', handlerFn
 
 
   ###*
@@ -173,12 +170,9 @@ class Remote
   *
   * @param {String} domainEventName Name of the `DomainEvent`
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToDomainEvent: (domainEventName, handlerFn, options = {}) ->
-    clientName = @get 'default client'
-    client = @getClient clientName
-    client.subscribe @_contextName, domainEventName, handlerFn
+  subscribeToDomainEvent: (domainEventName, handlerFn) ->
+    @_rps 'subscribeToDomainEvent', handlerFn, [domainEventName]
 
 
   ###*
@@ -189,12 +183,9 @@ class Remote
   * @param {String} domainEventName Name of the `DomainEvent`
   * @param {String} aggregateId AggregateId
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn, options = {}) ->
-    clientName = @get 'default client'
-    client = @getClient clientName
-    client.subscribe @_contextName, domainEventName, aggregateId, handlerFn
+  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
+    @_rps 'subscribeToDomainEventWithAggregateId', handlerFn, [domainEventName, aggregateId]
 
 
   ###*
@@ -204,7 +195,6 @@ class Remote
   *
   * @param {String} domainEventStreamName Name of the `DomainEvent`
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
   subscribeToDomainEventStream: ->
     @_rpc 'subscribeToDomainEventStream', arguments
@@ -221,6 +211,18 @@ class Remote
     clientName = @get 'default client'
     client = @getClient clientName
     client.unsubscribe subscriberId
+
+
+  _rps: (method, subscriberFn, params) ->
+    clientName = @get 'default client'
+    client = @getClient clientName
+    client.subscribe
+      contextName: @_contextName
+      method: method
+      params: params
+    ,
+      id: @_eventric.generateUid()
+      fn: subscriberFn
 
 
   _rpc: (method, params) ->

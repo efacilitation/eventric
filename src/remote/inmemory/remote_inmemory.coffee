@@ -1,6 +1,7 @@
 PubSub = require '../../pub_sub'
 
 customRemoteBridge = null
+subscribers = {}
 pubSub = new PubSub
 
 class InMemoryRemoteEndpoint
@@ -42,14 +43,9 @@ class InMemoryRemoteClient
     customRemoteBridge rpcRequest
 
 
-  ###*
-  * @name subscribe
-  *
-  * @module InMemoryRemoteClient
-  ###
-  subscribe: (contextName, [domainEventName, aggregateId]..., handlerFn) ->
-    fullEventName = getFullEventName contextName, domainEventName, aggregateId
-    pubSub.subscribe fullEventName, handlerFn
+  subscribe: (rpcRequest, subscriber) ->
+    rpcRequest.params.push subscriber.fn
+    customRemoteBridge rpcRequest
 
 
   ###*

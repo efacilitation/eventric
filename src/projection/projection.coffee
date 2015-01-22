@@ -13,7 +13,6 @@ class Projection
     @_projectionInstances = {}
     @_domainEventsApplied = {}
 
-
   ###*
   * @name initializeInstance
   * @module Projection
@@ -53,9 +52,9 @@ class Projection
         @_callInitializeOnProjection projectionName, projection, params
       .then =>
         @log.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
-        @_parseEventNamesFromProjection projection
-      .then (eventNames) =>
-        @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
+        @_parseEventsMapFromProjection projection
+      .then (eventsMap) =>
+        @_applyDomainEventsFromStoreToProjection projectionId, projectionName, projection, eventsMap, aggregateId
       .then (eventNames) =>
         @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
         @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName
@@ -126,42 +125,125 @@ class Projection
         resolve()
 
 
-  _parseEventNamesFromProjection: (projection) ->
+  _parseEventsMapFromProjection: (projection) ->
     new Promise (resolve, reject) =>
-      eventNames = []
+      eventsMap = {}
+      
       for key, value of projection
         if (key.indexOf 'handle') is 0 and (typeof value is 'function')
           eventName = key.replace /^handle/, ''
-          eventNames.push eventName
-      resolve eventNames
+          eventsMap[@_context.name] ?= []
+          eventsMap[@_context.name].push eventName
+        else if (key.indexOf 'from') is 0 and (typeof value is 'function')
+          contextName = key.replace /^from/, ''
+          contextName = contextName.replace /_.*$/, ''
+          eventsMap[contextName] ?= []
+          eventName = key.replace /.*_handle/, ''
+          eventsMap[contextName].push eventName
+          
+      resolve eventsMap
 
+  _generateSubProjectionStoredDomainEventsHandler: (ready) ->
+    return (domainEvents) =>
+      new Promise (resolve, reject) =>
+        ready
+          domainEvents: domainEvents
+          promise:
+            resolve: resolve
+            reject: reject
 
-  _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventNames, aggregateId) ->
+  _subContextDomainEventHandler: (projectionId, projectionName, projection) ->
+    return (domainEvent, p) =>
+      @_applyDomainEventToProjection domainEvent, projection
+      .then =>
+        @_domainEventsApplied[projectionId][domainEvent.id] = true
+        event =
+          id: projectionId
+          projection: projection
+          domainEvent: domainEvent
+        @_context.publish "projection:#{projectionName}:changed", event
+        @_context.publish "projection:#{projectionId}:changed", event
+        resolve()
+      .catch reject
+  
+  _createSubProjection: (projectionId, projectionName, projection, contextName, eventNames) ->
     new Promise (resolve, reject) =>
-      @_domainEventsApplied[projectionId] = {}
+      remote = false
+      subContext = @_eventric.getContext contextName
+      if not subContext
+        subContext = @_eventric.remote contextName
+        remote = true
+      
+      if not subContext
+        err = new Error("Context #{contextName} not found")
+        @log.error err
+        return reject err
+        
+      subProjection = {
+        $handleStoredDomainEvents: @_generateSubProjectionStoredDomainEventsHandler resolve
+      }
+      
+      for eventName in eventNames
+        subProjection["handle#{eventName}"] = @_subContextDomainEventHandler projectionId, projectionName, projection
+        
+      subProjectionName = "_globalProjection_#{projectionId}"
+      subContext.addProjection subProjectionName, subProjection
+      if subContext._initialized or remote then subContext.initializeProjectionInstance subProjectionName
+      
+      projection.$subProjections ?= {}
+      projection.$subProjections[contextName] = subProjection
 
+
+  _applyDomainEventsFromStoreToProjection: (projectionId, projectionName, projection, eventsMap, aggregateId) ->
+    @_domainEventsApplied[projectionId] = {}
+    promises = []
+    for contextName, eventNames of eventsMap when contextName isnt @_context.name
+      promises.push @_createSubProjection projectionId, projectionName, projection, contextName, eventNames
+      
+    if eventsMap[@_context.name]
       if aggregateId
-        findEvents = @_context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
+        promises.push @_context.findDomainEventsByNameAndAggregateId eventsMap[@_context.name], aggregateId
       else
-        findEvents = @_context.findDomainEventsByName eventNames
-
-      findEvents
-      .then (domainEvents) =>
-        if not domainEvents or domainEvents.length is 0
-          return resolve eventNames
-
-        @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-          @_applyDomainEventToProjection domainEvent, projection
-          .then =>
-            @_domainEventsApplied[projectionId][domainEvent.id] = true
-            next()
-
-        , (err) ->
-          return reject err if err
-          resolve eventNames
-
-      .catch (err) ->
-        reject err
+        promises.push @_context.findDomainEventsByName eventsMap[@_context.name]
+      
+    Promise.all promises
+    .then (initials) =>
+      new Promise (resolve, reject) =>
+        domainEvents = []
+        for key, value of initials
+          if value.domainEvents?
+            domainEvents = domainEvents.concat value.domainEvents
+          else 
+            domainEvents = domainEvents.concat value
+        
+        resolvePromise = =>
+          value.promise.resolve() for key, value of initials when value.promise?
+          resolve eventsMap[@_context.name]
+          
+        rejectPromise = (err) =>
+          value.promise.reject(err) for key, value of initials when value.promise?
+          resolve err
+          
+        domainEvents.sort (a, b) ->
+          if a.timestamp > b.timestamp then return 1 
+          if a.timestamp < b.timestamp then return -1
+          return 0
+        
+        if typeof projection.$handleStoredDomainEvents is 'function'
+          projection.$handleStoredDomainEvents(domainEvents)
+          .then resolvePromise
+          .catch rejectPromise
+        else
+          @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+            @_applyDomainEventToProjection domainEvent, projection
+            .then =>
+              @_domainEventsApplied[projectionId][domainEvent.id] = true
+              next()
+    
+          , (err) ->
+            return rejectPromise(err) if err
+            resolvePromise()
+  
 
 
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName) ->
@@ -211,20 +293,26 @@ class Projection
           resolve()
 
 
-  _applyDomainEventToProjection: (domainEvent, projection) =>  new Promise (resolve, reject) =>
-    if !projection["handle#{domainEvent.name}"]
+  _applyDomainEventToProjection: (domainEvent, projection) => new Promise (resolve, reject) =>
+    if projection["handle#{domainEvent.name}"] and projection["from#{domainEvent.context}_handle#{domainEvent.name}"]
+      err = new Error("handle#{domainEvent.name} is ambiguous !")
+      @log.error err
+      return reject err
+      
+    handlerFn = projection["handle#{domainEvent.name}"] || projection["from#{domainEvent.context}_handle#{domainEvent.name}"]
+    if !handlerFn
       @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
       return resolve()
 
-    if projection["handle#{domainEvent.name}"].length == 2
+    if handlerFn.length == 2
       # promise defined inside the handler
-      projection["handle#{domainEvent.name}"] domainEvent,
+      handlerFn.call projection, domainEvent,
         resolve: resolve
         reject: reject
 
     else
       # no promise defined inside the handler
-      projection["handle#{domainEvent.name}"] domainEvent
+      handlerFn.call projection, domainEvent
       resolve()
 
 

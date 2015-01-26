@@ -96,6 +96,7 @@ class Eventric
     @mixin context, pubsub
 
     @_delegateAllDomainEventsToGlobalHandlers context
+    @_delegateAllDomainEventsToRemoteEndpoints context
 
     @_contexts[name] = context
 
@@ -163,6 +164,13 @@ class Eventric
       for eventHandler in eventHandlers
         eventHandler domainEvent
 
+
+  _delegateAllDomainEventsToRemoteEndpoints: (context) ->
+    context.subscribeToAllDomainEvents (domainEvent) =>
+      @_remoteEndpoints.forEach (remoteEndpoint) ->
+        remoteEndpoint.publish context.name, domainEvent.name, domainEvent
+        if domainEvent.aggregate
+          remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
 
   ###*
   * @name subscribeToDomainEvent

@@ -1,41 +1,41 @@
 describe 'Remote Projection Feature', ->
   exampleContext  = null
+  exampleRemote   = null
+  projectionId    = null
 
-  beforeEach ->
-    exampleContext = eventric.context 'Example'
-    exampleContext.defineDomainEvents
-      ExampleCreated: ->
-      ExampleUpdated: ->
+  describe 'given a context with one aggregate with two commands', ->
 
-    exampleContext.addCommandHandlers
-      CreateExample: (params) ->
-        @$aggregate.create 'Example'
-        .then (example) ->
-          example.$save()
-      UpdateExample: (params) ->
-        @$aggregate.load 'Example', params.id
-        .then (example) ->
-          example.update()
-          example.$save()
+    beforeEach ->
+      exampleContext = eventric.context 'Example'
+      exampleContext.defineDomainEvents
+        ExampleCreated: ->
+        ExampleUpdated: ->
 
-    class Example
-      create: ->
-        @$emitDomainEvent 'ExampleCreated'
-      update: ->
-        @$emitDomainEvent 'ExampleUpdated'
+      exampleContext.addCommandHandlers
+        CreateExample: (params) ->
+          @$aggregate.create 'Example'
+          .then (example) ->
+            example.$save()
+        UpdateExample: (params) ->
+          @$aggregate.load 'Example', params.id
+          .then (example) ->
+            example.update()
+            example.$save()
 
-    exampleContext.addAggregate 'Example', Example
+      class Example
+        create: ->
+          @$emitDomainEvent 'ExampleCreated'
+        update: ->
+          @$emitDomainEvent 'ExampleUpdated'
 
-    exampleContext.initialize()
-    .then ->
-      exampleContext.enableWaitingMode()
+      exampleContext.addAggregate 'Example', Example
+
+      exampleContext.initialize()
+      .then ->
+        exampleContext.enableWaitingMode()
 
 
-  describe 'given we created and initialized some example context', ->
-
-    describe 'when we add a projection to the remote', ->
-      projectionId = null
-      exampleRemote = null
+    describe 'adding a projection to the remote', ->
 
       beforeEach ->
         exampleRemote = eventric.remote 'Example'
@@ -58,14 +58,14 @@ describe 'Remote Projection Feature', ->
           projectionId = _projectionId
 
 
-      it 'then the projection should update its state as expected', ->
+      it 'should update the projection state as expected', ->
         exampleRemote.command 'CreateExample'
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           expect(exampleProjection.created).to.be.true
 
 
-      it 'then we should be able to remove it', ->
+      it 'should be possible to remove the projection', ->
         sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
 
         exampleRemote.destroyProjectionInstance projectionId
@@ -74,9 +74,7 @@ describe 'Remote Projection Feature', ->
         expect(exampleRemote.unsubscribeFromDomainEvent).to.have.been.called
 
 
-    describe 'when we initialize a projection as object on the remote', ->
-      projectionId = null
-      exampleRemote = null
+    describe 'initializing a projection as object on the remote', ->
 
       beforeEach ->
         exampleRemote = eventric.remote 'Example'
@@ -93,15 +91,14 @@ describe 'Remote Projection Feature', ->
           projectionId = _projectionId
 
 
-      it 'then the projection should update its state as expected', ->
+      it 'should update the projection state as expected', ->
         exampleRemote.command 'CreateExample'
         .then ->
           exampleProjection = exampleRemote.getProjectionInstance projectionId
           expect(exampleProjection.created).to.be.true
 
 
-    describe 'when we add a remote projection to the remote which subscribes to a specific aggregate', ->
-      exampleRemote = null
+    describe 'adding a remote projection to the remote which subscribes to a specific aggregate', ->
       projectionId  = null
 
       beforeEach ->
@@ -119,7 +116,7 @@ describe 'Remote Projection Feature', ->
         exampleRemote.addProjection 'ExampleProjection', ExampleProjection
 
 
-      it 'then should update the remote projection as expected', ->
+      it 'should update the projection state as expected', ->
         testExampleId = null
         exampleRemote.command 'CreateExample'
         .then (exampleId) ->
@@ -141,7 +138,7 @@ describe 'Remote Projection Feature', ->
           expect(exampleProjection.updated).to.be.true
 
 
-      it 'then should publish an event whenever a remote projection is updated', (done) ->
+      it 'should publish an event whenever a remote projection is updated', (done) ->
         testExampleId = null
         exampleRemote.command 'CreateExample'
         .then (exampleId) ->
@@ -155,7 +152,7 @@ describe 'Remote Projection Feature', ->
             id: testExampleId
 
 
-      it 'then we should be able to remove it', ->
+      it 'should be possible to remove the projection', ->
         exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: '123'
         .then (projectionId) ->
           sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
@@ -166,9 +163,7 @@ describe 'Remote Projection Feature', ->
           expect(exampleRemote.unsubscribeFromDomainEvent).to.have.been.called
 
 
-    describe 'when we add a remote projection and already have domain events for it', ->
-
-      exampleRemote = null
+    describe 'adding a remote projection for which matching domain events already exist', ->
 
       beforeEach ->
         exampleRemote = eventric.remote 'Example'
@@ -184,7 +179,7 @@ describe 'Remote Projection Feature', ->
         exampleRemote.addProjection 'ExampleProjection', ExampleProjection
 
 
-      it 'then it should apply the already existing domain events immediately to the projection', ->
+      it 'should apply the already existing domain events immediately to the projection', ->
         exampleContext.command 'CreateExample'
         .then (id) ->
           exampleRemote.initializeProjectionInstance 'ExampleProjection'
@@ -193,9 +188,7 @@ describe 'Remote Projection Feature', ->
           expect(projection.exampleCount).to.equal 1
 
 
-    describe 'when we add a remote projection for a specific aggregate id and have domain events for it', ->
-
-      exampleRemote = null
+    describe 'adding a remote projection for a specific aggregate id for which matching domain events already exist', ->
 
       beforeEach ->
         exampleRemote = eventric.remote 'Example'
@@ -215,7 +208,7 @@ describe 'Remote Projection Feature', ->
         exampleRemote.addProjection 'ExampleProjection', ExampleProjection
 
 
-      it 'then it should apply the already existing domain events immediately to the projection', ->
+      it 'should apply the already existing domain events immediately to the projection', ->
         exampleContext.command 'CreateExample'
         .then (exampleId) ->
           exampleContext.command 'UpdateExample', id: exampleId
@@ -226,7 +219,7 @@ describe 'Remote Projection Feature', ->
           expect(projection.updated).to.be.true
 
 
-      it 'then it should only apply the already existing domain events for the specific aggregate', ->
+      it 'should only apply the already existing domain events for the specific aggregate', ->
         firstExampleId = null
         exampleContext.command 'CreateExample'
         .then (_firstExampleId) ->
@@ -241,9 +234,7 @@ describe 'Remote Projection Feature', ->
           expect(projection.updated).to.be.false
 
 
-    describe 'when we add a remote projection and already have multiple domain events for it', ->
-
-      exampleRemote = null
+    describe 'adding a remote projection  for which multiple matching domain events already exist', ->
 
       beforeEach ->
         exampleRemote = eventric.remote 'Example'
@@ -262,7 +253,7 @@ describe 'Remote Projection Feature', ->
         exampleRemote.addProjection 'ExampleProjection', ExampleProjection
 
 
-      it 'then it should apply the already existing domain events in the correct order', ->
+      it 'should apply the already existing domain events in the correct order', ->
         exampleContext.command 'CreateExample'
         .then (id) ->
           exampleContext.command 'UpdateExample', id: id
@@ -271,3 +262,102 @@ describe 'Remote Projection Feature', ->
         .then (projectionId) ->
           projection = exampleRemote.getProjectionInstance projectionId
           expect(projection.events).to.deep.equal ['ExampleCreated', 'ExampleUpdated']
+
+
+  describe 'given a context with one aggregate which emits two domain events in one behavior', ->
+
+    beforeEach ->
+      exampleContext = eventric.context 'Example'
+
+      exampleContext.defineDomainEvents
+        ExampleCreated: ->
+        ExampleModified: ->
+
+      exampleContext.addAggregate 'Example', ->
+        create: (params) ->
+          @$emitDomainEvent 'ExampleCreated'
+          @modify params
+
+        modify: (params) ->
+          @$emitDomainEvent 'ExampleModified'
+
+
+      exampleContext.addCommandHandlers
+        CreateExample: (params) ->
+          exampleId = null
+          @$aggregate.create 'Example',
+            foo: 'bar'
+          .then (example) ->
+            example.$save()
+
+      exampleContext.initialize()
+
+
+    describe 'given two projections where the first one listen to one event and the second one to both events', ->
+
+      beforeEach ->
+        exampleRemote = eventric.remote 'Example'
+
+        exampleRemote.addProjection 'FirstProjection', ->
+
+          initialize: (params, done) ->
+            @actions = []
+            done()
+
+
+          handleExampleCreated: (domainEvent) ->
+            @actions.push 'created'
+
+
+        exampleRemote.addProjection 'SecondProjection', ->
+
+          initialize: (params, done) ->
+            @actions = []
+            done()
+
+          handleExampleCreated: (domainEvent) ->
+            @actions.push 'created'
+
+
+          handleExampleModified: (domainEvent) ->
+            @actions.push 'modified'
+
+
+      describe 'when emitting domain events the projections subscribed to', ->
+
+        secondProjection = null
+
+        beforeEach ->
+          exampleRemote.initializeProjectionInstance 'FirstProjection'
+          .then (firstProjectionId) ->
+            exampleRemote.initializeProjectionInstance 'SecondProjection'
+          .then (secondProjectionId) ->
+            secondProjection = exampleRemote.getProjectionInstance secondProjectionId
+
+        describe 'without waiting mode', ->
+
+          it 'should execute the second projection\'s event handlers in the correct order', ->
+            new Promise (resolve, reject) ->
+              exampleRemote.subscribeToDomainEvent 'ExampleModified', ->
+                try
+                  expect(secondProjection.actions[0]).to.equal 'created'
+                  expect(secondProjection.actions[1]).to.equal 'modified'
+                  resolve()
+                catch e
+                  reject e
+              exampleRemote.command 'CreateExample'
+
+
+        describe 'with waiting mode', ->
+
+          it 'should execute the second projection\'s event handlers in the correct order', ->
+            exampleContext.enableWaitingMode()
+            new Promise (resolve, reject) ->
+              exampleRemote.subscribeToDomainEvent 'ExampleModified', ->
+                try
+                  expect(secondProjection.actions[0]).to.equal 'created'
+                  expect(secondProjection.actions[1]).to.equal 'modified'
+                  resolve()
+                catch e
+                  reject e
+              exampleRemote.command 'CreateExample'

@@ -142,25 +142,19 @@ class Repository
         callback err, null
         reject err
       else
-        if not @_context.isWaitingModeEnabled()
-          for domainEvent in domainEvents
-            @_eventric.log.debug "Publishing DomainEvent", domainEvent
-            @_context.getEventBus().publishDomainEvent domainEvent
-          resolve aggregate.id
-          callback null, aggregate.id
-        else
-          @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-            @_eventric.log.debug "Publishing DomainEvent in waiting mode", domainEvent
-            @_context.getEventBus().publishDomainEventAndWait domainEvent
-            .then ->
-              next()
-          , (err) =>
-            if err
-              callback err, null
-              reject err
-            else
-              resolve aggregate.id
-              callback null, aggregate.id
+        publishMethod = if @_context.isWaitingModeEnabled() then 'publishDomainEventAndWait' else 'publishDomainEvent'
+        @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+          @_eventric.log.debug "Publishing DomainEvent with #{publishMethod}", domainEvent
+          @_context.getEventBus()[publishMethod] domainEvent
+          .then ->
+            next()
+        , (err) =>
+          if err
+            callback err, null
+            reject err
+          else
+            resolve aggregate.id
+            callback null, aggregate.id
 
 
 

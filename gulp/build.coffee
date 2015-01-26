@@ -36,7 +36,7 @@ module.exports = (gulp) ->
       ))
 
     es6 = gulp.src([
-      'node_modules/es6-promise/dist/promise-1.0.0.js'
+      'node_modules/es6-promise/dist/es6-promise.js'
     ])
       .pipe(commonjs(
         pathModifier: (filePath) ->

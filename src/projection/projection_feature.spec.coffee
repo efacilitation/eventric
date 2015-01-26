@@ -1,33 +1,27 @@
 describe 'Projection Feature', ->
 
-  describe 'given we created and initialized some example context including a Projection', ->
+  describe 'given an example context with one aggregate with two simple commands', ->
     exampleContext = null
     beforeEach ->
       exampleContext = eventric.context 'exampleContext'
 
       exampleContext.defineDomainEvents
-        ExampleCreated: ->
+        ExampleCreated: (params) ->
+          @specific = params.specific
 
-        SomethingHappened: (params) ->
-          @specific = params.whateverFoo
 
-      exampleContext.addProjection 'ExampleProjection', ->
-        stores: ['inmemory']
+        ExampleModified: (params) ->
+          @specific = params.specific
 
-        handleSomethingHappened: (domainEvent, promise) ->
-          @$store.inmemory.totallyDenormalized = domainEvent.payload.specific
-          promise.resolve()
 
       exampleContext.addAggregate 'Example', ->
         create: ->
-          @$emitDomainEvent 'ExampleCreated'
-        handleExampleCreated: (domainEvent) ->
-          @whatever = 'bar'
-        doSomething: ->
-          if @whatever is 'bar'
-            @$emitDomainEvent 'SomethingHappened', whateverFoo: 'foo'
-        handleSomethingHappened: (domainEvent) ->
-          @whatever = domainEvent.payload.whateverFoo
+          @$emitDomainEvent 'ExampleCreated',
+            specific: 'created'
+        modify: ->
+          @$emitDomainEvent 'ExampleModified',
+            specific: 'modified'
+
 
       exampleContext.addCommandHandlers
         CreateExample: (params) ->
@@ -36,23 +30,41 @@ describe 'Projection Feature', ->
           .then (example) ->
             example.$save()
 
-        doSomethingWithExample: (params) ->
+        ModifyExample: (params) ->
           @$aggregate.load 'Example', params.id
           .then (example) ->
-            example.doSomething()
+            example.modify()
             example.$save()
 
-      exampleContext.initialize()
-      .then ->
-        exampleContext.enableWaitingMode()
+
+    describe 'given a projection added to it', ->
+
+      beforeEach ->
+        exampleContext.addProjection 'ExampleProjection', ->
+          stores: ['inmemory']
+
+          handleExampleCreated: (domainEvent, promise) ->
+            @$store.inmemory.exampleCreated = domainEvent.payload.specific
+            promise.resolve()
 
 
-    describe 'when DomainEvents got emitted which the Projection subscribed to', ->
-      it 'then the Projection should call the projectionStore with the denormalized state', ->
-        exampleContext.command 'CreateExample'
-        .then (exampleId) ->
-          exampleContext.command 'doSomethingWithExample', id: exampleId
+          handleExampleModified: (domainEvent, promise) ->
+            @$store.inmemory.exampleModified = domainEvent.payload.specific
+            promise.resolve()
+
+        exampleContext.initialize()
         .then ->
-          exampleContext.getProjectionStore 'inmemory', 'ExampleProjection'
-          .then (projectionStore) ->
-            expect(projectionStore).to.deep.equal totallyDenormalized: 'foo'
+          exampleContext.enableWaitingMode()
+
+
+      describe 'when emitting domain events the projection subscribed to', ->
+
+        it 'should execute the projection\'s event handlers and save it to the specified store', ->
+          exampleContext.command 'CreateExample'
+          .then (exampleId) ->
+            exampleContext.command 'ModifyExample', id: exampleId
+          .then ->
+            exampleContext.getProjectionStore 'inmemory', 'ExampleProjection'
+            .then (projectionStore) ->
+              expect(projectionStore.exampleCreated).to.equal 'created'
+              expect(projectionStore.exampleModified).to.equal 'modified'

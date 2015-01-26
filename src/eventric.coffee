@@ -143,7 +143,7 @@ class Eventric
     remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
 
 
-  _handleRemoteRPCRequest: (request) =>
+  _handleRemoteRPCRequest: (request, callback) =>
     context = @getContext request.contextName
     if not context
       err = "Tried to handle Remote RPC with not registered context #{request.contextName}"
@@ -155,7 +155,12 @@ class Eventric
       @log.error err
       return callback err, null
 
+    #middleware(request, user)
     context[request.method] request.params...
+    .then (result) ->
+      callback null, result
+    .catch (error) ->
+      callback error
 
 
   _delegateAllDomainEventsToGlobalHandlers: (context) ->

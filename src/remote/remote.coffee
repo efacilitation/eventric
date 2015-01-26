@@ -224,12 +224,18 @@ class Remote
 
 
   _rpc: (method, params) ->
-    clientName = @get 'default client'
-    client = @getClient clientName
-    client.rpc
-      contextName: @_contextName
-      method: method
-      params: Array.prototype.slice.call params
+    new Promise (resolve, reject) =>
+      clientName = @get 'default client'
+      client = @getClient clientName
+      client.rpc
+        contextName: @_contextName
+        method: method
+        params: Array.prototype.slice.call params
+      , (err, result) ->
+        if err
+          reject err
+        else
+          resolve result
 
 
   ###*

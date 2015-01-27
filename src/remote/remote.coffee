@@ -16,6 +16,7 @@ class Remote
     @_clients = {}
     @_projectionClasses = {}
     @_projectionInstances = {}
+    @_projectionInitializable = true
     @_handlerFunctions = {}
     @projectionService = new @_eventric.Projection @_eventric
     @addClient 'inmemory', @InMemoryRemote.client

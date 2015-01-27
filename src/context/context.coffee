@@ -11,6 +11,7 @@ class Context
 
   constructor: (@name, @_eventric) ->
     @_initialized = false
+    @_projectionInitializable = false
     @_params = @_eventric.get()
     @_di = {}
     @_aggregateRootClasses = {}
@@ -603,6 +604,7 @@ class Context
 
   _initializeProjections: ->
     new Promise (resolve, reject) =>
+      @_projectionInitializable = true
       projections = []
       for projectionName, ProjectionClass of @_projectionClasses
         projections.push

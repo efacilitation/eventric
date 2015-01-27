@@ -188,7 +188,7 @@ class Projection
         
       subProjectionName = "_globalProjection_#{projectionId}"
       subContext.addProjection subProjectionName, subProjection
-      if subContext._initialized or remote then subContext.initializeProjectionInstance subProjectionName
+      if subContext._projectionInitializable then subContext.initializeProjectionInstance subProjectionName
       
       projection.$subProjections ?= {}
       projection.$subProjections[contextName] = subProjection

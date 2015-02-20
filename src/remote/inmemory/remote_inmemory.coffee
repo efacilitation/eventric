@@ -39,14 +39,10 @@ class InMemoryRemoteClient
   *
   * @module InMemoryRemoteClient
   ###
-  rpc: (rpcRequest, callback) ->
+  rpc: (rpcRequest) ->
     if not customRemoteBridge
       throw new Error 'No Remote Endpoint available for in memory client'
     customRemoteBridge rpcRequest
-    .then (result) ->
-      callback null, result
-    .catch (error) ->
-      callback error
 
 
   ###*

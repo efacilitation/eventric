@@ -14,7 +14,7 @@ growl.initialize()
 
 module.exports = (gulp) ->
   lastSpecError = false
-  gulp.task 'spec', (next) =>
+  gulp.task 'spec', (next) ->
     growl.specsRun()
     runSequence 'build', 'spec:server', 'spec:client', ->
       growl.specsEnd()

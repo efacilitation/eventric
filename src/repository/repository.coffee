@@ -119,7 +119,7 @@ class Repository
       reject err
       return
 
-    domainEvents   = aggregate.getDomainEvents()
+    domainEvents = aggregate.getDomainEvents()
     if domainEvents.length < 1
       err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
       @_eventric.log.debug err, @_command

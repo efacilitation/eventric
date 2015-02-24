@@ -5,9 +5,7 @@ describe 'EventBus', ->
   beforeEach ->
     pubSubStub =
       subscribe: sandbox.stub().returns then: (next) -> next()
-      subscribeAsync: sandbox.stub().returns then: (next) -> next()
       publish: sandbox.stub().returns then: (next) -> next()
-      publishAsync: sandbox.stub().returns then: (next) -> next()
 
     eventricStub =
       PubSub: sandbox.stub().returns pubSubStub
@@ -57,23 +55,3 @@ describe 'EventBus', ->
         domainEvent = name: 'SomeEvent', aggregate: id: 12345
         eventBus.publishDomainEvent domainEvent
         expect(pubSubStub.publish).to.have.been.calledWith 'SomeEvent/12345', domainEvent
-
-
-  describe '#publishDomainEventAndWait', ->
-    it 'should publish a generic "DomainEvent" event asynchronously', ->
-      domainEvent = name: 'SomeEvent'
-      eventBus.publishDomainEventAndWait domainEvent
-      expect(pubSubStub.publishAsync).to.have.been.calledWith 'DomainEvent', domainEvent
-
-
-    it 'should then publish the given event asynchronously', ->
-      domainEvent = name: 'SomeEvent'
-      eventBus.publishDomainEventAndWait domainEvent
-      expect(pubSubStub.publishAsync).to.have.been.calledWith 'SomeEvent', domainEvent
-
-
-    describe 'given an event with an aggregate id', ->
-      it 'should publish an aggregate id specific event', ->
-        domainEvent = name: 'SomeEvent', aggregate: id: 12345
-        eventBus.publishDomainEventAndWait domainEvent
-        expect(pubSubStub.publishAsync).to.have.been.calledWith 'SomeEvent/12345', domainEvent

@@ -31,8 +31,6 @@ describe 'Remote Projection Feature', ->
       exampleContext.addAggregate 'Example', Example
 
       exampleContext.initialize()
-      .then ->
-        exampleContext.enableWaitingMode()
 
 
     describe 'adding a projection to the remote', ->
@@ -334,30 +332,14 @@ describe 'Remote Projection Feature', ->
           .then (secondProjectionId) ->
             secondProjection = exampleRemote.getProjectionInstance secondProjectionId
 
-        describe 'without waiting mode', ->
 
-          it 'should execute the second projection\'s event handlers in the correct order', ->
-            new Promise (resolve, reject) ->
-              exampleRemote.subscribeToDomainEvent 'ExampleModified', ->
-                try
-                  expect(secondProjection.actions[0]).to.equal 'created'
-                  expect(secondProjection.actions[1]).to.equal 'modified'
-                  resolve()
-                catch e
-                  reject e
-              exampleRemote.command 'CreateExample'
-
-
-        describe 'with waiting mode', ->
-
-          it 'should execute the second projection\'s event handlers in the correct order', ->
-            exampleContext.enableWaitingMode()
-            new Promise (resolve, reject) ->
-              exampleRemote.subscribeToDomainEvent 'ExampleModified', ->
-                try
-                  expect(secondProjection.actions[0]).to.equal 'created'
-                  expect(secondProjection.actions[1]).to.equal 'modified'
-                  resolve()
-                catch e
-                  reject e
-              exampleRemote.command 'CreateExample'
+        it 'should execute the second projection\'s event handlers in the correct order', ->
+          new Promise (resolve, reject) ->
+            exampleRemote.subscribeToDomainEvent 'ExampleModified', ->
+              try
+                expect(secondProjection.actions[0]).to.equal 'created'
+                expect(secondProjection.actions[1]).to.equal 'modified'
+                resolve()
+              catch error
+                reject error
+            exampleRemote.command 'CreateExample'

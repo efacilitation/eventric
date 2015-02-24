@@ -53,8 +53,6 @@ describe 'Projection Feature', ->
             promise.resolve()
 
         exampleContext.initialize()
-        .then ->
-          exampleContext.enableWaitingMode()
 
 
       describe 'when emitting domain events the projection subscribed to', ->

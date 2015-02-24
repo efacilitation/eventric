@@ -267,11 +267,10 @@ class Context
   *
   * @param {String} domainEventName Name of the `DomainEvent`
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToDomainEvent: (domainEventName, handlerFn, options = {}) ->
+  subscribeToDomainEvent: (domainEventName, handlerFn) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
-    @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler, options
+    @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
   ###*
@@ -293,11 +292,10 @@ class Context
   * @param {String} domainEventName Name of the `DomainEvent`
   * @param {String} aggregateId AggregateId
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn, options = {}) ->
+  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
-    @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler, options
+    @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler
 
 
   ###*
@@ -306,11 +304,10 @@ class Context
   * @description Add handler function which gets called when any `DomainEvent` gets triggered
   *
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToAllDomainEvents: (handlerFn, options = {}) ->
+  subscribeToAllDomainEvents: (handlerFn) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
-    @_eventBus.subscribeToAllDomainEvents domainEventHandler, options
+    @_eventBus.subscribeToAllDomainEvents domainEventHandler
 
 
   ###*
@@ -946,35 +943,6 @@ class Context
 
     .catch (err) ->
       reject err
-
-
-
-
-  ###*
-  * @name enableWaitingMode
-  * @module Context
-  * @description Enables the WaitingMode
-  ###
-  enableWaitingMode: ->
-    @set 'waiting mode', true
-
-
-  ###*
-  * @name disableWaitingMode
-  * @module Context
-  * @description Disables the WaitingMode
-  ###
-  disableWaitingMode: ->
-    @set 'waiting mode', false
-
-
-  ###*
-  * @name isWaitingModeEnabled
-  * @module Context
-  * @description Returns if the WaitingMode is enabled
-  ###
-  isWaitingModeEnabled: ->
-    @get 'waiting mode'
 
 
 module.exports = Context

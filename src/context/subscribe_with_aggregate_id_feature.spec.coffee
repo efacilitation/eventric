@@ -2,7 +2,7 @@ describe 'Subscribe to event with aggregate id Feature', ->
 
   describe 'given we created and initialized some example context including an aggregate', ->
     exampleContext = null
-    beforeEach (done) ->
+    beforeEach ->
       exampleContext = eventric.context 'exampleContext'
       exampleContext.addAggregate 'Example', class Example
 
@@ -30,9 +30,6 @@ describe 'Subscribe to event with aggregate id Feature', ->
             example.$save()
 
       exampleContext.initialize()
-      .then ->
-        exampleContext.enableWaitingMode()
-        done()
 
 
     describe 'when we subscribe to an event with a specific aggregate id', ->

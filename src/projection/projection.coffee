@@ -185,7 +185,7 @@ class Projection
           done err
 
       if domainEventStreamName
-        @_context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler, isAsync: true
+        @_context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler
         .then (subscriberId) =>
           @_handlerFunctions[projectionId] ?= []
           @_handlerFunctions[projectionId].push subscriberId
@@ -196,9 +196,9 @@ class Projection
       else
         @_eventric.eachSeries eventNames, (eventName, done) =>
           if aggregateId
-            subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler, isAsync: true
+            subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler
           else
-            subscriberPromise = @_context.subscribeToDomainEvent eventName, domainEventHandler, isAsync: true
+            subscriberPromise = @_context.subscribeToDomainEvent eventName, domainEventHandler
           subscriberPromise
           .then (subscriberId) =>
             @_handlerFunctions[projectionId] ?= []

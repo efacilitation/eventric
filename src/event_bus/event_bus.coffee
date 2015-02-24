@@ -20,10 +20,7 @@ class EventBus
   * @param {Function} handlerFn Function to handle the DomainEvent
   ###
   subscribeToDomainEvent: (eventName, handlerFn, options = {}) ->
-    if options.isAsync
-      @_pubSub.subscribeAsync eventName, handlerFn
-    else
-      @_pubSub.subscribe eventName, handlerFn
+    @_pubSub.subscribe eventName, handlerFn
 
 
   ###*
@@ -56,26 +53,13 @@ class EventBus
   * @description Publish a DomainEvent on the Bus
   ###
   publishDomainEvent: (domainEvent) ->
-    @_publish 'publish', domainEvent
-
-
-  ###*
-  * @name publishDomainEventAndWait
-  * @module EventBus
-  * @description Publish a DomainEvent on the Bus and wait for all Projections to call their promise.resolve
-  ###
-  publishDomainEventAndWait: (domainEvent) ->
-    @_publish 'publishAsync', domainEvent
-
-
-  _publish: (publishMethod, domainEvent) ->
     new Promise (resolve, reject) =>
-      @_pubSub[publishMethod] 'DomainEvent', domainEvent
+      @_pubSub.publish 'DomainEvent', domainEvent
       .then =>
-        @_pubSub[publishMethod] domainEvent.name, domainEvent
+        @_pubSub.publish domainEvent.name, domainEvent
       .then =>
         if domainEvent.aggregate and domainEvent.aggregate.id
-          @_pubSub[publishMethod] "#{domainEvent.name}/#{domainEvent.aggregate.id}", domainEvent
+          @_pubSub.publish "#{domainEvent.name}/#{domainEvent.aggregate.id}", domainEvent
           .then ->
             resolve()
         else

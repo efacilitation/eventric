@@ -151,9 +151,8 @@ class Remote
   * @description Add handler function which gets called when any `DomainEvent` gets triggered
   *
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToAllDomainEvents: (handlerFn, options = {}) ->
+  subscribeToAllDomainEvents: (handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
     client.subscribe @_contextName, handlerFn
@@ -173,9 +172,8 @@ class Remote
   *
   * @param {String} domainEventName Name of the `DomainEvent`
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToDomainEvent: (domainEventName, handlerFn, options = {}) ->
+  subscribeToDomainEvent: (domainEventName, handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
     client.subscribe @_contextName, domainEventName, handlerFn
@@ -189,9 +187,8 @@ class Remote
   * @param {String} domainEventName Name of the `DomainEvent`
   * @param {String} aggregateId AggregateId
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
-  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn, options = {}) ->
+  subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
     clientName = @get 'default client'
     client = @getClient clientName
     client.subscribe @_contextName, domainEventName, aggregateId, handlerFn
@@ -204,7 +201,6 @@ class Remote
   *
   * @param {String} domainEventStreamName Name of the `DomainEvent`
   * @param {Function} Function which gets called with `domainEvent` as argument
-  * @param {Object} options Options to set on the EventBus ("async: false" is default)
   ###
   subscribeToDomainEventStream: ->
     @_rpc 'subscribeToDomainEventStream', arguments

@@ -142,10 +142,9 @@ class Repository
         callback err, null
         reject err
       else
-        publishMethod = if @_context.isWaitingModeEnabled() then 'publishDomainEventAndWait' else 'publishDomainEvent'
         @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-          @_eventric.log.debug "Publishing DomainEvent with #{publishMethod}", domainEvent
-          @_context.getEventBus()[publishMethod] domainEvent
+          @_eventric.log.debug "Publishing DomainEvent", domainEvent
+          @_context.getEventBus().publishDomainEvent domainEvent
           .then ->
             next()
         , (err) =>

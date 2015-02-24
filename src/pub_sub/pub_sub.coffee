@@ -32,25 +32,6 @@ class PubSub
 
 
   ###*
-  * @name subscribeAsync
-  * @module PubSub
-  * @description Subscribe asynchronously to an Event
-  *
-  * @param {String} eventName Name of the Event to subscribe to
-  * @param {Function} subscriberFn Function to call when Event gets published
-  ###
-  subscribeAsync: (eventName, subscriberFn) ->
-    new Promise (resolve, reject) =>
-      subscriber =
-        eventName: eventName
-        subscriberFn: subscriberFn
-        subscriberId: @_getNextSubscriberId()
-        isAsync: true
-      @_subscribers.push subscriber
-      resolve subscriber.subscriberId
-
-
-  ###*
   * @name publish
   * @module PubSub
   * @description Publish an Event
@@ -67,30 +48,6 @@ class PubSub
         else
           subscribers.shift().subscriberFn payload, ->
           @_nextTick executeNextHandler, 0
-      @_nextTick executeNextHandler, 0
-
-
-  ###*
-  * @name publishAsync
-  * @module PubSub
-  * @description Publish an Event
-  *
-  * @param {String} eventName Name of the Event
-  * @param {Object} payload The Event payload to asynchronously be published
-  ###
-  publishAsync: (eventName, payload) ->
-    new Promise (resolve, reject) =>
-      subscribers = @_getRelevantSubscribers eventName
-      executeNextHandler = =>
-        if subscribers.length is 0
-          resolve()
-        else
-          subscriber = subscribers.shift()
-          if subscriber.isAsync
-            subscriber.subscriberFn payload, -> setTimeout executeNextHandler, 0
-          else
-            subscriber.subscriberFn payload
-            @_nextTick executeNextHandler, 0
       @_nextTick executeNextHandler, 0
 
 

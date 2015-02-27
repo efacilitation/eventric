@@ -9,7 +9,6 @@ class Eventric
     @Aggregate       = require './aggregate'
     @Repository      = require './repository'
     @Projection      = require './projection'
-    @ProcessManager  = require './process_manager'
     @Logger          = require './logger'
     @RemoteInMemory  = require './remote/inmemory'
     @StoreInMemory   = require './store/inmemory'
@@ -17,8 +16,6 @@ class Eventric
     @log                      = @Logger
     @_contexts                = {}
     @_params                  = {}
-    @_processManagerInstances = {}
-    @_processManagerService   = @ProcessManager
     @_domainEventHandlers     = {}
     @_domainEventHandlersAll  = []
     @_storeClasses            = {}
@@ -220,18 +217,6 @@ class Eventric
       (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
     delim = separator or "-"
     S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
-
-
-  ###*
-  * @name addProcessManager
-  * @module eventric
-  * @description Add a Global Process Manager
-  *
-  * @param {String} processManagerName Name of the ProcessManager
-  * @param {Object} processManagerObject Object containing `initializeWhen` and `class`
-  ###
-  addProcessManager: (processManagerName, processManagerObj) ->
-    @_processManagerService.add processManagerName, processManagerObj, @
 
 
   ###*

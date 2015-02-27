@@ -24,7 +24,6 @@ class Context
     @_domainEventStreamClasses = {}
     @_domainEventStreamInstances = {}
     @_repositoryInstances = {}
-    @_domainServices = {}
     @_storeClasses = {}
     @_storeInstances = {}
     @_eventBus         = new @_eventric.EventBus @_eventric
@@ -378,38 +377,6 @@ class Context
 
 
   ###*
-  * @name addDomainService
-  * @module Context
-  * @description Add function which gets called when called using $domainService
-  *
-  * @example
-    ```javascript
-    exampleContext.addDomainService('DoSomethingSpecial', function(params) {
-      // ...
-    });
-    ```
-  *
-  * @param {String} domainServiceName Name of the `DomainService`
-  * @param {Function} Function which gets called with params as argument
-  ###
-  addDomainService: (domainServiceName, domainServiceFn) ->
-    @_domainServices[domainServiceName] = => domainServiceFn.apply @_di, arguments
-    @
-
-
-  ###*
-  * @name addDomainServices
-  * @module Context
-  * @description Add multiple DomainServices at once
-  *
-  * @param {Object} domainServiceObjs Object containing multiple DomainEventStreamDefinitions "name: definition"
-  ###
-  addDomainServices: (domainServiceObjs) ->
-    @addDomainService domainServiceName, domainServiceFn for domainServiceName, domainServiceFn of domainServiceObjs
-    @
-
-
-  ###*
   * @name addAdapter
   * @module Context
   * @description Add adapter
@@ -553,8 +520,6 @@ class Context
         @_di =
           $adapter: => @getAdapter.apply @, arguments
           $query: => @query.apply @, arguments
-          $domainService: =>
-            (@getDomainService arguments[0]).apply @, [arguments[1], arguments[2]]
           $projectionStore: => @getProjectionStore.apply @, arguments
           $emitDomainEvent: => @emitDomainEvent.apply @, arguments
 
@@ -664,17 +629,6 @@ class Context
   ###
   getDomainEvent: (domainEventName) ->
     @_domainEventClasses[domainEventName]
-
-
-  ###*
-  * @name getDomainService
-  * @module Context
-  * @description Get a DomainService after initialize()
-  *
-  * @param {String} domainServiceName Name of the DomainService
-  ###
-  getDomainService: (domainServiceName) ->
-    @_domainServices[domainServiceName]
 
 
   ###*

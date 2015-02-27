@@ -14,8 +14,6 @@ class Context
     @_params = @_eventric.get()
     @_di = {}
     @_aggregateRootClasses = {}
-    @_adapterClasses = {}
-    @_adapterInstances = {}
     @_commandHandlers = {}
     @_queryHandlers = {}
     @_domainEventClasses = {}
@@ -377,38 +375,6 @@ class Context
 
 
   ###*
-  * @name addAdapter
-  * @module Context
-  * @description Add adapter
-  *
-  * @example
-    ```javascript
-    exampleContext.addAdapter('SomeAdapter', function() {
-      // ...
-    });
-    ```
-  *
-  * @param {String} adapterName Name of Adapter
-  * @param {Function} Adapter Class
-  ###
-  addAdapter: (adapterName, adapterClass) ->
-    @_adapterClasses[adapterName] = adapterClass
-    @
-
-
-  ###*
-  * @name addAdapters
-  * @module Context
-  * @description Add multiple Adapters at once
-  *
-  * @param {Object} adaptersObj Object containing multiple Adapters "name: function"
-  ###
-  addAdapters: (adaptersObj) ->
-    @addAdapter adapterName, fn for adapterName, fn of adaptersObj
-    @
-
-
-  ###*
   * @name addProjection
   * @module Context
   * @description Add Projection that can subscribe to and handle DomainEvents
@@ -518,15 +484,11 @@ class Context
       .then =>
         @log.debug "[#{@name}] Finished initializing Store"
         @_di =
-          $adapter: => @getAdapter.apply @, arguments
           $query: => @query.apply @, arguments
           $projectionStore: => @getProjectionStore.apply @, arguments
           $emitDomainEvent: => @emitDomainEvent.apply @, arguments
 
-        @log.debug "[#{@name}] Initializing Adapters"
-        @_initializeAdapters()
       .then =>
-        @log.debug "[#{@name}] Finished initializing Adapters"
         @log.debug "[#{@name}] Initializing Projections"
         @_initializeProjections()
       .then =>
@@ -587,17 +549,6 @@ class Context
         resolve()
 
 
-  _initializeAdapters: ->
-    new Promise (resolve, reject) =>
-      for adapterName, adapterClass of @_adapterClasses
-        adapter = new @_adapterClasses[adapterName]
-        adapter.initialize?()
-
-        @_adapterInstances[adapterName] = adapter
-
-      resolve()
-
-
   ###*
   * @name getProjection
   * @module Context
@@ -607,17 +558,6 @@ class Context
   ###
   getProjection: (projectionId) ->
     @projectionService.getInstance projectionId
-
-
-  ###*
-  * @name getAdapter
-  * @module Context
-  * @description Get a Adapter Instance after initialize()
-  *
-  * @param {String} adapterName Name of the Adapter
-  ###
-  getAdapter: (adapterName) ->
-    @_adapterInstances[adapterName]
 
 
   ###*

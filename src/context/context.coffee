@@ -308,73 +308,6 @@ class Context
 
 
   ###*
-  * @name subscribeToDomainEventStream
-  * @module Context
-  * @description Add DomainEventStream Definition
-  *
-  * @param {String} domainEventStreamName Name of the DomainEventStream
-  * @param {Function} DomainEventStream Definition
-  * @param {Object} Options to be used when initializing the DomainEventStream
-  ###
-  subscribeToDomainEventStream: (domainEventStreamName, handlerFn, options = {}) ->
-    new Promise (resolve, reject) =>
-      # TODO: extract to initializeDomainEventStream()
-      if not @_domainEventStreamClasses[domainEventStreamName]
-        err = new Error "DomainEventStream Class with name #{domainEventStreamName} not added"
-        @log.error err
-        return reject err
-      domainEventStream = new @_domainEventStreamClasses[domainEventStreamName]
-      domainEventStream._domainEventsPublished = {}
-      domainEventStreamId = @_eventric.generateUid()
-      @_domainEventStreamInstances[domainEventStreamId] = domainEventStream
-
-      domainEventNames = []
-      for functionName, functionValue of domainEventStream
-        if (functionName.indexOf 'filter') is 0 and (typeof functionValue is 'function')
-          domainEventName = functionName.replace /^filter/, ''
-          domainEventNames.push domainEventName
-
-      @_applyDomainEventsFromStoreToDomainEventStream domainEventNames, domainEventStream, handlerFn
-      .then =>
-        # TODO: async each
-        for domainEventName in domainEventNames
-          @subscribeToDomainEvent domainEventName, (domainEvent) ->
-            if domainEventStream._domainEventsPublished[domainEvent.id]
-              return
-
-            if (domainEventStream["filter#{domainEvent.name}"] domainEvent) is true
-              handlerFn domainEvent, ->
-
-          , options
-
-      .catch (err) ->
-        reject err
-
-      resolve domainEventStreamId
-
-
-  _applyDomainEventsFromStoreToDomainEventStream: (eventNames, domainEventStream) ->
-    new Promise (resolve, reject) =>
-      @findDomainEventsByName eventNames
-      .then (domainEvents) =>
-        if not domainEvents or domainEvents.length is 0
-          return resolve eventNames
-
-        @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-          if (domainEventStream["filter#{domainEvent.name}"] domainEvent) is true
-            handlerFn domainEvent, ->
-            domainEventStream._domainEventsPublished[domainEvent.id] = true
-            next()
-
-        , (err) ->
-          return reject err if err
-          resolve eventNames
-
-      .catch (err) ->
-        reject err
-
-
-  ###*
   * @name addProjection
   * @module Context
   * @description Add Projection that can subscribe to and handle DomainEvents
@@ -396,31 +329,6 @@ class Context
   ###
   addProjections: (viewsObj) ->
     @addProjection projectionName, ProjectionClass for projectionName, ProjectionClass of viewsObj
-    @
-
-
-  ###*
-  * @name addDomainEventStream
-  * @module Context
-  * @description Add DomainEventStream which projections can subscribe to
-  *
-  * @param {string} domainEventStreamName Name of the Stream
-  * @param {Function} The DomainEventStream Class definition
-  ###
-  addDomainEventStream: (domainEventStreamName, DomainEventStreamClass) ->
-    @_domainEventStreamClasses[domainEventStreamName] = DomainEventStreamClass
-    @
-
-
-  ###*
-  * @name addDomainEventStreams
-  * @module Context
-  * @description Add multiple DomainEventStreams at once
-  *
-  * @param {object} DomainEventStreams key domainEventStreamName, value DomainEventStreamClass
-  ###
-  addDomainEventStreams: (viewsObj) ->
-    @addDomainEventStream domainEventStreamName, DomainEventStreamClass for domainEventStreamName, DomainEventStreamClass of viewsObj
     @
 
 

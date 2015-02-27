@@ -40,9 +40,6 @@ class Projection
       projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
         aggregateId = _aggregateId
 
-      domainEventStreamName = null
-      projection.$subscribeToDomainEventStream = (_domainEventStreamName) ->
-        domainEventStreamName = _domainEventStreamName
 
       @log.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
       @_clearProjectionStores projection.stores, projectionName
@@ -58,7 +55,7 @@ class Projection
         @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
       .then (eventNames) =>
         @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
-        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName
+        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
       .then =>
         @_projectionInstances[projectionId] = projection
         event =
@@ -164,7 +161,7 @@ class Projection
         reject err
 
 
-  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId, domainEventStreamName) ->
+  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId) ->
     new Promise (resolve, reject) =>
       domainEventHandler = (domainEvent, done = ->) =>
         if @_domainEventsApplied[projectionId][domainEvent.id]
@@ -184,31 +181,21 @@ class Projection
         .catch (err) ->
           done err
 
-      if domainEventStreamName
-        @_context.subscribeToDomainEventStream domainEventStreamName, domainEventHandler
+      @_eventric.eachSeries eventNames, (eventName, done) =>
+        if aggregateId
+          subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler
+        else
+          subscriberPromise = @_context.subscribeToDomainEvent eventName, domainEventHandler
+        subscriberPromise
         .then (subscriberId) =>
           @_handlerFunctions[projectionId] ?= []
           @_handlerFunctions[projectionId].push subscriberId
-          resolve()
+          done()
         .catch (err) ->
-          reject err
-
-      else
-        @_eventric.eachSeries eventNames, (eventName, done) =>
-          if aggregateId
-            subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler
-          else
-            subscriberPromise = @_context.subscribeToDomainEvent eventName, domainEventHandler
-          subscriberPromise
-          .then (subscriberId) =>
-            @_handlerFunctions[projectionId] ?= []
-            @_handlerFunctions[projectionId].push subscriberId
-            done()
-          .catch (err) ->
-            done err
-        , (err) ->
-          return reject err if err
-          resolve()
+          done err
+      , (err) ->
+        return reject err if err
+        resolve()
 
 
   _applyDomainEventToProjection: (domainEvent, projection) =>  new Promise (resolve, reject) =>

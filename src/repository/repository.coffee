@@ -132,7 +132,6 @@ class Repository
 
     # TODO: this should be an transaction to guarantee consistency
     @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-      domainEvent.command = @_command
       @_store.saveDomainEvent domainEvent
       .then =>
         @_eventric.log.debug "Saved DomainEvent", domainEvent

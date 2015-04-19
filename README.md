@@ -6,14 +6,6 @@
 
 Behavior-first application development. Runs on NodeJS and modern Browsers.
 
-
-### Why?
-
-Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
-
-[![MVC evolved](http://img.youtube.com/vi/XSc7NPedAxw/0.jpg)](http://www.youtube.com/watch?v=XSc7NPedAxw)
-
-
 ## Philosophy
 
 * Emphasize [Domain-driven design](https://www.goodreads.com/book/show/179133.Domain_Driven_Design), [Event-driven architecture](https://www.goodreads.com/book/show/12369902-event-centric) and [Task-based UIs](http://cqrs.wordpress.com/documents/task-based-ui).
@@ -25,17 +17,13 @@ Because [MVC evolved](http://sixsteps.ghost.io/mvc-evolved/).
 * Support occasionally connected clients ([offline-first](http://offlinefirst.org) / [nobackend](https://github.com/noBackend/nobackend.org))
 * Be reactive ([Manifesto](http://www.reactivemanifesto.org))
 
+Early talk about MVC, CRUD, DDD, CQRS and Event Sourcing from Johannes Becker, original creator of eventric: http://www.youtube.com/watch?v=XSc7NPedAxw
 
 ## Getting started
-
-Take a look at the [eventric TodoMVC](https://github.com/efacilitation/eventric-todoMVC) for a running example, or try it yourself:
-
-We need to install eventric first.
 
 ```
 npm install eventric
 ```
-
 
 ### Setup Context
 
@@ -137,7 +125,6 @@ todoContext.initialize()
 ```
 After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing into the `InMemory Store`.
 
-
 ## Running Tests
 
 To execute all (client+server) tests, use:
@@ -175,4 +162,4 @@ git branch -D release
 
 MIT
 
-Copyright (c) 2013-2014 SixSteps Team, eFa GmbH
+Copyright (c) 2013-2015 SixSteps Team, eFa GmbH

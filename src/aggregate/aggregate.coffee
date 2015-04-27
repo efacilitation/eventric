@@ -43,6 +43,9 @@ class Aggregate
 
 
   _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
+    payload = {}
+    DomainEventClass.apply payload, [domainEventPayload]
+
     new @_eventric.DomainEvent
       id: @_eventric.generateUid()
       name: domainEventName
@@ -50,7 +53,7 @@ class Aggregate
         id: @id
         name: @_name
       context: @_context.name
-      payload: new DomainEventClass domainEventPayload
+      payload: payload
 
 
   _handleDomainEvent: (domainEventName, domainEvent) ->

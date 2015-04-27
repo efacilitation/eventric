@@ -26,25 +26,10 @@ class Eventric
     @set 'default domain events store', 'inmemory'
 
 
-  ###*
-  * @name set
-  * @module eventric
-  * @description Configure Global parameters
-  *
-  * @param {String} key Name of the key
-  * @param {Mixed} value Value to be set
-  ###
   set: (key, value) ->
     @_params[key] = value
 
 
-  ###*
-  * @name get
-  * @module eventric
-  * @description Get Global configured parameters
-  *
-  * @param {String} key Name of the Key
-  ###
   get: (key) ->
     if not key
       @_params
@@ -52,37 +37,16 @@ class Eventric
       @_params[key]
 
 
-  ###*
-  * @name addStore
-  * @module eventric
-  * @description Add Global Store
-  *
-  * @param {string} storeName Name of the store
-  * @param {Function} StoreClass Class of the store
-  * @param {Object} Options to be passed to the store on initialize
-  ###
   addStore: (storeName, StoreClass, storeOptions={}) ->
     @_storeClasses[storeName] =
       Class: StoreClass
       options: storeOptions
 
 
-  ###*
-  * @name getStores
-  * @module eventric
-  * @description Get all Global added Stores
-  ###
   getStores: ->
     @_storeClasses
 
 
-  ###*
-  * @name context
-  * @module eventric
-  * @description Generate a new context instance.
-  *
-  * @param {String} name Name of the Context
-  ###
   context: (name) ->
     if !name
       err = 'Contexts must have a name'
@@ -100,22 +64,10 @@ class Eventric
     context
 
 
-  ###*
-  * @name getContext
-  * @module eventric
-  * @decription Get a Context instance
-  ###
   getContext: (name) ->
     @_contexts[name]
 
 
-  ###*
-  * @name remote
-  * @module eventric
-  * @description Generate a new Remote
-  *
-  * @param {String} name Name of the Context to remote control
-  ###
   remote: (contextName) ->
     if !contextName
       err = 'Missing context name'
@@ -127,14 +79,6 @@ class Eventric
     remote
 
 
-  ###*
-  * @name addRemoteEndpoint
-  * @module eventric
-  * @description Add a Global RemoteEndpoint
-  *
-  * @param {String} remoteName Name of the Remote
-  * @param {Object} remoteEndpoint Initialized RemoteEndpoint
-  ###
   addRemoteEndpoint: (remoteName, remoteEndpoint) ->
     @_remoteEndpoints.push remoteEndpoint
     remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
@@ -179,15 +123,7 @@ class Eventric
         if domainEvent.aggregate
           remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
 
-  ###*
-  * @name subscribeToDomainEvent
-  * @module eventric
-  * @description Global DomainEvent Handlers
-  *
-  * @param {String} contextName Name of the context or 'all'
-  * @param {String} eventName Name of the Event or 'all'
-  * @param {Function} eventHandler Function which handles the DomainEvent
-  ###
+
   subscribeToDomainEvent: ([contextName, eventName]..., eventHandler) ->
     contextName ?= 'all'
     eventName ?= 'all'
@@ -200,22 +136,12 @@ class Eventric
       @_domainEventHandlers[contextName][eventName].push eventHandler
 
 
-  ###*
-  * @name getDomainEventHandlers
-  * @module eventric
-  * @description Get all Global defined DomainEventHandlers
-  ###
   getDomainEventHandlers: (contextName, domainEventName) ->
     [].concat (@_domainEventHandlers[contextName]?[domainEventName] ? []),
               (@_domainEventHandlers[contextName]?.all ? []),
               (@_domainEventHandlersAll ? [])
 
 
-  ###*
-  * @name generateUid
-  * @module eventric
-  * @description Generate a Global Unique ID
-  ###
   generateUid: (separator) ->
     # http://stackoverflow.com/a/12223573
     S4 = ->
@@ -224,27 +150,7 @@ class Eventric
     S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
 
 
-  ###*
-  * @name nextTick
-  * @module eventric
-  * @description Execute a function after the nextTick
-  *
-  * @param {Function} next Function to be executed after the nextTick
-  ###
-  nextTick: (next) ->
-    nextTick = process?.nextTick ? setTimeout
-    nextTick ->
-      next()
-
-
-  ###*
-  * @name defaults
-  * @module eventric
-  * @description Apply default options to a given option object
-  *
-  * @param {Object} options Object which will eventually contain the options
-  * @param {Object} optionDefaults Object containing default options
-  ###
+  # TODO: Use existing npm module
   defaults: (options, optionDefaults) ->
     allKeys = [].concat (Object.keys options), (Object.keys optionDefaults)
     for key in allKeys when !options[key] and optionDefaults[key]
@@ -252,15 +158,7 @@ class Eventric
     options
 
 
-  ###*
-  * @name eachSeries
-  * @module eventric
-  * @description Execute every function in the given Array in series, then the given callback
-  *
-  * @param {Array} arr Array containing functions
-  * @param {Function} iterator Function to be called
-  * @param {Function} callback Callback to be called after the function series
-  ###
+  # TODO: Use existing npm module
   eachSeries: (arr, iterator, callback) ->
     # MIT https://github.com/jb55/async-each-series
     callback = callback or ->
@@ -283,6 +181,7 @@ class Eventric
     iterate()
 
 
+  # TODO: Use existing npm module
   mixin: (destination, source) ->
     for prop of source
       destination[prop] = source[prop]

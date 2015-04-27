@@ -143,14 +143,19 @@ class Eventric
   _handleRemoteRPCRequest: (request, callback) =>
     context = @getContext request.contextName
     if not context
-      err = "Tried to handle Remote RPC with not registered context #{request.contextName}"
-      @log.error err
-      return callback err, null
+      error = "Tried to handle Remote RPC with not registered context #{request.contextName}"
+      @log.error error
+      return callback error, null
+
+    if @Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.method) is -1
+      error = "RPC operation '#{request.method}' not allowed"
+      @log.error error
+      return callback error, null
 
     if request.method not of context
-      err = "Remote RPC method #{request.method} not found on Context #{request.contextName}"
-      @log.error err
-      return callback err, null
+      error = "Remote RPC method #{request.method} not found on Context #{request.contextName}"
+      @log.error error
+      return callback error, null
 
     #middleware(request, user)
     context[request.method] request.params...

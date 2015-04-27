@@ -1,13 +1,19 @@
 describe 'Remote Feature', ->
+
   exampleContext  = null
-  doSomethingStub = null
-  beforeEach (done) ->
-    doSomethingStub = sandbox.stub()
+  exampleRemote = null
+  doSomethingCommandHandlerStub = null
+  getSomethingQueryHandlerStub = null
+
+  beforeEach ->
+    doSomethingCommandHandlerStub = sandbox.stub()
+    getSomethingQueryHandlerStub = sandbox.stub()
 
     exampleContext = eventric.context 'Example'
     exampleContext.defineDomainEvents
       ExampleCreated: ->
       ExampleModified: ->
+
 
     exampleContext.addCommandHandlers
       CreateExample: (params) ->
@@ -15,17 +21,20 @@ describe 'Remote Feature', ->
         .then (example) ->
           example.$save()
 
+
       ModifyExample: (params) ->
         @$aggregate.load 'Example', params.id
         .then (example) ->
           example.modify()
           example.$save()
 
+
       DoSomething: (params, promise) ->
-        doSomethingStub()
+        doSomethingCommandHandlerStub params
         promise.resolve null
 
-    class Example
+
+    class ExampleAggregate
       create: ->
         @$emitDomainEvent 'ExampleCreated'
 
@@ -33,35 +42,47 @@ describe 'Remote Feature', ->
         @$emitDomainEvent 'ExampleModified'
 
 
-    exampleContext.addAggregate 'Example', Example
+    exampleContext.addAggregate 'Example', ExampleAggregate
 
     exampleContext.addQueryHandlers
       getSomething: (params, promise) ->
+        getSomethingQueryHandlerStub params
         promise.resolve 'something'
 
     exampleContext.initialize()
     .then ->
-      done()
-
-
-  describe 'given we created and initialized some example context', ->
-    it 'then it should be able to receive commands over a remote', ->
       exampleRemote = eventric.remote 'Example'
-      exampleRemote.command 'DoSomething'
+
+
+  describe 'creating a remote for an example context', ->
+
+    it 'should create a remote for the context', ->
+      expect(exampleRemote).to.be.an.instanceof eventric.Remote
+
+
+  describe 'executing a command on a remote', ->
+
+    it 'should pass on the command to the context', ->
+      params = {}
+      exampleRemote.command 'DoSomething', params
       .then ->
-        expect(doSomethingStub).to.have.been.calledOnce
+        expect(doSomethingCommandHandlerStub).to.have.been.calledOnce
+        expect(doSomethingCommandHandlerStub).to.have.been.calledWith params
 
 
-    it 'then it should be able to answer queries over a remote', ->
-      exampleRemote = eventric.remote 'Example'
-      exampleRemote.query 'getSomething'
+  describe 'querying a remote', ->
+
+    it 'should pass on the query to the context', ->
+      params = {}
+      exampleRemote.query 'getSomething', params
       .then (result) ->
+        expect(getSomethingQueryHandlerStub).to.have.been.calledWith params
         expect(result).to.equal 'something'
 
 
-    it 'then it should be possible to subscribe to domain events and receive them', (done) ->
-      exampleRemote = eventric.remote 'Example'
+  describe 'subscribing to an event on a remote', ->
 
+    it 'should notify the subscriber in case of an event', (done) ->
       numberOfReceivedEvents = 0
       exampleRemote.subscribeToDomainEvent 'ExampleCreated', ->
         numberOfReceivedEvents++
@@ -72,9 +93,9 @@ describe 'Remote Feature', ->
       exampleRemote.command 'CreateExample', {}
 
 
-    it 'then it should be possible to subscribe to domain events for specific aggregate ids', (done) ->
-      exampleRemote = eventric.remote 'Example'
+  describe 'subscribing for an event for a specific aggregate id on a remote', ->
 
+    it 'should notify the subscriber in case of an event for the aggregate id', (done) ->
       exampleRemote.command 'CreateExample'
       .then (exampleId) ->
         exampleRemote.subscribeToDomainEventWithAggregateId 'ExampleModified', exampleId, ->
@@ -83,8 +104,9 @@ describe 'Remote Feature', ->
           id: exampleId
 
 
-    it 'then it should be possible to unsubscribe from domain events', (done) ->
-      exampleRemote = eventric.remote 'Example'
+  describe 'unsubscribing form an event on a remote', ->
+
+    it 'should not notify the subscriber anymore', (done) ->
       firstHandler = sandbox.stub()
       exampleRemote.subscribeToDomainEvent 'ExampleCreated', firstHandler
       .then (subscriberId) ->
@@ -97,8 +119,9 @@ describe 'Remote Feature', ->
         exampleRemote.command 'CreateExample', {}
 
 
-    it 'then it should be possible to find all domain events', ->
-      exampleRemote = eventric.remote 'Example'
+  describe 'finding all domain events on a remote', ->
+
+    it 'should be possible to find all domain events', ->
       exampleRemote.command 'CreateExample', {}
       .then (id) ->
         exampleRemote.command 'ModifyExample', id: id
@@ -108,8 +131,9 @@ describe 'Remote Feature', ->
         expect(events.length).to.equal 2
 
 
-    it 'then it should be possible to find domain events by name', ->
-      exampleRemote = eventric.remote 'Example'
+  describe 'finding domain events by on a remote', ->
+
+    it 'should be possible to find domain events by name', ->
       exampleRemote.command 'CreateExample', {}
       .then ->
         exampleRemote.findDomainEventsByName 'ExampleCreated'
@@ -117,8 +141,9 @@ describe 'Remote Feature', ->
         expect(events.length).to.equal 1
 
 
-    it 'then it should be possible to find domain events by aggregate id', ->
-      exampleRemote = eventric.remote 'Example'
+  describe 'finding domain events by aggregate id', ->
+
+    it 'should be possible to find domain events by aggregate id', ->
       exampleRemote.command 'CreateExample', {}
       .then (id) ->
         exampleRemote.findDomainEventsByAggregateId id
@@ -126,8 +151,9 @@ describe 'Remote Feature', ->
         expect(events.length).to.equal 1
 
 
-    it 'then it should be possible to find domain events by aggregate name', ->
-      exampleRemote = eventric.remote 'Example'
+  describe 'finding domain events by aggregate name', ->
+
+    it 'should be possible to find domain events by aggregate name', ->
       exampleRemote.command 'CreateExample', {}
       .then ->
         exampleRemote.findDomainEventsByAggregateName 'Example'
@@ -135,12 +161,39 @@ describe 'Remote Feature', ->
         expect(events.length).to.equal 1
 
 
-  describe 'given we created and initialized some example context with a custom remote endpoint', ->
-    customRemoteBridge = null
+  describe 'trying to execute sensitive or private functions from a context on a remote', ->
+
+    it 'should not be possible', ->
+      exposedHandleRPCRequest = null
+
+      verifyThatContextFunctionCannotBeCalled = (functionName) ->
+        sandbox.spy exampleContext, functionName
+
+        callback = sandbox.spy()
+        exposedHandleRPCRequest(
+          contextName: 'Example', method: functionName, params: {}
+          callback
+        )
+
+        expect(callback).to.have.been.calledWith sinon.match /not allowed/
+        expect(exampleContext.set).not.to.have.been.called
+
+
+      eventric.addRemoteEndpoint 'test',
+        setRPCHandler: (_handleRPCRequest) ->
+          exposedHandleRPCRequest = _handleRPCRequest
+
+      verifyThatContextFunctionCannotBeCalled 'set'
+      verifyThatContextFunctionCannotBeCalled 'emitDomainEvent'
+      verifyThatContextFunctionCannotBeCalled '_initializeStores'
+
+
+  describe 'creating and initializing some example context with a custom remote endpoint', ->
+    communicationFake = null
     beforeEach ->
       class CustomRemoteEndpoint
         constructor: ->
-          customRemoteBridge = (rpcRequest) =>
+          communicationFake = (rpcRequest) =>
             new Promise (resolve, reject) =>
               @_handleRPCRequest rpcRequest, (error, result) ->
                 return reject error if error
@@ -152,15 +205,14 @@ describe 'Remote Feature', ->
       eventric.addRemoteEndpoint 'custom', new CustomRemoteEndpoint
 
 
-    it 'then it should be able to receive commands over the custom remote client', (done) ->
+    it 'should be able to receive commands over the custom remote client', (done) ->
       class CustomRemoteClient
         rpc: (rpcRequest) ->
-          customRemoteBridge rpcRequest
+          communicationFake rpcRequest
 
-      exampleRemote = eventric.remote 'Example'
       exampleRemote.addClient 'custom', new CustomRemoteClient
       exampleRemote.set 'default client', 'custom'
       exampleRemote.command 'DoSomething'
       .then ->
-        expect(doSomethingStub).to.have.been.calledOnce
+        expect(doSomethingCommandHandlerStub).to.have.been.calledOnce
         done()

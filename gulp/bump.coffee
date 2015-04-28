@@ -1,6 +1,11 @@
 bump = require 'gulp-bump'
 
 module.exports = (gulp) ->
+  gulp.task 'bump:major', ->
+    gulp.src(['package.json', 'bower.json'])
+    .pipe bump(type: 'major')
+    .pipe gulp.dest('./')
+
   gulp.task 'bump:minor', ->
     gulp.src(['package.json', 'bower.json'])
     .pipe bump(type: 'minor')

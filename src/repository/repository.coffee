@@ -84,21 +84,13 @@ class Repository
     @_aggregateInstances[commandId] ?= {}
     @_aggregateInstances[commandId][aggregate.id] = aggregate
 
-    createPromise = new Promise (resolve, reject) =>
-      if aggregate.root.create.length <= 1
-        aggregate.root.create params
-        resolve()
+    createAggregate = aggregate.root.create params
 
-      else
-        aggregate.root.create params,
-          resolve: resolve
-          reject: reject
-
-    createPromise
+    Promise.all [createAggregate]
     .then ->
       resolve aggregate.root
-    .catch (err) ->
-      reject err
+    .catch ([error]) ->
+      reject error
 
 
   ###*

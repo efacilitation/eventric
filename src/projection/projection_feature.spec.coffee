@@ -43,14 +43,13 @@ describe 'Projection Feature', ->
         exampleContext.addProjection 'ExampleProjection', ->
           stores: ['inmemory']
 
-          handleExampleCreated: (domainEvent, promise) ->
+          handleExampleCreated: (domainEvent) ->
             @$store.inmemory.exampleCreated = domainEvent.payload.specific
-            promise.resolve()
 
 
-          handleExampleModified: (domainEvent, promise) ->
+          handleExampleModified: (domainEvent) ->
             @$store.inmemory.exampleModified = domainEvent.payload.specific
-            promise.resolve()
+
 
         exampleContext.initialize()
 

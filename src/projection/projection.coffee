@@ -198,21 +198,17 @@ class Projection
         resolve()
 
 
-  _applyDomainEventToProjection: (domainEvent, projection) =>  new Promise (resolve, reject) =>
-    if !projection["handle#{domainEvent.name}"]
-      @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
-      return resolve()
+  _applyDomainEventToProjection: (domainEvent, projection) =>
+    new Promise (resolve, reject) =>
+      if !projection["handle#{domainEvent.name}"]
+        @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
+        resolve()
+        return
 
-    if projection["handle#{domainEvent.name}"].length == 2
-      # promise defined inside the handler
-      projection["handle#{domainEvent.name}"] domainEvent,
-        resolve: resolve
-        reject: reject
-
-    else
-      # no promise defined inside the handler
-      projection["handle#{domainEvent.name}"] domainEvent
-      resolve()
+      handleDomainEvent = projection["handle#{domainEvent.name}"] domainEvent
+      Promise.all [handleDomainEvent]
+      .then ([result]) ->
+        resolve result
 
 
   ###*

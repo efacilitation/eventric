@@ -367,11 +367,11 @@ class Context
           repository.findById aggregateId
 
 
-      commandOperation = null
+      executeCommand = null
       commandHandlerFn = @_commandHandlers[name]
-      commandOperation = commandHandlerFn.apply _di, [params]
+      executeCommand = commandHandlerFn.apply _di, [params]
 
-      Promise.all [commandOperation]
+      Promise.all [executeCommand]
       .then ([result]) =>
         @log.debug 'Completed Command', name
         resolve result
@@ -379,31 +379,32 @@ class Context
         reject error
 
 
-  query: (name, params) ->  new Promise (resolve, reject) =>
-    @log.debug 'Got Query', name
+  query: (name, params) ->
+    new Promise (resolve, reject) =>
+      @log.debug 'Got Query', name
 
-    if not @_initialized
-      err = 'Context not initialized yet'
-      @log.error err
-      err = new Error err
-      reject err
-      return
+      if not @_initialized
+        err = 'Context not initialized yet'
+        @log.error err
+        err = new Error err
+        reject err
+        return
 
-    if not @_queryHandlers[name]
-      err = "Given query #{name} not registered on context"
-      @log.error err
-      err = new Error err
-      return reject err
+      if not @_queryHandlers[name]
+        err = "Given query #{name} not registered on context"
+        @log.error err
+        err = new Error err
+        return reject err
 
-    queryOperation = @_queryHandlers[name].apply @_di, [params]
+      executeQuery = @_queryHandlers[name].apply @_di, [params]
 
-    Promise.all [queryOperation]
-    .then ([result]) =>
-      @log.debug "Completed Query #{name} with Result #{result}"
-      resolve result
+      Promise.all [executeQuery]
+      .then ([result]) =>
+        @log.debug "Completed Query #{name} with Result #{result}"
+        resolve result
 
-    .catch (err) ->
-      reject err
+      .catch (err) ->
+        reject err
 
 
 module.exports = Context

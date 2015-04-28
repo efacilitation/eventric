@@ -13,10 +13,9 @@ describe 'Create Aggregate Feature', ->
 
         createCalled = false
         class Example
-          create: (params, promise) ->
+          create: (params) ->
             createCalled = true
             @$emitDomainEvent 'ExampleCreated', params
-            promise.resolve()
 
         exampleContext.addAggregate 'Example', Example
 

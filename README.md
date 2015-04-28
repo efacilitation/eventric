@@ -1,4 +1,4 @@
-> Not production ready. API might change heavily. 
+> Not production ready. API might change heavily.
 
 ![eventric logo](https://raw.githubusercontent.com/wiki/efacilitation/eventric/eventric_logo.png)
 
@@ -75,7 +75,7 @@ To actually work with the `Context` from the outside world we need `CommandHandl
 
 ```javascript
 todoContext.addCommandHandler('CreateTodo', function(params) {
-  this.$aggregate.create('Todo')
+  return this.$aggregate.create('Todo')
   .then(function (todo) {
     return todo.$save();
   });
@@ -87,7 +87,7 @@ It would be nice if we could change the description of the `Todo`, so let's add 
 
 ```javascript
 todoContext.addCommandHandler('ChangeTodoDescription', function(params) {
-  this.$aggregate.load('Todo', params.id)
+  return this.$aggregate.load('Todo', params.id)
   .then(function (todo) {
     todo.changeDescription(params.description);
     return todo.$save();

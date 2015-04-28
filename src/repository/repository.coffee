@@ -1,10 +1,3 @@
-###*
-* @name Repository
-* @module Repository
-* @description
-*
-* The Repository is responsible for creating, saving and finding Aggregates
-###
 class Repository
 
   constructor: (params, @_eventric) ->
@@ -18,13 +11,6 @@ class Repository
     @_store = @_context.getDomainEventsStore()
 
 
-  ###*
-  * @name findById
-  * @module Repository
-  * @description Find an aggregate by its id
-  *
-  * @param {String} aggregateId The AggregateId of the Aggregate to be found
-  ###
   findById: (aggregateId, callback = ->) =>  new Promise (resolve, reject) =>
     @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
       if err
@@ -61,11 +47,6 @@ class Repository
       callback null, domainEvents
 
 
-  ###*
-  * @name create
-  * @module Repository
-  * @description Create an Aggregate
-  ###
   create: (params) =>  new Promise (resolve, reject) =>
     aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
     aggregate.id = @_eventric.generateUid()
@@ -93,68 +74,54 @@ class Repository
       reject error
 
 
-  ###*
-  * @name save
-  * @module Repository
-  * @description Save the Aggregate
-  *
-  * @param {String} aggregateId The AggregateId of the Aggregate to be saved
-  ###
-  save: (aggregateId, callback=->) =>  new Promise (resolve, reject) =>
-    commandId = @_command.id ? 'nocommand'
-    aggregate = @_aggregateInstances[commandId][aggregateId]
-    if not aggregate
-      err = "Tried to save unknown aggregate #{@_aggregateName}"
-      @_eventric.log.error err
-      err = new Error err
-      callback? err, null
-      reject err
-      return
-
-    domainEvents = aggregate.getDomainEvents()
-    if domainEvents.length < 1
-      err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
-      @_eventric.log.debug err, @_command
-      err = new Error err
-      callback? err, null
-      reject err
-      return
-
-    @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
-
-    # TODO: this should be an transaction to guarantee consistency
-    @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-      @_store.saveDomainEvent domainEvent
-      .then =>
-        @_eventric.log.debug "Saved DomainEvent", domainEvent
-        next null
-    , (err) =>
-      if err
-        callback err, null
+  save: (aggregateId, callback = ->) =>
+    new Promise (resolve, reject) =>
+      commandId = @_command.id ? 'nocommand'
+      aggregate = @_aggregateInstances[commandId][aggregateId]
+      if not aggregate
+        err = "Tried to save unknown aggregate #{@_aggregateName}"
+        @_eventric.log.error err
+        err = new Error err
+        callback? err, null
         reject err
-      else
-        @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-          @_eventric.log.debug "Publishing DomainEvent", domainEvent
-          @_context.getEventBus().publishDomainEvent domainEvent
-          .then ->
-            next()
-        , (err) =>
-          if err
-            callback err, null
-            reject err
-          else
-            resolve aggregate.id
-            callback null, aggregate.id
+        return
+
+      domainEvents = aggregate.getDomainEvents()
+      if domainEvents.length < 1
+        err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
+        @_eventric.log.debug err, @_command
+        err = new Error err
+        callback? err, null
+        reject err
+        return
+
+      @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
+
+      # TODO: this should be an transaction to guarantee consistency
+      @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+        @_store.saveDomainEvent domainEvent
+        .then =>
+          @_eventric.log.debug "Saved DomainEvent", domainEvent
+          next null
+      , (err) =>
+        if err
+          callback err, null
+          reject err
+        else
+          @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+            @_eventric.log.debug "Publishing DomainEvent", domainEvent
+            @_context.getEventBus().publishDomainEvent domainEvent
+            .then ->
+              next()
+          , (err) =>
+            if err
+              callback err, null
+              reject err
+            else
+              resolve aggregate.id
+              callback null, aggregate.id
 
 
-
-  ###*
-  * @name setCommand
-  * @module Repository
-  * @description Set the command which is currently processed
-  *
-  * @param {Object} command The command Object
-  ###
   setCommand: (command) ->
     @_command = command
 

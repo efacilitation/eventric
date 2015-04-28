@@ -29,9 +29,8 @@ describe 'Remote Feature', ->
           example.$save()
 
 
-      DoSomething: (params, promise) ->
+      DoSomething: (params) ->
         doSomethingCommandHandlerStub params
-        promise.resolve null
 
 
     class ExampleAggregate
@@ -45,9 +44,10 @@ describe 'Remote Feature', ->
     exampleContext.addAggregate 'Example', ExampleAggregate
 
     exampleContext.addQueryHandlers
-      getSomething: (params, promise) ->
-        getSomethingQueryHandlerStub params
-        promise.resolve 'something'
+      getSomething: (params) ->
+        new Promise (resolve) ->
+          getSomethingQueryHandlerStub params
+          resolve 'something'
 
     exampleContext.initialize()
     .then ->

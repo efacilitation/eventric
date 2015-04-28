@@ -367,28 +367,16 @@ class Context
           repository.findById aggregateId
 
 
-      commandPromise = null
+      commandOperation = null
       commandHandlerFn = @_commandHandlers[name]
-      if commandHandlerFn.length <= 1
-        commandPromise = commandHandlerFn.apply _di, [params]
-        if commandPromise not instanceof Promise
-          err = "CommandHandler #{name} didnt return a promise and no promise argument defined."
-          @log.error err
-          return reject err
-      else
-        commandPromise = new Promise (resolve, reject) =>
-          commandHandlerFn.apply _di, [params,
-            resolve: resolve
-            reject: reject
-          ]
+      commandOperation = commandHandlerFn.apply _di, [params]
 
-      commandPromise
-      .then (result) =>
+      Promise.all [commandOperation]
+      .then ([result]) =>
         @log.debug 'Completed Command', name
         resolve result
-
-      .catch (err) ->
-        reject err
+      .catch (error) ->
+        reject error
 
 
   query: (name, params) ->  new Promise (resolve, reject) =>
@@ -407,18 +395,10 @@ class Context
       err = new Error err
       return reject err
 
-    if @_queryHandlers[name].length <= 1
-      queryPromise = @_queryHandlers[name].apply @_di, [params]
+    queryOperation = @_queryHandlers[name].apply @_di, [params]
 
-    else
-      queryPromise = new Promise (resolve, reject) =>
-        @_queryHandlers[name].apply @_di, [params,
-          resolve: resolve
-          reject: reject
-        ]
-
-    queryPromise
-    .then (result) =>
+    Promise.all [queryOperation]
+    .then ([result]) =>
       @log.debug "Completed Query #{name} with Result #{result}"
       resolve result
 

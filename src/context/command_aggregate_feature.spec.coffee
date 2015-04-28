@@ -3,7 +3,7 @@ describe 'Command Aggregate Feature', ->
   describe 'given we created and initialized some example context including an aggregate', ->
     exampleContext = null
 
-    beforeEach (done)->
+    beforeEach ->
       exampleContext = eventric.context 'exampleContext'
 
       # Domain Events
@@ -12,8 +12,8 @@ describe 'Command Aggregate Feature', ->
         @someId   = params.someId
         @someProperty = params.someProperty
 
-      # Aggregate
-      class Example
+
+      class ExampleAggregate
         create: ->
           @$emitDomainEvent 'ExampleCreated'
 
@@ -26,19 +26,15 @@ describe 'Command Aggregate Feature', ->
           @someId = domainEvent.payload.someId
           @someProperty = domainEvent.payload.someProperty
 
-      exampleContext.addAggregate 'Example', Example
+      exampleContext.addAggregate 'Example', ExampleAggregate
 
-      # Command Handlers
       exampleContext.addCommandHandlers
-        CreateExample: (params, promise) ->
+        CreateExample: (params) ->
           exampleId = null
           @$aggregate.create 'Example'
           .then (example) ->
             example.$save()
-          .then (exampleId) ->
-            promise.resolve exampleId
 
-          return
 
         DoSomething: (params) ->
           @$aggregate.load 'Example', params.aggregateId
@@ -46,13 +42,10 @@ describe 'Command Aggregate Feature', ->
             example.doSomething params.someId, params.someProperty
             example.$save()
 
-      # Initialize Context
       exampleContext.initialize()
-      .then ->
-        done()
 
 
-    describe 'when we send a command to the context', ->
+    describe 'sending a command to the context', ->
 
       it 'should trigger the correct DomainEvent', (done) ->
         exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->
@@ -69,7 +62,7 @@ describe 'Command Aggregate Feature', ->
             someProperty: 'some-property'
 
 
-    describe 'when we send multiple commands to the context', ->
+    describe 'sending multiple commands to the context', ->
 
       it 'should execute all commands as expected', (done) ->
         commandCount = 0
@@ -92,7 +85,7 @@ describe 'Command Aggregate Feature', ->
             someProperty: 'some-property'
 
 
-    describe '[bugfix] when we return an array at the domain event definition', ->
+    describe '[bugfix] returning an array at the domain event definition', ->
 
       it 'should also return the whole domain event properties as payload', (done) ->
         exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->

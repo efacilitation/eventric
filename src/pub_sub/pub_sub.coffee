@@ -1,10 +1,3 @@
-###*
-* @name PubSub
-* @module PubSub
-* @description
-*
-* Publish and Subscribe to arbitrary Events
-###
 class PubSub
 
   constructor: ->
@@ -13,14 +6,6 @@ class PubSub
     @_nextTick = (args...) -> setTimeout args...
 
 
-  ###*
-  * @name subscribe
-  * @module PubSub
-  * @description Subscribe to an Event
-  *
-  * @param {String} eventName Name of the Event to subscribe to
-  * @param {Function} subscriberFn Function to call when Event gets published
-  ###
   subscribe: (eventName, subscriberFn) ->
     new Promise (resolve, reject) =>
       subscriber =
@@ -31,14 +16,6 @@ class PubSub
       resolve subscriber.subscriberId
 
 
-  ###*
-  * @name publish
-  * @module PubSub
-  * @description Publish an Event
-  *
-  * @param {String} eventName Name of the Event
-  * @param {Object} payload The Event payload to be published
-  ###
   publish: (eventName, payload) ->
     new Promise (resolve, reject) =>
       subscribers = @_getRelevantSubscribers eventName
@@ -58,13 +35,6 @@ class PubSub
       @_subscribers
 
 
-  ###*
-  * @name unsubscribe
-  * @module PubSub
-  * @description Unscribe from an Event
-  *
-  * @param {String} subscriberId SubscriberId
-  ###
   unsubscribe: (subscriberId) ->
     new Promise (resolve, reject) =>
       @_subscribers = @_subscribers.filter (x) -> x.subscriberId isnt subscriberId

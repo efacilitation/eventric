@@ -11,19 +11,10 @@ class InMemoryRemoteEndpoint
           return reject error if error
           resolve result
 
-  ###*
-  * @name setRPCHandler
-  *
-  * @module InMemoryRemoteEndpoint
-  ###
+
   setRPCHandler: (@_handleRPCRequest) ->
 
 
-  ###*
-  * @name publish
-  *
-  * @module InMemoryRemoteEndpoint
-  ###
   publish: (contextName, [domainEventName, aggregateId]..., payload) ->
     fullEventName = getFullEventName contextName, domainEventName, aggregateId
     pubSub.publish fullEventName, payload, ->
@@ -34,32 +25,17 @@ module.exports.endpoint = new InMemoryRemoteEndpoint
 
 class InMemoryRemoteClient
 
-  ###*
-  * @name rpc
-  *
-  * @module InMemoryRemoteClient
-  ###
   rpc: (rpcRequest) ->
     if not customRemoteBridge
       throw new Error 'No Remote Endpoint available for in memory client'
     customRemoteBridge rpcRequest
 
 
-  ###*
-  * @name subscribe
-  *
-  * @module InMemoryRemoteClient
-  ###
   subscribe: (contextName, [domainEventName, aggregateId]..., handlerFn) ->
     fullEventName = getFullEventName contextName, domainEventName, aggregateId
     pubSub.subscribe fullEventName, handlerFn
 
 
-  ###*
-  * @name unsubscribe
-  *
-  * @module InMemoryRemoteClient
-  ###
   unsubscribe: (subscriberId) ->
     pubSub.unsubscribe subscriberId
 

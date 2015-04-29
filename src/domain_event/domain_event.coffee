@@ -1,10 +1,3 @@
-###*
-* @name DomainEvent
-* @module DomainEvent
-* @description
-*
-* DomainEvents are the most important and most easy building block.
-###
 class DomainEvent
   constructor: (params) ->
     @id             = params.id

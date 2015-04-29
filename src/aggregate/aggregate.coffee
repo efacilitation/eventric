@@ -1,11 +1,3 @@
-###*
-* @name Aggregate
-* @module Aggregate
-* @description
-*
-* Aggregates live inside a Context and give you basically transactional boundaries
-* for your Behaviors and DomainEvents.
-###
 class Aggregate
 
   constructor: (@_context, @_eventric, @_name, Root) ->
@@ -19,14 +11,6 @@ class Aggregate
     @root.$emitDomainEvent = @emitDomainEvent
 
 
-  ###*
-  * @name emitDomainEvent
-  * @module Aggregate
-  * @description Emit DomainEvent
-  *
-  * @param {String} domainEventName Name of the DomainEvent
-  * @param {Object} domainEventPayload Object containing the payload of the DomainEvent
-  ###
   emitDomainEvent: (domainEventName, domainEventPayload) =>
     DomainEventClass = @_context.getDomainEvent domainEventName
     if !DomainEventClass
@@ -63,22 +47,11 @@ class Aggregate
     else
       @_eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
-  ###*
-  * @name getDomainEvents
-  * @module Aggregate
-  * @description Get all emitted DomainEvents
-  ###
+
   getDomainEvents: =>
     @_domainEvents
 
 
-  ###*
-  * @name applyDomainEvents
-  * @module Context
-  * @description Apply DomainEvents to the Aggregate
-  *
-  * @param {Array} domainEvents Array containing DomainEvents
-  ###
   applyDomainEvents: (domainEvents) ->
     @_applyDomainEvent domainEvent for domainEvent in domainEvents
 

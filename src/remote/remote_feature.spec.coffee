@@ -119,44 +119,12 @@ describe 'Remote Feature', ->
         exampleRemote.command 'CreateExample', {}
 
 
-  describe 'finding all domain events on a remote', ->
-
-    it 'should be possible to find all domain events', ->
-      exampleRemote.command 'CreateExample', {}
-      .then (id) ->
-        exampleRemote.command 'ModifyExample', id: id
-      .then ->
-        exampleRemote.findAllDomainEvents()
-      .then (events) ->
-        expect(events.length).to.equal 2
-
-
   describe 'finding domain events by on a remote', ->
 
     it 'should be possible to find domain events by name', ->
       exampleRemote.command 'CreateExample', {}
       .then ->
         exampleRemote.findDomainEventsByName 'ExampleCreated'
-      .then (events) ->
-        expect(events.length).to.equal 1
-
-
-  describe 'finding domain events by aggregate id', ->
-
-    it 'should be possible to find domain events by aggregate id', ->
-      exampleRemote.command 'CreateExample', {}
-      .then (id) ->
-        exampleRemote.findDomainEventsByAggregateId id
-      .then (events) ->
-        expect(events.length).to.equal 1
-
-
-  describe 'finding domain events by aggregate name', ->
-
-    it 'should be possible to find domain events by aggregate name', ->
-      exampleRemote.command 'CreateExample', {}
-      .then ->
-        exampleRemote.findDomainEventsByAggregateName 'Example'
       .then (events) ->
         expect(events.length).to.equal 1
 

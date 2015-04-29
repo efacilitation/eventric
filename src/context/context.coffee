@@ -261,14 +261,6 @@ class Context
 
 
   # TODO: Remove this when stream subscriptions are implemented
-  findAllDomainEvents: ->
-    new Promise (resolve, reject) =>
-      @getDomainEventsStore().findAllDomainEvents (err, events) ->
-        return reject err if err
-        resolve events
-
-
-  # TODO: Remove this when stream subscriptions are implemented
   findDomainEventsByName: (findArguments...) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findDomainEventsByName findArguments..., (err, events) ->
@@ -277,25 +269,9 @@ class Context
 
 
   # TODO: Remove this when stream subscriptions are implemented
-  findDomainEventsByAggregateId: (findArguments...) ->
-    new Promise (resolve, reject) =>
-      @getDomainEventsStore().findDomainEventsByAggregateId findArguments..., (err, events) ->
-        return reject err if err
-        resolve events
-
-
-  # TODO: Remove this when stream subscriptions are implemented
   findDomainEventsByNameAndAggregateId: (findArguments...) ->
     new Promise (resolve, reject) =>
       @getDomainEventsStore().findDomainEventsByNameAndAggregateId findArguments..., (err, events) ->
-        return reject err if err
-        resolve events
-
-
-  # TODO: Remove this when stream subscriptions are implemented
-  findDomainEventsByAggregateName: (findArguments...) ->
-    new Promise (resolve, reject) =>
-      @getDomainEventsStore().findDomainEventsByAggregateName findArguments..., (err, events) ->
         return reject err if err
         resolve events
 

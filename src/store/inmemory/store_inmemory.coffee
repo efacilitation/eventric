@@ -14,29 +14,11 @@ class InMemoryStore
     resolve()
 
 
-  ###*
-  * @name saveDomainEvent
-  *
-  * @module InMemoryStore
-  ###
   saveDomainEvent: (domainEvent, callback) ->  new Promise (resolve, reject) =>
     @_domainEvents[@_domainEventsCollectionName].push domainEvent
     resolve domainEvent
 
 
-  ###*
-  * @name findAllDomainEvents
-  *
-  * @module InMemoryStore
-  ###
-  findAllDomainEvents: (callback) ->
-    callback null, @_domainEvents[@_domainEventsCollectionName]
-
-  ###*
-  * @name findDomainEventsByName
-  *
-  * @module InMemoryStore
-  ###
   findDomainEventsByName: (name, callback) ->
     if name instanceof Array
       checkFn = (eventName) ->
@@ -50,11 +32,6 @@ class InMemoryStore
     callback null, events
 
 
-  ###*
-  * @name findDomainEventsByNameAndAggregateId
-  *
-  * @module InMemoryStore
-  ###
   findDomainEventsByNameAndAggregateId: (name, aggregateId, callback) ->
     if name instanceof Array
       checkNameFn = (eventName) ->
@@ -75,11 +52,6 @@ class InMemoryStore
     callback null, events
 
 
-  ###*
-  * @name findDomainEventsByAggregateId
-  *
-  * @module InMemoryStore
-  ###
   findDomainEventsByAggregateId: (aggregateId, callback) ->
     if aggregateId instanceof Array
       checkFn = (eventAggregateId) ->
@@ -93,40 +65,12 @@ class InMemoryStore
     callback null, events
 
 
-  ###*
-  * @name findDomainEventsByAggregateName
-  *
-  * @module InMemoryStore
-  ###
-  findDomainEventsByAggregateName: (aggregateName, callback) ->
-    if aggregateName instanceof Array
-      checkFn = (eventAggregateName) ->
-        (aggregateName.indexOf eventAggregateName) > -1
-    else
-      checkFn = (eventAggregateName) ->
-        eventAggregateName == aggregateName
-
-    events = @_domainEvents[@_domainEventsCollectionName].filter (event) ->
-      checkFn event.aggregate?.name
-    callback null, events
-
-
-  ###*
-  * @name getProjectionStore
-  *
-  * @module InMemoryStore
-  ###
   getProjectionStore: (projectionName) -> new Promise (resolve, reject) =>
     @_projections[@_projectionCollectionName] ?= {}
     @_projections[@_projectionCollectionName][projectionName] ?= {}
     resolve @_projections[@_projectionCollectionName][projectionName]
 
 
-  ###*
-  * @name clearProjectionStore
-  *
-  * @module InMemoryStore
-  ###
   clearProjectionStore: (projectionName) -> new Promise (resolve, reject) =>
     @_projections[@_projectionCollectionName] ?= {}
     @_projections[@_projectionCollectionName][projectionName] ?= {}
@@ -134,11 +78,6 @@ class InMemoryStore
     resolve()
 
 
-  ###*
-  * @name checkSupport
-  *
-  * @module InMemoryStore
-  ###
   checkSupport: (check) ->
     (STORE_SUPPORTS.indexOf check) > -1
 

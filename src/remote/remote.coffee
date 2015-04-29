@@ -3,10 +3,7 @@ class Remote
   @ALLOWED_RPC_OPERATIONS: [
     'command'
     'query'
-    'findAllDomainEvents'
     'findDomainEventsByName'
-    'findDomainEventsByAggregateId'
-    'findDomainEventsByAggregateName'
     'findDomainEventsByNameAndAggregateId'
   ]
 

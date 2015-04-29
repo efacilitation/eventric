@@ -11,33 +11,34 @@ class Repository
     @_store = @_context.getDomainEventsStore()
 
 
-  findById: (aggregateId, callback = ->) =>  new Promise (resolve, reject) =>
-    @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
-      if err
-        callback err, null
-        reject err
-        return
+  findById: (aggregateId, callback = ->) =>
+    new Promise (resolve, reject) =>
+      @_findDomainEventsForAggregate aggregateId, (err, domainEvents) =>
+        if err
+          callback err, null
+          reject err
+          return
 
-      if not domainEvents.length
-        err = "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
-        @_eventric.log.error err
-        callback err, null
-        reject err
-        return
+        if not domainEvents.length
+          err = "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
+          @_eventric.log.error err
+          callback err, null
+          reject err
+          return
 
-      aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
-      aggregate.applyDomainEvents domainEvents
-      aggregate.id = aggregateId
-      aggregate.root.$id = aggregateId
-      aggregate.root.$save = =>
-        @save aggregate.id
+        aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
+        aggregate.applyDomainEvents domainEvents
+        aggregate.id = aggregateId
+        aggregate.root.$id = aggregateId
+        aggregate.root.$save = =>
+          @save aggregate.id
 
-      commandId = @_command.id ? 'nocommand'
-      @_aggregateInstances[commandId] ?= {}
-      @_aggregateInstances[commandId][aggregateId] = aggregate
+        commandId = @_command.id ? 'nocommand'
+        @_aggregateInstances[commandId] ?= {}
+        @_aggregateInstances[commandId][aggregateId] = aggregate
 
-      callback null, aggregate.root
-      resolve aggregate.root
+        callback null, aggregate.root
+        resolve aggregate.root
 
 
   _findDomainEventsForAggregate: (aggregateId, callback) ->

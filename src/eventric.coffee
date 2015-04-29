@@ -91,18 +91,17 @@ class Eventric
       @log.error error
       return callback error, null
 
-    if @Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.method) is -1
-      error = "RPC operation '#{request.method}' not allowed"
+    if @Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.functionName) is -1
+      error = "RPC operation '#{request.functionName}' not allowed"
       @log.error error
       return callback error, null
 
-    if request.method not of context
-      error = "Remote RPC method #{request.method} not found on Context #{request.contextName}"
+    if request.functionName not of context
+      error = "Remote RPC function #{request.functionName} not found on Context #{request.contextName}"
       @log.error error
       return callback error, null
 
-    #middleware(request, user)
-    context[request.method] request.params...
+    context[request.functionName] request.args...
     .then (result) ->
       callback null, result
     .catch (error) ->

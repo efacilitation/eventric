@@ -63,13 +63,13 @@ class Remote
     client.unsubscribe subscriberId
 
 
-  _rpc: (method, params) ->
+  _rpc: (functionName, args) ->
     clientName = @get 'default client'
     client = @getClient clientName
     client.rpc
       contextName: @_contextName
-      method: method
-      params: Array.prototype.slice.call params
+      functionName: functionName
+      args: Array.prototype.slice.call args
 
 
   addClient: (clientName, client) ->

@@ -1,6 +1,6 @@
 {
   "name": "eventric",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "homepage": "https://github.com/efacilitation/eventric",
   "authors": [
     "efa GmbH <team@efa-gmbh.com>"
@@ -17,10 +17,7 @@
     "bdd",
     "cqrs",
     "eventsourcing",
-    "offline-first",
-    "nobackend",
     "reactive",
-    "model by example",
     "eventric"
   ],
   "license": "MIT",

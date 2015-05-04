@@ -1,6 +1,6 @@
 describe 'Command Aggregate Feature', ->
 
-  describe 'given we created and initialized some example context including an aggregate', ->
+  describe 'given a created and initialized example context including an aggregate', ->
     exampleContext = null
 
     beforeEach ->

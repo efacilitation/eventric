@@ -12,7 +12,7 @@
     "eventric"
   ],
   "author": "eFa Team <team@efa-gmbh.com>",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"
@@ -43,7 +43,6 @@
     "karma-spec-reporter": "0.0.13",
     "mocha": "1.21.4",
     "mockery": "1.4.0",
-
     "rimraf": "*",
     "run-sequence": "*",
     "sinon": "1.12.0",

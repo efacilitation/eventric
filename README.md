@@ -24,6 +24,9 @@ Early talk about MVC, CRUD, DDD, CQRS and Event Sourcing from Johannes Becker, o
 npm install eventric
 ```
 
+**Important:** eventric requires [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+If you have to support older browsers use the [es6-promise](https://github.com/jakearchibald/es6-promise) polyfill.
+
 ### Setup Context
 
 Having discussed the upcoming **TodoApp Project** with the Business-Experts and fellow Developers it got clear that we should start with a `Context` named `Todo`.

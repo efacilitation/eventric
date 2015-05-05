@@ -23,7 +23,7 @@
     "prepublish": "node_modules/.bin/gulp build"
   },
   "devDependencies": {
-    "chai": "1.9.1",
+    "chai": "1.9.2",
     "coffee-script": "1.8.0",
     "commonjs-require": "1.4.6",
     "es6-promise": "2.1.1",

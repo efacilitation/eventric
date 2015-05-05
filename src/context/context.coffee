@@ -17,7 +17,7 @@ class Context
     @_storeClasses = {}
     @_storeInstances = {}
     @_eventBus         = new @_eventric.EventBus @_eventric
-    @projectionService = new @_eventric.Projection @_eventric
+    @projectionService = new @_eventric.Projection @_eventric, @
     @log = @_eventric.log
 
 
@@ -161,7 +161,7 @@ class Context
       err = new Error err
       return err
 
-    @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params, @
+    @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params
 
 
   initialize: ->
@@ -224,7 +224,7 @@ class Context
       @_eventric.eachSeries projections, (projection, next) =>
         eventNames = null
         @log.debug "[#{@name}] Initializing Projection #{projection.name}"
-        @projectionService.initializeInstance projection.name, projection.class, {}, @
+        @projectionService.initializeInstance projection.name, projection.class, {}
         .then (projectionId) =>
           @log.debug "[#{@name}] Finished initializing Projection #{projection.name}"
           next()

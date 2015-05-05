@@ -1,13 +1,13 @@
 class Projection
 
-  constructor: (@_eventric) ->
+  constructor: (@_eventric, @_context) ->
     @log = @_eventric.log
     @_handlerFunctions    = {}
     @_projectionInstances = {}
     @_domainEventsApplied = {}
 
 
-  initializeInstance: (projectionName, Projection, params, @_context) ->
+  initializeInstance: (projectionName, Projection, params) ->
     new Promise (resolve, reject) =>
 
       if typeof Projection is 'function'

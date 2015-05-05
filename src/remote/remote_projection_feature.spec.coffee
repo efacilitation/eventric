@@ -136,20 +136,6 @@ describe 'Remote Projection Feature', ->
           expect(exampleProjection.updated).to.be.true
 
 
-      it 'should publish an event whenever a remote projection is updated', (done) ->
-        testExampleId = null
-        exampleRemote.command 'CreateExample'
-        .then (exampleId) ->
-          testExampleId = exampleId
-          exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: exampleId
-        .then (projectionId) ->
-          exampleProjection = exampleRemote.getProjectionInstance projectionId
-          exampleRemote.subscribe 'projection:ExampleProjection:changed', ->
-            done()
-          exampleRemote.command 'UpdateExample',
-            id: testExampleId
-
-
       it 'should be possible to remove the projection', ->
         exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: '123'
         .then (projectionId) ->

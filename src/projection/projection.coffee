@@ -47,9 +47,6 @@ class Projection
           id: projectionId
           projection: projection
 
-        @_context.publish "projection:#{projectionName}:initialized", event
-        @_context.publish "projection:#{projectionId}:initialized", event
-
         resolve projectionId
 
       .catch (err) ->
@@ -159,8 +156,6 @@ class Projection
             id: projectionId
             projection: projection
             domainEvent: domainEvent
-          @_context.publish "projection:#{projectionName}:changed", event
-          @_context.publish "projection:#{projectionId}:changed", event
           done()
 
         .catch (err) ->

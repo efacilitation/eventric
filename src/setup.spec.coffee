@@ -1,3 +1,5 @@
+require('es6-promise').polyfill()
+
 if typeof window isnt 'undefined'
   root = window
 else

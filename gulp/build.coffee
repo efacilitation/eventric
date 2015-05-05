@@ -22,9 +22,9 @@ module.exports = (gulp) ->
       .pipe(gulp.dest('build/src'))
 
   gulp.task 'build:dist', ->
-    cjs = gulp.src('node_modules/commonjs-require/commonjs-require.js')
+    commonJsRequire = gulp.src 'node_modules/commonjs-require/commonjs-require.js'
 
-    src = gulp.src([
+    eventricSource = gulp.src([
       'build/src/**/*.js'
       '!**/*.spec.js'
       ])
@@ -35,15 +35,7 @@ module.exports = (gulp) ->
           return path
       ))
 
-    es6 = gulp.src([
-      'node_modules/es6-promise/dist/es6-promise.js'
-    ])
-      .pipe(commonjs(
-        pathModifier: (filePath) ->
-          'es6-promise'
-      ))
-
-    mergeStream cjs, es6, src
+    mergeStream commonJsRequire, eventricSource
       .pipe(concat('eventric.js'))
       .pipe(gulp.dest('build/dist'))
       .pipe(uglify())
@@ -73,6 +65,7 @@ module.exports = (gulp) ->
     gulp.src([
       'node_modules/chai/chai.js'
       'node_modules/async/lib/async.js'
+      'node_modules/es6-promise/dist/es6-promise.js'
       'node_modules/mockery/mockery.js'
       'node_modules/sinon/lib/**/*.js'
       'node_modules/sinon-chai/lib/sinon-chai.js'
@@ -84,6 +77,8 @@ module.exports = (gulp) ->
           sinonPath = '/node_modules/sinon/lib/'
           if (path.indexOf sinonPath) is 0
             path = path.replace sinonPath, ''
+          else if path.indexOf('es6-promise') > -1
+            path = 'es6-promise'
           else
             path = path.replace /.*\//, ''
           path

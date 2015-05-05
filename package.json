@@ -41,13 +41,13 @@
     "karma-mocha": "0.1.9",
     "karma-phantomjs-launcher": "0.1.4",
     "karma-spec-reporter": "0.0.13",
+    "merge-stream": "0.1.7",
     "mocha": "1.21.4",
     "mockery": "1.4.0",
-    "rimraf": "*",
-    "run-sequence": "*",
+    "rimraf": "2.3.3",
+    "run-sequence": "1.1.0",
     "sinon": "1.12.0",
-    "sinon-chai": "*",
-    "merge-stream": "*"
+    "sinon-chai": "2.7.0"
   },
   "licenses": [
     {

@@ -12,6 +12,7 @@ class Eventric
     @Logger          = require './logger'
     @RemoteInMemory  = require './remote/inmemory'
     @StoreInMemory   = require './store/inmemory'
+    @GlobalContext   = require './global_context'
 
     @log                      = @Logger
     @_contexts                = {}
@@ -20,6 +21,9 @@ class Eventric
     @_domainEventHandlersAll  = []
     @_storeClasses            = {}
     @_remoteEndpoints         = []
+
+    @_globalContext = new @GlobalContext @
+    @_projectionService = new @Projection @, @_globalContext
 
     @addRemoteEndpoint 'inmemory', @RemoteInMemory.endpoint
     @addStore 'inmemory', @StoreInMemory
@@ -62,6 +66,14 @@ class Eventric
     @_contexts[name] = context
 
     context
+
+
+  initializeProjection: (projectionObject, params) ->
+    @_projectionService.initializeInstance '', projectionObject, params
+
+
+  getRegisteredContextNames: ->
+    Object.keys @_contexts
 
 
   getContext: (name) ->

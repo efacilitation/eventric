@@ -35,7 +35,7 @@ class Context
     if !DomainEventClass
       throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
-    domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
+    domainEvent = @createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @saveAndPublishDomainEvent domainEvent
     .then =>
       @_eventric.log.debug "Created and Handled DomainEvent in Context", domainEvent
@@ -45,16 +45,20 @@ class Context
     @_eventBus.publishDomainEvent domainEvent
 
 
-  _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
+  createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload, aggregate) ->
+    payload = {}
+    DomainEventClass.apply payload, [domainEventPayload]
+
     new @_eventric.DomainEvent
       id: @_eventric.generateUid()
       name: domainEventName
+      aggregate: aggregate
       context: @name
-      payload: new DomainEventClass domainEventPayload
+      payload: payload
 
 
   # TODO: Consider renaming. What store? event store? read model store?
-  addStore: (storeName, StoreClass, storeOptions={}) ->
+  addStore: (storeName, StoreClass, storeOptions = {}) ->
     @_storeClasses[storeName] =
       Class: StoreClass
       options: storeOptions
@@ -232,7 +236,7 @@ class Context
         .catch (err) ->
           reject err
 
-      , (err) =>
+      , (err) ->
         return reject err if err
         resolve()
 

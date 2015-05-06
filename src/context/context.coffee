@@ -10,6 +10,7 @@ class Context
     @_queryHandlers = {}
     @_domainEventClasses = {}
     @_domainEventHandlers = {}
+    @_globalProjectionClasses = []
     @_projectionClasses = {}
     @_domainEventStreamClasses = {}
     @_domainEventStreamInstances = {}
@@ -136,6 +137,10 @@ class Context
     @_eventBus.subscribeToAllDomainEvents domainEventHandler
 
 
+  addGlobalProjection: (ProjectionClass) ->
+    @_globalProjectionClasses.push ProjectionClass
+
+
   addProjection: (projectionName, ProjectionClass) ->
     @_projectionClasses[projectionName] = ProjectionClass
     @
@@ -181,6 +186,10 @@ class Context
         @_initializeProjections()
       .then =>
         @log.debug "[#{@name}] Finished initializing Projections"
+        @log.debug "[#{@name}] Initializing global Projections"
+        @_initializeGlobalProjections()
+      .then =>
+        @log.debug "[#{@name}] Finished initializing global Projections"
         @log.debug "[#{@name}] Finished initializing"
         @_initialized = true
         resolve()
@@ -235,6 +244,11 @@ class Context
       , (err) =>
         return reject err if err
         resolve()
+
+
+  _initializeGlobalProjections: ->
+    Promise.all @_globalProjectionClasses.map (GlobalProjectionClass) =>
+      @_eventric.initializeProjection new GlobalProjectionClass
 
 
   getProjection: (projectionId) ->

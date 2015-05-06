@@ -21,6 +21,7 @@ class Eventric
     @_domainEventHandlersAll  = []
     @_storeClasses            = {}
     @_remoteEndpoints         = []
+    @_globalProjectionClasses = []
 
     @_globalContext = new @GlobalContext @
     @_projectionService = new @Projection @, @_globalContext
@@ -53,9 +54,9 @@ class Eventric
 
   context: (name) ->
     if !name
-      err = 'Contexts must have a name'
-      @log.error err
-      throw new Error err
+      error = 'Contexts must have a name'
+      @log.error error
+      throw new Error error
     pubsub = new @PubSub
     context = new @Context name, @
     @mixin context, pubsub
@@ -68,8 +69,13 @@ class Eventric
     context
 
 
-  initializeProjection: (projectionObject, params) ->
-    @_projectionService.initializeInstance '', projectionObject, params
+  initializeGlobalProjections: ->
+    Promise.all @_globalProjectionClasses.map (GlobalProjectionClass) =>
+      @_projectionService.initializeInstance '', new GlobalProjectionClass, {}
+
+
+  addGlobalProjection: (ProjectionClass) ->
+    @_globalProjectionClasses.push ProjectionClass
 
 
   getRegisteredContextNames: ->

@@ -4,7 +4,6 @@ describe 'Global Projection Feature', ->
 
     firstContext = null
     secondContext = null
-    thirdContext = null
 
     receivedDomainEventNames = null
 
@@ -37,10 +36,7 @@ describe 'Global Projection Feature', ->
           aggregate.$save()
 
 
-      thirdContext = eventric.context 'Third'
-
-
-    describe 'creating a global projection on one context which handles events from other contexts', ->
+    describe 'adding a global projection which handles events from other contexts', ->
 
       GlobalProjection = null
 
@@ -56,12 +52,13 @@ describe 'Global Projection Feature', ->
             receivedDomainEventNames.push domainEvent.name
 
 
-        thirdContext.addGlobalProjection GlobalProjection
+        eventric.addGlobalProjection GlobalProjection
         Promise.all [
           firstContext.initialize()
           secondContext.initialize()
-          thirdContext.initialize()
         ]
+        .then ->
+          eventric.initializeGlobalProjections()
 
 
       describe 'given there are already saved domain events on the first context', ->
@@ -135,4 +132,3 @@ describe 'Global Projection Feature', ->
 
         it 'should correctly handle those events', ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated', 'FirstContextAggregateCreated']
-

@@ -18,26 +18,15 @@ class Aggregate
       @_eventric.log.error err
       throw new Error err
 
-    domainEvent = @_createDomainEvent domainEventName, DomainEventClass, domainEventPayload
+    aggregate:
+      id: @id
+      name: @_name
+    domainEvent = @_context.createDomainEvent domainEventName, DomainEventClass, domainEventPayload, aggregate
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
     @_eventric.log.debug "Created and Handled DomainEvent in Aggregate", domainEvent
     # TODO: do a rollback if something goes wrong inside the handle function
-
-
-  _createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload) ->
-    payload = {}
-    DomainEventClass.apply payload, [domainEventPayload]
-
-    new @_eventric.DomainEvent
-      id: @_eventric.generateUid()
-      name: domainEventName
-      aggregate:
-        id: @id
-        name: @_name
-      context: @_context.name
-      payload: payload
 
 
   _handleDomainEvent: (domainEventName, domainEvent) ->

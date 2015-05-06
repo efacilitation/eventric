@@ -18,7 +18,7 @@ class Aggregate
       @_eventric.log.error err
       throw new Error err
 
-    aggregate:
+    aggregate =
       id: @id
       name: @_name
     domainEvent = @_context.createDomainEvent domainEventName, DomainEventClass, domainEventPayload, aggregate

@@ -69,11 +69,13 @@ class Eventric
     context
 
 
+  # TODO: Reconsider/Remove when adding EventStore
   initializeGlobalProjections: ->
     Promise.all @_globalProjectionClasses.map (GlobalProjectionClass) =>
       @_projectionService.initializeInstance '', new GlobalProjectionClass, {}
 
 
+  # TODO: Reconsider/Remove when adding EventStore
   addGlobalProjection: (ProjectionClass) ->
     @_globalProjectionClasses.push ProjectionClass
 

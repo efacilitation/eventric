@@ -1,134 +1,113 @@
 describe 'Global Projection Feature', ->
 
-  describe 'given multiple contexts with distinctly named domain events', ->
+  firstContext = null
+  secondContext = null
 
-    firstContext = null
-    secondContext = null
+  beforeEach ->
+    firstContext = createContextWithOneAggregate
+      contextName: 'First'
+      aggregateName: 'FirstContextAggregate'
+      domainEventName: 'FirstContextAggregateCreated'
+
+    secondContext = createContextWithOneAggregate
+      contextName: 'Second'
+      aggregateName: 'SecondContextAggregate'
+      domainEventName: 'SecondContextAggregateCreated'
+
+    Promise.all [
+      firstContext.initialize()
+      secondContext.initialize()
+    ]
+
+
+  describe 'given a global projection which handles events from multiple contexts', ->
 
     receivedDomainEventNames = null
 
     beforeEach ->
       receivedDomainEventNames = []
+      class GlobalProjection
+        initialize: (params, done) ->
+          done()
 
-      firstContext = eventric.context 'First'
+        handleFirstContextAggregateCreated: (domainEvent) ->
+          receivedDomainEventNames.push domainEvent.name
 
-      firstContext.defineDomainEvent 'FirstContextAggregateCreated', ->
-      firstContext.addAggregate 'FirstContextAggregate', ->
-        create: (params) ->
-          @$emitDomainEvent 'FirstContextAggregateCreated'
-
-      firstContext.addCommandHandler 'CreateAggregate', ->
-        @$aggregate.create 'FirstContextAggregate'
-        .then (aggregate) ->
-          aggregate.$save()
+        handleSecondContextAggregateCreated: (domainEvent) ->
+          receivedDomainEventNames.push domainEvent.name
 
 
-      secondContext = eventric.context 'Second'
-
-      secondContext.defineDomainEvent 'SecondContextAggregateCreated', ->
-      secondContext.addAggregate 'SecondContextAggregate', ->
-        create: (params) ->
-          @$emitDomainEvent 'SecondContextAggregateCreated'
-
-      secondContext.addCommandHandler 'CreateAggregate', ->
-        @$aggregate.create 'SecondContextAggregate'
-        .then (aggregate) ->
-          aggregate.$save()
+      eventric.addGlobalProjection GlobalProjection
 
 
-    describe 'adding a global projection which handles events from other contexts', ->
+    describe 'initializing the projection', ->
 
-      GlobalProjection = null
-
-      beforeEach ->
-        class GlobalProjection
-          initialize: (params, done) ->
-            done()
-
-          handleFirstContextAggregateCreated: (domainEvent) ->
-            receivedDomainEventNames.push domainEvent.name
-
-          handleSecondContextAggregateCreated: (domainEvent) ->
-            receivedDomainEventNames.push domainEvent.name
-
-
-        eventric.addGlobalProjection GlobalProjection
-        Promise.all [
-          firstContext.initialize()
-          secondContext.initialize()
-        ]
+      it 'should correctly replay those events given there are saved domain events from the first context', ->
+        firstContext.command 'CreateAggregate'
         .then ->
           eventric.initializeGlobalProjections()
+        .then ->
+          expect(receivedDomainEventNames).to.deep.equal ['FirstContextAggregateCreated']
 
 
-      describe 'given there are already saved domain events on the first context', ->
+      it 'should correctly replay those events given there are saved domain events from the second context', ->
+        secondContext.command 'CreateAggregate'
+        .then ->
+          eventric.initializeGlobalProjections()
+        .then ->
+          expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
 
 
-        beforeEach ->
+      it 'should replay all events in correct order given there are saved domain events from all contexts', ->
+        secondContext.command 'CreateAggregate'
+        .then ->
           firstContext.command 'CreateAggregate'
-
-
-        it 'should correctly replay those events', ->
-          expect(receivedDomainEventNames).to.deep.equal ['FirstContextAggregateCreated']
-
-
-
-      describe 'given there are already saved domain events on the second context', ->
-
-        beforeEach ->
-          secondContext.command 'CreateAggregate'
-
-
-        it 'should correctly replay those events', ->
-          expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
-
-
-      describe 'given there are already saved domain events for all contexts', ->
-
-        beforeEach ->
-          secondContext.command 'CreateAggregate'
-          .then ->
-            firstContext.command 'CreateAggregate'
-
-
-        it 'should replay all events in correct order', ->
+        .then ->
+          eventric.initializeGlobalProjections()
+        .then ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated', 'FirstContextAggregateCreated']
 
 
+    describe.only 'receiving domain events on the projection', ->
 
-      describe 'given new events are emitted on the first context', ->
-
-        beforeEach (done) ->
-            firstContext.subscribeToDomainEvent 'FirstContextAggregateCreated', ->
-              done()
-            firstContext.command 'CreateAggregate'
-
-
-        it 'should correctly handle those events', ->
+      it 'should correctly handle those events given new events are emitted on the first context', ->
+        eventric.initializeGlobalProjections()
+        .then ->
+          firstContext.command 'CreateAggregate'
+        .then ->
           expect(receivedDomainEventNames).to.deep.equal ['FirstContextAggregateCreated']
 
 
-      describe 'given new events are emitted on the second context', ->
-
-        beforeEach (done) ->
-          secondContext.subscribeToDomainEvent 'SecondContextAggregateCreated', ->
-            done()
+      it 'should correctly handle those events given new events are emitted on the second context', ->
+        eventric.initializeGlobalProjections()
+        .then ->
           secondContext.command 'CreateAggregate'
-
-
-        it 'should correctly handle those events', ->
+        .then ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
 
 
-      describe 'given new events are emitted on all contexts', ->
-
-        beforeEach (done) ->
-          firstContext.subscribeToDomainEvent 'FirstContextAggregateCreated', ->
-            done()
+      it 'should correctly handle those events in order given new events are emitted on all contexts', ->
+        eventric.initializeGlobalProjections()
+        .then ->
           secondContext.command 'CreateAggregate'
-          .then ->
-            firstContext.command 'CreateAggregate'
-
-
-        it 'should correctly handle those events', ->
+        .then ->
+          firstContext.command 'CreateAggregate'
+        .then ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated', 'FirstContextAggregateCreated']
+
+
+createContextWithOneAggregate = ({contextName, aggregateName, domainEventName}) ->
+
+  context = eventric.context contextName
+
+  context.defineDomainEvent domainEventName, ->
+  context.addAggregate aggregateName, ->
+    create: (params) ->
+      @$emitDomainEvent domainEventName
+
+  context.addCommandHandler 'CreateAggregate', ->
+    @$aggregate.create aggregateName
+    .then (aggregate) ->
+      aggregate.$save()
+
+  context

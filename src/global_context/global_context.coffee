@@ -1,4 +1,4 @@
-# TODO: Simple approach for global projections without changing the Projection service. Recfactor when adding EventStore
+# TODO: Simple approach for global projections without changing the Projection service. Refactor when adding EventStore
 class GlobalContext
 
   constructor: (@_eventric) ->

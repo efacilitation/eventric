@@ -68,7 +68,7 @@ describe 'Global Projection Feature', ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated', 'FirstContextAggregateCreated']
 
 
-    describe.only 'receiving domain events on the projection', ->
+    describe 'receiving domain events on the projection', ->
 
       it 'should correctly handle those events given new events are emitted on the first context', ->
         eventric.initializeGlobalProjections()

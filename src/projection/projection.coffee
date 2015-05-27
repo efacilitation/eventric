@@ -106,7 +106,7 @@ class Projection
 
 
   _parseEventNamesFromProjection: (projection) ->
-    new Promise (resolve, reject) =>
+    new Promise (resolve, reject) ->
       eventNames = []
       for key, value of projection
         if (key.indexOf 'handle') is 0 and (typeof value is 'function')
@@ -116,31 +116,28 @@ class Projection
 
 
   _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventNames, aggregateId) ->
-    new Promise (resolve, reject) =>
-      @_domainEventsApplied[projectionId] = {}
+    @_domainEventsApplied[projectionId] = {}
 
-      if aggregateId
-        findEvents = @_context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
-      else
-        findEvents = @_context.findDomainEventsByName eventNames
+    if aggregateId
+      findEvents = @_context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
+    else
+      findEvents = @_context.findDomainEventsByName eventNames
 
-      findEvents
-      .then (domainEvents) =>
-        if not domainEvents or domainEvents.length is 0
-          return resolve eventNames
+    findEvents
+    .then (domainEvents) =>
+      if not domainEvents or domainEvents.length is 0
+        return eventNames
 
-        @_eventric.eachSeries domainEvents, (domainEvent, next) =>
+      promise = new Promise (resolve) -> resolve()
+      domainEvents.forEach (domainEvent) =>
+        promise = promise.then =>
           @_applyDomainEventToProjection domainEvent, projection
           .then =>
             @_domainEventsApplied[projectionId][domainEvent.id] = true
-            next()
+      promise.then ->
+        return eventNames
 
-        , (err) ->
-          return reject err if err
-          resolve eventNames
-
-      .catch (err) ->
-        reject err
+      return promise
 
 
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId) ->

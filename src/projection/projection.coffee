@@ -126,7 +126,7 @@ class Projection
     findEvents
     .then (domainEvents) =>
       if not domainEvents or domainEvents.length is 0
-        return eventNames
+        return new Promise (resolve) -> resolve eventNames
 
       promise = new Promise (resolve) -> resolve()
       domainEvents.forEach (domainEvent) =>

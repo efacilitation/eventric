@@ -27,6 +27,7 @@ class Projection
 
 
       @log.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
+      eventNames = null
       @_clearProjectionStores projection.stores, projectionName
       .then =>
         @log.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"
@@ -36,9 +37,10 @@ class Projection
       .then =>
         @log.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
         @_parseEventNamesFromProjection projection
-      .then (eventNames) =>
+      .then (_eventNames) =>
+        eventNames = _eventNames
         @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
-      .then (eventNames) =>
+      .then =>
         @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
         @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
       .then =>
@@ -126,7 +128,7 @@ class Projection
     findEvents
     .then (domainEvents) =>
       if not domainEvents or domainEvents.length is 0
-        return new Promise (resolve) -> resolve eventNames
+        return
 
       promise = new Promise (resolve) -> resolve()
       domainEvents.forEach (domainEvent) =>
@@ -134,8 +136,6 @@ class Projection
           @_applyDomainEventToProjection domainEvent, projection
           .then =>
             @_domainEventsApplied[projectionId][domainEvent.id] = true
-      promise.then ->
-        return eventNames
 
       return promise
 

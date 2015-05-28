@@ -15,11 +15,13 @@ describe 'Context', ->
 
   describe '#command', ->
     describe 'given the context was not initialized yet', ->
-      it 'should callback with an error', (done) ->
-        someContext = new Context 'exampleContext', eventricStub
-        someContext.command 'getSomething'
+      it 'should callback with an error including the context name and command name', (done) ->
+        someContext = new Context 'ExampleContext', eventricStub
+        someContext.command 'DoSomething'
         .catch (error) ->
           expect(error).to.be.an.instanceOf Error
+          expect(error.message).to.contain 'ExampleContext'
+          expect(error.message).to.contain 'DoSomething'
           done()
 
 
@@ -42,13 +44,15 @@ describe 'Context', ->
   describe '#query', ->
     someContext = null
     beforeEach ->
-      someContext = new Context 'exampleContext', eventricStub
+      someContext = new Context 'ExampleContext', eventricStub
 
     describe 'given the context was not initialized yet', ->
-      it 'should callback with an error', (done) ->
+      it 'should callback with an error including the context name and command name', (done) ->
         someContext.query 'getSomething'
         .catch (error) ->
           expect(error).to.be.an.instanceOf Error
+          expect(error.message).to.contain 'ExampleContext'
+          expect(error.message).to.contain 'getSomething'
           done()
 
 

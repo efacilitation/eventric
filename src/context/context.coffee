@@ -312,22 +312,18 @@ class Context
     @_eventBus
 
 
-  command: (name, params) ->
+  command: (commandName, params) ->
     new Promise (resolve, reject) =>
       command =
         id: @_eventric.generateUid()
-        name: name
+        name: commandName
         params: params
       @log.debug 'Got Command', command
 
-      if not @_initialized
-        err = 'Context not initialized yet'
-        @log.error err
-        err = new Error err
-        return reject err
+      @_verifyContextIsInitialized commandName
 
-      if not @_commandHandlers[name]
-        err = "Given command #{name} not registered on context"
+      if not @_commandHandlers[commandName]
+        err = "Given command #{commandName} not registered on context"
         @log.error err
         err = new Error err
         return reject err
@@ -348,43 +344,45 @@ class Context
 
 
       executeCommand = null
-      commandHandlerFn = @_commandHandlers[name]
+      commandHandlerFn = @_commandHandlers[commandName]
       executeCommand = commandHandlerFn.apply _di, [params]
 
       Promise.all [executeCommand]
       .then ([result]) =>
-        @log.debug 'Completed Command', name
+        @log.debug 'Completed Command', commandName
         resolve result
       .catch (error) ->
         reject error
 
 
-  query: (name, params) ->
+  query: (queryName, params) ->
     new Promise (resolve, reject) =>
-      @log.debug 'Got Query', name
+      @log.debug 'Got Query', queryName
 
-      if not @_initialized
-        err = 'Context not initialized yet'
-        @log.error err
-        err = new Error err
-        reject err
-        return
+      @_verifyContextIsInitialized queryName
 
-      if not @_queryHandlers[name]
-        err = "Given query #{name} not registered on context"
+      if not @_queryHandlers[queryName]
+        err = "Given query #{queryName} not registered on context"
         @log.error err
         err = new Error err
         return reject err
 
-      executeQuery = @_queryHandlers[name].apply @_di, [params]
+      executeQuery = @_queryHandlers[queryName].apply @_di, [params]
 
       Promise.all [executeQuery]
       .then ([result]) =>
-        @log.debug "Completed Query #{name} with Result #{result}"
+        @log.debug "Completed Query #{queryName} with Result #{result}"
         resolve result
 
       .catch (err) ->
         reject err
+
+
+  _verifyContextIsInitialized: (methodName) ->
+    if not @_initialized
+      errorMessage = "Context #{@name} not initialized yet, cannot execute #{methodName}"
+      @log.error errorMessage
+      throw new Error errorMessage
 
 
 module.exports = Context

@@ -92,35 +92,32 @@ class Repository
         err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
         @_eventric.log.debug err, @_command
         err = new Error err
-        callback? err, null
+        callback err, null
         reject err
         return
 
       @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
-      @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-        @_store.saveDomainEvent domainEvent
+      promise = new Promise (resolve) -> resolve()
+      domainEvents.forEach (domainEvent) =>
+        promise = promise.then =>
+          @_store.saveDomainEvent domainEvent
         .then =>
           @_eventric.log.debug "Saved DomainEvent", domainEvent
-          next null
-      , (err) =>
-        if err
-          callback err, null
-          reject err
-        else
-          @_eventric.eachSeries domainEvents, (domainEvent, next) =>
-            @_eventric.log.debug "Publishing DomainEvent", domainEvent
-            @_context.getEventBus().publishDomainEvent domainEvent
-            .then ->
-              next()
-          , (err) ->
-            if err
-              callback err, null
-              reject err
-            else
-              resolve aggregate.id
-              callback null, aggregate.id
+
+      domainEvents.forEach (domainEvent) =>
+        @_eventric.log.debug "Publishing DomainEvent", domainEvent
+        promise = promise.then =>
+          @_context.getEventBus().publishDomainEvent domainEvent
+
+      promise
+      .then ->
+        resolve aggregate.id
+        callback null, aggregate.id
+      .catch (error) ->
+        callback error, null
+        reject error
 
 
   setCommand: (command) ->

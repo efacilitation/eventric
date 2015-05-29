@@ -178,29 +178,6 @@ class Eventric
 
 
   # TODO: Use existing npm module
-  eachSeries: (arr, iterator, callback) ->
-    # MIT https://github.com/jb55/async-each-series
-    callback = callback or ->
-
-    return callback()  if not Array.isArray(arr) or not arr.length
-    completed = 0
-    iterate = ->
-      iterator arr[completed], (err) ->
-        if err
-          callback err
-        else
-          ++completed
-          if completed >= arr.length
-            callback()
-          else
-            iterate()
-        return
-      return
-
-    iterate()
-
-
-  # TODO: Use existing npm module
   mixin: (destination, source) ->
     for prop of source
       destination[prop] = source[prop]

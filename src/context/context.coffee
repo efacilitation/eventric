@@ -38,7 +38,7 @@ class Context
     domainEvent = @createDomainEvent domainEventName, DomainEventClass, domainEventPayload
     @saveAndPublishDomainEvent domainEvent
     .then =>
-      @_eventric.log.debug "Created and Handled DomainEvent in Context", domainEvent
+      @log.debug "Created and Handled DomainEvent in Context", domainEvent
 
 
   publishDomainEvent: (domainEvent) =>
@@ -161,7 +161,7 @@ class Context
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on context"
-      @_eventric.log.error err
+      @log.error err
       err = new Error err
       return err
 
@@ -193,52 +193,45 @@ class Context
 
 
   _initializeStores: ->
-    new Promise (resolve, reject) =>
-      stores = []
-      for storeName, store of (@_eventric.defaults @_storeClasses, @_eventric.getStores())
-        stores.push
-          name: storeName
-          Class: store.Class
-          options: store.options
+    stores = []
+    for storeName, store of (@_eventric.defaults @_storeClasses, @_eventric.getStores())
+      stores.push
+        name: storeName
+        Class: store.Class
+        options: store.options
 
-      @_eventric.eachSeries stores, (store, next) =>
-        @log.debug "[#{@name}] Initializing Store #{store.name}"
-        @_storeInstances[store.name] = new store.Class
+    promise = new Promise (resolve) -> resolve()
+    stores.forEach (store) =>
+      @log.debug "[#{@name}] Initializing Store #{store.name}"
+      @_storeInstances[store.name] = new store.Class
+
+      promise = promise.then =>
         @_storeInstances[store.name].initialize @, store.options
-        .then =>
-          @log.debug "[#{@name}] Finished initializing Store #{store.name}"
-          next()
+      .then =>
+        @log.debug "[#{@name}] Finished initializing Store #{store.name}"
 
-        .catch (err) ->
-          next err
-
-      , (err) ->
-        return reject err if err
-        resolve()
+    return promise
 
 
   _initializeProjections: ->
-    new Promise (resolve, reject) =>
-      projections = []
-      for projectionName, ProjectionClass of @_projectionClasses
-        projections.push
-          name: projectionName
-          class: ProjectionClass
+    promise = new Promise (resolve) -> resolve()
 
-      @_eventric.eachSeries projections, (projection, next) =>
-        eventNames = null
-        @log.debug "[#{@name}] Initializing Projection #{projection.name}"
+    projections = []
+    for projectionName, ProjectionClass of @_projectionClasses
+      projections.push
+        name: projectionName
+        class: ProjectionClass
+
+    projections.forEach (projection) =>
+      eventNames = null
+      @log.debug "[#{@name}] Initializing Projection #{projection.name}"
+
+      promise = promise.then =>
         @projectionService.initializeInstance projection.name, projection.class, {}
-        .then (projectionId) =>
-          @log.debug "[#{@name}] Finished initializing Projection #{projection.name}"
-          next()
+      .then (projectionId) =>
+        @log.debug "[#{@name}] Finished initializing Projection #{projection.name}"
 
-        .catch (err) ->
-          reject err
-
-      , (err) ->
-        return reject err if err
-        resolve()
+    return promise
 
 
   getProjection: (projectionId) ->

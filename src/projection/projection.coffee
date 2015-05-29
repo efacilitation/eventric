@@ -68,44 +68,37 @@ class Projection
 
 
   _injectStoresIntoProjection: (projectionName, projection) ->
-    new Promise (resolve, reject) =>
-      if not projection.stores
-        return resolve()
+    promise = new Promise (resolve) -> resolve()
+    if not projection.stores
+      return promise
 
-      projection["$store"] ?= {}
-      @_eventric.eachSeries projection.stores, (projectionStoreName, next) =>
-        @log.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
+    projection["$store"] ?= {}
+    projection.stores?.forEach (projectionStoreName) =>
+      @log.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
+      promise = promise.then =>
         @_context.getProjectionStore projectionStoreName, projectionName
-        .then (projectionStore) =>
-          if projectionStore
-            projection["$store"][projectionStoreName] = projectionStore
-            @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} \
-            into Projection #{projectionName}"
-            next()
+      .then (projectionStore) =>
+        if projectionStore
+          projection["$store"][projectionStoreName] = projectionStore
+          @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} \
+          into Projection #{projectionName}"
 
-        .catch (err) ->
-          next err
-
-      , (err) ->
-        return reject err if err
-        resolve()
+    return promise
 
 
   _clearProjectionStores: (projectionStores, projectionName) ->
-    new Promise (resolve, reject) =>
-      if not projectionStores
-        return resolve()
+    promise = new Promise (resolve) -> resolve()
+    if not projectionStores
+      return promise
 
-      @_eventric.eachSeries projectionStores, (projectionStoreName, next) =>
-        @log.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+    projectionStores.forEach (projectionStoreName) =>
+      @log.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+      promise = promise.then =>
         @_context.clearProjectionStore projectionStoreName, projectionName
-        .then =>
-          @log.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
-          next()
-        .catch (err) ->
-          next err
-      , (err) ->
-        resolve()
+      .then =>
+        @log.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+
+    return promise
 
 
   _parseEventNamesFromProjection: (projection) ->
@@ -142,38 +135,34 @@ class Projection
 
 
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId) ->
-    new Promise (resolve, reject) =>
-      domainEventHandler = (domainEvent, done = ->) =>
-        if @_domainEventsApplied[projectionId][domainEvent.id]
-          return done()
+    domainEventHandler = (domainEvent, done = ->) =>
+      if @_domainEventsApplied[projectionId][domainEvent.id]
+        return done()
 
-        @_applyDomainEventToProjection domainEvent, projection
-        .then =>
-          @_domainEventsApplied[projectionId][domainEvent.id] = true
-          event =
-            id: projectionId
-            projection: projection
-            domainEvent: domainEvent
-          done()
+      @_applyDomainEventToProjection domainEvent, projection
+      .then =>
+        @_domainEventsApplied[projectionId][domainEvent.id] = true
+        event =
+          id: projectionId
+          projection: projection
+          domainEvent: domainEvent
+        done()
 
-        .catch (err) ->
-          done err
+      .catch (err) ->
+        done err
 
-      @_eventric.eachSeries eventNames, (eventName, done) =>
+    promise = new Promise (resolve) -> resolve()
+    eventNames.forEach (eventName) =>
+      promise = promise.then =>
         if aggregateId
-          subscriberPromise = @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler
+          @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler
         else
-          subscriberPromise = @_context.subscribeToDomainEvent eventName, domainEventHandler
-        subscriberPromise
-        .then (subscriberId) =>
-          @_handlerFunctions[projectionId] ?= []
-          @_handlerFunctions[projectionId].push subscriberId
-          done()
-        .catch (err) ->
-          done err
-      , (err) ->
-        return reject err if err
-        resolve()
+          @_context.subscribeToDomainEvent eventName, domainEventHandler
+      .then (subscriberId) =>
+        @_handlerFunctions[projectionId] ?= []
+        @_handlerFunctions[projectionId].push subscriberId
+
+    return promise
 
 
   _applyDomainEventToProjection: (domainEvent, projection) =>
@@ -195,7 +184,7 @@ class Projection
 
   destroyInstance: (projectionId) ->
     if not @_handlerFunctions[projectionId]
-      return @_eventric.log.error 'Missing attribute projectionId'
+      return @log.error 'Missing attribute projectionId'
 
     unsubscribePromises = []
     for subscriberId in @_handlerFunctions[projectionId]

@@ -42,7 +42,7 @@ class Repository
 
 
   _findDomainEventsForAggregate: (aggregateId, callback) ->
-    @_store.findDomainEventsByAggregateId aggregateId, (err, domainEvents) =>
+    @_store.findDomainEventsByAggregateId aggregateId, (err, domainEvents) ->
       return callback err, null if err
       return callback null, [] if domainEvents.length == 0
       callback null, domainEvents
@@ -114,7 +114,7 @@ class Repository
             @_context.getEventBus().publishDomainEvent domainEvent
             .then ->
               next()
-          , (err) =>
+          , (err) ->
             if err
               callback err, null
               reject err

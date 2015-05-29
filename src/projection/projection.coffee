@@ -79,7 +79,8 @@ class Projection
         .then (projectionStore) =>
           if projectionStore
             projection["$store"][projectionStoreName] = projectionStore
-            @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
+            @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} \
+            into Projection #{projectionName}"
             next()
 
         .catch (err) ->

@@ -42,7 +42,7 @@ class Eventric
       @_params[key]
 
 
-  addStore: (storeName, StoreClass, storeOptions={}) ->
+  addStore: (storeName, StoreClass, storeOptions = {}) ->
     @_storeClasses[storeName] =
       Class: StoreClass
       options: storeOptions

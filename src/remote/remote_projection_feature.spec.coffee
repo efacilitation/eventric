@@ -186,6 +186,9 @@ describe 'Remote Projection Feature', ->
             @$subscribeHandlersWithAggregateId params.aggregateId
             done()
 
+          handleExampleCreated: ->
+            @created = true
+
           handleExampleUpdated: ->
             @updated = true
 
@@ -216,6 +219,20 @@ describe 'Remote Projection Feature', ->
         .then (projectionId) ->
           projection = exampleRemote.getProjectionInstance projectionId
           expect(projection.updated).to.be.false
+
+
+      it '[bugfix] should call all handle functions given there are events already stored', ->
+        exampleId = null
+        projection = null
+        exampleContext.command 'CreateExample'
+        .then (_exampleId) ->
+          exampleId = _exampleId
+          exampleRemote.initializeProjectionInstance 'ExampleProjection', aggregateId: exampleId
+        .then (projectionId) ->
+          projection = exampleRemote.getProjectionInstance projectionId
+          exampleContext.command 'UpdateExample', id: exampleId
+        .then ->
+          expect(projection.updated).to.be.true
 
 
     describe 'adding a remote projection  for which multiple matching domain events already exist', ->

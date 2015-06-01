@@ -17,7 +17,7 @@ class InMemoryRemoteEndpoint
 
   publish: (contextName, [domainEventName, aggregateId]..., payload) ->
     fullEventName = getFullEventName contextName, domainEventName, aggregateId
-    pubSub.publish fullEventName, payload, ->
+    pubSub.publish fullEventName, payload
 
 
 module.exports.endpoint = new InMemoryRemoteEndpoint

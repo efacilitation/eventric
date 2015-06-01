@@ -3,46 +3,51 @@ class PubSub
   constructor: ->
     @_subscribers = []
     @_subscriberId = 0
-    @_nextTick = (args...) -> setTimeout args...
+    @_publishQueue = new Promise (resolve) -> resolve()
 
 
-  subscribe: (eventName, subscriberFn) ->
-    new Promise (resolve, reject) =>
+  subscribe: (eventName, subscriberFunction) ->
+    new Promise (resolve) =>
       subscriber =
         eventName: eventName
-        subscriberFn: subscriberFn
+        subscriberFunction: subscriberFunction
         subscriberId: @_getNextSubscriberId()
       @_subscribers.push subscriber
       resolve subscriber.subscriberId
 
 
   publish: (eventName, payload) ->
-    new Promise (resolve, reject) =>
-      subscribers = @_getRelevantSubscribers eventName
-      executeNextHandler = =>
-        if subscribers.length is 0
-          resolve()
-        else
-          subscribers.shift().subscriberFn payload, ->
-          @_nextTick executeNextHandler, 0
-      @_nextTick executeNextHandler, 0
+    subscribers = @_getRelevantSubscribers eventName
+    executeSubscriberFunctions = Promise.all subscribers.map (subscriber) -> subscriber.subscriberFunction payload
+    @_enqueuePublishing executeSubscriberFunctions
+    executeSubscriberFunctions
 
 
   _getRelevantSubscribers: (eventName) ->
     if eventName
-      @_subscribers.filter (x) -> x.eventName is eventName
+      @_subscribers.filter (subscriber) -> subscriber.eventName is eventName
     else
       @_subscribers
 
 
+  _enqueuePublishing: (publishOperation) ->
+    @_publishQueue = @_publishQueue.then publishOperation
+
+
   unsubscribe: (subscriberId) ->
-    new Promise (resolve, reject) =>
-      @_subscribers = @_subscribers.filter (x) -> x.subscriberId isnt subscriberId
+    new Promise (resolve) =>
+      @_subscribers = @_subscribers.filter (subscriber) -> subscriber.subscriberId isnt subscriberId
       resolve()
 
 
   _getNextSubscriberId: ->
     @_subscriberId++
+
+
+  destroy: ->
+    @_publishQueue.then =>
+      @subscribe = undefined
+      @publish = undefined
 
 
 module.exports = PubSub

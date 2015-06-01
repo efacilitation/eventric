@@ -75,49 +75,42 @@ class Repository
       reject error
 
 
-  save: (aggregateId, callback = ->) =>
+  save: (aggregateId) =>
     new Promise (resolve, reject) =>
       commandId = @_command.id ? 'nocommand'
       aggregate = @_aggregateInstances[commandId][aggregateId]
       if not aggregate
-        err = "Tried to save unknown aggregate #{@_aggregateName}"
-        @_eventric.log.error err
-        err = new Error err
-        callback? err, null
-        reject err
-        return
+        errorMessage = "Tried to save unknown aggregate #{@_aggregateName}"
+        @_eventric.log.error errorMessage
+        throw new Error errorMessage
 
       domainEvents = aggregate.getDomainEvents()
       if domainEvents.length < 1
-        err = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
-        @_eventric.log.debug err, @_command
-        err = new Error err
-        callback err, null
-        reject err
-        return
+        errorMessage = "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
+        @_eventric.log.debug errorMessage, @_command
+        throw new Error errorMessage
 
       @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
-      promise = new Promise (resolve) -> resolve()
+      saveDomainEventQueue = new Promise (resolve) -> resolve()
       domainEvents.forEach (domainEvent) =>
-        promise = promise.then =>
+        saveDomainEventQueue = saveDomainEventQueue.then =>
           @_store.saveDomainEvent domainEvent
         .then =>
           @_eventric.log.debug "Saved DomainEvent", domainEvent
 
-      domainEvents.forEach (domainEvent) =>
-        @_eventric.log.debug "Publishing DomainEvent", domainEvent
-        promise = promise.then =>
-          @_context.getEventBus().publishDomainEvent domainEvent
 
-      promise
+      saveDomainEventQueue
+      .then =>
+        domainEvents.forEach (domainEvent) =>
+          @_eventric.log.debug "Publishing DomainEvent", domainEvent
+          @_context.getEventBus().publishDomainEvent domainEvent
+          .catch (error) =>
+            @_eventric.log.error error
       .then ->
         resolve aggregate.id
-        callback null, aggregate.id
-      .catch (error) ->
-        callback error, null
-        reject error
+      .catch reject
 
 
   setCommand: (command) ->

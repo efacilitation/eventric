@@ -2,35 +2,49 @@ class EventBus
 
   constructor: (@_eventric) ->
     @_pubSub = new @_eventric.PubSub()
+    @_publishQueue = new Promise (resolve) -> resolve()
 
 
-  subscribeToDomainEvent: (eventName, handlerFn, options = {}) ->
+  subscribeToDomainEvent: (eventName, handlerFn) ->
     @_pubSub.subscribe eventName, handlerFn
 
 
-  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn, options = {}) ->
-    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn, options
+  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn) ->
+    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn
 
 
   subscribeToAllDomainEvents: (handlerFn) ->
-    @_pubSub.subscribe 'DomainEvent', handlerFn
+    @subscribeToDomainEvent 'DomainEvent', handlerFn
 
 
   publishDomainEvent: (domainEvent) ->
-    new Promise (resolve, reject) =>
-      @_pubSub.publish 'DomainEvent', domainEvent
-      .then =>
-        @_pubSub.publish domainEvent.name, domainEvent
-      .then =>
-        if domainEvent.aggregate and domainEvent.aggregate.id
-          @_pubSub.publish "#{domainEvent.name}/#{domainEvent.aggregate.id}", domainEvent
-          .then ->
-            resolve()
-        else
-          resolve()
+    @_enqueuePublishing =>
+      @_publishDomainEvent domainEvent
 
-      .catch (err) ->
-        reject err
+
+  _enqueuePublishing: (publishOperation) ->
+    @_publishQueue = @_publishQueue.then publishOperation
+
+
+  _publishDomainEvent: (domainEvent) ->
+    publishPasses = [
+      @_pubSub.publish 'DomainEvent', domainEvent
+      @_pubSub.publish domainEvent.name, domainEvent
+    ]
+
+    if domainEvent.aggregate?.id
+      eventName = "#{domainEvent.name}/#{domainEvent.aggregate.id}"
+      publishPasses.push @_pubSub.publish eventName, domainEvent
+
+    Promise.all publishPasses
+
+
+  destroy: ->
+    @_publishQueue.then =>
+      @subscribeToDomainEvent = undefined
+      @subscribeToDomainEventWithAggregateId = undefined
+      @subscribeToAllDomainEvents = undefined
+      @publishDomainEvent = undefined
 
 
 module.exports = EventBus

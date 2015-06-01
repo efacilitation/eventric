@@ -124,14 +124,14 @@ class Projection
       if not domainEvents or domainEvents.length is 0
         return
 
-      promise = new Promise (resolve) -> resolve()
+      applyDomainEventsToProjection = new Promise (resolve) -> resolve()
       domainEvents.forEach (domainEvent) =>
-        promise = promise.then =>
+        applyDomainEventsToProjection = applyDomainEventsToProjection.then =>
           @_applyDomainEventToProjection domainEvent, projection
-          .then =>
-            @_domainEventsApplied[projectionId][domainEvent.id] = true
+        .then =>
+          @_domainEventsApplied[projectionId][domainEvent.id] = true
 
-      return promise
+      return applyDomainEventsToProjection
 
 
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId) ->

@@ -89,6 +89,16 @@ describe 'EventBus', ->
         expect(eventBus.publishDomainEvent).to.be.undefined
 
 
+    it 'should wait to resolve given there are ongoing publish operations', ->
+      pubSubStub.publish.returns new Promise (resolve) -> setTimeout resolve, 15
+      domainEvent1 = name: 'SomeEvent1'
+      domainEvent2 = name: 'SomeEvent2'
 
+      eventBus.publishDomainEvent domainEvent1
+      eventBus.publishDomainEvent domainEvent2
+      eventBus.destroy()
+      .then ->
+        expect(pubSubStub.publish.getCall(1).args[0]).to.equal 'SomeEvent1'
+        expect(pubSubStub.publish.getCall(3).args[0]).to.equal 'SomeEvent2'
 
 

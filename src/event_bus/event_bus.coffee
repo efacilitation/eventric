@@ -40,7 +40,11 @@ class EventBus
 
 
   destroy: ->
-    @_pubSub.destroy().then =>
+    Promise.all [
+      @_publishQueue
+      @_pubSub.destroy()
+    ]
+    .then =>
       @publishDomainEvent = undefined
 
 

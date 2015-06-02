@@ -1,14 +1,18 @@
 describe 'Context', ->
   Context = null
 
-  class RepositoryMock
   eventBusStub = null
 
   beforeEach ->
-    eventBusStub =
-      subscribeToDomainEvent: sandbox.stub()
-      subscribeToDomainEventWithAggregateId: sandbox.stub()
-      publishDomainEvent: sandbox.stub()
+    EventBus = require '../event_bus'
+
+    eventBusStub = new EventBus eventricStub
+    sandbox.stub eventBusStub, 'subscribeToDomainEvent'
+    sandbox.stub eventBusStub, 'subscribeToDomainEventWithAggregateId'
+    sandbox.stub eventBusStub, 'publishDomainEvent'
+    sandbox.stub(eventBusStub, 'destroy').returns new Promise (resolve) -> resolve()
+
+    eventricStub.EventBus = -> eventBusStub
 
     Context = require './'
 
@@ -64,3 +68,23 @@ describe 'Context', ->
           .catch (error) ->
             expect(error).to.be.an.instanceOf Error
             done()
+
+
+  describe '#destroy', ->
+    someContext = null
+
+    beforeEach ->
+      someContext = new Context 'ExampleContext', eventricStub
+
+
+    it 'should call destroy on the event bus', ->
+      someContext.destroy()
+      expect(eventBusStub.destroy).to.have.been.called
+
+
+    it 'should remove the relevant instance methods', ->
+      someContext.destroy()
+      .then ->
+        expect(someContext.command).to.be.undefined
+        expect(someContext.emitDomainEvent).to.be.undefined
+

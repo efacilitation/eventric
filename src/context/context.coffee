@@ -41,10 +41,6 @@ class Context
       @log.debug "Created and Handled DomainEvent in Context", domainEvent
 
 
-  publishDomainEvent: (domainEvent) =>
-    @_eventBus.publishDomainEvent domainEvent
-
-
   createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload, aggregate) ->
     payload = {}
     DomainEventClass.apply payload, [domainEventPayload]
@@ -75,11 +71,6 @@ class Context
     @
 
 
-  addCommandHandler: (commandHandlerName, commandHandlerFn) ->
-    @_commandHandlers[commandHandlerName] = commandHandlerFn
-    @
-
-
   _getAggregateRepository: (aggregateName, command) =>
     repositoriesCache = {} if not repositoriesCache
     if not repositoriesCache[aggregateName]
@@ -95,28 +86,20 @@ class Context
     repositoriesCache[aggregateName]
 
 
-  addCommandHandlers: (commandObj) ->
-    @addCommandHandler commandHandlerName, commandFunction for commandHandlerName, commandFunction of commandObj
+  addCommandHandlers: (commands) ->
+    for commandHandlerName, commandFunction of commands
+      @_commandHandlers[commandHandlerName] = commandFunction
     @
 
 
-  addQueryHandler: (queryHandlerName, queryHandlerFn) ->
-    @_queryHandlers[queryHandlerName] = queryHandlerFn
-    @
-
-
-  addQueryHandlers: (queryObj) ->
-    @addQueryHandler queryHandlerName, queryFunction for queryHandlerName, queryFunction of queryObj
+  addQueryHandlers: (queries) ->
+    for queryHandlerName, queryFunction of queries
+      @_queryHandlers[queryHandlerName] = queryFunction
     @
 
 
   addAggregate: (aggregateName, AggregateRootClass) ->
     @_aggregateRootClasses[aggregateName] = AggregateRootClass
-    @
-
-
-  addAggregates: (aggregatesObj) ->
-    @addAggregate aggregateName, AggregateRootClass for aggregateName, AggregateRootClass of aggregatesObj
     @
 
 
@@ -369,6 +352,12 @@ class Context
 
       .catch (err) ->
         reject err
+
+
+  destroy: ->
+    @_eventBus.destroy().then =>
+      @command = undefined
+      @emitDomainEvent = undefined
 
 
   _verifyContextIsInitialized: (methodName) ->

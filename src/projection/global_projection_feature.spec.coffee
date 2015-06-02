@@ -105,9 +105,10 @@ createContextWithOneAggregate = ({contextName, aggregateName, domainEventName}) 
     create: (params) ->
       @$emitDomainEvent domainEventName
 
-  context.addCommandHandler 'CreateAggregate', ->
-    @$aggregate.create aggregateName
-    .then (aggregate) ->
-      aggregate.$save()
+  context.addCommandHandlers
+    CreateAggregate: ->
+      @$aggregate.create aggregateName
+      .then (aggregate) ->
+        aggregate.$save()
 
   context

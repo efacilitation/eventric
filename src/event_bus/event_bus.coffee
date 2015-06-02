@@ -40,10 +40,7 @@ class EventBus
 
 
   destroy: ->
-    @_publishQueue.then =>
-      @subscribeToDomainEvent = undefined
-      @subscribeToDomainEventWithAggregateId = undefined
-      @subscribeToAllDomainEvents = undefined
+    @_pubSub.destroy().then =>
       @publishDomainEvent = undefined
 
 

@@ -57,9 +57,8 @@ class Eventric
       error = 'Contexts must have a name'
       @log.error error
       throw new Error error
-    pubsub = new @PubSub
+
     context = new @Context name, @
-    @mixin context, pubsub
 
     @_delegateAllDomainEventsToGlobalHandlers context
     @_delegateAllDomainEventsToRemoteEndpoints context
@@ -93,10 +92,7 @@ class Eventric
       err = 'Missing context name'
       @log.error err
       throw new Error err
-    pubsub = new @PubSub
-    remote = new @Remote contextName, @
-    @mixin remote, pubsub
-    remote
+    new @Remote contextName, @
 
 
   addRemoteEndpoint: (remoteName, remoteEndpoint) ->

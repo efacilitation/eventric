@@ -94,10 +94,9 @@ describe 'PubSub', ->
 
   describe '#destroy', ->
 
-    it 'should remove the publish and subscribe methods', ->
+    it 'should remove the publish method', ->
       pubSub.destroy()
       .then ->
-        expect(pubSub.subscribe).to.be.undefined
         expect(pubSub.publish).to.be.undefined
 
 

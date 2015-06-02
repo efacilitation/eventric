@@ -8,6 +8,7 @@ describe 'EventBus', ->
     pubSubStub = new PubSub
     sandbox.stub(pubSubStub, 'publish').returns new Promise (resolve) -> resolve()
     sandbox.stub(pubSubStub, 'subscribe').returns new Promise (resolve) -> resolve()
+    sandbox.stub(pubSubStub, 'destroy').returns new Promise (resolve) -> resolve()
 
     eventricStub =
       PubSub: -> pubSubStub
@@ -76,21 +77,18 @@ describe 'EventBus', ->
 
   describe '#destroy', ->
 
-    it 'should remove all instance methods', ->
+    it 'should call destroy on the pub sub', ->
       eventBus.destroy()
       .then ->
-        expect(eventBus.subscribeToDomainEvent).to.be.undefined
-        expect(eventBus.subscribeToDomainEventWithAggregateId).to.be.undefined
-        expect(eventBus.subscribeToAllDomainEvents).to.be.undefined
+        expect(pubSubStub.destroy).to.have.been.called
+
+
+    it 'should remove the publish domain event method', ->
+      eventBus.destroy()
+      .then ->
         expect(eventBus.publishDomainEvent).to.be.undefined
 
 
-    it 'should wait to resolve given there are ongoing publish domain event operations', ->
-      pubSubStub.publish.returns new Promise (resolve) -> setTimeout resolve, 5
-      eventBus.publishDomainEvent name: 'Event1', aggregate: id: 1
-      eventBus.publishDomainEvent name: 'Event2', aggregate: id: 1
-      eventBus.destroy()
-      .then ->
-        expect(pubSubStub.publish.callCount).to.equal 6
+
 
 

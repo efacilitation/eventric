@@ -26,9 +26,8 @@ root.before ->
 
 
 root.beforeEach ->
-  root.eventric     = require './'
+  root.eventric = require './'
 
-  #eventric.log.setLogLevel 'debug'
 
 root.afterEach ->
   delete root.eventric

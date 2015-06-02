@@ -76,11 +76,13 @@ todoContext.addAggregate('Todo', function() {
 To actually work with the `Context` from the outside world we need `CommandHandlers`. Let's start by adding a simple one that will create an instance of our `Todo` Aggregate.
 
 ```javascript
-todoContext.addCommandHandler('CreateTodo', function(params) {
-  return this.$aggregate.create('Todo')
-  .then(function (todo) {
-    return todo.$save();
-  });
+todoContext.addCommandHandlers({
+  CreateTodo: function(params) {
+    return this.$aggregate.create('Todo')
+    .then(function (todo) {
+      return todo.$save();
+    });
+  }
 });
 ```
 > Hint: `this.$aggregate` is dependency injected
@@ -88,12 +90,14 @@ todoContext.addCommandHandler('CreateTodo', function(params) {
 It would be nice if we could change the description of the `Todo`, so let's add this `CommandHandler` too.
 
 ```javascript
-todoContext.addCommandHandler('ChangeTodoDescription', function(params) {
-  return this.$aggregate.load('Todo', params.id)
-  .then(function (todo) {
-    todo.changeDescription(params.description);
-    return todo.$save();
-  });
+todoContext.addCommandHandlers({
+  ChangeTodoDescription: function(params) {
+    return this.$aggregate.load('Todo', params.id)
+    .then(function (todo) {
+      todo.changeDescription(params.description);
+      return todo.$save();
+    });
+  }
 });
 ```
 

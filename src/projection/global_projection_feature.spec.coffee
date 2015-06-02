@@ -58,16 +58,6 @@ describe 'Global Projection Feature', ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
 
 
-      it 'should replay all events in correct order given there are saved domain events from all contexts', ->
-        secondContext.command 'CreateAggregate'
-        .then ->
-          firstContext.command 'CreateAggregate'
-        .then ->
-          eventric.initializeGlobalProjections()
-        .then ->
-          expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated', 'FirstContextAggregateCreated']
-
-
     describe 'receiving domain events on the projection', ->
 
       it 'should correctly handle those events given new events are emitted on the first context', ->
@@ -84,16 +74,6 @@ describe 'Global Projection Feature', ->
           secondContext.command 'CreateAggregate'
         .then ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
-
-
-      it 'should correctly handle those events in order given new events are emitted on all contexts', ->
-        eventric.initializeGlobalProjections()
-        .then ->
-          secondContext.command 'CreateAggregate'
-        .then ->
-          firstContext.command 'CreateAggregate'
-        .then ->
-          expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated', 'FirstContextAggregateCreated']
 
 
 createContextWithOneAggregate = ({contextName, aggregateName, domainEventName}) ->

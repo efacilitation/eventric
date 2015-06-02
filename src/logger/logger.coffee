@@ -23,4 +23,3 @@ module.exports =
   error: ->
     return if @_logLevel > 3
     console.log arguments...
-

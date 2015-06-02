@@ -226,6 +226,7 @@ class Context
     @_domainEventClasses[domainEventName]
 
 
+  # TODO: DomainEventStore? - It is responsible for the projections too!
   getDomainEventsStore: ->
     storeName = @get 'default domain events store'
     @_storeInstances[storeName]

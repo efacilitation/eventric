@@ -1,22 +1,19 @@
-STORE_SUPPORTS = ['domain_events', 'projections']
-
-
 class InMemoryStore
-
   _domainEvents: {}
   _projections: {}
 
-  initialize: (@_context, [options]...) ->  new Promise (resolve, reject) =>
-    @_domainEventsCollectionName = "#{@_context.name}.DomainEvents"
-    @_projectionCollectionName   = "#{@_context.name}.Projections"
+  initialize: (@_context, [options]...) ->
+    new Promise (resolve, reject) =>
+      @_domainEventsCollectionName = "#{@_context.name}.DomainEvents"
+      @_projectionCollectionName   = "#{@_context.name}.Projections"
+      @_domainEvents[@_domainEventsCollectionName] = []
+      resolve()
 
-    @_domainEvents[@_domainEventsCollectionName] = []
-    resolve()
 
-
-  saveDomainEvent: (domainEvent, callback) ->  new Promise (resolve, reject) =>
-    @_domainEvents[@_domainEventsCollectionName].push domainEvent
-    resolve domainEvent
+  saveDomainEvent: (domainEvent, callback) ->
+    new Promise (resolve, reject) =>
+      @_domainEvents[@_domainEventsCollectionName].push domainEvent
+      resolve domainEvent
 
 
   findDomainEventsByName: (name, callback) ->
@@ -65,21 +62,19 @@ class InMemoryStore
     callback null, events
 
 
-  getProjectionStore: (projectionName) -> new Promise (resolve, reject) =>
-    @_projections[@_projectionCollectionName] ?= {}
-    @_projections[@_projectionCollectionName][projectionName] ?= {}
-    resolve @_projections[@_projectionCollectionName][projectionName]
+  getProjectionStore: (projectionName) ->
+    new Promise (resolve, reject) =>
+      @_projections[@_projectionCollectionName] ?= {}
+      @_projections[@_projectionCollectionName][projectionName] ?= {}
+      resolve @_projections[@_projectionCollectionName][projectionName]
 
 
-  clearProjectionStore: (projectionName) -> new Promise (resolve, reject) =>
-    @_projections[@_projectionCollectionName] ?= {}
-    @_projections[@_projectionCollectionName][projectionName] ?= {}
-    delete @_projections[@_projectionCollectionName][projectionName]
-    resolve()
-
-
-  checkSupport: (check) ->
-    (STORE_SUPPORTS.indexOf check) > -1
+  clearProjectionStore: (projectionName) ->
+    new Promise (resolve, reject) =>
+      @_projections[@_projectionCollectionName] ?= {}
+      @_projections[@_projectionCollectionName][projectionName] ?= {}
+      delete @_projections[@_projectionCollectionName][projectionName]
+      resolve()
 
 
 module.exports = InMemoryStore

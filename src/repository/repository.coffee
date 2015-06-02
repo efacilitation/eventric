@@ -107,7 +107,7 @@ class Repository
           @_eventric.log.debug "Publishing DomainEvent", domainEvent
           @_context.getEventBus().publishDomainEvent domainEvent
           .catch (error) =>
-            @_eventric.log.error error
+            @_eventric.log.error error.stack || error
       .then ->
         resolve aggregate.id
       .catch reject

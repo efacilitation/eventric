@@ -1,6 +1,5 @@
 # TODO: Add for each interface function a spec!
-
-describe.only 'Projection Store Interface Feature', ->
+describe 'Projection Store Interface Feature', ->
   exampleContext = null
 
   beforeEach ->

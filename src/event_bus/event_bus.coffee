@@ -40,12 +40,9 @@ class EventBus
 
 
   destroy: ->
-    Promise.all [
-      @_publishQueue
-      @_pubSub.destroy()
-    ]
-    .then =>
-      @publishDomainEvent = undefined
+    @_publishQueue.then =>
+      @_pubSub.destroy().then =>
+        @publishDomainEvent = undefined
 
 
 module.exports = EventBus

@@ -1,17 +1,17 @@
 describe 'EventBus', ->
 
   eventBus = null
-  pubSubStub = null
+  pubSub = null
 
   beforeEach ->
     PubSub = require '../pub_sub'
-    pubSubStub = new PubSub
-    sandbox.stub(pubSubStub, 'publish').returns new Promise (resolve) -> resolve()
-    sandbox.stub(pubSubStub, 'subscribe').returns new Promise (resolve) -> resolve()
-    sandbox.stub(pubSubStub, 'destroy').returns new Promise (resolve) -> resolve()
+    pubSub = new PubSub
+    sandbox.spy pubSub, 'publish'
+    sandbox.spy pubSub, 'subscribe'
+    sandbox.spy pubSub, 'destroy'
 
     eventricStub =
-      PubSub: -> pubSubStub
+      PubSub: -> pubSub
 
     EventBus = require './'
     eventBus = new EventBus eventricStub
@@ -22,7 +22,7 @@ describe 'EventBus', ->
       subscriberFunction = ->
       eventBus.subscribeToDomainEvent 'SomeEvent', subscriberFunction
       .then ->
-        expect(pubSubStub.subscribe).to.have.been.calledWith 'SomeEvent', subscriberFunction
+        expect(pubSub.subscribe).to.have.been.calledWith 'SomeEvent', subscriberFunction
 
 
   describe '#subscribeToDomainEventWithAggregateId', ->
@@ -30,7 +30,7 @@ describe 'EventBus', ->
       subscriberFunction = ->
       eventBus.subscribeToDomainEventWithAggregateId 'SomeEvent', 12345, subscriberFunction
       .then ->
-        expect(pubSubStub.subscribe).to.have.been.calledWith 'SomeEvent/12345', subscriberFunction
+        expect(pubSub.subscribe).to.have.been.calledWith 'SomeEvent/12345', subscriberFunction
 
 
   describe '#subscribeToAllDomainEvents', ->
@@ -38,7 +38,7 @@ describe 'EventBus', ->
       subscriberFunction = ->
       eventBus.subscribeToAllDomainEvents subscriberFunction
       .then ->
-        expect(pubSubStub.subscribe).to.have.been.calledWith 'DomainEvent', subscriberFunction
+        expect(pubSub.subscribe).to.have.been.calledWith 'DomainEvent', subscriberFunction
 
 
   describe '#publishDomainEvent', ->
@@ -47,32 +47,33 @@ describe 'EventBus', ->
       domainEvent = name: 'SomeEvent'
       eventBus.publishDomainEvent domainEvent
       .then ->
-        expect(pubSubStub.publish).to.have.been.calledWith 'DomainEvent', domainEvent
+        expect(pubSub.publish).to.have.been.calledWith 'DomainEvent', domainEvent
 
 
     it 'should publish an event with the correct event name', ->
       domainEvent = name: 'SomeEvent'
       eventBus.publishDomainEvent domainEvent
       .then ->
-        expect(pubSubStub.publish).to.have.been.calledWith 'SomeEvent', domainEvent
+        expect(pubSub.publish).to.have.been.calledWith 'SomeEvent', domainEvent
 
 
     it 'should publish an aggregate id specific event given an event with an aggregate id', ->
       domainEvent = name: 'SomeEvent', aggregate: id: 12345
       eventBus.publishDomainEvent domainEvent
       .then ->
-        expect(pubSubStub.publish).to.have.been.calledWith 'SomeEvent/12345', domainEvent
+        expect(pubSub.publish).to.have.been.calledWith 'SomeEvent/12345', domainEvent
 
 
     it 'should wait to publish a domain event given a previous publish operation is still ongoing', ->
-      pubSubStub.publish.onFirstCall().returns new Promise (resolve) -> setTimeout resolve, 15
-      pubSubStub.publish.onSecondCall().returns new Promise (resolve) -> resolve()
+      publishedDomainEventNames = []
+      eventBus.subscribeToAllDomainEvents (domainEvent) ->
+        publishedDomainEventNames.push domainEvent.name
 
       eventBus.publishDomainEvent name: 'Event1'
+
       eventBus.publishDomainEvent name: 'Event2'
       .then ->
-        expect(pubSubStub.publish.getCall(1).args[0]).to.equal 'Event1'
-        expect(pubSubStub.publish.getCall(3).args[0]).to.equal 'Event2'
+        expect(publishedDomainEventNames).to.deep.equal ['Event1', 'Event2']
 
 
   describe '#destroy', ->
@@ -80,7 +81,7 @@ describe 'EventBus', ->
     it 'should call destroy on the pub sub', ->
       eventBus.destroy()
       .then ->
-        expect(pubSubStub.destroy).to.have.been.called
+        expect(pubSub.destroy).to.have.been.called
 
 
     it 'should remove the publish domain event method', ->
@@ -90,15 +91,15 @@ describe 'EventBus', ->
 
 
     it 'should wait to resolve given there are ongoing publish operations', ->
-      pubSubStub.publish.returns new Promise (resolve) -> setTimeout resolve, 15
-      domainEvent1 = name: 'SomeEvent1'
-      domainEvent2 = name: 'SomeEvent2'
+      publishedDomainEventNames = []
+      eventBus.subscribeToAllDomainEvents (domainEvent) ->
+        publishedDomainEventNames.push domainEvent.name
 
-      eventBus.publishDomainEvent domainEvent1
-      eventBus.publishDomainEvent domainEvent2
+      eventBus.publishDomainEvent name: 'Event1'
+      eventBus.publishDomainEvent name: 'Event2'
+
       eventBus.destroy()
       .then ->
-        expect(pubSubStub.publish.getCall(1).args[0]).to.equal 'SomeEvent1'
-        expect(pubSubStub.publish.getCall(3).args[0]).to.equal 'SomeEvent2'
+        expect(publishedDomainEventNames).to.deep.equal ['Event1', 'Event2']
 
 

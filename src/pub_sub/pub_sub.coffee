@@ -3,7 +3,7 @@ class PubSub
   constructor: ->
     @_subscribers = []
     @_subscriberId = 0
-    @_pendingPublishOperations = []
+    @_pendingOperations = []
 
 
   subscribe: (eventName, subscriberFunction) ->
@@ -19,7 +19,7 @@ class PubSub
   publish: (eventName, payload) ->
     subscribers = @_getRelevantSubscribers eventName
     executeSubscriberFunctions = Promise.all subscribers.map (subscriber) -> subscriber.subscriberFunction payload
-    @_addPendingPublishOperation executeSubscriberFunctions
+    @_addPendingOperation executeSubscriberFunctions
     executeSubscriberFunctions
 
 
@@ -30,10 +30,11 @@ class PubSub
       @_subscribers
 
 
-  _addPendingPublishOperation: (publishOperation) ->
-    @_pendingPublishOperations.push publishOperation
-    publishOperation.then =>
-      @_pendingPublishOperations.splice @_pendingPublishOperations.indexOf(publishOperation), 1
+  _addPendingOperation: (pendingOperation) ->
+    errorSuppressedPendingOperation = pendingOperation.catch ->
+    @_pendingOperations.push errorSuppressedPendingOperation
+    errorSuppressedPendingOperation.then =>
+      @_pendingOperations.splice @_pendingOperations.indexOf(errorSuppressedPendingOperation), 1
 
 
   unsubscribe: (subscriberId) ->
@@ -47,7 +48,7 @@ class PubSub
 
 
   destroy: ->
-    Promise.all(@_pendingPublishOperations).then =>
+    Promise.all(@_pendingOperations).then =>
       @publish = undefined
 
 

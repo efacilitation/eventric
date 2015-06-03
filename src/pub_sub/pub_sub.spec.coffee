@@ -111,3 +111,12 @@ describe 'PubSub', ->
       .then ->
         expect(stub1).to.have.been.called
         expect(stub2).to.have.been.called
+
+
+    it 'should correctly resolve given previous publish operations rejected', ->
+      stub1 = sandbox.stub().returns new Promise (resolve, reject) -> reject()
+      pubSub.subscribe 'Event1', stub1
+      pubSub.publish 'Event1', {}
+      pubSub.destroy()
+      .then ->
+        expect(stub1).to.have.been.called

@@ -64,16 +64,50 @@ describe 'EventBus', ->
         expect(pubSub.publish).to.have.been.calledWith 'SomeEvent/12345', domainEvent
 
 
+    it 'should reject with an error given a domain event handler rejects with an error', ->
+      domainEventHandlerError = new Error
+      eventBus.subscribeToDomainEvent 'SomeEvent', -> new Promise (resolve, reject) -> reject domainEventHandlerError
+      eventBus.publishDomainEvent name: 'SomeEvent'
+      .catch (error) ->
+        expect(error).to.equal domainEventHandlerError
+
+
     it 'should wait to publish a domain event given a previous publish operation is still ongoing', ->
       publishedDomainEventNames = []
       eventBus.subscribeToAllDomainEvents (domainEvent) ->
         publishedDomainEventNames.push domainEvent.name
-
       eventBus.publishDomainEvent name: 'Event1'
 
       eventBus.publishDomainEvent name: 'Event2'
       .then ->
         expect(publishedDomainEventNames).to.deep.equal ['Event1', 'Event2']
+
+
+    it 'should not wait to publish given there are ongoing then handlers of a previous publish operation', ->
+      asynchronousThenHandler = sandbox.spy()
+      eventBus.publishDomainEvent name: 'Event1'
+      .then ->
+        new Promise (resolve, reject) ->
+          setTimeout ->
+            asynchronousThenHandler()
+            resolve()
+          , 1000
+
+      eventBus.publishDomainEvent name: 'Event2'
+      .then ->
+        expect(asynchronousThenHandler).not.to.have.been.called
+
+
+    it 'should correctly publish a domain event given a previous publish operation rejected unhandled with an error', ->
+      eventHandlerSpy = sandbox.spy()
+      eventBus.subscribeToDomainEvent 'Event1', -> new Promise (resolve, reject) -> reject new Error
+      eventBus.subscribeToDomainEvent 'Event2', eventHandlerSpy
+
+      eventBus.publishDomainEvent name: 'Event1'
+
+      eventBus.publishDomainEvent name: 'Event2'
+      .then ->
+        expect(eventHandlerSpy).to.have.been.called
 
 
   describe '#destroy', ->
@@ -101,5 +135,3 @@ describe 'EventBus', ->
       eventBus.destroy()
       .then ->
         expect(publishedDomainEventNames).to.deep.equal ['Event1', 'Event2']
-
-

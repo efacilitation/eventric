@@ -18,8 +18,10 @@ class EventBus
 
 
   publishDomainEvent: (domainEvent) ->
-    @_enqueuePublishing =>
-      @_publishDomainEvent domainEvent
+    new Promise (resolve, reject) =>
+      @_enqueuePublishing =>
+        @_publishDomainEvent(domainEvent)
+        .then(resolve).catch(reject)
 
 
   _enqueuePublishing: (publishOperation) ->

@@ -103,7 +103,7 @@ class Eventric
   _handleRemoteRPCRequest: (request, callback) =>
     context = @getContext request.contextName
     if not context
-      erro = new Error "Tried to handle Remote RPC with not registered context #{request.contextName}"
+      error = new Error "Tried to handle Remote RPC with not registered context #{request.contextName}"
       @log.error error.stack
       return callback error, null
 

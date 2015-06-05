@@ -353,8 +353,12 @@ class Context
 
   destroy: ->
     @_eventBus.destroy().then =>
-      @command = undefined
-      @emitDomainEvent = undefined
+      @command = (commandName, params = {}) =>
+        Promise.reject new Error """
+          Context #{@name} was destroyed, cannot execute command #{commandName} with arguments #{JSON.stringify(params)}
+        """
+      @emitDomainEvent = (domainEventName) =>
+        Promise.reject new Error "Context #{@name} was destroyed, cannot emit domain event #{domainEventName}"
 
 
   _verifyContextIsInitialized: (methodName) ->

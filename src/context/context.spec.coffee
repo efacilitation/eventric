@@ -82,9 +82,27 @@ describe 'Context', ->
       expect(eventBusStub.destroy).to.have.been.called
 
 
-    it 'should remove the relevant instance methods', ->
+    it 'should reject with an error given command is called afterwards', ->
+      someContext.addCommandHandlers DoSomething: ->
+      commandParams = foo: 'bar'
       someContext.destroy()
       .then ->
-        expect(someContext.command).to.be.undefined
-        expect(someContext.emitDomainEvent).to.be.undefined
+        someContext.command 'DoSomething', commandParams
+      .catch (error) ->
+        expect(error).to.be.an.instanceOf Error
+        expect(error.message).to.contain 'command'
+        expect(error.message).to.contain 'DoSomething'
+        expect(error.message).to.contain 'ExampleContext'
+        expect(error.message).to.match /"foo"\:\s*"bar"/
 
+
+    it 'should reject with an error given emitDomainEvent is called afterwards', ->
+      someContext.defineDomainEvent SomethingHappened: ->
+      someContext.destroy()
+      .then ->
+        someContext.emitDomainEvent 'SomethingHappened', {}
+      .catch (error) ->
+        expect(error).to.be.an.instanceOf Error
+        expect(error.message).to.contain 'emit domain event'
+        expect(error.message).to.contain 'SomethingHappened'
+        expect(error.message).to.contain 'ExampleContext'

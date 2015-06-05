@@ -45,9 +45,10 @@ class EventBus
     @_publishQueue.then =>
       @_pubSub.destroy().then =>
 
-        @publishDomainEvent = ->
-          new Promise (resolve, reject) ->
-            reject new Error 'Cannot publish event. Event bus was already destroyed.'
+        @publish = (domainEvent, payload) ->
+          Promise.reject new Error """
+              Event Bus was destroyed, cannot publish #{domainEvent.name} with payload #{JSON.stringify domainEvent.payload}
+            """
 
 
 module.exports = EventBus

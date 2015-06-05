@@ -121,9 +121,12 @@ describe 'EventBus', ->
     it 'should reject with an error given the publish domain event method is called afterwards', ->
       eventBus.destroy()
       .then ->
-        eventBus.publishDomainEvent()
+        eventBus.publishDomainEvent name: 'Event1', payload: foo: 'bar'
       .catch (error) ->
+        expect(error).to.be.an.instanceOf Error
         expect(error.message).to.contain 'destroyed'
+        expect(error.message).to.contain 'Event1'
+        expect(error.message).to.match /"foo"\:\s*"bar"/
 
 
     it 'should wait to resolve given there are ongoing publish operations', ->

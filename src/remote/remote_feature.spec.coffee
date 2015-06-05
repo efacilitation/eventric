@@ -143,7 +143,7 @@ describe 'Remote Feature', ->
           callback
         )
 
-        expect(callback).to.have.been.calledWith sinon.match /not allowed/
+        expect(callback.getCall(0).args[0].message).to.match /not allowed/
         expect(exampleContext.set).not.to.have.been.called
 
 

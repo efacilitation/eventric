@@ -31,14 +31,19 @@ class Context
 
 
   emitDomainEvent: (domainEventName, domainEventPayload) =>
-    DomainEventClass = @getDomainEvent domainEventName
-    if !DomainEventClass
-      throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
+    new Promise (resolve, reject) =>
+      DomainEventClass = @getDomainEvent domainEventName
+      if !DomainEventClass
+        throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
-    domainEvent = @createDomainEvent domainEventName, DomainEventClass, domainEventPayload
-    @saveAndPublishDomainEvent domainEvent
-    .then =>
-      @log.debug "Created and Handled DomainEvent in Context", domainEvent
+      domainEvent = @createDomainEvent domainEventName, DomainEventClass, domainEventPayload
+      @getDomainEventsStore().saveDomainEvent domainEvent
+      .then =>
+        @getEventBus().publishDomainEvent domainEvent
+        .catch (error) =>
+          @_eventric.log.error error.stack || error
+        resolve domainEvent
+      .catch reject
 
 
   createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload, aggregate) ->
@@ -232,13 +237,8 @@ class Context
     @_storeInstances[storeName]
 
 
-  saveAndPublishDomainEvent: (domainEvent) ->  new Promise (resolve, reject) =>
-    @getDomainEventsStore().saveDomainEvent domainEvent
-    .then =>
-      @publishDomainEvent domainEvent
-    .then (err) ->
-      return reject err if err
-      resolve domainEvent
+  getEventBus: ->
+    @_eventBus
 
 
   # TODO: Remove this when stream subscriptions are implemented
@@ -283,10 +283,6 @@ class Context
 
     .catch (err) ->
       reject err
-
-
-  getEventBus: ->
-    @_eventBus
 
 
   command: (commandName, params) ->

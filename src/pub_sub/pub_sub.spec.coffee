@@ -94,10 +94,15 @@ describe 'PubSub', ->
 
   describe '#destroy', ->
 
-    it 'should remove the publish method', ->
+    it 'should reject with an error given the publish method is called afterwards', ->
       pubSub.destroy()
       .then ->
-        expect(pubSub.publish).to.be.undefined
+        pubSub.publish 'Event1', foo: 'bar'
+      .catch (error) ->
+        expect(error).to.be.an.instanceOf Error
+        expect(error.message).to.contain 'destroyed'
+        expect(error.message).to.contain 'Event1'
+        expect(error.message).to.match /"foo"\:\s*"bar"/
 
 
     it 'should wait to resolve given there are ongoing publish operations', ->

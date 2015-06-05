@@ -49,7 +49,11 @@ class PubSub
 
   destroy: ->
     Promise.all(@_pendingOperations).then =>
-      @publish = undefined
+
+      @publish = (eventName, payload) ->
+        Promise.reject new Error """
+          Pub sub was destroyed, cannot publish #{eventName} with payload #{JSON.stringify payload}
+        """
 
 
 module.exports = PubSub

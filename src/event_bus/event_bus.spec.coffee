@@ -118,10 +118,12 @@ describe 'EventBus', ->
         expect(pubSub.destroy).to.have.been.called
 
 
-    it 'should remove the publish domain event method', ->
+    it 'should reject with an error given the publish domain event method is called afterwards', ->
       eventBus.destroy()
       .then ->
-        expect(eventBus.publishDomainEvent).to.be.undefined
+        eventBus.publishDomainEvent()
+      .catch (error) ->
+        expect(error.message).to.contain 'destroyed'
 
 
     it 'should wait to resolve given there are ongoing publish operations', ->

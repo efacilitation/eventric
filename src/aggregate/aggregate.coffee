@@ -1,22 +1,15 @@
 class Aggregate
 
-  constructor: (@_context, @_eventric, @_name, Root) ->
+  constructor: (@_context, @_eventric, @_name, AggregateClass) ->
     @_domainEvents = []
-
-    if !Root
-      @root = {}
-    else
-      @root = new Root
-
-    @root.$emitDomainEvent = @emitDomainEvent
+    @instance = new AggregateClass
+    @instance.$emitDomainEvent = @emitDomainEvent
 
 
   emitDomainEvent: (domainEventName, domainEventPayload) =>
     DomainEventClass = @_context.getDomainEvent domainEventName
     if !DomainEventClass
-      err = "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
-      @_eventric.log.error err
-      throw new Error err
+      throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
     aggregate =
       id: @id
@@ -26,13 +19,11 @@ class Aggregate
 
     @_handleDomainEvent domainEventName, domainEvent
     @_eventric.log.debug "Created and Handled DomainEvent in Aggregate", domainEvent
-    # TODO: do a rollback if something goes wrong inside the handle function
 
 
   _handleDomainEvent: (domainEventName, domainEvent) ->
-    if @root["handle#{domainEventName}"]
-      @root["handle#{domainEventName}"] domainEvent, ->
-
+    if @instance["handle#{domainEventName}"]
+      @instance["handle#{domainEventName}"] domainEvent
     else
       @_eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 

@@ -2,10 +2,11 @@
 class Context
 
   constructor: (@name, @_eventric) ->
-    @_initialized = false
+    @_isInitialized = false
+    @_isDestroyed = false
     @_params = @_eventric.get()
     @_di = {}
-    @_aggregateRootClasses = {}
+    @_aggregateClasses = {}
     @_commandHandlers = {}
     @_queryHandlers = {}
     @_domainEventClasses = {}
@@ -59,8 +60,8 @@ class Context
     @
 
 
-  addAggregate: (aggregateName, AggregateRootClass) ->
-    @_aggregateRootClasses[aggregateName] = AggregateRootClass
+  addAggregate: (aggregateName, AggregateClass) ->
+    @_aggregateClasses[aggregateName] = AggregateClass
     @
 
 
@@ -119,7 +120,7 @@ class Context
     .then =>
       @log.debug "[#{@name}] Finished initializing Projections"
       @log.debug "[#{@name}] Finished initializing"
-      @_initialized = true
+      @_isInitialized = true
 
 
   _initializeStores: ->
@@ -165,11 +166,16 @@ class Context
 
 
   emitDomainEvent: (domainEventName, domainEventPayload) =>
+    if @_isDestroyed
+      Promise.reject new Error "Context #{@name} was destroyed, cannot emit domain event #{domainEventName}"
+      return
+
     emittingDomainEvent = new Promise (resolve, reject) =>
       DomainEventClass = @getDomainEvent domainEventName
       if !DomainEventClass
         throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
 
+      # TODO: Refactor this, it is partially similar to the save function of the repository
       domainEvent = @createDomainEvent domainEventName, DomainEventClass, domainEventPayload
       @getDomainEventsStore().saveDomainEvent domainEvent
       .then =>
@@ -181,7 +187,7 @@ class Context
 
     @_addPendingOperation emittingDomainEvent
 
-    emittingDomainEvent
+    return emittingDomainEvent
 
 
   createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload, aggregate) ->
@@ -270,58 +276,64 @@ class Context
 
 
   command: (commandName, params) ->
-    new Promise (resolve, reject) =>
+    if @_isDestroyed
+      Promise.reject new Error """
+        Context #{@name} was destroyed, cannot execute command #{commandName} with arguments #{JSON.stringify(params)}
+      """
+      return
+
+    executingCommand = new Promise (resolve, reject) =>
+      @_verifyContextIsInitialized commandName
       command =
         id: @_eventric.generateUid()
         name: commandName
         params: params
       @log.debug 'Got Command', command
 
-      @_verifyContextIsInitialized commandName
-
       if not @_commandHandlers[commandName]
-        err = "Given command #{commandName} not registered on context"
-        @log.error err
-        err = new Error err
-        return reject err
+        throw new Error "Given command #{commandName} not registered on context"
 
-      injectedServices = {}
-      for diFnName, diFn of @_di
-        injectedServices[diFnName] = diFn
+      servicesToInject = @_getServicesToInject()
 
-      injectedServices.$aggregate =
-        create: (aggregateName, aggregateParams...) =>
-          repository = @_getAggregateRepository aggregateName, command
-          repository.create aggregateParams...
-
-        load: (aggregateName, aggregateId) =>
-          repository = @_getAggregateRepository aggregateName, command
-          repository.findById aggregateId
-
-      executeCommand = Promise.resolve @_commandHandlers[commandName].apply injectedServices, [params]
-
-      @_addPendingOperation executeCommand
-
-      executeCommand
+      Promise.resolve @_commandHandlers[commandName].apply servicesToInject, [params]
       .then (result) =>
         @log.debug 'Completed Command', commandName
         resolve result
-      .catch (error) ->
-        reject error
+      .catch reject
+
+    @_addPendingOperation executingCommand
+
+    return executingCommand
 
 
-  _getAggregateRepository: (aggregateName, command) =>
+  _getServicesToInject: ->
+    servicesToInject = {}
+    for diFnName, diFn of @_di
+      servicesToInject[diFnName] = diFn
+
+    servicesToInject.$aggregate =
+      create: (aggregateName, aggregateParams...) =>
+        repository = @_getAggregateRepository aggregateName
+        repository.create aggregateParams...
+
+      load: (aggregateName, aggregateId) =>
+        repository = @_getAggregateRepository aggregateName
+        repository.findById aggregateId
+
+    return servicesToInject
+
+
+  _getAggregateRepository: (aggregateName) =>
     repositoriesCache = {} if not repositoriesCache
     if not repositoriesCache[aggregateName]
-      AggregateRoot = @_aggregateRootClasses[aggregateName]
+      AggregateClass = @_aggregateClasses[aggregateName]
       repository = new @_eventric.Repository
         aggregateName: aggregateName
-        AggregateRoot: AggregateRoot
+        AggregateClass: AggregateClass
         context: @
         eventric: @_eventric
       repositoriesCache[aggregateName] = repository
 
-    repositoriesCache[aggregateName].setCommand command
     repositoriesCache[aggregateName]
 
 
@@ -356,21 +368,14 @@ class Context
 
 
   _verifyContextIsInitialized: (methodName) ->
-    if not @_initialized
-      errorMessage = "Context #{@name} not initialized yet, cannot execute #{methodName}"
-      @log.error errorMessage
-      throw new Error errorMessage
+    if not @_isInitialized
+      throw new Error "Context #{@name} not initialized yet, cannot execute #{methodName}"
 
 
   destroy: ->
     Promise.all(@_pendingOperations).then =>
       @_eventBus.destroy().then =>
-        @command = (commandName, params = {}) =>
-          Promise.reject new Error """
-            Context #{@name} was destroyed, cannot execute command #{commandName} with arguments #{JSON.stringify(params)}
-          """
-        @emitDomainEvent = (domainEventName) =>
-          Promise.reject new Error "Context #{@name} was destroyed, cannot emit domain event #{domainEventName}"
+        @_isDestroyed = true
 
 
 module.exports = Context

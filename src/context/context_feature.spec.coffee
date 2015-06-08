@@ -106,11 +106,51 @@ describe 'Context Feature', ->
       .catch done
 
 
+  describe 'adding a projection', ->
+
+    it 'should call the initialize method of the projection', ->
+      exampleContext = eventric.context 'exampleContext'
+
+      class ProjectionStub
+        initialize: sandbox.stub().yields()
+      exampleContext.addProjection 'SomeProjection', ProjectionStub
+      exampleContext.initialize()
+      .then ->
+        expect(ProjectionStub::initialize).to.have.been.called
+
+
+
   describe 'destroying a context', ->
     exampleContext = null
 
     beforeEach ->
       exampleContext = eventric.context 'ExampleContext'
+
+
+    it 'should reject with an error given a command is executed afterwards', ->
+      exampleContext.addCommandHandlers DoSomething: ->
+      commandParams = foo: 'bar'
+      exampleContext.destroy()
+      .then ->
+        exampleContext.command 'DoSomething', commandParams
+      .catch (error) ->
+        expect(error).to.be.an.instanceOf Error
+        expect(error.message).to.contain 'command'
+        expect(error.message).to.contain 'DoSomething'
+        expect(error.message).to.contain 'ExampleContext'
+        expect(error.message).to.match /"foo"\:\s*"bar"/
+
+
+    it 'should reject with an error given emitDomainEvent is called afterwards', ->
+      exampleContext.defineDomainEvent SomethingHappened: ->
+      exampleContext.destroy()
+      .then ->
+        exampleContext.emitDomainEvent 'SomethingHappened', {}
+      .catch (error) ->
+        expect(error).to.be.an.instanceOf Error
+        expect(error.message).to.contain 'emit domain event'
+        expect(error.message).to.contain 'SomethingHappened'
+        expect(error.message).to.contain 'ExampleContext'
 
 
     it 'should wait to resolve given there are ongoing command operations', ->
@@ -169,43 +209,3 @@ describe 'Context Feature', ->
         exampleContext.destroy()
       .then ->
         expect(EventBus::destroy).to.have.been.called
-
-
-    it 'should reject with an error given command is called afterwards', ->
-      exampleContext.addCommandHandlers DoSomething: ->
-      commandParams = foo: 'bar'
-      exampleContext.destroy()
-      .then ->
-        exampleContext.command 'DoSomething', commandParams
-      .catch (error) ->
-        expect(error).to.be.an.instanceOf Error
-        expect(error.message).to.contain 'command'
-        expect(error.message).to.contain 'DoSomething'
-        expect(error.message).to.contain 'ExampleContext'
-        expect(error.message).to.match /"foo"\:\s*"bar"/
-
-
-    it 'should reject with an error given emitDomainEvent is called afterwards', ->
-      exampleContext.defineDomainEvent SomethingHappened: ->
-      exampleContext.destroy()
-      .then ->
-        exampleContext.emitDomainEvent 'SomethingHappened', {}
-      .catch (error) ->
-        expect(error).to.be.an.instanceOf Error
-        expect(error.message).to.contain 'emit domain event'
-        expect(error.message).to.contain 'SomethingHappened'
-        expect(error.message).to.contain 'ExampleContext'
-
-
-  describe 'adding a projection', ->
-
-    it 'should call the initialize method of the projection', ->
-      exampleContext = eventric.context 'exampleContext'
-
-      class ProjectionStub
-        initialize: sandbox.stub().yields()
-      exampleContext.addProjection 'SomeProjection', ProjectionStub
-      exampleContext.initialize()
-      .then ->
-        expect(ProjectionStub::initialize).to.have.been.called
-

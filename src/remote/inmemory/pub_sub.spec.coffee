@@ -1,6 +1,6 @@
 describe 'PubSub', ->
 
-  PubSub = require './'
+  PubSub = require './pub_sub'
 
   pubSub = null
 

@@ -139,7 +139,7 @@ describe 'Remote Feature', ->
 
         callback = sandbox.spy()
         exposedHandleRPCRequest(
-          contextName: 'Example', method: functionName, params: {}
+          contextName: 'Example', functionName: functionName, params: {}
           callback
         )
 

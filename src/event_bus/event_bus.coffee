@@ -1,54 +1,98 @@
+Subscriber = require './subscriber'
+
 class EventBus
 
-  constructor: (@_eventric) ->
-    @_pubSub = new @_eventric.PubSub()
-    @_publishQueue = new Promise (resolve) -> resolve()
+  constructor: ->
+    @_subscribers = []
+    @_subscriberId = 0
+    @_eventPublishQueue = Promise.resolve()
+    @_isDestroyed = false
 
 
-  subscribeToDomainEvent: (eventName, handlerFn) ->
-    @_pubSub.subscribe eventName, handlerFn
+  subscribeToAllDomainEvents: (handlerFunction) ->
+    @_subscribe '*', handlerFunction
 
 
-  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFn) ->
-    @subscribeToDomainEvent "#{eventName}/#{aggregateId}", handlerFn
+  subscribeToDomainEvent: (eventName, handlerFunction) ->
+    @_subscribe eventName, handlerFunction
 
 
-  subscribeToAllDomainEvents: (handlerFn) ->
-    @subscribeToDomainEvent 'DomainEvent', handlerFn
+  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFunction) ->
+    @_subscribe "#{eventName}/#{aggregateId}", handlerFunction
+
+
+  _subscribe: (eventName, subscriberFunction) ->
+    new Promise (resolve) =>
+      subscriber = new Subscriber
+        eventName: eventName
+        subscriberFunction: subscriberFunction
+        subscriberId: @_getNextSubscriberId()
+      @_subscribers.push subscriber
+      resolve subscriber.subscriberId
+
+
+  _getNextSubscriberId: ->
+    @_subscriberId++
 
 
   publishDomainEvent: (domainEvent) ->
     new Promise (resolve, reject) =>
-      @_enqueuePublishing =>
-        @_publishDomainEvent(domainEvent)
+      @_verifyPublishIsPossible domainEvent
+
+      publishOperation = =>
+        @_notifySubscribers domainEvent
         .then(resolve).catch(reject)
 
-
-  _enqueuePublishing: (publishOperation) ->
-    @_publishQueue = @_publishQueue.then publishOperation
+      @_enqueueEventPublishing publishOperation
 
 
-  _publishDomainEvent: (domainEvent) ->
-    publishPasses = [
-      @_pubSub.publish 'DomainEvent', domainEvent
-      @_pubSub.publish domainEvent.name, domainEvent
-    ]
+  _verifyPublishIsPossible: (domainEvent) ->
+    if @_isDestroyed
+      errorMessage = """
+        Event Bus was destroyed, cannot publish #{domainEvent.name}
+        with payload #{JSON.stringify domainEvent.payload}
+      """
+      if domainEvent.aggregate?.id
+        errorMessage += " and aggregate id #{domainEvent.aggregate.id}"
+      throw new Error errorMessage
 
+
+  _notifySubscribers: (domainEvent) ->
+    Promise.resolve()
+    .then =>
+      subscribers = @_getSubscribersForDomainEvent domainEvent
+      Promise.all subscribers.map (subscriber) -> subscriber.subscriberFunction domainEvent
+
+
+  _getSubscribersForDomainEvent: (domainEvent) ->
+    subscribers = @_subscribers.filter (subscriber) -> subscriber.eventName is '*'
+    subscribers = subscribers.concat @_subscribers.filter (subscriber) -> subscriber.eventName is domainEvent.name
     if domainEvent.aggregate?.id
-      eventName = "#{domainEvent.name}/#{domainEvent.aggregate.id}"
-      publishPasses.push @_pubSub.publish eventName, domainEvent
+      subscribers = subscribers.concat @_subscribers.filter (subscriber) ->
+        subscriber.eventName is "#{domainEvent.name}/#{domainEvent.aggregate.id}"
 
-    Promise.all publishPasses
+    return subscribers
+
+
+  _enqueueEventPublishing: (publishOperation) ->
+    @_eventPublishQueue = @_eventPublishQueue.then publishOperation
+
+
+  unsubscribe: (subscriberId) ->
+    Promise.resolve().then =>
+      @_subscribers = @_subscribers.filter (subscriber) -> subscriber.subscriberId isnt subscriberId
 
 
   destroy: ->
-    @_publishQueue.then =>
-      @_pubSub.destroy().then =>
+    @_waitForEventPublishQueue().then =>
+      @_isDestroyed = true
 
-        @publish = (domainEvent, payload) ->
-          Promise.reject new Error """
-              Event Bus was destroyed, cannot publish #{domainEvent.name} with payload #{JSON.stringify domainEvent.payload}
-            """
+
+  _waitForEventPublishQueue: ->
+    currentEventPublishQueue = @_eventPublishQueue
+    currentEventPublishQueue.then =>
+      if @_eventPublishQueue isnt currentEventPublishQueue
+        @_waitForEventPublishQueue()
 
 
 module.exports = EventBus

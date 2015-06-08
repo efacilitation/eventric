@@ -1,7 +1,6 @@
 class Eventric
 
   constructor: ->
-    @PubSub          = require './pub_sub'
     @EventBus        = require './event_bus'
     @Remote          = require './remote'
     @Context         = require './context'
@@ -89,9 +88,9 @@ class Eventric
 
   remote: (contextName) ->
     if !contextName
-      err = 'Missing context name'
-      @log.error err
-      throw new Error err
+      error = 'Missing context name'
+      @log.error error
+      throw new Error error
     new @Remote contextName, @
 
 
@@ -105,17 +104,19 @@ class Eventric
     if not context
       error = new Error "Tried to handle Remote RPC with not registered context #{request.contextName}"
       @log.error error.stack
-      return callback error, null
+      callback error, null
+      return
 
     if @Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.functionName) is -1
       error = new Error "RPC operation '#{request.functionName}' not allowed"
-      @log.error error.stack
-      return callback error, null
+      callback error, null
+      return
 
     if request.functionName not of context
       error = new Error "Remote RPC function #{request.functionName} not found on Context #{request.contextName}"
       @log.error error.stack
-      return callback error, null
+      callback error, null
+      return
 
     context[request.functionName] request.args...
     .then (result) ->

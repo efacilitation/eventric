@@ -1,4 +1,4 @@
-PubSub = require '../../pub_sub'
+PubSub = require './pub_sub'
 
 customRemoteBridge = null
 pubSub = new PubSub

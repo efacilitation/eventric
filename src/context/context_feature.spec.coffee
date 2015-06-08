@@ -153,6 +153,16 @@ describe 'Context Feature', ->
         expect(error.message).to.contain 'ExampleContext'
 
 
+    it 'should call destroy on the event bus', ->
+      EventBus = require '../event_bus'
+      sandbox.stub(EventBus::, 'destroy').returns Promise.resolve()
+      exampleContext.initialize()
+      .then ->
+        exampleContext.destroy()
+      .then ->
+        expect(EventBus::destroy).to.have.been.called
+
+
     it 'should wait to resolve given there are ongoing command operations', ->
       commandSpy = sandbox.spy()
       exampleContext.addCommandHandlers
@@ -186,7 +196,7 @@ describe 'Context Feature', ->
         expect(domainEventHandlerSpy.callCount).to.equal 2
 
 
-    it 'should correctly resolve given previous command operations rejected', ->
+    it 'should resolve correctly given previous command operations rejected', ->
       commandSpy = sandbox.spy()
       exampleContext.addCommandHandlers
         DoSomething: (params) ->
@@ -201,11 +211,41 @@ describe 'Context Feature', ->
         expect(commandSpy).to.have.been.called
 
 
-    it 'should call destroy on the event bus', ->
-      EventBus = require '../event_bus'
-      sandbox.stub(EventBus::, 'destroy').returns Promise.resolve()
+    it 'should wait to resolve given a command which publishes a domain event which triggers another command with domain event', ->
+      exampleContext.addAggregate 'Example', class Example
+        create: ->
+          @$emitDomainEvent 'ExampleCreated', {}
+
+
+        modify: ->
+          @$emitDomainEvent 'ExampleModified', {}
+      exampleContext.defineDomainEvents
+        ExampleCreated: ->
+        ExampleModified: ->
+
+
+      exampleContext.addCommandHandlers
+        CreateExample: ->
+          @$aggregate.create 'Example'
+          .then (example) ->
+            example.$save()
+
+
+        ModifyExample: ({id}) ->
+          @$aggregate.load 'Example', id
+          .then (example) ->
+            example.modify()
+            example.$save()
+
+      exampleContext.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
+        exampleContext.command 'ModifyExample', id: domainEvent.aggregate.id
+
+      domainEventHandlerStub = sandbox.stub()
+      exampleContext.subscribeToDomainEvent 'ExampleModified', domainEventHandlerStub
+
       exampleContext.initialize()
       .then ->
+        exampleContext.command 'CreateExample', {}
         exampleContext.destroy()
       .then ->
-        expect(EventBus::destroy).to.have.been.called
+        expect(domainEventHandlerStub).to.have.been.called

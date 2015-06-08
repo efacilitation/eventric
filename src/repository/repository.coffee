@@ -48,31 +48,31 @@ class Repository
       callback null, domainEvents
 
 
-  create: (params) =>  new Promise (resolve, reject) =>
-    aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
-    aggregate.id = @_eventric.generateUid()
+  create: (params) =>
+    new Promise (resolve, reject) =>
+      aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateRoot
+      aggregate.id = @_eventric.generateUid()
 
-    if typeof aggregate.root.create isnt 'function'
-      err = "No create function on aggregate"
-      @_eventric.log.error err
-      reject new Error err
+      if typeof aggregate.root.create isnt 'function'
+        err = "No create function on aggregate"
+        @_eventric.log.error err
+        reject new Error err
 
-    aggregate.root.$id = aggregate.id
-    aggregate.root.$save = =>
-      @save aggregate.id
+      aggregate.root.$id = aggregate.id
+      aggregate.root.$save = =>
+        @save aggregate.id
 
-    # TODO: needs refactoring
-    commandId = @_command.id ? 'nocommand'
-    @_aggregateInstances[commandId] ?= {}
-    @_aggregateInstances[commandId][aggregate.id] = aggregate
+      # TODO: needs refactoring
+      commandId = @_command.id ? 'nocommand'
+      @_aggregateInstances[commandId] ?= {}
+      @_aggregateInstances[commandId][aggregate.id] = aggregate
 
-    createAggregate = aggregate.root.create params
+      createAggregate = aggregate.root.create params
 
-    Promise.all [createAggregate]
-    .then ->
-      resolve aggregate.root
-    .catch ([error]) ->
-      reject error
+      Promise.resolve createAggregate
+      .then ->
+        resolve aggregate.root
+      .catch reject
 
 
   save: (aggregateId) =>

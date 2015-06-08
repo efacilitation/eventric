@@ -1,38 +1,112 @@
 describe 'Context Feature', ->
 
-  describe '#emitDomainEvent', ->
+  describe 'emitting a domain event', ->
+    exampleContext = null
 
-    describe 'given the domain event is registered on the context', ->
+    beforeEach ->
+      exampleContext = eventric.context 'ExampleContext'
+      exampleContext.defineDomainEvent 'SomeEvent', ->
 
-      exampleContext = null
 
-      beforeEach ->
-        exampleContext = eventric.context 'ExampleContext'
-        exampleContext.defineDomainEvent 'SomeEvent', ->
+    it 'should publish the domain event', (done) ->
+      exampleContext.subscribeToDomainEvent 'SomeEvent', (domainEvent) ->
+        expect(domainEvent).to.be.ok
+        done()
+      exampleContext.initialize()
+      .then ->
+        exampleContext.emitDomainEvent 'SomeEvent', {}
+      .catch done
 
-      it 'should publish the domain event', (done) ->
-        exampleContext.subscribeToDomainEvent 'SomeEvent', (domainEvent) ->
+
+    it 'should save the domain event', (done) ->
+      exampleContext.initialize()
+      .then ->
+        exampleContext.emitDomainEvent 'SomeEvent', {}
+      .then ->
+        exampleContext.getDomainEventsStore().findDomainEventsByName 'SomeEvent', (error, domainEvents) ->
+          expect(domainEvents.length).to.equal 1
+          expect(domainEvents[0].name).to.equal 'SomeEvent'
+          done()
+      .catch done
+
+
+  describe 'subscribing to all domain events', ->
+
+    it 'should call the handler function with the domain event given the event is emitted', (done) ->
+      exampleContext = eventric.context 'ExampleContext'
+      exampleContext.defineDomainEvent 'SomeEvent', ->
+
+      exampleContext.subscribeToAllDomainEvents (domainEvent) ->
+        expect(domainEvent).to.be.ok
+        done()
+
+      exampleContext.initialize()
+      .then ->
+        exampleContext.emitDomainEvent 'SomeEvent', {}
+      .catch done
+
+
+  describe 'subscribing to a domain event by name', ->
+
+    it 'should call the handler function with the domain event given the event is emitted', (done) ->
+      exampleContext = eventric.context 'ExampleContext'
+      exampleContext.defineDomainEvent 'SomeEvent', ->
+
+      exampleContext.subscribeToDomainEvent 'SomeEvent', (domainEvent) ->
+        expect(domainEvent).to.be.ok
+        done()
+
+      exampleContext.initialize()
+      .then ->
+        exampleContext.emitDomainEvent 'SomeEvent', {}
+      .catch done
+
+
+  describe 'subscribing to a domain event by name and aggregate id', ->
+
+    it 'should call the handler function with the domain event given the event is emitted', (done) ->
+      aggregateId = null
+      exampleContext = eventric.context 'ExampleContext'
+
+      exampleContext.defineDomainEvents
+        'ExampleCreated': ->
+        'ExampleModified': ->
+
+      class ExampleAggregate
+        create: ->
+          @$emitDomainEvent 'ExampleCreated'
+
+        modify: ->
+          @$emitDomainEvent 'ExampleModified'
+
+      exampleContext.addAggregate 'Example', ExampleAggregate
+
+      exampleContext.addCommandHandlers
+        CreateExample: (params) ->
+          @$aggregate.create 'Example'
+          .then (example) ->
+            example.$save()
+
+        ModifyExample: (params) ->
+          @$aggregate.load 'Example', params.exampleId
+          .then (example) ->
+            example.modify params.exampleId
+            example.$save()
+
+      exampleContext.initialize()
+      .then ->
+        exampleContext.command 'CreateExample', {}
+      .then (exampleId) ->
+        exampleContext.subscribeToDomainEventWithAggregateId 'ExampleModified', exampleId, (domainEvent) ->
           expect(domainEvent).to.be.ok
           done()
-        exampleContext.initialize()
-        .then ->
-          exampleContext.emitDomainEvent 'SomeEvent', {}
-        .catch done
+
+        exampleContext.command 'ModifyExample',
+          exampleId: exampleId
+      .catch done
 
 
-      it 'should save the domain event', (done) ->
-        exampleContext.initialize()
-        .then ->
-          exampleContext.emitDomainEvent 'SomeEvent', {}
-        .then ->
-          exampleContext.getDomainEventsStore().findDomainEventsByName 'SomeEvent', (error, domainEvents) ->
-            expect(domainEvents.length).to.equal 1
-            expect(domainEvents[0].name).to.equal 'SomeEvent'
-            done()
-        .catch done
-
-
-  describe '#destroy', ->
+  describe 'destroying a context', ->
     exampleContext = null
 
     beforeEach ->
@@ -121,3 +195,17 @@ describe 'Context Feature', ->
         expect(error.message).to.contain 'emit domain event'
         expect(error.message).to.contain 'SomethingHappened'
         expect(error.message).to.contain 'ExampleContext'
+
+
+  describe 'adding a projection', ->
+
+    it 'should call the initialize method of the projection', ->
+      exampleContext = eventric.context 'exampleContext'
+
+      class ProjectionStub
+        initialize: sandbox.stub().yields()
+      exampleContext.addProjection 'SomeProjection', ProjectionStub
+      exampleContext.initialize()
+      .then ->
+        expect(ProjectionStub::initialize).to.have.been.called
+

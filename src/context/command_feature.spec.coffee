@@ -1,0 +1,164 @@
+describe 'Command Feature', ->
+
+  describe 'executing a command', ->
+
+    it 'should reject with a descriptive error given the context was not initialized yet', ->
+      someContext = eventric.context 'ExampleContext'
+      someContext.command 'DoSomething'
+      .catch (error) ->
+        expect(error).to.be.an.instanceOf Error
+        expect(error.message).to.contain 'ExampleContext'
+        expect(error.message).to.contain 'DoSomething'
+
+
+    it 'should reject with a command not found error given the command has no registered handler', ->
+      someContext = eventric.context 'Examplecontext'
+      someContext.initialize()
+      .then ->
+        someContext.command 'DoSomething',
+          id: 42
+          foo: 'bar'
+      .catch (error) ->
+        expect(error).to.be.an.instanceof Error
+
+
+    it 'should call the command handler with the passed in params given the command has a registered handler', ->
+      someContext = eventric.context 'Examplecontext'
+      commandHandlerStub = sandbox.stub()
+      someContext.addCommandHandlers DoSomething: commandHandlerStub
+      params =
+        id: 42
+        foo: 'bar'
+      someContext.initialize()
+      .then ->
+        someContext.command 'DoSomething', params
+      .then ->
+        expect(commandHandlerStub).to.have.been.calledWith params
+
+
+    describe 'given a created and initialized example context including an aggregate', ->
+      exampleContext = null
+
+      beforeEach ->
+        exampleContext = eventric.context 'exampleContext'
+
+        # Domain Events
+        exampleContext.defineDomainEvent 'ExampleCreated', ->
+        exampleContext.defineDomainEvent 'SomethingHappened', (params) ->
+          @someId   = params.someId
+          @someProperty = params.someProperty
+
+
+        class ExampleAggregate
+          create: ->
+            @$emitDomainEvent 'ExampleCreated'
+
+          doSomething: (someId, someProperty) ->
+            @$emitDomainEvent 'SomethingHappened',
+              someId: someId
+              someProperty: someProperty
+
+          handleSomethingHappened: (domainEvent) ->
+            @someId = domainEvent.payload.someId
+            @someProperty = domainEvent.payload.someProperty
+
+        exampleContext.addAggregate 'Example', ExampleAggregate
+
+        exampleContext.addCommandHandlers
+          CreateExample: (params) ->
+            @$aggregate.create 'Example'
+            .then (example) ->
+              example.$save()
+
+
+          DoSomething: (params) ->
+            @$aggregate.load 'Example', params.aggregateId
+            .then (example) ->
+              example.doSomething params.someId, params.someProperty
+              example.$save()
+
+        exampleContext.initialize()
+
+
+      it 'should trigger the correct domain event given one command is sent to the context', (done) ->
+        exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->
+          expect(domainEvent.payload.someId).to.equal 'some-id'
+          expect(domainEvent.payload.someProperty).to.equal 'some-property'
+          expect(domainEvent.name).to.equal 'SomethingHappened'
+          done()
+
+        exampleContext.command 'CreateExample'
+        .then (exampleId) ->
+          exampleContext.command 'DoSomething',
+            aggregateId: exampleId
+            someId: 'some-id'
+            someProperty: 'some-property'
+
+
+      it 'should execute all commands as expected given multiple commands are sent to the context', (done) ->
+        commandCount = 0
+        exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->
+          commandCount++
+
+          if commandCount == 2
+            expect(commandCount).to.equal 2
+            done()
+
+        exampleContext.command 'CreateExample'
+        .then (exampleId) ->
+          exampleContext.command 'DoSomething',
+            aggregateId: exampleId
+            someId: 'some-id'
+            someProperty: 'some-property'
+          exampleContext.command 'DoSomething',
+            aggregateId: exampleId
+            someId: 'some-id'
+            someProperty: 'some-property'
+
+
+      it '[bugfix] should return the correct payload given an array at the domain event definition', (done) ->
+        exampleContext.subscribeToDomainEvent 'SomethingHappened', (domainEvent) ->
+          expect(domainEvent.payload).to.deep.equal
+            someId: 'some-id'
+            someProperty: ['value-1', 'value-2']
+          done()
+
+        exampleContext.command 'CreateExample'
+        .then (exampleId) ->
+          exampleContext.command 'DoSomething',
+            aggregateId: exampleId
+            someId: 'some-id'
+            someProperty: ['value-1', 'value-2']
+
+
+  describe 'creating an aggregate', ->
+
+    it 'should emit the create domain event after creating an aggregate', (done) ->
+      exampleContext = eventric.context 'Examplecontext'
+
+      exampleContext.defineDomainEvent 'ExampleCreated', (params) ->
+        @name = params.name
+        @email = params.email
+
+      class Example
+        create: (params) ->
+          @$emitDomainEvent 'ExampleCreated', params
+      exampleContext.addAggregate 'Example', Example
+
+      exampleContext.addCommandHandlers
+        CreateExample: (params) ->
+          @$aggregate.create 'Example', params
+          .then (example) ->
+            example.$save()
+
+      exampleContext.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
+        expect(domainEvent.payload.name).to.be.equal 'John'
+        expect(domainEvent.payload.email).to.be.equal 'john@example.com'
+        done()
+
+      exampleContext.initialize()
+      .then ->
+        exampleContext.command 'CreateExample',
+          name: 'John'
+          email: 'john@example.com'
+      .catch done

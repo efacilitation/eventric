@@ -64,6 +64,11 @@ class Context
     @
 
 
+  subscribeToAllDomainEvents: (handlerFn) ->
+    domainEventHandler = () => handlerFn.apply @_di, arguments
+    @_eventBus.subscribeToAllDomainEvents domainEventHandler
+
+
   subscribeToDomainEvent: (domainEventName, handlerFn) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
@@ -77,11 +82,6 @@ class Context
   subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
     domainEventHandler = () => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler
-
-
-  subscribeToAllDomainEvents: (handlerFn) ->
-    domainEventHandler = () => handlerFn.apply @_di, arguments
-    @_eventBus.subscribeToAllDomainEvents domainEventHandler
 
 
   addProjection: (projectionName, ProjectionClass) ->

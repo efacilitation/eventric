@@ -15,7 +15,7 @@ class Context
     @_repositoryInstances = {}
     @_storeClasses = {}
     @_storeInstances = {}
-    @_pendingOperations = []
+    @_pendingPromises = []
     @_eventBus         = new @_eventric.EventBus @_eventric
     @projectionService = new @_eventric.Projection @_eventric, @
     @log = @_eventric.log
@@ -180,12 +180,12 @@ class Context
       @getDomainEventsStore().saveDomainEvent domainEvent
       .then =>
         @getEventBus().publishDomainEvent domainEvent
-        .catch (error) =>
+        .catch (error = {}) =>
           @_eventric.log.error error.stack || error
         resolve domainEvent
       .catch reject
 
-    @_addPendingOperation emittingDomainEvent
+    @_addPendingPromise emittingDomainEvent
 
     return emittingDomainEvent
 
@@ -284,29 +284,24 @@ class Context
 
     executingCommand = new Promise (resolve, reject) =>
       @_verifyContextIsInitialized commandName
-      command =
-        id: @_eventric.generateUid()
-        name: commandName
-        params: params
-      @log.debug 'Got Command', command
 
       if not @_commandHandlers[commandName]
         throw new Error "Given command #{commandName} not registered on context"
 
-      servicesToInject = @_getServicesToInject()
+      commandServicesToInject = @_getCommandServicesToInject()
 
-      Promise.resolve @_commandHandlers[commandName].apply servicesToInject, [params]
+      Promise.resolve @_commandHandlers[commandName].apply commandServicesToInject, [params]
       .then (result) =>
         @log.debug 'Completed Command', commandName
         resolve result
       .catch reject
 
-    @_addPendingOperation executingCommand
+    @_addPendingPromise executingCommand
 
     return executingCommand
 
 
-  _getServicesToInject: ->
+  _getCommandServicesToInject: ->
     servicesToInject = {}
     for diFnName, diFn of @_di
       servicesToInject[diFnName] = diFn
@@ -337,11 +332,11 @@ class Context
     repositoriesCache[aggregateName]
 
 
-  _addPendingOperation: (pendingOperation) ->
-    errorSuppressedPendingOperation = pendingOperation.catch ->
-    @_pendingOperations.push errorSuppressedPendingOperation
-    errorSuppressedPendingOperation.then =>
-      @_pendingOperations.splice @_pendingOperations.indexOf(errorSuppressedPendingOperation), 1
+  _addPendingPromise: (pendingPromise) ->
+    alwaysResolvingPromise = pendingPromise.catch ->
+    @_pendingPromises.push alwaysResolvingPromise
+    alwaysResolvingPromise.then =>
+      @_pendingPromises.splice @_pendingPromises.indexOf(alwaysResolvingPromise), 1
 
 
   query: (queryName, params) ->
@@ -356,15 +351,11 @@ class Context
         err = new Error err
         return reject err
 
-      executeQuery = @_queryHandlers[queryName].apply @_di, [params]
-
-      Promise.all [executeQuery]
-      .then ([result]) =>
+      Promise.resolve @_queryHandlers[queryName].apply @_di, [params]
+      .then (result) =>
         @log.debug "Completed Query #{queryName} with Result #{result}"
         resolve result
-
-      .catch (err) ->
-        reject err
+      .catch reject
 
 
   _verifyContextIsInitialized: (methodName) ->
@@ -373,7 +364,7 @@ class Context
 
 
   destroy: ->
-    Promise.all(@_pendingOperations).then =>
+    Promise.all(@_pendingPromises).then =>
       @_eventBus.destroy().then =>
         @_isDestroyed = true
 

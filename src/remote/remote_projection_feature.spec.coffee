@@ -291,6 +291,15 @@ describe 'Remote Projection Feature', ->
           .then (example) ->
             example.$save()
 
+
+        ModifyExample: (params) ->
+          exampleId = null
+          @$aggregate.load 'Example', params.exampleId
+          .then (example) ->
+            example.modify()
+            example.$save()
+
+
       exampleContext.initialize()
 
 
@@ -343,6 +352,10 @@ describe 'Remote Projection Feature', ->
                 expect(secondProjection.actions[0]).to.equal 'created'
                 expect(secondProjection.actions[1]).to.equal 'modified'
                 resolve()
-              catch error
-                reject error
+              catch reject
+
             exampleRemote.command 'CreateExample'
+            .then (exampleId) ->
+              exampleRemote.command 'ModifyExample',
+                exampleId: exampleId
+            .catch reject

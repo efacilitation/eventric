@@ -37,9 +37,10 @@ describe 'Projection Feature', ->
             example.$save()
 
 
-    describe 'given a projection added to it', ->
 
-      beforeEach ->
+    describe 'when emitting domain events the projection subscribed to', ->
+
+      it 'should execute the projection\'s event handlers and save it to the specified store', ->
         exampleContext.addProjection 'ExampleProjection', ->
           stores: ['inmemory']
 
@@ -52,16 +53,32 @@ describe 'Projection Feature', ->
 
 
         exampleContext.initialize()
-
-
-      describe 'when emitting domain events the projection subscribed to', ->
-
-        it 'should execute the projection\'s event handlers and save it to the specified store', ->
+        .then ->
           exampleContext.command 'CreateExample'
-          .then (exampleId) ->
-            exampleContext.command 'ModifyExample', id: exampleId
-          .then ->
-            exampleContext.getProjectionStore 'inmemory', 'ExampleProjection'
-            .then (projectionStore) ->
-              expect(projectionStore.exampleCreated).to.equal 'created'
-              expect(projectionStore.exampleModified).to.equal 'modified'
+        .then (exampleId) ->
+          exampleContext.command 'ModifyExample', id: exampleId
+        .then ->
+          exampleContext.getProjectionStore 'inmemory', 'ExampleProjection'
+          .then (projectionStore) ->
+            expect(projectionStore.exampleCreated).to.equal 'created'
+            expect(projectionStore.exampleModified).to.equal 'modified'
+
+
+    it 'should log an error given a domain event handler functions throws an error after initialization', ->
+      exampleContext.addProjection 'ExampleProjection', ->
+        stores: ['inmemory']
+
+        handleExampleCreated: (domainEvent) ->
+          throw new Error 'runtime error'
+
+      new Promise (resolve, reject) ->
+        exampleContext.initialize()
+        .then ->
+          exampleContext.command 'CreateExample'
+        .then ->
+          log = require '../logger'
+          sandbox.stub log, 'error'
+          setTimeout ->
+            expect(log.error).to.have.been.calledOnce
+            resolve()
+        .catch reject

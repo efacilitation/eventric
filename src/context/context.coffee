@@ -81,7 +81,7 @@ class Context
 
   # TODO: Remove this when stream subscriptions are implemented
   subscribeToDomainEventWithAggregateId: (domainEventName, aggregateId, handlerFn) ->
-    domainEventHandler = () => handlerFn.apply @_di, arguments
+    domainEventHandler = => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler
 
 

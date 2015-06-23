@@ -9,16 +9,16 @@ class EventBus
     @_isDestroyed = false
 
 
-  subscribeToAllDomainEvents: (handlerFunction) ->
-    @_subscribe '*', handlerFunction
+  subscribeToAllDomainEvents: (subscriberFunction) ->
+    @_subscribe '*', subscriberFunction
 
 
-  subscribeToDomainEvent: (eventName, handlerFunction) ->
-    @_subscribe eventName, handlerFunction
+  subscribeToDomainEvent: (eventName, subscriberFunction) ->
+    @_subscribe eventName, subscriberFunction
 
 
-  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, handlerFunction) ->
-    @_subscribe "#{eventName}/#{aggregateId}", handlerFunction
+  subscribeToDomainEventWithAggregateId: (eventName, aggregateId, subscriberFunction) ->
+    @_subscribe "#{eventName}/#{aggregateId}", subscriberFunction
 
 
   _subscribe: (eventName, subscriberFunction) ->

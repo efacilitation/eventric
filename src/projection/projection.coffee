@@ -45,14 +45,8 @@ class Projection
         @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
       .then =>
         @_projectionInstances[projectionId] = projection
-        event =
-          id: projectionId
-          projection: projection
-
         resolve projectionId
-
-      .catch (err) ->
-        reject err
+      .catch reject
 
 
   _callInitializeOnProjection: (projectionName, projection, params) ->
@@ -68,14 +62,14 @@ class Projection
 
 
   _injectStoresIntoProjection: (projectionName, projection) ->
-    promise = new Promise (resolve) -> resolve()
+    injectStoresIntoProjectionPromise = Promise.resolve()
     if not projection.stores
-      return promise
+      return injectStoresIntoProjectionPromise
 
     projection["$store"] ?= {}
     projection.stores?.forEach (projectionStoreName) =>
       @log.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
-      promise = promise.then =>
+      injectStoresIntoProjectionPromise = injectStoresIntoProjectionPromise.then =>
         @_context.getProjectionStore projectionStoreName, projectionName
       .then (projectionStore) =>
         if projectionStore
@@ -83,22 +77,22 @@ class Projection
           @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} \
           into Projection #{projectionName}"
 
-    return promise
+    return injectStoresIntoProjectionPromise
 
 
   _clearProjectionStores: (projectionStores, projectionName) ->
-    promise = new Promise (resolve) -> resolve()
+    clearProjectionStoresPromise = Promise.resolve()
     if not projectionStores
-      return promise
+      return clearProjectionStoresPromise
 
     projectionStores.forEach (projectionStoreName) =>
       @log.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
-      promise = promise.then =>
+      clearProjectionStoresPromise = clearProjectionStoresPromise.then =>
         @_context.clearProjectionStore projectionStoreName, projectionName
       .then =>
         @log.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
 
-    return promise
+    return clearProjectionStoresPromise
 
 
   _parseEventNamesFromProjection: (projection) ->
@@ -124,36 +118,30 @@ class Projection
       if not domainEvents or domainEvents.length is 0
         return
 
-      applyDomainEventsToProjection = new Promise (resolve) -> resolve()
+      applyDomainEventsToProjectionPromise = Promise.resolve()
       domainEvents.forEach (domainEvent) =>
-        applyDomainEventsToProjection = applyDomainEventsToProjection.then =>
+        applyDomainEventsToProjectionPromise = applyDomainEventsToProjectionPromise.then =>
           @_applyDomainEventToProjection domainEvent, projection
         .then =>
           @_domainEventsApplied[projectionId][domainEvent.id] = true
 
-      return applyDomainEventsToProjection
+      return applyDomainEventsToProjectionPromise
 
 
   _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId) ->
-    domainEventHandler = (domainEvent, done = ->) =>
+    domainEventHandler = (domainEvent) =>
       if @_domainEventsApplied[projectionId][domainEvent.id]
-        return done()
+        return
 
       @_applyDomainEventToProjection domainEvent, projection
       .then =>
         @_domainEventsApplied[projectionId][domainEvent.id] = true
-        event =
-          id: projectionId
-          projection: projection
-          domainEvent: domainEvent
-        done()
+        return
 
-      .catch (err) ->
-        done err
 
-    promise = new Promise (resolve) -> resolve()
+    subscribeProjectionToDomainEventsPromise = Promise.resolve()
     eventNames.forEach (eventName) =>
-      promise = promise.then =>
+      subscribeProjectionToDomainEventsPromise = subscribeProjectionToDomainEventsPromise.then =>
         if aggregateId
           @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler
         else
@@ -162,20 +150,17 @@ class Projection
         @_handlerFunctions[projectionId] ?= []
         @_handlerFunctions[projectionId].push subscriberId
 
-    return promise
+    return subscribeProjectionToDomainEventsPromise
 
 
   _applyDomainEventToProjection: (domainEvent, projection) =>
-    new Promise (resolve, reject) =>
+    Promise.resolve()
+    .then =>
       if !projection["handle#{domainEvent.name}"]
         @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
-        resolve()
         return
 
-      handleDomainEvent = projection["handle#{domainEvent.name}"] domainEvent
-      Promise.all [handleDomainEvent]
-      .then ([result]) ->
-        resolve result
+      return projection["handle#{domainEvent.name}"] domainEvent
 
 
   getInstance: (projectionId) ->

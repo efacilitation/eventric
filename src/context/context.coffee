@@ -131,22 +131,21 @@ class Context
         Class: store.Class
         options: store.options
 
-    promise = new Promise (resolve) -> resolve()
+    initializeStoresPromise = Promise.resolve()
     stores.forEach (store) =>
       @log.debug "[#{@name}] Initializing Store #{store.name}"
       @_storeInstances[store.name] = new store.Class
 
-      promise = promise.then =>
+      initializeStoresPromise = initializeStoresPromise.then =>
         @_storeInstances[store.name].initialize @, store.options
       .then =>
         @log.debug "[#{@name}] Finished initializing Store #{store.name}"
 
-    return promise
+    return initializeStoresPromise
 
 
   _initializeProjections: ->
-    promise = new Promise (resolve) -> resolve()
-
+    initializeProjectionsPromise = Promise.resolve()
     projections = []
     for projectionName, ProjectionClass of @_projectionClasses
       projections.push
@@ -157,12 +156,12 @@ class Context
       eventNames = null
       @log.debug "[#{@name}] Initializing Projection #{projection.name}"
 
-      promise = promise.then =>
+      initializeProjectionsPromise = initializeProjectionsPromise.then =>
         @projectionService.initializeInstance projection.name, projection.class, {}
       .then (projectionId) =>
         @log.debug "[#{@name}] Finished initializing Projection #{projection.name}"
 
-    return promise
+    return initializeProjectionsPromise
 
 
   emitDomainEvent: (domainEventName, domainEventPayload) =>

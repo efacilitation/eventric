@@ -57,7 +57,7 @@ class Repository
       @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
-      saveDomainEventQueue = new Promise (resolve) -> resolve()
+      saveDomainEventQueue = Promise.resolve()
       domainEvents.forEach (domainEvent) =>
         saveDomainEventQueue = saveDomainEventQueue.then =>
           @_store.saveDomainEvent domainEvent

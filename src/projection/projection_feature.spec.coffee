@@ -37,6 +37,11 @@ describe 'Projection Feature', ->
             example.$save()
 
 
+    describe 'when initializing the projection', ->
+
+      # TODO: Add when i can access projection instances
+      it 'should set the projection to initialized'
+
 
     describe 'when emitting domain events the projection subscribed to', ->
 
@@ -64,21 +69,23 @@ describe 'Projection Feature', ->
             expect(projectionStore.exampleModified).to.equal 'modified'
 
 
-    it 'should log an error given a domain event handler functions throws an error after initialization', ->
-      exampleContext.addProjection 'ExampleProjection', ->
-        stores: ['inmemory']
 
-        handleExampleCreated: (domainEvent) ->
-          throw new Error 'runtime error'
 
-      new Promise (resolve, reject) ->
-        exampleContext.initialize()
-        .then ->
-          exampleContext.command 'CreateExample'
-        .then ->
-          log = require '../logger'
-          sandbox.stub log, 'error'
-          setTimeout ->
-            expect(log.error).to.have.been.calledOnce
-            resolve()
-        .catch reject
+      it 'should log an error given a domain event handler functions throws an error after initialization', ->
+        exampleContext.addProjection 'ExampleProjection', ->
+          stores: ['inmemory']
+
+          handleExampleCreated: (domainEvent) ->
+            throw new Error 'runtime error'
+
+        new Promise (resolve, reject) ->
+          exampleContext.initialize()
+          .then ->
+            exampleContext.command 'CreateExample'
+          .then ->
+            log = require '../logger'
+            sandbox.stub log, 'error'
+            setTimeout ->
+              expect(log.error).to.have.been.calledOnce
+              resolve()
+          .catch reject

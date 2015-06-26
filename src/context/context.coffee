@@ -5,7 +5,10 @@ class Context
     @_isInitialized = false
     @_isDestroyed = false
     @_params = @_eventric.get()
-    @_di = {}
+    @_di =
+      $query: => @query.apply @, arguments
+      $projectionStore: => @getProjectionStore.apply @, arguments
+      $emitDomainEvent: => @emitDomainEvent.apply @, arguments
     @_aggregateClasses = {}
     @_commandHandlers = {}
     @_queryHandlers = {}
@@ -66,12 +69,12 @@ class Context
 
 
   subscribeToAllDomainEvents: (handlerFn) ->
-    domainEventHandler = () => handlerFn.apply @_di, arguments
+    domainEventHandler = => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToAllDomainEvents domainEventHandler
 
 
   subscribeToDomainEvent: (domainEventName, handlerFn) ->
-    domainEventHandler = () => handlerFn.apply @_di, arguments
+    domainEventHandler = => handlerFn.apply @_di, arguments
     @_eventBus.subscribeToDomainEvent domainEventName, domainEventHandler
 
 
@@ -109,12 +112,6 @@ class Context
     @_initializeStores()
     .then =>
       @log.debug "[#{@name}] Finished initializing Store"
-      @_di =
-        $query: => @query.apply @, arguments
-        $projectionStore: => @getProjectionStore.apply @, arguments
-        $emitDomainEvent: => @emitDomainEvent.apply @, arguments
-
-    .then =>
       @log.debug "[#{@name}] Initializing Projections"
       @_initializeProjections()
     .then =>
@@ -146,20 +143,13 @@ class Context
 
   _initializeProjections: ->
     initializeProjectionsPromise = Promise.resolve()
-    projections = []
     for projectionName, ProjectionClass of @_projectionClasses
-      projections.push
-        name: projectionName
-        class: ProjectionClass
-
-    projections.forEach (projection) =>
-      eventNames = null
-      @log.debug "[#{@name}] Initializing Projection #{projection.name}"
+      @log.debug "[#{@name}] Initializing Projection #{projectionName}"
 
       initializeProjectionsPromise = initializeProjectionsPromise.then =>
-        @projectionService.initializeInstance projection.name, projection.class, {}
+        @projectionService.initializeInstance projectionName, ProjectionClass, {}
       .then (projectionId) =>
-        @log.debug "[#{@name}] Finished initializing Projection #{projection.name}"
+        @log.debug "[#{@name}] Finished initializing Projection #{projectionName}"
 
     return initializeProjectionsPromise
 

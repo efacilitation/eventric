@@ -8,47 +8,44 @@ class Projection
 
 
   initializeInstance: (projectionName, Projection, params) ->
-    new Promise (resolve, reject) =>
+    if typeof Projection is 'function'
+      projection = new Projection
+    else
+      projection = Projection
 
-      if typeof Projection is 'function'
-        projection = new Projection
-      else
-        projection = Projection
+    if @_context._di
+      for diName, diFn of @_context._di
+        projection[diName] = diFn
 
-      if @_context._di
-        for diName, diFn of @_context._di
-          projection[diName] = diFn
+    projectionId = @_eventric.generateUid()
 
-      projectionId = @_eventric.generateUid()
+    aggregateId = null
+    projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
+      aggregateId = _aggregateId
 
-      aggregateId = null
-      projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
-        aggregateId = _aggregateId
-
-
-      @log.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
-      eventNames = null
-      @_clearProjectionStores projection.stores, projectionName
-      .then =>
-        @log.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"
-        @_injectStoresIntoProjection projectionName, projection
-      .then =>
-        @_callInitializeOnProjection projectionName, projection, params
-      .then =>
-        @log.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
-        @_parseEventNamesFromProjection projection
-      .then (_eventNames) =>
-        eventNames = _eventNames
-        @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
-      .then =>
-        @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
-        @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
-      .then =>
-        @_projectionInstances[projectionId] = projection
-        resolve projectionId
-      .then ->
-        projection.isInitialized = true
-      .catch reject
+    @log.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
+    eventNames = null
+    @_clearProjectionStores projection.stores, projectionName
+    .then =>
+      @log.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"
+      @_injectStoresIntoProjection projectionName, projection
+    .then =>
+      @_callInitializeOnProjection projectionName, projection, params
+    .then =>
+      @log.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
+      @_parseEventNamesFromProjection projection
+    .then (_eventNames) =>
+      eventNames = _eventNames
+      @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
+    .then =>
+      @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
+      @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
+    .then =>
+      @_projectionInstances[projectionId] = projection
+    .then ->
+      projection.isInitialized = true
+    .then ->
+      projectionId
 
 
   _callInitializeOnProjection: (projectionName, projection, params) ->

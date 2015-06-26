@@ -46,6 +46,8 @@ class Projection
       .then =>
         @_projectionInstances[projectionId] = projection
         resolve projectionId
+      .then ->
+        projection.isInitialized = true
       .catch reject
 
 

@@ -39,12 +39,13 @@ describe 'Projection Feature', ->
 
     describe 'when initializing the projection', ->
 
-      it 'should set the projection to initialized', ->
+      it 'should set the projection to initialized', (done) ->
         exampleContext.addProjection 'ExampleProjection', ->
           stores: ['inmemory']
 
           handleExampleCreated: (domainEvent) ->
             expect(@isInitialized).to.equal true
+            done()
 
 
         exampleContext.initialize()

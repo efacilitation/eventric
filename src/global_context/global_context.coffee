@@ -13,6 +13,7 @@ class GlobalContext
     .then (domainEventsByContext) =>
       domainEvents = @_combineDomainEventsByContext domainEventsByContext
       @_sortDomainEventsByTimestamp domainEvents
+      return domainEvents
 
 
   subscribeToDomainEvent: (eventName, domainEventHandler) ->

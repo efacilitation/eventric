@@ -3,16 +3,18 @@ describe 'Global Projection Feature', ->
   firstContext = null
   secondContext = null
 
+  specHelper = null
+
   beforeEach ->
-    firstContext = createContextWithOneAggregate
+    specHelper = require './global_projection_feature.spec_helper'
+
+    firstContext = specHelper.createContextWithOneAggregate
       contextName: 'First'
       aggregateName: 'FirstContextAggregate'
-      domainEventName: 'FirstContextAggregateCreated'
 
-    secondContext = createContextWithOneAggregate
+    secondContext = specHelper.createContextWithOneAggregate
       contextName: 'Second'
       aggregateName: 'SecondContextAggregate'
-      domainEventName: 'SecondContextAggregateCreated'
 
     Promise.all [
       firstContext.initialize()
@@ -33,7 +35,16 @@ describe 'Global Projection Feature', ->
         handleFirstContextAggregateCreated: (domainEvent) ->
           receivedDomainEventNames.push domainEvent.name
 
+
+        handleFirstContextAggregateModified: (domainEvent) ->
+          receivedDomainEventNames.push domainEvent.name
+
+
         handleSecondContextAggregateCreated: (domainEvent) ->
+          receivedDomainEventNames.push domainEvent.name
+
+
+        handleFirstContextAggregateModified: (domainEvent) ->
           receivedDomainEventNames.push domainEvent.name
 
 
@@ -58,6 +69,18 @@ describe 'Global Projection Feature', ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
 
 
+      it 'should replay events with identical timestamps from one context in the same order they are received', ->
+        currentTimestamp = Date.now()
+        sandbox.stub(Date::, 'getTime').returns currentTimestamp
+        firstContext.command 'CreateAggregate'
+        .then (aggregateId) ->
+          firstContext.command 'ModifyAggregate', aggregateId: aggregateId
+        .then ->
+          eventric.initializeGlobalProjections()
+        .then ->
+          expect(receivedDomainEventNames).to.deep.equal ['FirstContextAggregateCreated', 'FirstContextAggregateModified']
+
+
     describe 'receiving domain events on the projection', ->
 
       it 'should correctly handle those events given new events are emitted on the first context', ->
@@ -75,20 +98,3 @@ describe 'Global Projection Feature', ->
         .then ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
 
-
-createContextWithOneAggregate = ({contextName, aggregateName, domainEventName}) ->
-
-  context = eventric.context contextName
-
-  context.defineDomainEvent domainEventName, ->
-  context.addAggregate aggregateName, ->
-    create: (params) ->
-      @$emitDomainEvent domainEventName
-
-  context.addCommandHandlers
-    CreateAggregate: ->
-      @$aggregate.create aggregateName
-      .then (aggregate) ->
-        aggregate.$save()
-
-  context

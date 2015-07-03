@@ -39,8 +39,17 @@ describe 'Projection Feature', ->
 
     describe 'when initializing the projection', ->
 
-      # TODO: Add when i can access projection instances
-      it 'should set the projection to initialized'
+      it 'should set the projection to initialized', ->
+        exampleContext.addProjection 'ExampleProjection', ->
+          stores: ['inmemory']
+
+          handleExampleCreated: (domainEvent) ->
+            expect(@isInitialized).to.equal true
+
+
+        exampleContext.initialize()
+        .then ->
+          exampleContext.command 'CreateExample'
 
 
     describe 'when emitting domain events the projection subscribed to', ->

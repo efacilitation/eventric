@@ -2,7 +2,7 @@
 EventBus = require 'eventric/event_bus'
 Projection = require 'eventric/projection'
 DomainEvent = require 'eventric/domain_event'
-Repository = require 'eventric/repository'
+AggregateRepository = require 'eventric/aggregate_repository'
 logger = require 'eventric/logger'
 
 class Context
@@ -303,27 +303,27 @@ class Context
 
     servicesToInject.$aggregate =
       create: (aggregateName, aggregateParams...) =>
-        repository = @_getAggregateRepository aggregateName
-        repository.create aggregateParams...
+        aggregateRepository = @_getAggregateRepository aggregateName
+        aggregateRepository.create aggregateParams...
 
       load: (aggregateName, aggregateId) =>
-        repository = @_getAggregateRepository aggregateName
-        repository.findById aggregateId
+        aggregateRepository = @_getAggregateRepository aggregateName
+        aggregateRepository.load aggregateId
 
     return servicesToInject
 
 
   _getAggregateRepository: (aggregateName) =>
-    repositoriesCache = {} if not repositoriesCache
-    if not repositoriesCache[aggregateName]
+    aggregateRepositoriesCache = {} if not aggregateRepositoriesCache
+    if not aggregateRepositoriesCache[aggregateName]
       AggregateClass = @_aggregateClasses[aggregateName]
-      repository = new Repository
+      aggregateRepository = new AggregateRepository
         aggregateName: aggregateName
         AggregateClass: AggregateClass
         context: @
-      repositoriesCache[aggregateName] = repository
+      aggregateRepositoriesCache[aggregateName] = aggregateRepository
 
-    repositoriesCache[aggregateName]
+    aggregateRepositoriesCache[aggregateName]
 
 
   _addPendingPromise: (pendingPromise) ->

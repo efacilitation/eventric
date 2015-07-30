@@ -1,7 +1,7 @@
 Aggregate = require 'eventric/aggregate'
 logger = require 'eventric/logger'
 
-class Repository
+class AggregateRepository
 
   constructor: (params) ->
     @_eventric = require 'eventric'
@@ -11,7 +11,7 @@ class Repository
     @_store = @_context.getDomainEventsStore()
 
 
-  findById: (aggregateId) =>
+  load: (aggregateId) =>
     new Promise (resolve, reject) =>
       @_store.findDomainEventsByAggregateId aggregateId, (error, domainEvents) =>
         if error
@@ -80,4 +80,4 @@ class Repository
       .catch reject
 
 
-module.exports = Repository
+module.exports = AggregateRepository

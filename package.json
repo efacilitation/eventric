@@ -19,7 +19,7 @@
   },
   "main": "src/index.coffee",
   "scripts": {
-    "test": "node_modules/.bin/gulp spec"
+    "test": "node_modules/.bin/gulp specs"
   },
   "devDependencies": {
     "chai": "2.3.0",

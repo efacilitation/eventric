@@ -174,10 +174,7 @@ class Context
 
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
-      err = "Given projection #{projectionName} not registered on context"
-      logger.error err
-      err = new Error err
-      return err
+      return Promise.reject new Error "Given projection #{projectionName} not registered on context"
 
     @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params
 
@@ -217,32 +214,18 @@ class Context
         resolve events
 
 
-  getProjectionStore: (storeName, projectionName) =>  new Promise (resolve, reject) =>
+  getProjectionStore: (storeName, projectionName) =>
     if not @_storeInstances[storeName]
-      err = "Requested Store with name #{storeName} not found"
-      logger.error err
-      return reject err
+      return Promise.reject new Error "Requested Store with name #{storeName} not found"
 
     @_storeInstances[storeName].getProjectionStore projectionName
-    .then (projectionStore) ->
-      resolve projectionStore
-
-    .catch (err) ->
-      reject err
 
 
-  clearProjectionStore: (storeName, projectionName) =>  new Promise (resolve, reject) =>
+  clearProjectionStore: (storeName, projectionName) =>
     if not @_storeInstances[storeName]
-      err = "Requested Store with name #{storeName} not found"
-      logger.error err
-      return reject err
+      return Promise.reject new Error "Requested Store with name #{storeName} not found"
 
     @_storeInstances[storeName].clearProjectionStore projectionName
-    .then ->
-      resolve()
-
-    .catch (err) ->
-      reject err
 
 
   command: (commandName, params) ->
@@ -315,10 +298,8 @@ class Context
       @_verifyContextIsInitialized queryName
 
       if not @_queryHandlers[queryName]
-        err = "Given query #{queryName} not registered on context"
-        logger.error err
-        err = new Error err
-        return reject err
+        reject new Error "Given query #{queryName} not registered on context"
+        return
 
       Promise.resolve @_queryHandlers[queryName].apply @_di, [params]
       .then (result) =>

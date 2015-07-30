@@ -95,10 +95,7 @@ class Remote
 
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
-      err = "Given projection #{projectionName} not registered on remote"
-      logger.error err
-      err = new Error err
-      return err
+      return Promise.reject new Error "Given projection #{projectionName} not registered on remote"
 
     @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params
 

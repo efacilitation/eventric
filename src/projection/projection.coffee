@@ -170,7 +170,7 @@ class Projection
 
   destroyInstance: (projectionId) ->
     if not @_handlerFunctions[projectionId]
-      return logger.error 'Missing attribute projectionId'
+      return Promise.reject new Error 'Missing attribute projectionId'
 
     unsubscribePromises = []
     for subscriberId in @_handlerFunctions[projectionId]

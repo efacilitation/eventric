@@ -1,7 +1,14 @@
-# TODO: Split up Context into smaller modules
+
+EventBus = require 'eventric/event_bus'
+Projection = require 'eventric/projection'
+DomainEvent = require 'eventric/domain_event'
+Repository = require 'eventric/repository'
+logger = require 'eventric/logger'
+
 class Context
 
-  constructor: (@name, @_eventric) ->
+  constructor: (@name) ->
+    @_eventric = require 'eventric'
     @_isInitialized = false
     @_isDestroyed = false
     @_params = @_eventric.get()
@@ -19,9 +26,8 @@ class Context
     @_storeClasses = {}
     @_storeInstances = {}
     @_pendingPromises = []
-    @_eventBus         = new @_eventric.EventBus @_eventric
-    @projectionService = new @_eventric.Projection @_eventric, @
-    @log = @_eventric.log
+    @_eventBus         = new EventBus
+    @projectionService = new Projection @
 
 
   set: (key, value) ->
@@ -107,16 +113,16 @@ class Context
 
 
   initialize: ->
-    @log.debug "[#{@name}] Initializing"
-    @log.debug "[#{@name}] Initializing Store"
+    logger.debug "[#{@name}] Initializing"
+    logger.debug "[#{@name}] Initializing Store"
     @_initializeStores()
     .then =>
-      @log.debug "[#{@name}] Finished initializing Store"
-      @log.debug "[#{@name}] Initializing Projections"
+      logger.debug "[#{@name}] Finished initializing Store"
+      logger.debug "[#{@name}] Initializing Projections"
       @_initializeProjections()
     .then =>
-      @log.debug "[#{@name}] Finished initializing Projections"
-      @log.debug "[#{@name}] Finished initializing"
+      logger.debug "[#{@name}] Finished initializing Projections"
+      logger.debug "[#{@name}] Finished initializing"
       @_isInitialized = true
 
 
@@ -130,13 +136,13 @@ class Context
 
     initializeStoresPromise = Promise.resolve()
     stores.forEach (store) =>
-      @log.debug "[#{@name}] Initializing Store #{store.name}"
+      logger.debug "[#{@name}] Initializing Store #{store.name}"
       @_storeInstances[store.name] = new store.Class
 
       initializeStoresPromise = initializeStoresPromise.then =>
         @_storeInstances[store.name].initialize @, store.options
       .then =>
-        @log.debug "[#{@name}] Finished initializing Store #{store.name}"
+        logger.debug "[#{@name}] Finished initializing Store #{store.name}"
 
     return initializeStoresPromise
 
@@ -144,12 +150,12 @@ class Context
   _initializeProjections: ->
     initializeProjectionsPromise = Promise.resolve()
     for projectionName, ProjectionClass of @_projectionClasses
-      @log.debug "[#{@name}] Initializing Projection #{projectionName}"
+      logger.debug "[#{@name}] Initializing Projection #{projectionName}"
 
       initializeProjectionsPromise = initializeProjectionsPromise.then =>
         @projectionService.initializeInstance projectionName, ProjectionClass, {}
       .then (projectionId) =>
-        @log.debug "[#{@name}] Finished initializing Projection #{projectionName}"
+        logger.debug "[#{@name}] Finished initializing Projection #{projectionName}"
 
     return initializeProjectionsPromise
 
@@ -170,7 +176,7 @@ class Context
       .then =>
         @getEventBus().publishDomainEvent domainEvent
         .catch (error = {}) =>
-          @_eventric.log.error error.stack || error
+          logger.error error.stack || error
         resolve domainEvent
       .catch reject
 
@@ -183,8 +189,8 @@ class Context
     payload = {}
     DomainEventClass.apply payload, [domainEventPayload]
 
-    new @_eventric.DomainEvent
-      id: @_eventric.generateUid()
+    new DomainEvent
+      id: eventric.generateUid()
       name: domainEventName
       aggregate: aggregate
       context: @name
@@ -194,7 +200,7 @@ class Context
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on context"
-      @log.error err
+      logger.error err
       err = new Error err
       return err
 
@@ -239,7 +245,7 @@ class Context
   getProjectionStore: (storeName, projectionName) =>  new Promise (resolve, reject) =>
     if not @_storeInstances[storeName]
       err = "Requested Store with name #{storeName} not found"
-      @log.error err
+      logger.error err
       return reject err
 
     @_storeInstances[storeName].getProjectionStore projectionName
@@ -253,7 +259,7 @@ class Context
   clearProjectionStore: (storeName, projectionName) =>  new Promise (resolve, reject) =>
     if not @_storeInstances[storeName]
       err = "Requested Store with name #{storeName} not found"
-      @log.error err
+      logger.error err
       return reject err
 
     @_storeInstances[storeName].clearProjectionStore projectionName
@@ -281,7 +287,7 @@ class Context
 
       Promise.resolve @_commandHandlers[commandName].apply commandServicesToInject, [params]
       .then (result) =>
-        @log.debug 'Completed Command', commandName
+        logger.debug 'Completed Command', commandName
         resolve result
       .catch reject
 
@@ -311,11 +317,10 @@ class Context
     repositoriesCache = {} if not repositoriesCache
     if not repositoriesCache[aggregateName]
       AggregateClass = @_aggregateClasses[aggregateName]
-      repository = new @_eventric.Repository
+      repository = new Repository
         aggregateName: aggregateName
         AggregateClass: AggregateClass
         context: @
-        eventric: @_eventric
       repositoriesCache[aggregateName] = repository
 
     repositoriesCache[aggregateName]
@@ -330,19 +335,19 @@ class Context
 
   query: (queryName, params) ->
     new Promise (resolve, reject) =>
-      @log.debug 'Got Query', queryName
+      logger.debug 'Got Query', queryName
 
       @_verifyContextIsInitialized queryName
 
       if not @_queryHandlers[queryName]
         err = "Given query #{queryName} not registered on context"
-        @log.error err
+        logger.error err
         err = new Error err
         return reject err
 
       Promise.resolve @_queryHandlers[queryName].apply @_di, [params]
       .then (result) =>
-        @log.debug "Completed Query #{queryName} with Result #{result}"
+        logger.debug "Completed Query #{queryName} with Result #{result}"
         resolve result
       .catch reject
 

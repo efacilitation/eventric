@@ -8,6 +8,7 @@ gulp.on 'task_err', (e) ->
     process.exit 1
 
 require('./gulp/watch')(gulp)
+require('./gulp/symlink')(gulp)
 require('./gulp/build')(gulp)
 require('./gulp/spec')(gulp)
 require('./gulp/bump')(gulp)

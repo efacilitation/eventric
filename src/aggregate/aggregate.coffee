@@ -1,6 +1,8 @@
+logger = require 'eventric/logger'
+
 class Aggregate
 
-  constructor: (@_context, @_eventric, @_name, AggregateClass) ->
+  constructor: (@_context, @_name, AggregateClass) ->
     @_domainEvents = []
     @instance = new AggregateClass
     @instance.$emitDomainEvent = @emitDomainEvent
@@ -18,14 +20,14 @@ class Aggregate
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
-    @_eventric.log.debug "Created and Handled DomainEvent in Aggregate", domainEvent
+    logger.debug "Created and Handled DomainEvent in Aggregate", domainEvent
 
 
   _handleDomainEvent: (domainEventName, domainEvent) ->
     if @instance["handle#{domainEventName}"]
       @instance["handle#{domainEventName}"] domainEvent
     else
-      @_eventric.log.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
+      logger.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
 
   getDomainEvents: =>

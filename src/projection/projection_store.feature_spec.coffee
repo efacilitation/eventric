@@ -2,10 +2,13 @@
 describe 'Projection Store Interface Feature', ->
   exampleContext = null
 
+  StoreInMemory = null
+
   beforeEach ->
-    sandbox.spy eventric.StoreInMemory::, 'initialize'
-    sandbox.spy eventric.StoreInMemory::, 'getProjectionStore'
-    sandbox.spy eventric.StoreInMemory::, 'clearProjectionStore'
+    StoreInMemory = require 'eventric/store/inmemory'
+    sandbox.spy StoreInMemory::, 'initialize'
+    sandbox.spy StoreInMemory::, 'getProjectionStore'
+    sandbox.spy StoreInMemory::, 'clearProjectionStore'
 
     exampleContext = eventric.context 'exampleContext'
 
@@ -22,13 +25,13 @@ describe 'Projection Store Interface Feature', ->
 
 
   it 'should call initialize with the correct params', ->
-    expect(eventric.StoreInMemory::initialize)
+    expect(StoreInMemory::initialize)
       .to.have.been.calledWith sinon.match.has('name', 'exampleContext'), sinon.match.object
 
 
   it 'should call getProjectionStore with the correct params', ->
-    expect(eventric.StoreInMemory::getProjectionStore).to.have.been.calledWith 'ExampleProjection'
+    expect(StoreInMemory::getProjectionStore).to.have.been.calledWith 'ExampleProjection'
 
 
   it 'should call clearProjectionStore with the correct params', ->
-    expect(eventric.StoreInMemory::clearProjectionStore).to.have.been.calledWith 'ExampleProjection'
+    expect(StoreInMemory::clearProjectionStore).to.have.been.calledWith 'ExampleProjection'

@@ -18,15 +18,13 @@ if not root._spec_setup
 
 
 root.before ->
-  root.eventricStub = sandbox.stub (new (require './eventric'))
-
   mockery.enable useCleanCache: true
   mockery.warnOnUnregistered false
   mockery.warnOnReplace false
 
 
 root.beforeEach ->
-  root.eventric = require './'
+  root.eventric = require 'eventric'
 
 
 root.afterEach ->

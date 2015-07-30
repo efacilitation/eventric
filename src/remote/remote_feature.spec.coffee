@@ -57,7 +57,8 @@ describe 'Remote Feature', ->
   describe 'creating a remote for an example context', ->
 
     it 'should create a remote for the context', ->
-      expect(exampleRemote).to.be.an.instanceof eventric.Remote
+      Remote = require 'eventric/remote'
+      expect(exampleRemote).to.be.an.instanceof Remote
 
 
   describe 'executing a command on a remote', ->

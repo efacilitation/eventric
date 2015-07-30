@@ -1,7 +1,8 @@
+logger = require 'eventric/logger'
+
 class Projection
 
-  constructor: (@_eventric, @_context) ->
-    @log = @_eventric.log
+  constructor: (@_context) ->
     @_handlerFunctions    = {}
     @_projectionInstances = {}
     @_domainEventsApplied = {}
@@ -17,28 +18,29 @@ class Projection
       for diName, diFn of @_context._di
         projection[diName] = diFn
 
-    projectionId = @_eventric.generateUid()
+    eventric = require 'eventric'
+    projectionId = eventric.generateUid()
 
     aggregateId = null
     projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
       aggregateId = _aggregateId
 
-    @log.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
+    logger.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
     eventNames = null
     @_clearProjectionStores projection.stores, projectionName
     .then =>
-      @log.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"
+      logger.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"
       @_injectStoresIntoProjection projectionName, projection
     .then =>
       @_callInitializeOnProjection projectionName, projection, params
     .then =>
-      @log.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
+      logger.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
       @_parseEventNamesFromProjection projection
     .then (_eventNames) =>
       eventNames = _eventNames
       @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
     .then =>
-      @log.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
+      logger.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
       @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
     .then =>
       @_projectionInstances[projectionId] = projection
@@ -51,12 +53,12 @@ class Projection
   _callInitializeOnProjection: (projectionName, projection, params) ->
     new Promise (resolve, reject) =>
       if not projection.initialize
-        @log.debug "[#{@_context.name}] No initialize function on Projection #{projectionName} given, skipping"
+        logger.debug "[#{@_context.name}] No initialize function on Projection #{projectionName} given, skipping"
         return resolve projection
 
-      @log.debug "[#{@_context.name}] Calling initialize on Projection #{projectionName}"
+      logger.debug "[#{@_context.name}] Calling initialize on Projection #{projectionName}"
       projection.initialize params, =>
-        @log.debug "[#{@_context.name}] Finished initialize call on Projection #{projectionName}"
+        logger.debug "[#{@_context.name}] Finished initialize call on Projection #{projectionName}"
         resolve projection
 
 
@@ -67,13 +69,13 @@ class Projection
 
     projection["$store"] ?= {}
     projection.stores?.forEach (projectionStoreName) =>
-      @log.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
+      logger.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
       injectStoresIntoProjectionPromise = injectStoresIntoProjectionPromise.then =>
         @_context.getProjectionStore projectionStoreName, projectionName
       .then (projectionStore) =>
         if projectionStore
           projection["$store"][projectionStoreName] = projectionStore
-          @log.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} \
+          logger.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} \
           into Projection #{projectionName}"
 
     return injectStoresIntoProjectionPromise
@@ -85,11 +87,11 @@ class Projection
       return clearProjectionStoresPromise
 
     projectionStores.forEach (projectionStoreName) =>
-      @log.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+      logger.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
       clearProjectionStoresPromise = clearProjectionStoresPromise.then =>
         @_context.clearProjectionStore projectionStoreName, projectionName
       .then =>
-        @log.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
+        logger.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
 
     return clearProjectionStoresPromise
 
@@ -156,7 +158,7 @@ class Projection
     Promise.resolve()
     .then =>
       if !projection["handle#{domainEvent.name}"]
-        @log.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
+        logger.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
         return
 
       return projection["handle#{domainEvent.name}"] domainEvent
@@ -168,7 +170,7 @@ class Projection
 
   destroyInstance: (projectionId) ->
     if not @_handlerFunctions[projectionId]
-      return @log.error 'Missing attribute projectionId'
+      return logger.error 'Missing attribute projectionId'
 
     unsubscribePromises = []
     for subscriberId in @_handlerFunctions[projectionId]

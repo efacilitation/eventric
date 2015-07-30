@@ -1,3 +1,6 @@
+logger = require 'eventric/logger'
+Projection = require 'eventric/projection'
+
 class Remote
 
   @ALLOWED_RPC_OPERATIONS: [
@@ -7,7 +10,7 @@ class Remote
     'findDomainEventsByNameAndAggregateId'
   ]
 
-  constructor: (@_contextName, @_eventric) ->
+  constructor: (@_contextName) ->
     @name = @_contextName
 
     @InMemoryRemote = require './inmemory'
@@ -17,7 +20,7 @@ class Remote
     @_projectionClasses = {}
     @_projectionInstances = {}
     @_handlerFunctions = {}
-    @projectionService = new @_eventric.Projection @_eventric, @
+    @projectionService = new Projection @
     @addClient 'inmemory', @InMemoryRemote.client
     @set 'default client', 'inmemory'
 
@@ -93,7 +96,7 @@ class Remote
   initializeProjectionInstance: (projectionName, params) ->
     if not @_projectionClasses[projectionName]
       err = "Given projection #{projectionName} not registered on remote"
-      @_eventric.log.error err
+      logger.error err
       err = new Error err
       return err
 

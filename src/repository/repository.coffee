@@ -1,10 +1,13 @@
+Aggregate = require 'eventric/aggregate'
+logger = require 'eventric/logger'
+
 class Repository
 
   constructor: (params) ->
+    @_eventric = require 'eventric'
     @_aggregateName = params.aggregateName
     @_AggregateClass = params.AggregateClass
     @_context = params.context
-    @_eventric = params.eventric
     @_store = @_context.getDomainEventsStore()
 
 
@@ -19,7 +22,7 @@ class Repository
           reject new Error "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
           return
 
-        aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateClass
+        aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
         aggregate.applyDomainEvents domainEvents
         aggregate.id = aggregate.instance.$id = aggregateId
         aggregate.instance.$save = =>
@@ -30,7 +33,7 @@ class Repository
 
   create: (params) =>
     new Promise (resolve, reject) =>
-      aggregate = new @_eventric.Aggregate @_context, @_eventric, @_aggregateName, @_AggregateClass
+      aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
 
       if typeof aggregate.instance.create isnt 'function'
         throw new Error "No create function on aggregate"
@@ -54,7 +57,7 @@ class Repository
       if domainEvents.length < 1
         throw new Error "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
 
-      @_eventric.log.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
+      logger.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: this should be an transaction to guarantee consistency
       saveDomainEventQueue = Promise.resolve()
@@ -62,16 +65,16 @@ class Repository
         saveDomainEventQueue = saveDomainEventQueue.then =>
           @_store.saveDomainEvent domainEvent
         .then =>
-          @_eventric.log.debug "Saved DomainEvent", domainEvent
+          logger.debug "Saved DomainEvent", domainEvent
 
 
       saveDomainEventQueue
       .then =>
         domainEvents.forEach (domainEvent) =>
-          @_eventric.log.debug "Publishing DomainEvent", domainEvent
+          logger.debug "Publishing DomainEvent", domainEvent
           @_context.getEventBus().publishDomainEvent domainEvent
           .catch (error) =>
-            @_eventric.log.error error.stack || error
+            logger.error error.stack || error
       .then ->
         resolve aggregate.id
       .catch reject

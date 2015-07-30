@@ -1,32 +1,25 @@
+GlobalContext = require './global_context'
+RemoteInMemory = require './remote/inmemory'
+Remote = require './remote'
+Projection = require './projection'
+Context = require './context'
+StoreInMemory = require './store/inmemory'
+
 class Eventric
 
   constructor: ->
-    @EventBus        = require './event_bus'
-    @Remote          = require './remote'
-    @Context         = require './context'
-    @DomainEvent     = require './domain_event'
-    @Aggregate       = require './aggregate'
-    @Repository      = require './repository'
-    @Projection      = require './projection'
-    @Logger          = require './logger'
-    @RemoteInMemory  = require './remote/inmemory'
-    @StoreInMemory   = require './store/inmemory'
-    @GlobalContext   = require './global_context'
-
-    @log                      = @Logger
-    @_contexts                = {}
-    @_params                  = {}
-    @_domainEventHandlers     = {}
-    @_domainEventHandlersAll  = []
-    @_storeClasses            = {}
-    @_remoteEndpoints         = []
+    @_contexts = {}
+    @_params = {}
+    @_domainEventHandlers = {}
+    @_domainEventHandlersAll = []
+    @_storeClasses = {}
+    @_remoteEndpoints = []
     @_globalProjectionClasses = []
 
-    @_globalContext = new @GlobalContext @
-    @_projectionService = new @Projection @, @_globalContext
-
-    @addRemoteEndpoint 'inmemory', @RemoteInMemory.endpoint
-    @addStore 'inmemory', @StoreInMemory
+    @_globalContext = new GlobalContext
+    @_projectionService = new Projection @_globalContext
+    @addRemoteEndpoint 'inmemory', RemoteInMemory.endpoint
+    @addStore 'inmemory', StoreInMemory
     @set 'default domain events store', 'inmemory'
 
 
@@ -57,7 +50,7 @@ class Eventric
       @log.error error
       throw new Error error
 
-    context = new @Context name, @
+    context = new Context name
 
     @_delegateAllDomainEventsToGlobalHandlers context
     @_delegateAllDomainEventsToRemoteEndpoints context
@@ -91,7 +84,7 @@ class Eventric
       error = 'Missing context name'
       @log.error error
       throw new Error error
-    new @Remote contextName, @
+    new Remote contextName
 
 
   addRemoteEndpoint: (remoteName, remoteEndpoint) ->
@@ -107,7 +100,7 @@ class Eventric
       callback error, null
       return
 
-    if @Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.functionName) is -1
+    if Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.functionName) is -1
       error = new Error "RPC operation '#{request.functionName}' not allowed"
       callback error, null
       return

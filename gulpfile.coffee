@@ -9,6 +9,5 @@ gulp.on 'task_err', (e) ->
 
 require('./gulp/watch')(gulp)
 require('./gulp/symlink')(gulp)
-require('./gulp/build')(gulp)
-require('./gulp/spec')(gulp)
+require('./gulp/specs')(gulp)
 require('./gulp/bump')(gulp)

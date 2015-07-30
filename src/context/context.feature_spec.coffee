@@ -80,7 +80,7 @@ describe 'Context Feature', ->
 
 
     it 'should call destroy on the event bus', ->
-      EventBus = require '../event_bus'
+      EventBus = require 'eventric/src/event_bus'
       sandbox.stub(EventBus::, 'destroy').returns Promise.resolve()
       exampleContext.initialize()
       .then ->

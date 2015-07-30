@@ -7,7 +7,6 @@ else
 
 if not root._spec_setup
   root.sinon    = require 'sinon'
-  root.mockery  = require 'mockery'
   root.chai     = require 'chai'
   root.expect   = chai.expect
   root.sandbox  = sinon.sandbox.create()
@@ -17,22 +16,12 @@ if not root._spec_setup
   root._spec_setup = true
 
 
-root.before ->
-  mockery.enable useCleanCache: true
-  mockery.warnOnUnregistered false
-  mockery.warnOnReplace false
-
-
-root.beforeEach ->
+beforeEach ->
   root.eventric = require 'eventric'
 
 
-root.afterEach ->
+afterEach ->
   delete root.eventric
-  mockery.resetCache()
-  mockery.deregisterAll()
+  Object.keys(require.cache).forEach (key) ->
+    delete require.cache[key]
   sandbox.restore()
-
-
-root.after ->
-  mockery.disable()

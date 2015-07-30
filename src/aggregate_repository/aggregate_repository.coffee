@@ -1,5 +1,5 @@
-Aggregate = require 'eventric/aggregate'
-logger = require 'eventric/logger'
+Aggregate = require 'eventric/src/aggregate'
+logger = require 'eventric/src/logger'
 
 class AggregateRepository
 

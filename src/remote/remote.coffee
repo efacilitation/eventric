@@ -1,5 +1,5 @@
-logger = require 'eventric/logger'
-Projection = require 'eventric/projection'
+logger = require 'eventric/src/logger'
+Projection = require 'eventric/src/projection'
 
 class Remote
 

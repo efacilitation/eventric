@@ -1,26 +1,22 @@
 coffee      = require 'gulp-coffee'
 mocha       = require 'gulp-mocha'
-commonjs    = require 'gulp-wrap-commonjs'
-concat      = require 'gulp-concat'
 gutil       = require 'gulp-util'
+del         = require 'del'
+webpack     = require 'webpack-stream'
 runSequence = require 'run-sequence'
 fs          = require 'fs'
 spawn       = require('child_process').spawn
 
-growl = require './helper/growl'
-growl.initialize()
+require 'coffee-loader'
 
 module.exports = (gulp) ->
   lastSpecError = false
-  gulp.task 'spec', (next) ->
-    growl.specsRun()
-    runSequence 'symlink', 'build', 'spec:server', 'spec:client', ->
-      growl.specsEnd()
+  gulp.task 'specs', (next) ->
+    runSequence 'symlink', 'specs:server', 'specs:client', 'specs:client', ->
       next()
 
-
   mochaProcess = null
-  gulp.task 'spec:server', (next) ->
+  gulp.task 'specs:server', (next) ->
     glob = [
       'src/setup.spec.coffee'
       'src/**/*.coffee'
@@ -56,12 +52,29 @@ module.exports = (gulp) ->
         else
           next()
 
+  gulp.task 'specs:client', ->
+    runSequence 'specs:client:clean', 'specs:client:build', 'specs:client:run'
 
-  gulp.task 'spec:client', (next) ->
-    runSequence 'build:spec', 'spec:client:run', next
+
+  gulp.task 'specs:client:clean', (next) ->
+    del './dist', force: true, next
 
 
-  gulp.task 'spec:client:run', (next) ->
+  gulp.task 'specs:client:build', ->
+    gulp.src [
+      'src/**/*.coffee'
+    ]
+    .pipe webpack
+      module:
+        loaders: [
+          {test: /\.coffee$/i, loader: 'coffee-loader'}
+        ]
+      resolve:
+        extensions: ['', '.js', '.coffee']
+    .pipe gulp.dest 'dist/specs'
+
+
+  gulp.task 'specs:client:run', (next) ->
     executeChildProcess = require './helper/child_process'
     executeChildProcess(
       'Karma specs'

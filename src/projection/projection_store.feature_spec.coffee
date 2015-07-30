@@ -5,7 +5,7 @@ describe 'Projection Store Interface Feature', ->
   StoreInMemory = null
 
   beforeEach ->
-    StoreInMemory = require 'eventric/store/inmemory'
+    StoreInMemory = require '../store/inmemory'
     sandbox.spy StoreInMemory::, 'initialize'
     sandbox.spy StoreInMemory::, 'getProjectionStore'
     sandbox.spy StoreInMemory::, 'clearProjectionStore'
@@ -19,7 +19,7 @@ describe 'Projection Store Interface Feature', ->
       stores: ['inmemory']
 
       handleExampleCreated: (domainEvent) ->
-        console.log @$store.inmemory.created = true
+        @$store.inmemory.created = true
 
     exampleContext.initialize()
 

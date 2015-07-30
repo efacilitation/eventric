@@ -8,16 +8,7 @@ module.exports = (config) ->
     # list of files / patterns to load in the browser
     files: [
       # source
-      'build/dist/eventric.js'
-
-      # spec vendor files
-      'build/helper/spec/vendor.js'
-
-      # spec setup
-      'build/src/setup.spec.js'
-
-      # specs
-      'build/src/**/*spec.js'
+      'dist/specs/*.js'
     ]
 
     # list of files to exclude

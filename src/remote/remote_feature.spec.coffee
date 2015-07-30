@@ -153,7 +153,6 @@ describe 'Remote Feature', ->
           exposedHandleRPCRequest = _handleRPCRequest
 
       verifyThatContextFunctionCannotBeCalled 'set'
-      verifyThatContextFunctionCannotBeCalled 'emitDomainEvent'
       verifyThatContextFunctionCannotBeCalled '_initializeStores'
 
 

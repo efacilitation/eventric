@@ -160,31 +160,6 @@ class Context
     return initializeProjectionsPromise
 
 
-  emitDomainEvent: (domainEventName, domainEventPayload) =>
-    if @_isDestroyed
-      Promise.reject new Error "Context #{@name} was destroyed, cannot emit domain event #{domainEventName}"
-      return
-
-    emittingDomainEvent = new Promise (resolve, reject) =>
-      DomainEventClass = @getDomainEvent domainEventName
-      if !DomainEventClass
-        throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
-
-      # TODO: Refactor this, it is partially similar to the save function of the repository
-      domainEvent = @createDomainEvent domainEventName, DomainEventClass, domainEventPayload
-      @getDomainEventsStore().saveDomainEvent domainEvent
-      .then =>
-        @getEventBus().publishDomainEvent domainEvent
-        .catch (error = {}) =>
-          logger.error error.stack || error
-        resolve domainEvent
-      .catch reject
-
-    @_addPendingPromise emittingDomainEvent
-
-    return emittingDomainEvent
-
-
   createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload, aggregate) ->
     payload = {}
     DomainEventClass.apply payload, [domainEventPayload]

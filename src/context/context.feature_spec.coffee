@@ -1,67 +1,5 @@
 describe 'Context Feature', ->
 
-  describe 'emitting a domain event', ->
-    exampleContext = null
-
-    beforeEach ->
-      exampleContext = eventric.context 'ExampleContext'
-      exampleContext.defineDomainEvent 'SomeEvent', ->
-
-
-    it 'should publish the domain event', (done) ->
-      exampleContext.subscribeToDomainEvent 'SomeEvent', (domainEvent) ->
-        expect(domainEvent).to.be.ok
-        done()
-      exampleContext.initialize()
-      .then ->
-        exampleContext.emitDomainEvent 'SomeEvent', {}
-      .catch done
-
-
-    it 'should save the domain event', (done) ->
-      exampleContext.initialize()
-      .then ->
-        exampleContext.emitDomainEvent 'SomeEvent', {}
-      .then ->
-        exampleContext.getDomainEventsStore().findDomainEventsByName 'SomeEvent', (error, domainEvents) ->
-          expect(domainEvents.length).to.equal 1
-          expect(domainEvents[0].name).to.equal 'SomeEvent'
-          done()
-      .catch done
-
-
-  describe 'subscribing to all domain events', ->
-
-    it 'should call the handler function with the domain event given the event is emitted', (done) ->
-      exampleContext = eventric.context 'ExampleContext'
-      exampleContext.defineDomainEvent 'SomeEvent', ->
-
-      exampleContext.subscribeToAllDomainEvents (domainEvent) ->
-        expect(domainEvent).to.be.ok
-        done()
-
-      exampleContext.initialize()
-      .then ->
-        exampleContext.emitDomainEvent 'SomeEvent', {}
-      .catch done
-
-
-  describe 'subscribing to a domain event by name', ->
-
-    it 'should call the handler function with the domain event given the event is emitted', (done) ->
-      exampleContext = eventric.context 'ExampleContext'
-      exampleContext.defineDomainEvent 'SomeEvent', ->
-
-      exampleContext.subscribeToDomainEvent 'SomeEvent', (domainEvent) ->
-        expect(domainEvent).to.be.ok
-        done()
-
-      exampleContext.initialize()
-      .then ->
-        exampleContext.emitDomainEvent 'SomeEvent', {}
-      .catch done
-
-
   describe 'subscribing to a domain event by name and aggregate id', ->
 
     it 'should call the handler function with the domain event given the event is emitted', (done) ->
@@ -141,18 +79,6 @@ describe 'Context Feature', ->
         expect(error.message).to.match /"foo"\:\s*"bar"/
 
 
-    it 'should reject with an error given emitDomainEvent is called afterwards', ->
-      exampleContext.defineDomainEvent SomethingHappened: ->
-      exampleContext.destroy()
-      .then ->
-        exampleContext.emitDomainEvent 'SomethingHappened', {}
-      .catch (error) ->
-        expect(error).to.be.an.instanceOf Error
-        expect(error.message).to.contain 'emit domain event'
-        expect(error.message).to.contain 'SomethingHappened'
-        expect(error.message).to.contain 'ExampleContext'
-
-
     it 'should call destroy on the event bus', ->
       EventBus = require '../event_bus'
       sandbox.stub(EventBus::, 'destroy').returns Promise.resolve()
@@ -181,19 +107,6 @@ describe 'Context Feature', ->
       .then ->
         expect(commandSpy).to.have.been.calledWith call: 1
         expect(commandSpy).to.have.been.calledWith call: 2
-
-
-    it 'should wait to resolve given there are ongoing emit domain event operations', ->
-      domainEventHandlerSpy = sandbox.spy()
-      exampleContext.defineDomainEvent 'SomethingHappened', ->
-      exampleContext.initialize()
-      .then ->
-        exampleContext.subscribeToDomainEvent 'SomethingHappened', domainEventHandlerSpy
-        exampleContext.emitDomainEvent 'SomethingHappened', {}
-        exampleContext.emitDomainEvent 'SomethingHappened', {}
-        exampleContext.destroy()
-      .then ->
-        expect(domainEventHandlerSpy.callCount).to.equal 2
 
 
     it 'should resolve correctly given previous command operations rejected', ->

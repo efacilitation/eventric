@@ -17,7 +17,7 @@ module.exports = (config) ->
       'build/src/setup.spec.js'
 
       # specs
-      'build/src/**/*.spec.js'
+      'build/src/**/*spec.js'
     ]
 
     # list of files to exclude

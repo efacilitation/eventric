@@ -6,7 +6,7 @@ describe 'Global Projection Feature', ->
   specHelper = null
 
   beforeEach ->
-    specHelper = require './global_projection_feature.spec_helper'
+    specHelper = require './global_projection.spec_helper'
 
     firstContext = specHelper.createContextWithOneAggregate
       contextName: 'First'

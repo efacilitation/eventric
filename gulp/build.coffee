@@ -48,7 +48,7 @@ module.exports = (gulp) ->
 
   gulp.task 'build:spec:src', (next) ->
     gulp.src([
-      'src/**/*.spec.coffee'
+      'src/**/*spec.coffee'
     ])
       .pipe(coffee({bare: true}))
       .pipe(commonjs(

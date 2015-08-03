@@ -151,11 +151,4 @@ class Eventric
               (@_domainEventHandlersAll ? [])
 
 
-  # TODO: Use existing npm module
-  defaults: (options, optionDefaults) ->
-    allKeys = [].concat (Object.keys options), (Object.keys optionDefaults)
-    for key in allKeys when !options[key] and optionDefaults[key]
-      options[key] = optionDefaults[key]
-    options
-
 module.exports = Eventric

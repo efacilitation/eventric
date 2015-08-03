@@ -23,7 +23,6 @@ class Context
     @_domainEventHandlers = {}
     @_projectionClasses = {}
     @_repositoryInstances = {}
-    @_storeClasses = {}
     @_storeInstances = {}
     @_pendingPromises = []
     @_eventBus         = new EventBus
@@ -37,14 +36,6 @@ class Context
 
   get: (key) ->
     @_params[key]
-
-
-  # TODO: Consider renaming. What store? event store? read model store?
-  addStore: (storeName, StoreClass, storeOptions = {}) ->
-    @_storeClasses[storeName] =
-      Class: StoreClass
-      options: storeOptions
-    @
 
 
   defineDomainEvent: (domainEventName, DomainEventClass) ->
@@ -128,7 +119,7 @@ class Context
 
   _initializeStores: ->
     stores = []
-    for storeName, store of (@_eventric.defaults @_storeClasses, @_eventric.getStores())
+    for storeName, store of @_eventric.getStores()
       stores.push
         name: storeName
         Class: store.Class

@@ -158,11 +158,4 @@ class Eventric
       options[key] = optionDefaults[key]
     options
 
-
-  # TODO: Use existing npm module
-  mixin: (destination, source) ->
-    for prop of source
-      destination[prop] = source[prop]
-
-
 module.exports = Eventric

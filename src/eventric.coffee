@@ -36,7 +36,6 @@ class Eventric
 
     context = new Context name, @_storeDefintion
 
-    @_delegateAllDomainEventsToGlobalHandlers context
     @_delegateAllDomainEventsToRemoteEndpoints context
 
     @_contexts[name] = context
@@ -102,37 +101,12 @@ class Eventric
       callback error
 
 
-  _delegateAllDomainEventsToGlobalHandlers: (context) ->
-    context.subscribeToAllDomainEvents (domainEvent) =>
-      eventHandlers = @getDomainEventHandlers context.name, domainEvent.name
-      for eventHandler in eventHandlers
-        eventHandler domainEvent
-
-
   _delegateAllDomainEventsToRemoteEndpoints: (context) ->
     context.subscribeToAllDomainEvents (domainEvent) =>
       @_remoteEndpoints.forEach (remoteEndpoint) ->
         remoteEndpoint.publish context.name, domainEvent.name, domainEvent
         if domainEvent.aggregate
           remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
-
-
-  subscribeToDomainEvent: ([contextName, eventName]..., eventHandler) ->
-    contextName ?= 'all'
-    eventName ?= 'all'
-
-    if contextName is 'all' and eventName is 'all'
-      @_domainEventHandlersAll.push eventHandler
-    else
-      @_domainEventHandlers[contextName] ?= {}
-      @_domainEventHandlers[contextName][eventName] ?= []
-      @_domainEventHandlers[contextName][eventName].push eventHandler
-
-
-  getDomainEventHandlers: (contextName, domainEventName) ->
-    [].concat (@_domainEventHandlers[contextName]?[domainEventName] ? []),
-              (@_domainEventHandlers[contextName]?.all ? []),
-              (@_domainEventHandlersAll ? [])
 
 
 module.exports = Eventric

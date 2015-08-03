@@ -1,9 +1,9 @@
-EventBus = require 'eventric/src/event_bus'
-Projection = require 'eventric/src/projection'
-DomainEvent = require 'eventric/src/domain_event'
-AggregateRepository = require 'eventric/src/aggregate_repository'
-logger = require 'eventric/src/logger'
-uidGenerator = require 'eventric/src/uid_generator'
+EventBus = require 'eventric/event_bus'
+Projection = require 'eventric/projection'
+DomainEvent = require 'eventric/domain_event'
+AggregateRepository = require 'eventric/aggregate_repository'
+logger = require 'eventric/logger'
+uidGenerator = require 'eventric/uid_generator'
 
 class Context
 

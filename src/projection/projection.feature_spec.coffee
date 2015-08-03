@@ -91,7 +91,7 @@ describe 'Projection Feature', ->
           .then ->
             exampleContext.command 'CreateExample'
           .then ->
-            log = require 'eventric/src/logger'
+            log = require 'eventric/logger'
             sandbox.stub log, 'error'
             setTimeout ->
               expect(log.error).to.have.been.calledOnce

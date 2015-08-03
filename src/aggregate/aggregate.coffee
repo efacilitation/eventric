@@ -1,4 +1,4 @@
-logger = require 'eventric/src/logger'
+logger = require 'eventric/logger'
 
 class Aggregate
 

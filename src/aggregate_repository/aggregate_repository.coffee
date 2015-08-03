@@ -1,6 +1,6 @@
-Aggregate = require 'eventric/src/aggregate'
-logger = require 'eventric/src/logger'
-uidGenerator = require 'eventric/src/uid_generator'
+Aggregate = require 'eventric/aggregate'
+logger = require 'eventric/logger'
+uidGenerator = require 'eventric/uid_generator'
 
 class AggregateRepository
 

@@ -5,7 +5,7 @@ describe 'EventBus', ->
 
   beforeEach ->
     EventBus = require './'
-    DomainEvent = require 'eventric/src/domain_event'
+    DomainEvent = require 'eventric/domain_event'
     eventBus = new EventBus
 
 

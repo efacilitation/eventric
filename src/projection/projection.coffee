@@ -1,5 +1,5 @@
-logger = require 'eventric/src/logger'
-uidGenerator = require 'eventric/src/uid_generator'
+logger = require 'eventric/logger'
+uidGenerator = require 'eventric/uid_generator'
 
 class Projection
 

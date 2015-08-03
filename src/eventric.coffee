@@ -109,4 +109,4 @@ class Eventric
           remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
 
 
-module.exports = Eventric
+module.exports = new Eventric

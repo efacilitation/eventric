@@ -1,1 +1,1 @@
-module.exports = new (require './eventric')
+module.exports = require './eventric'

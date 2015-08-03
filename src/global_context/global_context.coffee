@@ -1,5 +1,3 @@
-
-
 # TODO: Simple approach for global projections without changing the Projection service. Refactor when adding EventStore
 class GlobalContext
 
@@ -25,7 +23,7 @@ class GlobalContext
 
 
   _getAllContexts: ->
-    eventric = require '../'
+    eventric = require '../eventric'
     contextNames = eventric.getRegisteredContextNames()
     contextNames.map (contextName) =>
       eventric.remote contextName

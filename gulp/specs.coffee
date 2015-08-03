@@ -61,16 +61,11 @@ module.exports = (gulp) ->
 
 
   gulp.task 'specs:client:build', ->
+    webpackConfig = require('./webpack_config').getDefaultConfiguration()
     gulp.src [
       'src/**/*.coffee'
     ]
-    .pipe webpack
-      module:
-        loaders: [
-          {test: /\.coffee$/i, loader: 'coffee-loader'}
-        ]
-      resolve:
-        extensions: ['', '.js', '.coffee']
+    .pipe webpack webpackConfig
     .pipe gulp.dest 'dist/specs'
 
 

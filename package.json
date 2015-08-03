@@ -16,9 +16,10 @@
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"
   },
-  "main": "src/index.coffee",
+  "main": "dist/release/eventric.js",
   "scripts": {
-    "test": "node_modules/.bin/gulp specs"
+    "test": "node_modules/.bin/gulp specs",
+    "prepublish": "node_modules/.bin/gulp build"
   },
   "devDependencies": {
     "chai": "2.3.0",

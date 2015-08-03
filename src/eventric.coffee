@@ -151,14 +151,6 @@ class Eventric
               (@_domainEventHandlersAll ? [])
 
 
-  generateUid: (separator) ->
-    # http://stackoverflow.com/a/12223573
-    S4 = ->
-      (((1 + Math.random()) * 0x10000) | 0).toString(16).substring 1
-    delim = separator or "-"
-    S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4()
-
-
   # TODO: Use existing npm module
   defaults: (options, optionDefaults) ->
     allKeys = [].concat (Object.keys options), (Object.keys optionDefaults)

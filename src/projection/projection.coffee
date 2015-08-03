@@ -1,4 +1,5 @@
 logger = require 'eventric/src/logger'
+uidGenerator = require 'eventric/src/uid_generator'
 
 class Projection
 
@@ -18,8 +19,7 @@ class Projection
       for diName, diFn of @_context._di
         projection[diName] = diFn
 
-    eventric = require 'eventric'
-    projectionId = eventric.generateUid()
+    projectionId = uidGenerator.generateUid()
 
     aggregateId = null
     projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->

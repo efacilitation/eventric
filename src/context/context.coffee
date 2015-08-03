@@ -3,11 +3,12 @@ Projection = require 'eventric/src/projection'
 DomainEvent = require 'eventric/src/domain_event'
 AggregateRepository = require 'eventric/src/aggregate_repository'
 logger = require 'eventric/src/logger'
+uidGenerator = require 'eventric/src/uid_generator'
 
 class Context
 
   constructor: (@name) ->
-    @_eventric = require 'eventric'
+    @_eventric = require '../'
     @_isInitialized = false
     @_isDestroyed = false
     @_params = @_eventric.get()
@@ -164,7 +165,7 @@ class Context
     DomainEventClass.apply payload, [domainEventPayload]
 
     new DomainEvent
-      id: eventric.generateUid()
+      id: uidGenerator.generateUid()
       name: domainEventName
       aggregate: aggregate
       context: @name

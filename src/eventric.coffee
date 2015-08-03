@@ -12,36 +12,20 @@ class Eventric
     @_params = {}
     @_domainEventHandlers = {}
     @_domainEventHandlersAll = []
-    @_storeClasses = {}
+    @_storeDefintion = null
     @_remoteEndpoints = []
     @_globalProjectionClasses = []
 
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
     @addRemoteEndpoint 'inmemory', RemoteInMemory.endpoint
-    @addStore 'inmemory', StoreInMemory
-    @set 'default domain events store', 'inmemory'
+    @setStore StoreInMemory, {}
 
 
-  set: (key, value) ->
-    @_params[key] = value
-
-
-  get: (key) ->
-    if not key
-      @_params
-    else
-      @_params[key]
-
-
-  addStore: (storeName, StoreClass, storeOptions = {}) ->
-    @_storeClasses[storeName] =
+  setStore: (StoreClass, storeOptions = {}) ->
+    @_storeDefintion =
       Class: StoreClass
       options: storeOptions
-
-
-  getStores: ->
-    @_storeClasses
 
 
   context: (name) ->
@@ -50,7 +34,7 @@ class Eventric
       @log.error error
       throw new Error error
 
-    context = new Context name
+    context = new Context name, @_storeDefintion
 
     @_delegateAllDomainEventsToGlobalHandlers context
     @_delegateAllDomainEventsToRemoteEndpoints context

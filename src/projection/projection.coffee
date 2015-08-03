@@ -25,22 +25,14 @@ class Projection
     projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
       aggregateId = _aggregateId
 
-    logger.debug "[#{@_context.name}] Clearing ProjectionStores #{projection.stores} of #{projectionName}"
     eventNames = null
-    @_clearProjectionStores projection.stores, projectionName
+    @_callInitializeOnProjection projectionName, projection, params
     .then =>
-      logger.debug "[#{@_context.name}] Finished clearing ProjectionStores of #{projectionName}"
-      @_injectStoresIntoProjection projectionName, projection
-    .then =>
-      @_callInitializeOnProjection projectionName, projection, params
-    .then =>
-      logger.debug "[#{@_context.name}] Replaying DomainEvents against Projection #{projectionName}"
       @_parseEventNamesFromProjection projection
     .then (_eventNames) =>
       eventNames = _eventNames
       @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
     .then =>
-      logger.debug "[#{@_context.name}] Finished Replaying DomainEvents against Projection #{projectionName}"
       @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
     .then =>
       @_projectionInstances[projectionId] = projection
@@ -60,40 +52,6 @@ class Projection
       projection.initialize params, =>
         logger.debug "[#{@_context.name}] Finished initialize call on Projection #{projectionName}"
         resolve projection
-
-
-  _injectStoresIntoProjection: (projectionName, projection) ->
-    injectStoresIntoProjectionPromise = Promise.resolve()
-    if not projection.stores
-      return injectStoresIntoProjectionPromise
-
-    projection["$store"] ?= {}
-    projection.stores?.forEach (projectionStoreName) =>
-      logger.debug "[#{@_context.name}] Injecting ProjectionStore #{projectionStoreName} into Projection #{projectionName}"
-      injectStoresIntoProjectionPromise = injectStoresIntoProjectionPromise.then =>
-        @_context.getProjectionStore projectionStoreName, projectionName
-      .then (projectionStore) =>
-        if projectionStore
-          projection["$store"][projectionStoreName] = projectionStore
-          logger.debug "[#{@_context.name}] Finished Injecting ProjectionStore #{projectionStoreName} \
-          into Projection #{projectionName}"
-
-    return injectStoresIntoProjectionPromise
-
-
-  _clearProjectionStores: (projectionStores, projectionName) ->
-    clearProjectionStoresPromise = Promise.resolve()
-    if not projectionStores
-      return clearProjectionStoresPromise
-
-    projectionStores.forEach (projectionStoreName) =>
-      logger.debug "[#{@_context.name}] Clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
-      clearProjectionStoresPromise = clearProjectionStoresPromise.then =>
-        @_context.clearProjectionStore projectionStoreName, projectionName
-      .then =>
-        logger.debug "[#{@_context.name}] Finished clearing ProjectionStore #{projectionStoreName} for #{projectionName}"
-
-    return clearProjectionStoresPromise
 
 
   _parseEventNamesFromProjection: (projection) ->

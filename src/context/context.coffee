@@ -7,15 +7,11 @@ uidGenerator = require 'eventric/src/uid_generator'
 
 class Context
 
-  constructor: (@name) ->
-    @_eventric = require '../'
+  constructor: (@name, @_storeDefinition) ->
     @_isInitialized = false
     @_isDestroyed = false
-    @_params = @_eventric.get()
     @_di =
       $query: => @query.apply @, arguments
-      $projectionStore: => @getProjectionStore.apply @, arguments
-      $emitDomainEvent: => @emitDomainEvent.apply @, arguments
     @_aggregateClasses = {}
     @_commandHandlers = {}
     @_queryHandlers = {}
@@ -23,19 +19,10 @@ class Context
     @_domainEventHandlers = {}
     @_projectionClasses = {}
     @_repositoryInstances = {}
-    @_storeInstances = {}
+    @_storeInstance = null
     @_pendingPromises = []
     @_eventBus         = new EventBus
     @projectionService = new Projection @
-
-
-  set: (key, value) ->
-    @_params[key] = value
-    @
-
-
-  get: (key) ->
-    @_params[key]
 
 
   defineDomainEvent: (domainEventName, DomainEventClass) ->
@@ -106,36 +93,18 @@ class Context
   initialize: ->
     logger.debug "[#{@name}] Initializing"
     logger.debug "[#{@name}] Initializing Store"
-    @_initializeStores()
+    @_initializeStore()
     .then =>
-      logger.debug "[#{@name}] Finished initializing Store"
       logger.debug "[#{@name}] Initializing Projections"
       @_initializeProjections()
     .then =>
-      logger.debug "[#{@name}] Finished initializing Projections"
-      logger.debug "[#{@name}] Finished initializing"
       @_isInitialized = true
 
 
-  _initializeStores: ->
-    stores = []
-    for storeName, store of @_eventric.getStores()
-      stores.push
-        name: storeName
-        Class: store.Class
-        options: store.options
-
-    initializeStoresPromise = Promise.resolve()
-    stores.forEach (store) =>
-      logger.debug "[#{@name}] Initializing Store #{store.name}"
-      @_storeInstances[store.name] = new store.Class
-
-      initializeStoresPromise = initializeStoresPromise.then =>
-        @_storeInstances[store.name].initialize @, store.options
-      .then =>
-        logger.debug "[#{@name}] Finished initializing Store #{store.name}"
-
-    return initializeStoresPromise
+  _initializeStore: ->
+    @_storeInstance = new @_storeDefinition.Class
+    initializeStorePromise = @_storeInstance.initialize @, @_storeDefinition.options
+    return initializeStorePromise
 
 
   _initializeProjections: ->
@@ -179,10 +148,8 @@ class Context
     @_domainEventClasses[domainEventName]
 
 
-  # TODO: DomainEventStore? - It is responsible for the projections too!
   getDomainEventsStore: ->
-    storeName = @get 'default domain events store'
-    @_storeInstances[storeName]
+    @_storeInstance
 
 
   getEventBus: ->
@@ -203,20 +170,6 @@ class Context
       @getDomainEventsStore().findDomainEventsByNameAndAggregateId findArguments..., (err, events) ->
         return reject err if err
         resolve events
-
-
-  getProjectionStore: (storeName, projectionName) =>
-    if not @_storeInstances[storeName]
-      return Promise.reject new Error "Requested Store with name #{storeName} not found"
-
-    @_storeInstances[storeName].getProjectionStore projectionName
-
-
-  clearProjectionStore: (storeName, projectionName) =>
-    if not @_storeInstances[storeName]
-      return Promise.reject new Error "Requested Store with name #{storeName} not found"
-
-    @_storeInstances[storeName].clearProjectionStore projectionName
 
 
   command: (commandName, params) ->

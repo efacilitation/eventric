@@ -41,7 +41,6 @@ describe 'Projection Feature', ->
 
       it 'should set the projection to initialized', (done) ->
         exampleContext.addProjection 'ExampleProjection', ->
-          stores: ['inmemory']
 
           handleExampleCreated: (domainEvent) ->
             expect(@isInitialized).to.equal true
@@ -55,28 +54,27 @@ describe 'Projection Feature', ->
 
     describe 'when emitting domain events the projection subscribed to', ->
 
-      it 'should execute the projection\'s event handlers and save it to the specified store', ->
-        exampleContext.addProjection 'ExampleProjection', ->
-          stores: ['inmemory']
+      it 'should execute the projection\'s event handlers', ->
+        exampleCreated = null
+        exampleModified = null
+        projection = ->
 
           handleExampleCreated: (domainEvent) ->
-            @$store.inmemory.exampleCreated = domainEvent.payload.specific
+            exampleCreated = domainEvent.payload.specific
 
 
           handleExampleModified: (domainEvent) ->
-            @$store.inmemory.exampleModified = domainEvent.payload.specific
+            exampleModified = domainEvent.payload.specific
 
-
+        exampleContext.addProjection 'ExampleProjection', projection
         exampleContext.initialize()
         .then ->
           exampleContext.command 'CreateExample'
         .then (exampleId) ->
           exampleContext.command 'ModifyExample', id: exampleId
         .then ->
-          exampleContext.getProjectionStore 'inmemory', 'ExampleProjection'
-          .then (projectionStore) ->
-            expect(projectionStore.exampleCreated).to.equal 'created'
-            expect(projectionStore.exampleModified).to.equal 'modified'
+          expect(exampleCreated).to.equal 'created'
+          expect(exampleModified).to.equal 'modified'
 
 
 

@@ -22,12 +22,15 @@ describe 'Query Feature', ->
 
   describe 'given we created and initialized some example context including a query handler', ->
     exampleContext = null
+    queryResult = null
+
     beforeEach ->
+      queryResult = {}
       exampleContext = eventric.context 'exampleContext'
 
       exampleContext.addQueryHandlers
         getExample: (params) ->
-          @$projectionStore 'inmemory', 'ExampleProjection'
+          queryResult
 
       exampleContext.initialize()
 
@@ -36,4 +39,4 @@ describe 'Query Feature', ->
       it 'then the query should return the correct result', ->
         exampleContext.query 'getExample', id: 1
         .then (result) ->
-          expect(result).to.deep.equal {}
+          expect(result).to.deep.equal queryResult

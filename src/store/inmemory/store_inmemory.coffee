@@ -62,19 +62,4 @@ class InMemoryStore
     callback null, events
 
 
-  getProjectionStore: (projectionName) ->
-    new Promise (resolve, reject) =>
-      @_projections[@_projectionCollectionName] ?= {}
-      @_projections[@_projectionCollectionName][projectionName] ?= {}
-      resolve @_projections[@_projectionCollectionName][projectionName]
-
-
-  clearProjectionStore: (projectionName) ->
-    new Promise (resolve, reject) =>
-      @_projections[@_projectionCollectionName] ?= {}
-      @_projections[@_projectionCollectionName][projectionName] ?= {}
-      delete @_projections[@_projectionCollectionName][projectionName]
-      resolve()
-
-
 module.exports = InMemoryStore

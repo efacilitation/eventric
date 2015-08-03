@@ -145,15 +145,15 @@ describe 'Remote Feature', ->
         )
 
         expect(callback.getCall(0).args[0].message).to.match /not allowed/
-        expect(exampleContext.set).not.to.have.been.called
+        expect(exampleContext[functionName]).not.to.have.been.called
 
 
       eventric.addRemoteEndpoint 'test',
         setRPCHandler: (_handleRPCRequest) ->
           exposedHandleRPCRequest = _handleRPCRequest
 
-      verifyThatContextFunctionCannotBeCalled 'set'
-      verifyThatContextFunctionCannotBeCalled '_initializeStores'
+      verifyThatContextFunctionCannotBeCalled '_initializeProjections'
+      verifyThatContextFunctionCannotBeCalled '_initializeStore'
 
 
   describe 'creating and initializing some example context with a custom remote endpoint', ->

@@ -8,7 +8,7 @@ module.exports = (config) ->
     # list of files / patterns to load in the browser
     files: [
       # source
-      'dist/specs/*.js'
+      'dist/specs/specs.js'
     ]
 
     # list of files to exclude

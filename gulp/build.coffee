@@ -1,7 +1,13 @@
+runSequence = require 'run-sequence'
 webpack = require 'webpack-stream'
 
 module.exports = (gulp) ->
-  gulp.task 'build', ->
+
+  gulp.task 'build', (next) ->
+    runSequence 'symlink', 'build:release', next
+
+
+  gulp.task 'build:release', ->
     webpackConfig = require('./webpack_config').getDefaultConfiguration()
     webpackConfig.output =
       libraryTarget: 'umd'

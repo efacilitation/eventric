@@ -21,7 +21,14 @@ beforeEach ->
 
 
 afterEach ->
-  delete root.eventric
-  Object.keys(require.cache).forEach (key) ->
-    delete require.cache[key]
+  moduleFilenames = Object.keys require.cache
+  if window?
+    moduleFilenames.forEach (filename) ->
+      delete require.cache[filename]
+  else
+    moduleFilenames.forEach (filename) ->
+      isSourceFile = filename.indexOf('src/') > 1
+      isEventricPlugin = /node_modules\/eventric-/i.test filename
+      if isSourceFile or isEventricPlugin
+        delete require.cache[filename]
   sandbox.restore()

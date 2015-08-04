@@ -1,5 +1,6 @@
+remoteInmemory = require 'eventric-remote-inmemory'
+
 GlobalContext = require './global_context'
-RemoteInMemory = require './remote/inmemory'
 Remote = require './remote'
 Projection = require './projection'
 Context = require './context'
@@ -19,7 +20,7 @@ class Eventric
 
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
-    @addRemoteEndpoint 'inmemory', RemoteInMemory.endpoint
+    @setRemoteEndpoint remoteInmemory.endpoint
     @setStore StoreInMemory, {}
 
 
@@ -37,7 +38,7 @@ class Eventric
 
     context = new Context name, @_storeDefintion
 
-    @_delegateAllDomainEventsToRemoteEndpoints context
+    @_delegateAllDomainEventsToRemoteEndpoint context
 
     @_contexts[name] = context
 
@@ -71,9 +72,9 @@ class Eventric
     new Remote contextName
 
 
-  addRemoteEndpoint: (remoteName, remoteEndpoint) ->
-    @_remoteEndpoints.push remoteEndpoint
-    remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
+  setRemoteEndpoint: (remoteEndpoint) ->
+    @_remoteEndpoint = remoteEndpoint
+    @_remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
 
 
   generateUid: ->
@@ -106,12 +107,11 @@ class Eventric
       callback error
 
 
-  _delegateAllDomainEventsToRemoteEndpoints: (context) ->
+  _delegateAllDomainEventsToRemoteEndpoint: (context) ->
     context.subscribeToAllDomainEvents (domainEvent) =>
-      @_remoteEndpoints.forEach (remoteEndpoint) ->
-        remoteEndpoint.publish context.name, domainEvent.name, domainEvent
-        if domainEvent.aggregate
-          remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
+      @_remoteEndpoint.publish context.name, domainEvent.name, domainEvent
+      if domainEvent.aggregate
+        @_remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
 
 
 module.exports = new Eventric

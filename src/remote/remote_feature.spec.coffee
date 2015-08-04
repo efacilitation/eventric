@@ -148,7 +148,7 @@ describe 'Remote Feature', ->
         expect(exampleContext[functionName]).not.to.have.been.called
 
 
-      eventric.addRemoteEndpoint 'test',
+      eventric.setRemoteEndpoint
         setRPCHandler: (_handleRPCRequest) ->
           exposedHandleRPCRequest = _handleRPCRequest
 
@@ -170,7 +170,7 @@ describe 'Remote Feature', ->
 
         setRPCHandler: (@_handleRPCRequest) ->
 
-      eventric.addRemoteEndpoint 'custom', new CustomRemoteEndpoint
+      eventric.setRemoteEndpoint new CustomRemoteEndpoint
 
 
     it 'should be able to receive commands over the custom remote client', (done) ->
@@ -178,8 +178,7 @@ describe 'Remote Feature', ->
         rpc: (rpcRequest) ->
           communicationFake rpcRequest
 
-      exampleRemote.addClient 'custom', new CustomRemoteClient
-      exampleRemote.set 'default client', 'custom'
+      exampleRemote.setClient new CustomRemoteClient
       exampleRemote.command 'DoSomething'
       .then ->
         expect(doSomethingCommandHandlerStub).to.have.been.calledOnce

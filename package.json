@@ -21,6 +21,9 @@
     "test": "node_modules/.bin/gulp specs",
     "prepublish": "node_modules/.bin/gulp build"
   },
+  "dependencies": {
+    "eventric-remote-inmemory": "0.1.1"
+  },
   "devDependencies": {
     "chai": "2.3.0",
     "coffee-loader": "0.7.2",

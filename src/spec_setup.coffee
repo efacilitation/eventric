@@ -1,19 +1,14 @@
 require('es6-promise').polyfill()
 
-if typeof window isnt 'undefined'
-  root = window
-else
-  root = global
+root = if window? then window else global
 
-if not root._spec_setup
-  root.sinon    = require 'sinon'
-  root.chai     = require 'chai'
-  root.expect   = chai.expect
-  root.sandbox  = sinon.sandbox.create()
+root.sinon    = require 'sinon'
+root.chai     = require 'chai'
+root.expect   = chai.expect
+root.sandbox  = sinon.sandbox.create()
 
-  sinonChai = require 'sinon-chai'
-  chai.use sinonChai
-  root._spec_setup = true
+sinonChai = require 'sinon-chai'
+chai.use sinonChai
 
 
 beforeEach ->
@@ -21,8 +16,10 @@ beforeEach ->
 
 
 afterEach ->
+  # TODO: Implement proper destroy() functionality on eventric so this cleanup can be removed
   moduleFilenames = Object.keys require.cache
-  if window?
+  areSpecsRunningInBrowser = window?
+  if areSpecsRunningInBrowser
     moduleFilenames.forEach (filename) ->
       delete require.cache[filename]
   else

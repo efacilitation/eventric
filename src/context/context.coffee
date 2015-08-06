@@ -16,7 +16,7 @@ class Context
     @_aggregateClasses = {}
     @_commandHandlers = {}
     @_queryHandlers = {}
-    @_domainEventClasses = {}
+    @_domainEventPayloadConstructors = {}
     @_domainEventHandlers = {}
     @_projectionClasses = {}
     @_repositoryInstances = {}
@@ -27,13 +27,14 @@ class Context
     @setStore StoreInMemory, {}
 
 
-  defineDomainEvent: (domainEventName, DomainEventClass) ->
-    @_domainEventClasses[domainEventName] = DomainEventClass
+  defineDomainEvent: (domainEventName, DomainEventPayloadConstructor) ->
+    @_domainEventPayloadConstructors[domainEventName] = DomainEventPayloadConstructor
     @
 
 
   defineDomainEvents: (domainEventClassesObj) ->
-    @defineDomainEvent domainEventName, DomainEventClass for domainEventName, DomainEventClass of domainEventClassesObj
+    for domainEventName, DomainEventPayloadConstructor of domainEventClassesObj
+      @defineDomainEvent domainEventName, DomainEventPayloadConstructor
     @
 
 
@@ -129,9 +130,13 @@ class Context
     return initializeProjectionsPromise
 
 
-  createDomainEvent: (domainEventName, DomainEventClass, domainEventPayload, aggregate) ->
+  createDomainEvent: (domainEventName, domainEventConstructorParams, aggregate) ->
+    DomainEventPayloadConstructor = @_domainEventPayloadConstructors[domainEventName]
+    if !DomainEventPayloadConstructor
+      throw new Error "Tried to create domain event '#{domainEventName}' which is not defined"
+
     payload = {}
-    DomainEventClass.apply payload, [domainEventPayload]
+    DomainEventPayloadConstructor.apply payload, [domainEventConstructorParams]
 
     new DomainEvent
       id: uidGenerator.generateUid()
@@ -150,11 +155,6 @@ class Context
 
   getProjection: (projectionId) ->
     @projectionService.getInstance projectionId
-
-
-  # TODO: Rename to getDomainEventClass
-  getDomainEvent: (domainEventName) ->
-    @_domainEventClasses[domainEventName]
 
 
   getDomainEventsStore: ->

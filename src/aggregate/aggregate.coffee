@@ -9,14 +9,11 @@ class Aggregate
 
 
   emitDomainEvent: (domainEventName, domainEventPayload) =>
-    DomainEventClass = @_context.getDomainEvent domainEventName
-    if !DomainEventClass
-      throw new Error "Tried to emitDomainEvent '#{domainEventName}' which is not defined"
-
     aggregate =
       id: @id
       name: @_name
-    domainEvent = @_context.createDomainEvent domainEventName, DomainEventClass, domainEventPayload, aggregate
+
+    domainEvent = @_context.createDomainEvent domainEventName, domainEventPayload, aggregate
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent

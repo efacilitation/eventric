@@ -5,6 +5,8 @@ Remote = require './remote'
 Projection = require './projection'
 Context = require './context'
 uidGenerator = require './uid_generator'
+logger = require './logger'
+
 
 class Eventric
 
@@ -71,6 +73,10 @@ class Eventric
 
   generateUid: ->
     uidGenerator.generateUid()
+
+
+  setLogLevel: (logLevel) ->
+    logger.setLogLevel logLevel
 
 
   _handleRemoteRPCRequest: (request, callback) =>

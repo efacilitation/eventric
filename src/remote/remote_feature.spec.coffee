@@ -148,7 +148,7 @@ describe 'Remote Feature', ->
         expect(exampleContext[functionName]).not.to.have.been.called
 
 
-      eventric.setRemoteEndpoint
+      eventric.addRemoteEndpoint
         setRPCHandler: (_handleRPCRequest) ->
           exposedHandleRPCRequest = _handleRPCRequest
 
@@ -156,7 +156,7 @@ describe 'Remote Feature', ->
       verifyThatContextFunctionCannotBeCalled '_initializeStore'
 
 
-  describe 'creating and initializing some example context with a custom remote endpoint', ->
+  describe 'creating and initializing a context with a custom remote endpoint', ->
     communicationFake = null
     beforeEach ->
       class CustomRemoteEndpoint
@@ -170,10 +170,10 @@ describe 'Remote Feature', ->
 
         setRPCHandler: (@_handleRPCRequest) ->
 
-      eventric.setRemoteEndpoint new CustomRemoteEndpoint
+      eventric.addRemoteEndpoint new CustomRemoteEndpoint
 
 
-    it 'should be able to receive commands over the custom remote client', (done) ->
+    it 'should be able to receive commands over the custom remote client', ->
       class CustomRemoteClient
         rpc: (rpcRequest) ->
           communicationFake rpcRequest
@@ -182,4 +182,27 @@ describe 'Remote Feature', ->
       exampleRemote.command 'DoSomething'
       .then ->
         expect(doSomethingCommandHandlerStub).to.have.been.calledOnce
-        done()
+
+
+  describe 'creating and initializing a context with multiple custom remote endpoints', ->
+
+    it 'should be able to receive commands over the custom remote client', ->
+
+      class CustomRemoteEndpoint
+
+        setRPCHandler: (@_handleRPCRequest) ->
+
+        publish: ->
+
+      customRemoteEndpoint1 = new CustomRemoteEndpoint
+      sandbox.spy customRemoteEndpoint1, 'publish'
+      eventric.addRemoteEndpoint customRemoteEndpoint1
+
+      customRemoteEndpoint2 = new CustomRemoteEndpoint
+      sandbox.spy customRemoteEndpoint2, 'publish'
+      eventric.addRemoteEndpoint customRemoteEndpoint2
+
+      exampleContext.command 'CreateExample'
+      .then ->
+        expect(customRemoteEndpoint1.publish).to.have.been.called
+        expect(customRemoteEndpoint2.publish).to.have.been.called

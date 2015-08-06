@@ -21,7 +21,7 @@ class Eventric
 
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
-    @setRemoteEndpoint remoteInmemory.endpoint
+    @addRemoteEndpoint remoteInmemory.endpoint
 
 
   context: (name) ->
@@ -66,9 +66,9 @@ class Eventric
     new Remote contextName
 
 
-  setRemoteEndpoint: (remoteEndpoint) ->
-    @_remoteEndpoint = remoteEndpoint
-    @_remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
+  addRemoteEndpoint: (remoteEndpoint) ->
+    @_remoteEndpoints.push remoteEndpoint
+    remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
 
 
   generateUid: ->
@@ -107,9 +107,10 @@ class Eventric
 
   _delegateAllDomainEventsToRemoteEndpoint: (context) ->
     context.subscribeToAllDomainEvents (domainEvent) =>
-      @_remoteEndpoint.publish context.name, domainEvent.name, domainEvent
-      if domainEvent.aggregate
-        @_remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
+      @_remoteEndpoints.forEach (remoteEndpoint) ->
+        remoteEndpoint.publish context.name, domainEvent.name, domainEvent
+        if domainEvent.aggregate
+          remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
 
 
 module.exports = new Eventric

@@ -4,7 +4,7 @@ webpack = require 'webpack-stream'
 module.exports = (gulp) ->
 
   gulp.task 'build', (next) ->
-    runSequence 'symlink', 'build:release', next
+    runSequence 'build:release', next
 
 
   gulp.task 'build:release', ->

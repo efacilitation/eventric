@@ -9,7 +9,7 @@ require 'coffee-loader'
 module.exports = (gulp) ->
 
   gulp.task 'specs', (next) ->
-    runSequence 'symlink', 'specs:server', 'specs:client', next
+    runSequence 'specs:server', 'specs:client', next
 
 
   gulp.task 'specs:client', (next) ->

@@ -19,7 +19,8 @@
   "main": "dist/release/eventric.js",
   "scripts": {
     "test": "node_modules/.bin/gulp specs",
-    "prepublish": "node_modules/.bin/gulp build"
+    "prepublish": "node_modules/.bin/gulp build",
+    "postinstall": "node_modules/.bin/gulp symlink"
   },
   "dependencies": {
     "eventric-remote-inmemory": "0.1.1"

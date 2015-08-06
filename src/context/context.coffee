@@ -4,6 +4,7 @@ DomainEvent = require 'eventric/domain_event'
 AggregateRepository = require 'eventric/aggregate_repository'
 logger = require 'eventric/logger'
 uidGenerator = require 'eventric/uid_generator'
+StoreInMemory = require 'eventric/store/inmemory'
 
 class Context
 
@@ -23,6 +24,7 @@ class Context
     @_pendingPromises = []
     @_eventBus         = new EventBus
     @projectionService = new Projection @
+    @setStore StoreInMemory, {}
 
 
   defineDomainEvent: (domainEventName, DomainEventClass) ->
@@ -88,6 +90,13 @@ class Context
 
   destroyProjectionInstance: (projectionId) ->
     @projectionService.destroyInstance projectionId, @
+
+
+  # TODO: Test
+  setStore: (StoreClass, storeOptions = {}) ->
+    @_storeDefinition =
+      Class: StoreClass
+      options: storeOptions
 
 
   initialize: ->

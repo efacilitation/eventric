@@ -4,7 +4,6 @@ GlobalContext = require './global_context'
 Remote = require './remote'
 Projection = require './projection'
 Context = require './context'
-StoreInMemory = require './store/inmemory'
 uidGenerator = require './uid_generator'
 
 class Eventric
@@ -21,13 +20,6 @@ class Eventric
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
     @setRemoteEndpoint remoteInmemory.endpoint
-    @setStore StoreInMemory, {}
-
-
-  setStore: (StoreClass, storeOptions = {}) ->
-    @_storeDefintion =
-      Class: StoreClass
-      options: storeOptions
 
 
   context: (name) ->
@@ -36,7 +28,7 @@ class Eventric
       @log.error error
       throw new Error error
 
-    context = new Context name, @_storeDefintion
+    context = new Context name
 
     @_delegateAllDomainEventsToRemoteEndpoint context
 

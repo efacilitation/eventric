@@ -4,6 +4,7 @@ GlobalContext = require './global_context'
 Remote = require './remote'
 Projection = require './projection'
 Context = require './context'
+inmemoryStore = require './store/inmemory'
 uidGenerator = require './uid_generator'
 logger = require './logger'
 
@@ -15,13 +16,26 @@ class Eventric
     @_params = {}
     @_domainEventHandlers = {}
     @_domainEventHandlersAll = []
-    @_storeDefintion = null
+    @_storeDefinition = null
     @_remoteEndpoints = []
     @_globalProjectionClasses = []
 
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
     @addRemoteEndpoint remoteInmemory.endpoint
+    @setStore inmemoryStore, {}
+
+
+  # TODO: Test
+  setStore: (StoreClass, storeOptions = {}) ->
+    @_storeDefinition =
+      Class: StoreClass
+      options: storeOptions
+
+
+  # TODO: Test
+  getStoreDefinition: ->
+    @_storeDefinition
 
 
   context: (name) ->

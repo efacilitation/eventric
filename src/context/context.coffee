@@ -4,11 +4,10 @@ DomainEvent = require 'eventric/domain_event'
 AggregateRepository = require 'eventric/aggregate_repository'
 logger = require 'eventric/logger'
 uidGenerator = require 'eventric/uid_generator'
-StoreInMemory = require 'eventric/store/inmemory'
 
 class Context
 
-  constructor: (@name, @_storeDefinition) ->
+  constructor: (@name) ->
     @_isInitialized = false
     @_isDestroyed = false
     @_di =
@@ -22,9 +21,8 @@ class Context
     @_repositoryInstances = {}
     @_storeInstance = null
     @_pendingPromises = []
-    @_eventBus         = new EventBus
+    @_eventBus = new EventBus
     @projectionService = new Projection @
-    @setStore StoreInMemory, {}
 
 
   defineDomainEvent: (domainEventName, DomainEventPayloadConstructor) ->
@@ -93,13 +91,6 @@ class Context
     @projectionService.destroyInstance projectionId, @
 
 
-  # TODO: Test
-  setStore: (StoreClass, storeOptions = {}) ->
-    @_storeDefinition =
-      Class: StoreClass
-      options: storeOptions
-
-
   initialize: ->
     logger.debug "[#{@name}] Initializing"
     logger.debug "[#{@name}] Initializing Store"
@@ -112,8 +103,11 @@ class Context
 
 
   _initializeStore: ->
-    @_storeInstance = new @_storeDefinition.Class
-    initializeStorePromise = @_storeInstance.initialize @, @_storeDefinition.options
+    # TODO: Test
+    eventric = require '../eventric'
+    storeDefinition = eventric.getStoreDefinition()
+    @_storeInstance = new storeDefinition.Class
+    initializeStorePromise = @_storeInstance.initialize @, storeDefinition.options
     return initializeStorePromise
 
 

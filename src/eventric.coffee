@@ -8,7 +8,6 @@ inmemoryStore = require './store/inmemory'
 uidGenerator = require './uid_generator'
 logger = require './logger'
 
-
 class Eventric
 
   constructor: ->
@@ -40,9 +39,7 @@ class Eventric
 
   context: (name) ->
     if !name
-      error = 'Contexts must have a name'
-      @log.error error
-      throw new Error error
+      throw new Error 'Contexts must have a name'
 
     context = new Context name
 
@@ -74,9 +71,7 @@ class Eventric
 
   remote: (contextName) ->
     if !contextName
-      error = 'Missing context name'
-      @log.error error
-      throw new Error error
+      throw new Error 'Missing context name'
     new Remote contextName
 
 
@@ -97,18 +92,19 @@ class Eventric
     context = @getContext request.contextName
     if not context
       error = new Error "Tried to handle Remote RPC with not registered context #{request.contextName}"
-      @log.error error.stack
+      logger.error error.stack
       callback error, null
       return
 
     if Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.functionName) is -1
       error = new Error "RPC operation '#{request.functionName}' not allowed"
+      logger.error error.stack
       callback error, null
       return
 
     if request.functionName not of context
       error = new Error "Remote RPC function #{request.functionName} not found on Context #{request.contextName}"
-      @log.error error.stack
+      logger.error error.stack
       callback error, null
       return
 

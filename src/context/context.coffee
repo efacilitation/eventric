@@ -191,7 +191,7 @@ class Context
       commandServicesToInject = @_getCommandServicesToInject()
 
       Promise.resolve @_commandHandlers[commandName].apply commandServicesToInject, [params]
-      .then (result) =>
+      .then (result) ->
         logger.debug 'Completed Command', commandName
         resolve result
       .catch reject
@@ -249,7 +249,7 @@ class Context
         return
 
       Promise.resolve @_queryHandlers[queryName].apply @_di, [params]
-      .then (result) =>
+      .then (result) ->
         logger.debug "Completed Query #{queryName} with Result #{result}"
         resolve result
       .catch reject

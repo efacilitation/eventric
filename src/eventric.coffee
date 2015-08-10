@@ -5,7 +5,7 @@ Remote = require './remote'
 Projection = require './projection'
 Context = require './context'
 inmemoryStore = require './store/inmemory'
-uidGenerator = require './uid_generator'
+uuidGenerator = require './uuid_generator'
 logger = require './logger'
 
 class Eventric
@@ -80,8 +80,8 @@ class Eventric
     remoteEndpoint.setRPCHandler @_handleRemoteRPCRequest
 
 
-  generateUid: ->
-    uidGenerator.generateUid()
+  generateUuid: ->
+    uuidGenerator.generateUuid()
 
 
   setLogLevel: (logLevel) ->

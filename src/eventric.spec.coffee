@@ -2,8 +2,8 @@ describe 'eventric', ->
 
   describe '#generateUid', ->
 
-    it 'should ask the uid generator to generate a unique id', ->
-      uidGenerator = require './uid_generator'
-      sandbox.spy uidGenerator, 'generateUid'
-      eventric.generateUid()
-      expect(uidGenerator.generateUid).to.have.been.called
+    it 'should ask the uuid generator to generate a uuid', ->
+      uuidGenerator = require './uuid_generator'
+      sandbox.spy uuidGenerator, 'generateUuid'
+      eventric.generateUuid()
+      expect(uuidGenerator.generateUuid).to.have.been.called

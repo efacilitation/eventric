@@ -1,6 +1,6 @@
 Aggregate = require 'eventric/aggregate'
 logger = require 'eventric/logger'
-uidGenerator = require 'eventric/uid_generator'
+uuidGenerator = require 'eventric/uuid_generator'
 
 class AggregateRepository
 
@@ -38,7 +38,7 @@ class AggregateRepository
       if typeof aggregate.instance.create isnt 'function'
         throw new Error "No create function on aggregate"
 
-      aggregate.id = aggregate.instance.$id = uidGenerator.generateUid()
+      aggregate.id = aggregate.instance.$id = uuidGenerator.generateUuid()
       aggregate.instance.$save = =>
         @save aggregate
 

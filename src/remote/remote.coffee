@@ -1,4 +1,4 @@
-remoteInmemory = require 'eventric-remote-inmemory'
+inmemoryRemote = require 'eventric-remote-inmemory'
 
 logger = require 'eventric/logger'
 Projection = require 'eventric/projection'
@@ -13,14 +13,12 @@ class Remote
   ]
 
   constructor: (@_contextName) ->
-    @name = @_contextName
-
     @_params = {}
     @_projectionClasses = {}
     @_projectionInstances = {}
     @_handlerFunctions = {}
     @projectionService = new Projection @
-    @setClient remoteInmemory.client
+    @setClient inmemoryRemote.client
 
     @_exposeRpcOperationsAsMemberFunctions()
 

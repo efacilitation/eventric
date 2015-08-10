@@ -1,4 +1,4 @@
-remoteInmemory = require 'eventric-remote-inmemory'
+inmemoryRemote = require 'eventric-remote-inmemory'
 
 GlobalContext = require './global_context'
 Remote = require './remote'
@@ -21,7 +21,7 @@ class Eventric
 
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
-    @addRemoteEndpoint remoteInmemory.endpoint
+    @addRemoteEndpoint inmemoryRemote.endpoint
     @setStore inmemoryStore, {}
 
 
@@ -43,7 +43,7 @@ class Eventric
 
     context = new Context name
 
-    @_delegateAllDomainEventsToRemoteEndpoint context
+    @_delegateAllDomainEventsToRemoteEndpoints context
 
     @_contexts[name] = context
 
@@ -63,10 +63,6 @@ class Eventric
 
   getRegisteredContextNames: ->
     Object.keys @_contexts
-
-
-  getContext: (name) ->
-    @_contexts[name]
 
 
   remote: (contextName) ->
@@ -89,7 +85,7 @@ class Eventric
 
 
   _handleRemoteRPCRequest: (request, callback) =>
-    context = @getContext request.contextName
+    context = @_contexts[request.contextName]
     if not context
       error = new Error "Tried to handle Remote RPC with not registered context #{request.contextName}"
       logger.error error.stack
@@ -115,7 +111,7 @@ class Eventric
       callback error
 
 
-  _delegateAllDomainEventsToRemoteEndpoint: (context) ->
+  _delegateAllDomainEventsToRemoteEndpoints: (context) ->
     context.subscribeToAllDomainEvents (domainEvent) =>
       @_remoteEndpoints.forEach (remoteEndpoint) ->
         remoteEndpoint.publish context.name, domainEvent.name, domainEvent

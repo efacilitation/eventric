@@ -131,6 +131,51 @@ describe 'Command Feature', ->
             someProperty: ['value-1', 'value-2']
 
 
+      describe 'given a command rejects with an error', ->
+
+        it 'should re-throw an error with a descriptive message given the command handler triggers an error', ->
+          dummyError = new Error 'dummy error'
+          exampleContext.addCommandHandlers
+            CommandWithError: (params) ->
+              new Promise ->
+                throw dummyError
+
+          exampleContext.command 'CommandWithError', foo: 'bar'
+          .catch (error) ->
+            expect(error).to.equal dummyError
+            expect(error.message).to.contain 'exampleContext'
+            expect(error.message).to.contain 'CommandWithError'
+            expect(error.message).to.contain '{"foo":"bar"}'
+
+
+        it 'should re-throw an error with a descriptive message given the command handler throws a synchronous error', ->
+          dummyError = new Error 'dummy error'
+          exampleContext.addCommandHandlers
+            CommandWithError: (params) ->
+              throw dummyError
+
+          exampleContext.command 'CommandWithError', foo: 'bar'
+          .catch (error) ->
+            expect(error).to.equal dummyError
+            expect(error.message).to.contain 'exampleContext'
+            expect(error.message).to.contain 'CommandWithError'
+            expect(error.message).to.contain '{"foo":"bar"}'
+
+
+        it 'should throw a generic error given the command handler rejects without an error', ->
+          exampleContext.addCommandHandlers
+            CommandWhichRejectsWithoutAnError: (params) ->
+              new Promise (resolve, reject) ->
+                reject()
+
+          exampleContext.command 'CommandWhichRejectsWithoutAnError', foo: 'bar'
+          .catch (error) ->
+            expect(error).to.be.an.instanceOf Error
+            expect(error.message).to.contain 'exampleContext'
+            expect(error.message).to.contain 'CommandWhichRejectsWithoutAnError'
+            expect(error.message).to.contain '{"foo":"bar"}'
+
+
   describe 'creating an aggregate', ->
 
     it 'should emit the create domain event after creating an aggregate', (done) ->

@@ -190,11 +190,23 @@ class Context
 
       commandServicesToInject = @_getCommandServicesToInject()
 
-      Promise.resolve @_commandHandlers[commandName].apply commandServicesToInject, [params]
+      Promise.resolve().then =>
+        @_commandHandlers[commandName].apply commandServicesToInject, [params]
       .then (result) ->
         logger.debug 'Completed Command', commandName
         resolve result
-      .catch reject
+      .catch (error) =>
+        commandErrorMessage = """
+          Context #{@name} rejects with an error in command #{commandName} with arguments #{JSON.stringify(params)}
+        """
+
+        if not error
+          reject new Error commandErrorMessage
+          return
+
+        error.message = "#{commandErrorMessage} - original error message: #{error.message}"
+        reject error
+
 
     @_addPendingPromise executingCommand
 
@@ -248,7 +260,8 @@ class Context
         reject new Error "Given query #{queryName} not registered on context"
         return
 
-      Promise.resolve @_queryHandlers[queryName].apply @_di, [params]
+      Promise.resolve().then =>
+        @_queryHandlers[queryName].apply @_di, [params]
       .then (result) ->
         logger.debug "Completed Query #{queryName} with Result #{result}"
         resolve result

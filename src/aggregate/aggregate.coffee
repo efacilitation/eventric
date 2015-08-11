@@ -23,8 +23,6 @@ class Aggregate
   _handleDomainEvent: (domainEventName, domainEvent) ->
     if @instance["handle#{domainEventName}"]
       @instance["handle#{domainEventName}"] domainEvent
-    else
-      logger.debug "Tried to handle the DomainEvent '#{domainEventName}' without a matching handle method"
 
 
   getDomainEvents: =>

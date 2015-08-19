@@ -1,3 +1,5 @@
+DomainEvent = require 'eventric/domain_event'
+domainEventIdGenerator = require './domain_event_id_generator'
 logger = require 'eventric/logger'
 
 class Aggregate
@@ -13,11 +15,28 @@ class Aggregate
       id: @id
       name: @_name
 
-    domainEvent = @_context.createDomainEvent domainEventName, domainEventPayload, aggregate
+    domainEvent = @_createDomainEvent domainEventName, domainEventPayload, aggregate
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
     logger.debug "Created and Handled DomainEvent in Aggregate", domainEvent
+
+
+  _createDomainEvent: (domainEventName, domainEventConstructorParams, aggregate) ->
+    DomainEventPayloadConstructor = @_context.getDomainEventPayloadConstructor domainEventName
+
+    if !DomainEventPayloadConstructor
+      throw new Error "Tried to create domain event '#{domainEventName}' which is not defined"
+
+    payload = {}
+    DomainEventPayloadConstructor.apply payload, [domainEventConstructorParams]
+
+    new DomainEvent
+      id: domainEventIdGenerator.generateId()
+      name: domainEventName
+      aggregate: aggregate
+      context: @_context.name
+      payload: payload
 
 
   _handleDomainEvent: (domainEventName, domainEvent) ->
@@ -25,7 +44,7 @@ class Aggregate
       @instance["handle#{domainEventName}"] domainEvent
 
 
-  getDomainEvents: =>
+  getDomainEvents: ->
     @_domainEvents
 
 

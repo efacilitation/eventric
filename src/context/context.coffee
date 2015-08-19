@@ -1,9 +1,7 @@
 EventBus = require 'eventric/event_bus'
 Projection = require 'eventric/projection'
-DomainEvent = require 'eventric/domain_event'
 AggregateRepository = require 'eventric/aggregate_repository'
 logger = require 'eventric/logger'
-uuidGenerator = require 'eventric/uuid_generator'
 
 class Context
 
@@ -124,20 +122,8 @@ class Context
     return initializeProjectionsPromise
 
 
-  createDomainEvent: (domainEventName, domainEventConstructorParams, aggregate) ->
-    DomainEventPayloadConstructor = @_domainEventPayloadConstructors[domainEventName]
-    if !DomainEventPayloadConstructor
-      throw new Error "Tried to create domain event '#{domainEventName}' which is not defined"
-
-    payload = {}
-    DomainEventPayloadConstructor.apply payload, [domainEventConstructorParams]
-
-    new DomainEvent
-      id: uuidGenerator.generateUuid()
-      name: domainEventName
-      aggregate: aggregate
-      context: @name
-      payload: payload
+  getDomainEventPayloadConstructor: (domainEventName) ->
+    @_domainEventPayloadConstructors[domainEventName]
 
 
   initializeProjectionInstance: (projectionName, params) ->

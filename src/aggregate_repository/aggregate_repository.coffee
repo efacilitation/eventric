@@ -64,16 +64,16 @@ class AggregateRepository
       domainEvents.forEach (domainEvent) =>
         saveDomainEventQueue = saveDomainEventQueue.then =>
           @_store.saveDomainEvent domainEvent
-        .then =>
-          logger.debug "Saved DomainEvent", domainEvent
+        .then ->
+          logger.debug 'Saved DomainEvent', domainEvent
 
 
       saveDomainEventQueue
       .then =>
         domainEvents.forEach (domainEvent) =>
-          logger.debug "Publishing DomainEvent", domainEvent
+          logger.debug 'Publishing DomainEvent', domainEvent
           @_context.getEventBus().publishDomainEvent domainEvent
-          .catch (error) =>
+          .catch (error) ->
             logger.error error.stack || error
       .then ->
         resolve aggregate.id

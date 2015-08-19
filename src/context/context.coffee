@@ -2,6 +2,7 @@ EventBus = require 'eventric/event_bus'
 Projection = require 'eventric/projection'
 AggregateRepository = require 'eventric/aggregate_repository'
 logger = require 'eventric/logger'
+domainEventService = require 'eventric/domain_event/domain_event_service'
 
 class Context
 
@@ -148,17 +149,19 @@ class Context
   # TODO: Remove this when stream subscriptions are implemented
   findDomainEventsByName: (findArguments...) ->
     new Promise (resolve, reject) =>
-      @getDomainEventsStore().findDomainEventsByName findArguments..., (err, events) ->
+      @getDomainEventsStore().findDomainEventsByName findArguments..., (err, domainEvents) ->
         return reject err if err
-        resolve events
+        domainEvents = domainEventService.sortDomainEventsById domainEvents
+        resolve domainEvents
 
 
   # TODO: Remove this when stream subscriptions are implemented
   findDomainEventsByNameAndAggregateId: (findArguments...) ->
     new Promise (resolve, reject) =>
-      @getDomainEventsStore().findDomainEventsByNameAndAggregateId findArguments..., (err, events) ->
+      @getDomainEventsStore().findDomainEventsByNameAndAggregateId findArguments..., (err, domainEvents) ->
         return reject err if err
-        resolve events
+        domainEvents = domainEventService.sortDomainEventsById domainEvents
+        resolve domainEvents
 
 
   command: (commandName, params) ->

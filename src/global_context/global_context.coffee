@@ -1,4 +1,6 @@
 # TODO: Simple approach for global projections without changing the Projection service. Refactor when adding EventStore
+domainEventService = require 'eventric/domain_event/domain_event_service'
+
 class GlobalContext
 
   constructor: ->
@@ -12,7 +14,7 @@ class GlobalContext
     Promise.all findDomainEventsByName
     .then (domainEventsByContext) =>
       domainEvents = @_combineDomainEventsByContext domainEventsByContext
-      @_sortDomainEventsByTimestamp domainEvents
+      domainEvents = domainEventService.sortDomainEventsById domainEvents
       return domainEvents
 
 
@@ -33,11 +35,6 @@ class GlobalContext
     domainEventsByContext.reduce (allDomainEvents, contextDomainEvents) ->
       allDomainEvents.concat contextDomainEvents
     , []
-
-
-  _sortDomainEventsByTimestamp: (domainEvents) ->
-    domainEvents.sort (firstEvent, secondEvent) ->
-      firstEvent.timestamp - secondEvent.timestamp
 
 
 module.exports = GlobalContext

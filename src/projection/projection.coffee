@@ -112,9 +112,9 @@ class Projection
     return subscribeProjectionToDomainEventsPromise
 
 
-  _applyDomainEventToProjection: (domainEvent, projection) =>
+  _applyDomainEventToProjection: (domainEvent, projection) ->
     Promise.resolve()
-    .then =>
+    .then ->
       if !projection["handle#{domainEvent.name}"]
         logger.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
         return

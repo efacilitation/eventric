@@ -38,6 +38,7 @@ class AggregateRepository
       if typeof aggregate.instance.create isnt 'function'
         throw new Error "No create function on aggregate"
 
+      # TODO: What in the world is going on here! - Why is there no setter for this attribute?
       aggregate.id = aggregate.instance.$id = uuidGenerator.generateUuid()
       aggregate.instance.$save = =>
         @save aggregate

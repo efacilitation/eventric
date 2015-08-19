@@ -1,6 +1,6 @@
 describe 'eventric', ->
 
-  describe '#generateUid', ->
+  describe '#generateUuid', ->
 
     it 'should ask the uuid generator to generate a uuid', ->
       uuidGenerator = require './uuid_generator'

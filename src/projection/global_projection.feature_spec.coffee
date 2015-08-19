@@ -44,10 +44,6 @@ describe 'Global Projection Feature', ->
           receivedDomainEventNames.push domainEvent.name
 
 
-        handleFirstContextAggregateModified: (domainEvent) ->
-          receivedDomainEventNames.push domainEvent.name
-
-
       eventric.addGlobalProjection GlobalProjection
 
 

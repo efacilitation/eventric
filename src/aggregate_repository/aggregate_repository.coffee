@@ -1,6 +1,7 @@
 Aggregate = require 'eventric/aggregate'
 logger = require 'eventric/logger'
 uuidGenerator = require 'eventric/uuid_generator'
+domainEventService = require 'eventric/domain_event/domain_event_service'
 
 class AggregateRepository
 
@@ -21,6 +22,8 @@ class AggregateRepository
         if not domainEvents.length
           reject new Error "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
           return
+
+        domainEvents = domainEventService.sortDomainEventsById domainEvents
 
         aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
         aggregate.applyDomainEvents domainEvents

@@ -18,8 +18,8 @@ describe 'context', ->
     sandbox.stub eventric
     eventric.getStoreDefinition.returns storeDefinitionFake
 
-    firstDomainEvent = domainEventSpecHelper.generateDomainEvent()
-    secondDomainEvent = domainEventSpecHelper.generateDomainEvent()
+    firstDomainEvent = domainEventSpecHelper.createDomainEvent()
+    secondDomainEvent = domainEventSpecHelper.createDomainEvent()
 
     Context = require './'
     context = new Context 'SampleContext'
@@ -38,7 +38,8 @@ describe 'context', ->
   describe '#findDomainEventsByNameAndAggregateId', ->
 
     it 'should return the domain events from the store ordered by the domain event id', ->
-      sandbox.stub(context.getDomainEventsStore(), 'findDomainEventsByNameAndAggregateId').yields null, [secondDomainEvent, firstDomainEvent]
+      sandbox.stub(context.getDomainEventsStore(), 'findDomainEventsByNameAndAggregateId')
+        .yields null, [secondDomainEvent, firstDomainEvent]
       context.findDomainEventsByNameAndAggregateId()
       .then (domainEvents) ->
         expect(domainEvents).to.deep.equal [firstDomainEvent, secondDomainEvent]

@@ -6,6 +6,8 @@
 
 Behavior-first application development. Runs on NodeJS and modern Browsers.
 
+**Note: eventric is currently under heavy development. The readme is outdated. It will be updated soon.**
+
 ## Philosophy
 
 * Emphasize [Domain-driven design](https://www.goodreads.com/book/show/179133.Domain_Driven_Design), [Event-driven architecture](https://www.goodreads.com/book/show/12369902-event-centric) and [Task-based UIs](http://cqrs.wordpress.com/documents/task-based-ui).
@@ -15,8 +17,6 @@ Behavior-first application development. Runs on NodeJS and modern Browsers.
 * Separation of concerns using Commands and Queries ([CQRS](http://msdn.microsoft.com/en-us/library/jj554200.aspx))
 * Capture all changes to your application state as a sequence of [DomainEvents](http://www.udidahan.com/2009/06/14/domain-events-salvation/) ([EventSourcing](http://martinfowler.com/eaaDev/EventSourcing.html))
 * Be reactive ([Manifesto](http://www.reactivemanifesto.org))
-
-Early talk about MVC, CRUD, DDD, CQRS and Event Sourcing from Johannes Becker, original creator of eventric: http://www.youtube.com/watch?v=XSc7NPedAxw
 
 ## Getting started
 

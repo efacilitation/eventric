@@ -131,38 +131,6 @@ todoContext.initialize()
 ```
 After executing the Commands the DomainEventHandler will print `Do something`. Your `Todo` Aggregate is now persisted using EventSourcing into the `InMemory Store`.
 
-## Running Tests
-
-To execute all (client+server) tests, use:
-
-```shell
-gulp spec
-```
-
-You can watch for file-changes with
-
-```shell
-gulp watch
-```
-
-
-## Release
-
-```
-gulp bump:patch
-git add .
-git commit -m"$VERSION"
-git push
-npm publish
-git checkout -b release master
-git add build -f
-git commit -m"$VERSION"
-git tag $VERSION
-git push --tags
-git checkout master
-git branch -D release
-```
-
 
 ## License
 

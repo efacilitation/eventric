@@ -162,6 +162,19 @@ describe 'Command Feature', ->
             expect(error.message).to.contain '{"foo":"bar"}'
 
 
+        it 'should make it possible to access the original error message given the command handler triggers an error', ->
+          dummyError = new Error 'dummy error'
+          exampleContext.addCommandHandlers
+            CommandWithError: (params) ->
+              new Promise ->
+                throw dummyError
+
+          exampleContext.command 'CommandWithError', foo: 'bar'
+          .catch (error) ->
+            expect(error).to.equal dummyError
+            expect(error.originalErrorMessage).to.equal 'dummy error'
+
+
         it 'should throw a generic error given the command handler rejects without an error', ->
           exampleContext.addCommandHandlers
             CommandWhichRejectsWithoutAnError: (params) ->

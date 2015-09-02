@@ -186,14 +186,15 @@ class Context
         resolve result
       .catch (error) =>
         commandErrorMessage = """
-          Context #{@name} rejects with an error in command #{commandName} with arguments #{JSON.stringify(params)}
+          Command "#{commandName}" with arguments #{JSON.stringify(params)} of context "#{@name}" rejects with an error
         """
 
         if not error
           reject new Error commandErrorMessage
           return
 
-        error.message = "#{commandErrorMessage} - original error message: #{error.message}"
+        error.originalErrorMessage = error.message
+        error.message = "#{commandErrorMessage} - original error message: #{error.originalErrorMessage}"
         reject error
 
 

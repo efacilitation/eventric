@@ -439,6 +439,7 @@ This feature makes it easily possible to create reactive user interfaces in the 
 
 ```coffeescript
 todoContext = eventric.remote 'Todo'
+todoContext.setClient socketIORemoteClient
 todoProjection =
 
   initialize: (params, done) ->

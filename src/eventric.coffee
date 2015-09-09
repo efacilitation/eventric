@@ -17,7 +17,7 @@ class Eventric
     @_domainEventHandlersAll = []
     @_storeDefinition = null
     @_remoteEndpoints = []
-    @_globalProjectionClasses = []
+    @_globalProjectionObjects = []
 
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
@@ -52,13 +52,13 @@ class Eventric
 
   # TODO: Reconsider/Remove when adding EventStore
   initializeGlobalProjections: ->
-    Promise.all @_globalProjectionClasses.map (GlobalProjectionClass) =>
-      @_projectionService.initializeInstance '', new GlobalProjectionClass, {}
+    Promise.all @_globalProjectionObjects.map (projectionObject) =>
+      @_projectionService.initializeInstance projectionObject, {}
 
 
   # TODO: Reconsider/Remove when adding EventStore
-  addGlobalProjection: (ProjectionClass) ->
-    @_globalProjectionClasses.push ProjectionClass
+  addGlobalProjection: (projectionObject) ->
+    @_globalProjectionObjects.push projectionObject
 
 
   getRegisteredContextNames: ->

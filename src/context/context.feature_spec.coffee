@@ -49,12 +49,12 @@ describe 'Context Feature', ->
     it 'should call the initialize method of the projection', ->
       exampleContext = eventric.context 'exampleContext'
 
-      class ProjectionStub
+      projectionObject =
         initialize: sandbox.stub().yields()
-      exampleContext.addProjection 'SomeProjection', ProjectionStub
+      exampleContext.addProjection projectionObject
       exampleContext.initialize()
       .then ->
-        expect(ProjectionStub::initialize).to.have.been.called
+        expect(projectionObject.initialize).to.have.been.called
 
 
 

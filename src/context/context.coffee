@@ -16,12 +16,12 @@ class Context
     @_queryHandlers = {}
     @_domainEventPayloadConstructors = {}
     @_domainEventHandlers = {}
-    @_projectionClasses = {}
+    @_projectionObjects = []
     @_repositoryInstances = {}
     @_storeInstance = null
     @_pendingPromises = []
     @_eventBus = new EventBus
-    @projectionService = new Projection @
+    @_projectionService = new Projection @
 
 
   defineDomainEvent: (domainEventName, DomainEventPayloadConstructor) ->
@@ -72,22 +72,13 @@ class Context
     @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler
 
 
-  addProjection: (projectionName, ProjectionClass) ->
-    @_projectionClasses[projectionName] = ProjectionClass
+  addProjection: (projectionObject) ->
+    @_projectionObjects.push projectionObject
     @
-
-
-  addProjections: (viewsObj) ->
-    @addProjection projectionName, ProjectionClass for projectionName, ProjectionClass of viewsObj
-    @
-
-
-  getProjectionInstance: (projectionId) ->
-    @projectionService.getInstance projectionId
 
 
   destroyProjectionInstance: (projectionId) ->
-    @projectionService.destroyInstance projectionId, @
+    @_projectionService.destroyInstance projectionId, @
 
 
   initialize: ->
@@ -112,30 +103,14 @@ class Context
 
   _initializeProjections: ->
     initializeProjectionsPromise = Promise.resolve()
-    for projectionName, ProjectionClass of @_projectionClasses
-      logger.debug "[#{@name}] Initializing Projection #{projectionName}"
-
+    for projectionObject in @_projectionObjects
       initializeProjectionsPromise = initializeProjectionsPromise.then =>
-        @projectionService.initializeInstance projectionName, ProjectionClass, {}
-      .then (projectionId) =>
-        logger.debug "[#{@name}] Finished initializing Projection #{projectionName}"
-
+        @_projectionService.initializeInstance projectionObject, {}
     return initializeProjectionsPromise
 
 
   getDomainEventPayloadConstructor: (domainEventName) ->
     @_domainEventPayloadConstructors[domainEventName]
-
-
-  initializeProjectionInstance: (projectionName, params) ->
-    if not @_projectionClasses[projectionName]
-      return Promise.reject new Error "Given projection #{projectionName} not registered on context"
-
-    @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params
-
-
-  getProjection: (projectionId) ->
-    @projectionService.getInstance projectionId
 
 
   getDomainEventsStore: ->

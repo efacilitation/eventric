@@ -28,7 +28,7 @@ describe 'Global Projection Feature', ->
 
     beforeEach ->
       receivedDomainEventNames = []
-      class GlobalProjection
+      globalProjection =
         initialize: (params, done) ->
           done()
 
@@ -44,7 +44,7 @@ describe 'Global Projection Feature', ->
           receivedDomainEventNames.push domainEvent.name
 
 
-      eventric.addGlobalProjection GlobalProjection
+      eventric.addGlobalProjection globalProjection
 
 
     describe 'initializing the projection', ->

@@ -40,7 +40,7 @@ describe 'Projection Feature', ->
     describe 'when initializing the projection', ->
 
       it 'should set the projection to initialized', (done) ->
-        exampleContext.addProjection 'ExampleProjection', ->
+        exampleContext.addProjection
 
           handleExampleCreated: (domainEvent) ->
             expect(@isInitialized).to.equal true
@@ -57,7 +57,7 @@ describe 'Projection Feature', ->
       it 'should execute the projection\'s event handlers', ->
         exampleCreated = null
         exampleModified = null
-        projection = ->
+        projection =
 
           handleExampleCreated: (domainEvent) ->
             exampleCreated = domainEvent.payload.specific
@@ -66,7 +66,7 @@ describe 'Projection Feature', ->
           handleExampleModified: (domainEvent) ->
             exampleModified = domainEvent.payload.specific
 
-        exampleContext.addProjection 'ExampleProjection', projection
+        exampleContext.addProjection projection
         exampleContext.initialize()
         .then ->
           exampleContext.command 'CreateExample'
@@ -80,8 +80,7 @@ describe 'Projection Feature', ->
 
 
       it 'should log an error given a domain event handler functions throws an error after initialization', ->
-        exampleContext.addProjection 'ExampleProjection', ->
-          stores: ['inmemory']
+        exampleContext.addProjection
 
           handleExampleCreated: (domainEvent) ->
             throw new Error 'runtime error'

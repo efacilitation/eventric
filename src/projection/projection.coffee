@@ -9,48 +9,40 @@ class Projection
     @_domainEventsApplied = {}
 
 
-  initializeInstance: (projectionName, Projection, params) ->
-    if typeof Projection is 'function'
-      projection = new Projection
-    else
-      projection = Projection
-
+  initializeInstance: (projectionObject, params) ->
     if @_context._di
       for diName, diFn of @_context._di
-        projection[diName] = diFn
+        projectionObject[diName] = diFn
 
     projectionId = uuidGenerator.generateUuid()
 
     aggregateId = null
-    projection.$subscribeHandlersWithAggregateId = (_aggregateId) ->
+    projectionObject.$subscribeHandlersWithAggregateId = (_aggregateId) ->
       aggregateId = _aggregateId
 
     eventNames = null
-    @_callInitializeOnProjection projectionName, projection, params
+    @_callInitializeOnProjection projectionObject, params
     .then =>
-      @_parseEventNamesFromProjection projection
+      @_parseEventNamesFromProjection projectionObject
     .then (_eventNames) =>
       eventNames = _eventNames
-      @_applyDomainEventsFromStoreToProjection projectionId, projection, eventNames, aggregateId
+      @_applyDomainEventsFromStoreToProjection projectionId, projectionObject, eventNames, aggregateId
     .then =>
-      @_subscribeProjectionToDomainEvents projectionId, projectionName, projection, eventNames, aggregateId
+      @_subscribeProjectionToDomainEvents projectionId, projectionObject, eventNames, aggregateId
     .then =>
-      @_projectionInstances[projectionId] = projection
+      @_projectionInstances[projectionId] = projectionObject
     .then ->
-      projection.isInitialized = true
+      projectionObject.isInitialized = true
     .then ->
       projectionId
 
 
-  _callInitializeOnProjection: (projectionName, projection, params) ->
+  _callInitializeOnProjection: (projection, params) ->
     new Promise (resolve, reject) =>
       if not projection.initialize
-        logger.debug "[#{@_context.name}] No initialize function on Projection #{projectionName} given, skipping"
         return resolve projection
 
-      logger.debug "[#{@_context.name}] Calling initialize on Projection #{projectionName}"
       projection.initialize params, =>
-        logger.debug "[#{@_context.name}] Finished initialize call on Projection #{projectionName}"
         resolve projection
 
 
@@ -87,7 +79,7 @@ class Projection
       return applyDomainEventsToProjectionPromise
 
 
-  _subscribeProjectionToDomainEvents: (projectionId, projectionName, projection, eventNames, aggregateId) ->
+  _subscribeProjectionToDomainEvents: (projectionId, projection, eventNames, aggregateId) ->
     domainEventHandler = (domainEvent) =>
       if @_domainEventsApplied[projectionId][domainEvent.id]
         return

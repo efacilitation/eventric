@@ -14,10 +14,8 @@ class Remote
 
   constructor: (@_contextName) ->
     @_params = {}
-    @_projectionClasses = {}
-    @_projectionInstances = {}
     @_handlerFunctions = {}
-    @projectionService = new Projection @
+    @_projectionService = new Projection @
     @setClient inmemoryRemote.client
 
     @_exposeRpcOperationsAsMemberFunctions()
@@ -57,28 +55,12 @@ class Remote
     @
 
 
-  addProjection: (projectionName, projectionClass) ->
-    @_projectionClasses[projectionName] = projectionClass
-    @
-
-
   initializeProjection: (projectionObject, params) ->
-    @projectionService.initializeInstance '', projectionObject, params
-
-
-  initializeProjectionInstance: (projectionName, params) ->
-    if not @_projectionClasses[projectionName]
-      return Promise.reject new Error "Given projection #{projectionName} not registered on remote"
-
-    @projectionService.initializeInstance projectionName, @_projectionClasses[projectionName], params
-
-
-  getProjectionInstance: (projectionId) ->
-    @projectionService.getInstance projectionId
+    return @_projectionService.initializeInstance projectionObject, params
 
 
   destroyProjectionInstance: (projectionId) ->
-    @projectionService.destroyInstance projectionId, @
+    @_projectionService.destroyInstance projectionId, @
 
 
 module.exports = Remote

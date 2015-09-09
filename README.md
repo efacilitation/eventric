@@ -183,7 +183,7 @@ todoContext.subscribeToDomainEventWithAggregateId 'TodoTitleChanged', 'some aggr
   console.log 'change title to: ', domainEvent.payload.title
 ```
 
-## Projection
+## Projections
 
 Projections always replay an event stream from the beginning.
 They are used to create or populate read models.

@@ -92,7 +92,7 @@ todoContext.addAggregate 'Todo', class Todo
   change: ({title}) ->
     if not title
       throw new Error 'title missing'
-    if @finished
+    if @isFinished
       throw new Error 'todo already finished'
     @$emitDomainEvent 'TodoTitleChanged',
       title: title

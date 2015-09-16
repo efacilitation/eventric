@@ -40,8 +40,7 @@ todoContext = eventric.context 'Todo'
 Contexts create architectural boundaries inside an eventric based application.
 They can be compared to (micro)services and somewhat also to bounded contexts from an implementation perspective.
 
-A context holds its own event store and provides a self contained space for domain events, aggregates,
-command and query handlers, projections and an event publishing infrastructure (which may be outsourced soon).
+A context holds its own event store and provides a self contained space for domain events, aggregates, command and query handlers, projections and an event publishing infrastructure (which may be outsourced soon).
 
 ### Domain events
 
@@ -89,11 +88,12 @@ todoContext.addAggregate 'Todo', class Todo
       title: title
 
 
-  change: ({title}) ->
+  changeTitle: ({title}) ->
     if not title
       throw new Error 'title missing'
     if @isFinished
       throw new Error 'todo already finished'
+
     @$emitDomainEvent 'TodoTitleChanged',
       title: title
 
@@ -125,14 +125,16 @@ todoContext.addCommandHandlers
   CreateTodo: ({title}) ->
     @$aggregate.create 'Todo',
       title: title
-    .then (todoId) ->
-      return todoId
+    .then (todo) ->
+      todo.$save()
+
 
   ChangeTodoTitle: ({todoId, title}) ->
     @$aggregate.load 'Todo', todoId
     .then (todo) ->
-      todo.changeTitle title
+      todo.changeTitle title: title
       todo.$save()
+
 
   FinishTodo: ({todoId}) ->
     @$aggregate.load 'Todo', todoId
@@ -242,14 +244,12 @@ Query handlers are registered the same way command handlers are by passing an ob
 ```coffeescript
 todoContext.addQueryHandlers
 
-  getTodos: (params) ->
+  getTodoList: (params) ->
     return todosReadModel
 
 
   getTodoCount: (params) ->
     return todoCountReadModel
-
-
 ```
 
 ### Execution
@@ -395,33 +395,43 @@ Then, configure eventric on the server side to use Socket.IO as additional remot
 socketIO = require 'socket.io'
 socketIORemoteEndpoint  = require 'eventric-remote-socketio-endpoint'
 
-io = socketIO.listen()
+io = socketIO.listen 1234
+socketIORemoteEndpointOptions =
+  ioInstance: io
 socketIORemoteEndpoint.initialize socketIORemoteEndpointOptions, ->
-  eventric.addRemoteEndpoint ioInstance: io
+  eventric.addRemoteEndpoint socketIORemoteEndpoint
 ```
 
 Finally, include the Socket.IO client and eventric in an html file, configure the remote client and create a remote.
 
 ```html
+<!DOCTYPE html>
 <html>
   <head>
-    <title>eventric demo</title>
+    <title>eventric tutorial</title>
   </head>
   <body>
     <!-- fix paths to files -->
-    <script type="text/javascript" href="path/to/socket.io/client.js" ></script>
-    <script type="text/javascript" href="path/to/eventric/dist/release/eventric.js" ></script>
+    <script type="text/javascript" src="node_modules/socket.io/node_modules/socket.io-client/socket.io.js" ></script>
+    <script type="text/javascript" src="node_modules/eventric/dist/release/eventric.js" ></script>
+    <script type="text/javascript" src="node_modules/eventric-remote-socketio-client/dist/release/eventric_remote_socketio_client.js" ></script>
+
     <script type="text/javascript">
-      var socket = io();
-      socketIORemoteClient = window['eventric-remote-socketio-client']:
+      var socket = io.connect('http://localhost:1234');
+      socketIORemoteClient = window['eventric-remote-socketio-client'];
       socketIORemoteClient.initialize({
         ioClientInstance: socket
       })
       .then(function() {
-        todoContext = eventric.remote('Todo');
+        var todoContext = eventric.remote('Todo');
         todoContext.setClient(socketIORemoteClient);
-        todoContext.command('CreateTodo', {}, function(todoId) {
-          console.log(todoId);
+
+        todoContext.command('CreateTodo', {title: 'My first todo'})
+        .then(function(todoId) {
+          console.log('Todo created: ', todoId);
+        })
+        .catch(function(error) {
+          console.error('Error creating todo: ', error);
         });
       });
     </script>

@@ -1,7 +1,7 @@
 logger = require 'eventric/logger'
 uuidGenerator = require 'eventric/uuid_generator'
 
-class Projection
+class ProjectionService
 
   constructor: (@_context) ->
     @_handlerFunctions    = {}
@@ -9,40 +9,40 @@ class Projection
     @_domainEventsApplied = {}
 
 
-  initializeInstance: (projectionObject, params) ->
+  initializeInstance: (projectionInstance, params) ->
     if @_context._di
       for diName, diFn of @_context._di
-        projectionObject[diName] = diFn
+        projectionInstance[diName] = diFn
 
     projectionId = uuidGenerator.generateUuid()
 
     aggregateId = null
-    projectionObject.$subscribeHandlersWithAggregateId = (_aggregateId) ->
+    projectionInstance.$subscribeHandlersWithAggregateId = (_aggregateId) ->
       aggregateId = _aggregateId
 
     eventNames = null
-    @_callInitializeOnProjection projectionObject, params
+    @_callInitializeOnProjection projectionInstance, params
     .then =>
-      @_parseEventNamesFromProjection projectionObject
+      @_parseEventNamesFromProjection projectionInstance
     .then (_eventNames) =>
       eventNames = _eventNames
-      @_applyDomainEventsFromStoreToProjection projectionId, projectionObject, eventNames, aggregateId
+      @_applyDomainEventsFromStoreToProjection projectionId, projectionInstance, eventNames, aggregateId
     .then =>
-      @_subscribeProjectionToDomainEvents projectionId, projectionObject, eventNames, aggregateId
+      @_subscribeProjectionToDomainEvents projectionId, projectionInstance, eventNames, aggregateId
     .then =>
-      @_projectionInstances[projectionId] = projectionObject
+      @_projectionInstances[projectionId] = projectionInstance
     .then ->
-      projectionObject.isInitialized = true
+      projectionInstance.isInitialized = true
     .then ->
       projectionId
 
 
   _callInitializeOnProjection: (projection, params) ->
-    new Promise (resolve, reject) =>
+    new Promise (resolve, reject) ->
       if not projection.initialize
         return resolve projection
 
-      projection.initialize params, =>
+      projection.initialize params, ->
         resolve projection
 
 
@@ -63,7 +63,6 @@ class Projection
       findEvents = @_context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
     else
       findEvents = @_context.findDomainEventsByName eventNames
-
     findEvents
     .then (domainEvents) =>
       if not domainEvents or domainEvents.length is 0
@@ -90,6 +89,7 @@ class Projection
         return
 
 
+    @_handlerFunctions[projectionId] = []
     subscribeProjectionToDomainEventsPromise = Promise.resolve()
     eventNames.forEach (eventName) =>
       subscribeProjectionToDomainEventsPromise = subscribeProjectionToDomainEventsPromise.then =>
@@ -98,7 +98,6 @@ class Projection
         else
           @_context.subscribeToDomainEvent eventName, domainEventHandler
       .then (subscriberId) =>
-        @_handlerFunctions[projectionId] ?= []
         @_handlerFunctions[projectionId].push subscriberId
 
     return subscribeProjectionToDomainEventsPromise
@@ -119,8 +118,12 @@ class Projection
 
 
   destroyInstance: (projectionId) ->
+    if not projectionId
+      return Promise.reject new Error 'Missing projection id'
+
     if not @_handlerFunctions[projectionId]
-      return Promise.reject new Error 'Missing attribute projectionId'
+      return Promise.reject new Error "Projection with id \"#{projectionId}\" is not initialized"
+
 
     unsubscribePromises = []
     for subscriberId in @_handlerFunctions[projectionId]
@@ -132,4 +135,4 @@ class Projection
     Promise.all unsubscribePromises
 
 
-module.exports = Projection
+module.exports = ProjectionService

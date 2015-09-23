@@ -72,6 +72,10 @@ class Context
     @_eventBus.subscribeToDomainEventWithAggregateId domainEventName, aggregateId, domainEventHandler
 
 
+  unsubscribeFromDomainEvent: (subscriberId) ->
+    @_eventBus.unsubscribe subscriberId
+
+
   addProjection: (projectionObject) ->
     @_projectionObjects.push projectionObject
     @

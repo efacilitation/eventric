@@ -77,8 +77,6 @@ describe 'Projection Feature', ->
           expect(exampleModified).to.equal 'modified'
 
 
-
-
       it 'should log an error given a domain event handler functions throws an error after initialization', ->
         exampleContext.addProjection
 

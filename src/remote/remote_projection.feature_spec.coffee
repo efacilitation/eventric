@@ -132,7 +132,7 @@ describe 'Remote Projection Feature', ->
 
 
       it 'should be possible to remove the projection', ->
-        exampleRemote.initializeProjection exampleProjection, {}
+        exampleRemote.initializeProjection exampleProjection, aggregateId: 'aggregate-1'
         .then (projectionId) ->
           sandbox.spy exampleRemote, 'unsubscribeFromDomainEvent'
 

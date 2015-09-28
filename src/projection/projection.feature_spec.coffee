@@ -9,7 +9,6 @@ describe 'Projection Feature', ->
         ExampleCreated: (params) ->
           @specific = params.specific
 
-
         ExampleModified: (params) ->
           @specific = params.specific
 
@@ -50,6 +49,16 @@ describe 'Projection Feature', ->
         exampleContext.initialize()
         .then ->
           exampleContext.command 'CreateExample'
+
+
+      it 'should reject with an error given subscribeHandlersWithAggregateId is called without an aggregate id', ->
+        exampleContext.addProjection
+          initialize: (params, done) ->
+            @$subscribeHandlersWithAggregateId()
+
+        exampleContext.initialize()
+        .catch (error) ->
+          expect(error).to.be.instanceof Error
 
 
     describe 'when emitting domain events the projection subscribed to', ->

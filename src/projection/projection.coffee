@@ -17,7 +17,7 @@ class ProjectionService
     projectionId = uuidGenerator.generateUuid()
 
     aggregateId = null
-    projectionObject.$subscribeHandlersWithAggregateId = (_aggregateId) ->
+    projectionInstance.$subscribeHandlersWithAggregateId = (_aggregateId) ->
       if not _aggregateId
         throw new Error 'Missing aggregate id'
       aggregateId = _aggregateId

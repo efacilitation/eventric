@@ -10,6 +10,10 @@ class Aggregate
     @instance.$emitDomainEvent = @emitDomainEvent
 
 
+  setId: (@id) ->
+    @instance.$id = @id
+
+
   emitDomainEvent: (domainEventName, domainEventPayload) =>
     aggregate =
       id: @id

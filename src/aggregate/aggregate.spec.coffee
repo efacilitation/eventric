@@ -15,7 +15,19 @@ describe 'aggregate', ->
 
     Aggregate = require './'
     aggregate = new Aggregate contextFake, 'ExampleAggregate', AggregateClass
-    aggregate.id = 'aggregate-1'
+    aggregate.setId 'aggregate-1'
+
+
+  describe '#setId', ->
+
+    it 'should set the id of the aggregate', ->
+      aggregate.setId 'aggregate-id'
+      expect(aggregate.id).to.equal 'aggregate-id'
+
+
+    it 'should set the id of the aggregate instance', ->
+      aggregate.setId 'aggregate-id'
+      expect(aggregate.instance.$id).to.equal 'aggregate-id'
 
 
   describe '#emitDomainEvent', ->

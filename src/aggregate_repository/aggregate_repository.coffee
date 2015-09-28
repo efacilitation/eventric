@@ -19,7 +19,7 @@ class AggregateRepository
           reject error
           return
 
-        if not domainEvents.length
+        if not domainEvents?.length
           reject new Error "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
           return
 
@@ -27,7 +27,7 @@ class AggregateRepository
 
         aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
         aggregate.applyDomainEvents domainEvents
-        aggregate.id = aggregate.instance.$id = aggregateId
+        aggregate.setId aggregateId
         aggregate.instance.$save = =>
           @save aggregate
 
@@ -41,8 +41,7 @@ class AggregateRepository
       if typeof aggregate.instance.create isnt 'function'
         throw new Error "No create function on aggregate"
 
-      # TODO: What in the world is going on here! - Why is there no setter for this attribute?
-      aggregate.id = aggregate.instance.$id = uuidGenerator.generateUuid()
+      aggregate.setId uuidGenerator.generateUuid()
       aggregate.instance.$save = =>
         @save aggregate
 
@@ -58,7 +57,7 @@ class AggregateRepository
         throw new Error "Tried to save unknown aggregate #{@_aggregateName}"
 
       domainEvents = aggregate.getDomainEvents()
-      if domainEvents.length < 1
+      if not domainEvents?.length
         throw new Error "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
 
       logger.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"

@@ -1,6 +1,5 @@
 DomainEvent = require 'eventric/domain_event'
 domainEventIdGenerator = require './domain_event_id_generator'
-logger = require 'eventric/logger'
 
 class Aggregate
 
@@ -23,7 +22,6 @@ class Aggregate
     @_domainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
-    logger.debug "Created and Handled DomainEvent in Aggregate", domainEvent
 
 
   _createDomainEvent: (domainEventName, domainEventConstructorParams, aggregate) ->

@@ -1,6 +1,5 @@
 inmemoryRemote = require 'eventric-remote-inmemory'
 
-logger = require 'eventric/logger'
 Projection = require 'eventric/projection'
 
 class Remote

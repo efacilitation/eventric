@@ -2,16 +2,16 @@ class InMemoryStore
   _domainEvents: {}
   _projections: {}
 
-  initialize: (@_context, [options]...) ->
-    new Promise (resolve, reject) =>
+  initialize: (@_context) ->
+    new Promise (resolve) =>
       @_domainEventsCollectionName = "#{@_context.name}.DomainEvents"
       @_projectionCollectionName   = "#{@_context.name}.Projections"
       @_domainEvents[@_domainEventsCollectionName] = []
       resolve()
 
 
-  saveDomainEvent: (domainEvent, callback) ->
-    new Promise (resolve, reject) =>
+  saveDomainEvent: (domainEvent) ->
+    new Promise (resolve) =>
       @_domainEvents[@_domainEventsCollectionName].push domainEvent
       resolve domainEvent
 

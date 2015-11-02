@@ -1,4 +1,3 @@
-logger = require 'eventric/logger'
 uuidGenerator = require 'eventric/uuid_generator'
 
 class ProjectionService
@@ -109,7 +108,6 @@ class ProjectionService
     Promise.resolve()
     .then ->
       if !projection["handle#{domainEvent.name}"]
-        logger.debug "Tried to apply DomainEvent '#{domainEvent.name}' to Projection without a matching handle method"
         return
 
       return projection["handle#{domainEvent.name}"] domainEvent

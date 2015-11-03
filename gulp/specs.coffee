@@ -17,7 +17,10 @@ module.exports = (gulp) ->
 
 
   gulp.task 'specs:server', ->
-    gulp.src 'src/**/*.coffee'
+    gulp.src [
+      'src/spec_setup.coffee'
+      'src/**/*.coffee'
+    ]
     .pipe mocha()
 
 
@@ -27,6 +30,7 @@ module.exports = (gulp) ->
       filename: 'specs.js'
 
     gulp.src [
+      'src/spec_setup.coffee'
       'src/**/*.coffee'
     ]
     .pipe webpack webpackConfig

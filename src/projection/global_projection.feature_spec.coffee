@@ -3,16 +3,16 @@ describe 'Global Projection Feature', ->
   firstContext = null
   secondContext = null
 
-  specHelper = null
+  contextSpecHelper = null
 
   beforeEach ->
-    specHelper = require './global_projection.spec_helper'
+    contextSpecHelper = require 'eventric/context/context.spec_helper'
 
-    firstContext = specHelper.createContextWithOneAggregate
+    firstContext = contextSpecHelper.createContextWithOneAggregate
       contextName: 'First'
       aggregateName: 'FirstContextAggregate'
 
-    secondContext = specHelper.createContextWithOneAggregate
+    secondContext = contextSpecHelper.createContextWithOneAggregate
       contextName: 'Second'
       aggregateName: 'SecondContextAggregate'
 

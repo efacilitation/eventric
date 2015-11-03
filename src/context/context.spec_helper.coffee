@@ -1,6 +1,6 @@
 class GlobalProjectionFeatureSpecHelper
 
-  createContextWithOneAggregate: ({contextName, aggregateName, domainEventName}) ->
+  createContextWithOneAggregate: ({contextName, aggregateName}) ->
     createdEventName = aggregateName + 'Created'
     modifiedEventName = aggregateName + 'Modified'
 

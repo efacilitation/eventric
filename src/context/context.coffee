@@ -145,10 +145,9 @@ class Context
 
   command: (commandName, params) ->
     if @_isDestroyed
-      Promise.reject new Error """
+      return Promise.reject new Error """
         Context #{@name} was destroyed, cannot execute command #{commandName} with arguments #{JSON.stringify(params)}
       """
-      return
 
     executingCommand = new Promise (resolve, reject) =>
       @_verifyContextIsInitialized commandName

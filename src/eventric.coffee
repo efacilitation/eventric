@@ -43,7 +43,8 @@ class Eventric
 
     context = new Context name
 
-    @_delegateAllDomainEventsToRemoteEndpoints context
+    context.subscribeToAllDomainEvents (domainEvent) =>
+      @_delegateDomainEventToRemoteEndpoints domainEvent
 
     @_contexts[name] = context
 
@@ -111,12 +112,15 @@ class Eventric
       callback error
 
 
-  _delegateAllDomainEventsToRemoteEndpoints: (context) ->
-    context.subscribeToAllDomainEvents (domainEvent) =>
-      @_remoteEndpoints.forEach (remoteEndpoint) ->
-        remoteEndpoint.publish context.name, domainEvent.name, domainEvent
-        if domainEvent.aggregate
-          remoteEndpoint.publish context.name, domainEvent.name, domainEvent.aggregate.id, domainEvent
+  _delegateDomainEventToRemoteEndpoints: (domainEvent) ->
+    Promise.all @_remoteEndpoints.map (remoteEndpoint) ->
+      publishPromise = Promise.resolve().then ->
+        remoteEndpoint.publish domainEvent.context, domainEvent.name, domainEvent
+      if domainEvent.aggregate
+        publishPromise = publishPromise.then ->
+          remoteEndpoint.publish domainEvent.context, domainEvent.name, domainEvent.aggregate.id, domainEvent
+
+      return publishPromise
 
 
 module.exports = new Eventric

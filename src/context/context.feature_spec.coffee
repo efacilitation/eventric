@@ -56,6 +56,16 @@ describe 'Context Feature', ->
       .then ->
         expect(projectionObject.initialize).to.have.been.called
 
+    it 'should correctly call initialize method of multiple projections', ->
+      exampleContext = eventric.context 'exampleContext'
+
+      projections = (initialize: sandbox.stub().yields() for i in [1..3])
+      for projection in projections
+        exampleContext.addProjection projection
+      exampleContext.initialize()
+      .then ->
+        for projection in projections
+          expect(projection.initialize).to.have.been.called
 
 
   describe 'destroying a context', ->

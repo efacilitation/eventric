@@ -199,16 +199,10 @@ class Context
 
 
   _getAggregateRepository: (aggregateName) =>
-    aggregateRepositoriesCache = {} if not aggregateRepositoriesCache
-    if not aggregateRepositoriesCache[aggregateName]
-      AggregateClass = @_aggregateClasses[aggregateName]
-      aggregateRepository = new AggregateRepository
-        aggregateName: aggregateName
-        AggregateClass: AggregateClass
-        context: @
-      aggregateRepositoriesCache[aggregateName] = aggregateRepository
-
-    aggregateRepositoriesCache[aggregateName]
+    new AggregateRepository
+      aggregateName: aggregateName
+      AggregateClass: @_aggregateClasses[aggregateName]
+      context: @
 
 
   _addPendingPromise: (pendingPromise) ->

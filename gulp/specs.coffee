@@ -1,6 +1,5 @@
 mocha = require 'gulp-mocha'
-gutil = require 'gulp-util'
-webpack = require 'webpack-stream'
+webpackStream = require 'webpack-stream'
 runSequence = require 'run-sequence'
 karma = require 'gulp-karma'
 
@@ -33,11 +32,11 @@ module.exports = (gulp) ->
       'src/spec_setup.coffee'
       'src/**/*.coffee'
     ]
-    .pipe webpack webpackConfig
+    .pipe webpackStream webpackConfig
     .pipe gulp.dest 'dist/specs'
 
 
-  gulp.task 'specs:client:run', (next) ->
+  gulp.task 'specs:client:run', ->
     gulp.src 'dist/specs/specs.js'
     .pipe karma
       configFile: 'karma.conf.coffee'

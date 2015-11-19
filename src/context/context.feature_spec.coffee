@@ -57,7 +57,6 @@ describe 'Context Feature', ->
         expect(projectionObject.initialize).to.have.been.called
 
 
-
   describe 'destroying a context', ->
     exampleContext = null
 
@@ -124,7 +123,8 @@ describe 'Context Feature', ->
         expect(commandSpy).to.have.been.called
 
 
-    it 'should wait to resolve given a command which publishes a domain event which triggers another command with domain event', ->
+    it 'should wait to resolve given a command which publishes a domain event \
+    which triggers another command with domain event', ->
       exampleContext.addAggregate 'Example', class Example
         create: ->
           @$emitDomainEvent 'ExampleCreated', {}

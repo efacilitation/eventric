@@ -133,8 +133,13 @@ describe 'Command Feature', ->
 
       describe 'given a command rejects with an error', ->
 
-        it 'should re-throw an error with a descriptive message given the command handler triggers an error', ->
+        dummyError = null
+
+        beforeEach ->
           dummyError = new Error 'dummy error'
+
+
+        it 'should re-throw an error with a descriptive message given the command handler triggers an error', ->
           exampleContext.addCommandHandlers
             CommandWithError: (params) ->
               new Promise ->
@@ -149,7 +154,6 @@ describe 'Command Feature', ->
 
 
         it 'should re-throw an error with a descriptive message given the command handler throws a synchronous error', ->
-          dummyError = new Error 'dummy error'
           exampleContext.addCommandHandlers
             CommandWithError: (params) ->
               throw dummyError
@@ -163,7 +167,6 @@ describe 'Command Feature', ->
 
 
         it 'should make it possible to access the original error message given the command handler triggers an error', ->
-          dummyError = new Error 'dummy error'
           exampleContext.addCommandHandlers
             CommandWithError: (params) ->
               new Promise ->

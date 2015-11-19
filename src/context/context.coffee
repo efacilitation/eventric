@@ -24,6 +24,34 @@ class Context
     @_projectionService = new Projection @
 
 
+  initialize: ->
+    logger.debug "[#{@name}] Initializing"
+    logger.debug "[#{@name}] Initializing Store"
+    @_initializeStore()
+    .then =>
+      logger.debug "[#{@name}] Initializing Projections"
+      @_initializeProjections()
+    .then =>
+      @_isInitialized = true
+
+
+  _initializeStore: ->
+    # TODO: Test
+    eventric = require '../eventric'
+    storeDefinition = eventric.getStoreDefinition()
+    @_storeInstance = new storeDefinition.Class
+    initializeStorePromise = @_storeInstance.initialize @, storeDefinition.options
+    return initializeStorePromise
+
+
+  _initializeProjections: ->
+    initializeProjectionsPromise = Promise.resolve()
+    for projectionObject in @_projectionObjects
+      initializeProjectionsPromise = initializeProjectionsPromise.then =>
+        @_projectionService.initializeInstance projectionObject, {}
+    return initializeProjectionsPromise
+
+
   defineDomainEvent: (domainEventName, DomainEventPayloadConstructor) ->
     @_domainEventPayloadConstructors[domainEventName] = DomainEventPayloadConstructor
     @
@@ -35,14 +63,14 @@ class Context
     @
 
 
-  addCommandHandlers: (commands) ->
-    for commandHandlerName, commandFunction of commands
+  addCommandHandlers: (commandHandlers) ->
+    for commandHandlerName, commandFunction of commandHandlers
       @_commandHandlers[commandHandlerName] = commandFunction
     @
 
 
-  addQueryHandlers: (queries) ->
-    for queryHandlerName, queryFunction of queries
+  addQueryHandlers: (queryHandlers) ->
+    for queryHandlerName, queryFunction of queryHandlers
       @_queryHandlers[queryHandlerName] = queryFunction
     @
 
@@ -83,34 +111,6 @@ class Context
 
   destroyProjectionInstance: (projectionId) ->
     @_projectionService.destroyInstance projectionId, @
-
-
-  initialize: ->
-    logger.debug "[#{@name}] Initializing"
-    logger.debug "[#{@name}] Initializing Store"
-    @_initializeStore()
-    .then =>
-      logger.debug "[#{@name}] Initializing Projections"
-      @_initializeProjections()
-    .then =>
-      @_isInitialized = true
-
-
-  _initializeStore: ->
-    # TODO: Test
-    eventric = require '../eventric'
-    storeDefinition = eventric.getStoreDefinition()
-    @_storeInstance = new storeDefinition.Class
-    initializeStorePromise = @_storeInstance.initialize @, storeDefinition.options
-    return initializeStorePromise
-
-
-  _initializeProjections: ->
-    initializeProjectionsPromise = Promise.resolve()
-    for projectionObject in @_projectionObjects
-      initializeProjectionsPromise = initializeProjectionsPromise.then =>
-        @_projectionService.initializeInstance projectionObject, {}
-    return initializeProjectionsPromise
 
 
   getDomainEventPayloadConstructor: (domainEventName) ->
@@ -171,8 +171,7 @@ class Context
           reject new Error commandErrorMessage
           return
 
-        error.originalErrorMessage = error.message
-        error.message = "#{commandErrorMessage} - original error message: #{error.originalErrorMessage}"
+        error = @_extendError error, commandErrorMessage
         reject error
 
 
@@ -196,6 +195,12 @@ class Context
         aggregateRepository.load aggregateId
 
     return servicesToInject
+
+
+  _extendError: (error, additionalMessage) ->
+    error.originalErrorMessage = error.message
+    error.message = "#{additionalMessage} - original error message: #{error.originalErrorMessage}"
+    return error
 
 
   _getAggregateRepository: (aggregateName) =>
@@ -227,7 +232,17 @@ class Context
       .then (result) ->
         logger.debug "Completed Query #{queryName} with Result #{result}"
         resolve result
-      .catch reject
+      .catch (error) =>
+        queryErrorMessage = """
+          Query "#{queryName}" with arguments #{JSON.stringify(params)} of context "#{@name}" rejects with an error
+        """
+
+        if not error
+          reject new Error queryErrorMessage
+          return
+
+        error = @_extendError error, queryErrorMessage
+        reject error
 
 
   _verifyContextIsInitialized: (methodName) ->

@@ -1,6 +1,7 @@
 describe 'Query Feature', ->
 
   describe 'given the context was not initialized yet', ->
+
     it 'should callback with an error including the context name and command name', ->
       someContext = eventric.context 'ExampleContext'
       someContext.query 'getSomething'
@@ -11,6 +12,7 @@ describe 'Query Feature', ->
 
 
   describe 'given the query has no matching query handler', ->
+
     it 'should callback with an error', ->
       someContext = eventric.context 'ExampleContext'
       someContext.initialize()
@@ -35,8 +37,67 @@ describe 'Query Feature', ->
       exampleContext.initialize()
 
 
-    describe 'when we query the context', ->
-      it 'then the query should return the correct result', ->
-        exampleContext.query 'getExample', id: 1
-        .then (result) ->
-          expect(result).to.deep.equal queryResult
+    it 'should return the correct result', ->
+      exampleContext.query 'getExample', id: 1
+      .then (result) ->
+        expect(result).to.deep.equal queryResult
+
+
+    describe 'given a query rejects with an error', ->
+
+      dummyError = null
+
+      beforeEach ->
+        dummyError = new Error 'dummy error'
+
+
+      it 'should re-throw an error with a descriptive message given the query handler triggers an error', ->
+        exampleContext.addQueryHandlers
+          getExampleWithError: ->
+            new Promise ->
+              throw dummyError
+
+        exampleContext.query 'getExampleWithError', foo: 'bar'
+        .catch (error) ->
+          expect(error).to.equal dummyError
+          expect(error.message).to.contain 'exampleContext'
+          expect(error.message).to.contain 'getExampleWithError'
+          expect(error.message).to.contain '{"foo":"bar"}'
+
+
+      it 'should re-throw an error with a descriptive message given the query handler throws a synchronous error', ->
+        exampleContext.addQueryHandlers
+          getExampleWithError: (params) ->
+            throw dummyError
+
+        exampleContext.query 'getExampleWithError', foo: 'bar'
+        .catch (error) ->
+          expect(error).to.equal dummyError
+          expect(error.message).to.contain 'exampleContext'
+          expect(error.message).to.contain 'getExampleWithError'
+          expect(error.message).to.contain '{"foo":"bar"}'
+
+
+      it 'should make it possible to access the original error message given the query handler triggers an error', ->
+        exampleContext.addQueryHandlers
+          getExampleWithError: (params) ->
+            new Promise ->
+              throw dummyError
+
+        exampleContext.query 'getExampleWithError', foo: 'bar'
+        .catch (error) ->
+          expect(error).to.equal dummyError
+          expect(error.originalErrorMessage).to.equal 'dummy error'
+
+
+      it 'should throw a generic error given the query handler rejects without an error', ->
+        exampleContext.addQueryHandlers
+          getExampleWithoutError: (params) ->
+            return Promise.reject()
+
+        exampleContext.query 'getExampleWithoutError', foo: 'bar'
+        .catch (error) ->
+          expect(error).to.be.an.instanceOf Error
+          expect(error.message).to.contain 'exampleContext'
+          expect(error.message).to.contain 'getExampleWithoutError'
+          expect(error.message).to.contain '{"foo":"bar"}'

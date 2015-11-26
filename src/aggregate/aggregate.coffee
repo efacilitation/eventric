@@ -4,7 +4,7 @@ domainEventIdGenerator = require './domain_event_id_generator'
 class Aggregate
 
   constructor: (@_context, @_name, AggregateClass) ->
-    @_domainEvents = []
+    @_newDomainEvents = []
     @instance = new AggregateClass
     @instance.$emitDomainEvent = @emitDomainEvent
 
@@ -19,7 +19,7 @@ class Aggregate
       name: @_name
 
     domainEvent = @_createDomainEvent domainEventName, domainEventPayload, aggregate
-    @_domainEvents.push domainEvent
+    @_newDomainEvents.push domainEvent
 
     @_handleDomainEvent domainEventName, domainEvent
 
@@ -46,8 +46,8 @@ class Aggregate
       @instance["handle#{domainEventName}"] domainEvent
 
 
-  getDomainEvents: ->
-    @_domainEvents
+  getNewDomainEvents: ->
+    @_newDomainEvents
 
 
   applyDomainEvents: (domainEvents) ->

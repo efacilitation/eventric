@@ -20,67 +20,65 @@ class AggregateRepository
           return
 
         if not domainEvents?.length
-          reject new Error "No domainEvents for #{@_aggregateName} Aggregate with #{aggregateId} available"
+          reject new Error "No domainEvents for aggregate of type #{@_aggregateName} with #{aggregateId} available"
           return
 
         domainEvents = domainEventService.sortDomainEventsById domainEvents
 
         aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
-        aggregate.applyDomainEvents domainEvents
         aggregate.setId aggregateId
-        aggregate.instance.$save = =>
-          @save aggregate
+        aggregate.applyDomainEvents domainEvents
+        @_installSaveFunctionOnAggregateInstance aggregate
 
         resolve aggregate.instance
 
 
   create: (params) =>
-    new Promise (resolve, reject) =>
+    Promise.resolve().then =>
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
 
       if typeof aggregate.instance.create isnt 'function'
         throw new Error "No create function on aggregate"
 
       aggregate.setId uuidGenerator.generateUuid()
-      aggregate.instance.$save = =>
-        @save aggregate
+      @_installSaveFunctionOnAggregateInstance aggregate
 
       Promise.resolve aggregate.instance.create params
       .then ->
-        resolve aggregate.instance
-      .catch reject
+        return aggregate.instance
+
+
+  _installSaveFunctionOnAggregateInstance: (aggregate) ->
+    aggregate.instance.$save = =>
+      @save aggregate
 
 
   save: (aggregate) =>
-    new Promise (resolve, reject) =>
+    Promise.resolve().then =>
       if not aggregate
         throw new Error "Tried to save unknown aggregate #{@_aggregateName}"
 
-      domainEvents = aggregate.getDomainEvents()
+      domainEvents = aggregate.getNewDomainEvents()
       if not domainEvents?.length
-        throw new Error "Tried to save 0 DomainEvents from Aggregate #{@_aggregateName}"
+        throw new Error "No new domain events to save for aggregate of type #{@_aggregateName} with id #{aggregate.id}"
 
       logger.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
-      # TODO: this should be an transaction to guarantee consistency
+      # TODO: Think about how to achieve "transactions" to guarantee consistency when saving multiple events
       saveDomainEventQueue = Promise.resolve()
       domainEvents.forEach (domainEvent) =>
         saveDomainEventQueue = saveDomainEventQueue.then =>
           @_store.saveDomainEvent domainEvent
-        .then ->
-          logger.debug 'Saved DomainEvent', domainEvent
 
 
       saveDomainEventQueue
       .then =>
         domainEvents.forEach (domainEvent) =>
-          logger.debug 'Publishing DomainEvent', domainEvent
           @_context.getEventBus().publishDomainEvent domainEvent
           .catch (error) ->
             logger.error error.stack || error
-      .then ->
-        resolve aggregate.id
-      .catch reject
+
+        return aggregate.id
 
 
 module.exports = AggregateRepository

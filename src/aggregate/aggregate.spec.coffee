@@ -43,7 +43,7 @@ describe 'aggregate', ->
         contextFake.getDomainEventPayloadConstructor = ->
           return DomainEvent
         aggregate.emitDomainEvent 'DomainEventName', sampleValue: 'sample-value'
-        domainEvent = aggregate.getDomainEvents()[0]
+        domainEvent = aggregate.getNewDomainEvents()[0]
 
 
       it 'should save a domain event with a domain event id', ->

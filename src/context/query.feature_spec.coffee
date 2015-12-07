@@ -43,8 +43,7 @@ describe 'Query Feature', ->
         expect(result).to.deep.equal queryResult
 
 
-    describe 'given a query rejects with an error', ->
-
+    describe 'given a query handler rejects with an error', ->
       dummyError = null
 
       beforeEach ->

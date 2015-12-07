@@ -25,6 +25,17 @@ class AggregateRepository
 
         domainEvents = domainEventService.sortDomainEventsById domainEvents
 
+        aggregateDeletedEvent = null
+        for domainEvent in domainEvents by -1
+          if domainEvent.name.indexOf("#{@_aggregateName}Deleted") > -1
+            aggregateDeletedEvent = domainEvent
+            break
+
+        if aggregateDeletedEvent?
+          reject new Error "Aggregate of type #{@_aggregateName} with id #{aggregateId} is marked as deleted because of \
+            domain event #{aggregateDeletedEvent.name} with domain event id #{aggregateDeletedEvent.id}"
+          return
+
         aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
         aggregate.setId aggregateId
         aggregate.applyDomainEvents domainEvents

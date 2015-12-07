@@ -33,7 +33,7 @@ describe 'aggregate repository', ->
 
 
     it 'should ask the domain event store for domain events of the aggregate with given id', ->
-      domainEvent = {}
+      domainEvent = domainEventSpecHelper.createDomainEvent 'DomainEvent'
       domainEventStoreStub.findDomainEventsByAggregateId.yields null, [domainEvent]
       aggregateRepository.load 'aggregate-1'
       .then ->
@@ -58,7 +58,7 @@ describe 'aggregate repository', ->
         expect(error).to.be.instanceof Error
 
 
-    describe 'given the domain event store yields domain events', ->
+    describe 'given the domain event store yields valid domain events', ->
 
       aggregateInstance = null
 
@@ -108,6 +108,47 @@ describe 'aggregate repository', ->
         aggregateInstance.$save()
         expect(aggregateRepository.save).to.have.been.called
         expect(aggregateRepository.save.getCall(0).args[0]).to.be.an.instanceOf Aggregate
+
+
+    describe 'given the domain event store yields events using the aggregate name followed by the word "Deleted" as name', ->
+
+      beforeEach ->
+        aggregateRepository = new AggregateRepository
+          aggregateName: 'SampleAggregate'
+          AggregateClass: class SampleAggregate
+          context: contextStub
+
+
+      it 'should reject with an error expressing that the aggregate has been marked as deleted', ->
+        deletedDomainEvent = domainEventSpecHelper.createDomainEvent 'SampleAggregateDeleted'
+        domainEventStoreStub.findDomainEventsByAggregateId.yields null, [deletedDomainEvent]
+        aggregateRepository.load 'aggregate-1'
+        .catch (error) ->
+          expect(error.message).to.contain 'aggregate-1'
+          expect(error.message).to.contain 'SampleAggregate'
+          expect(error.message).to.contain 'SampleAggregateDeleted'
+
+
+      it 'should always use the deleted event with the latest domain event id given there are multiple matching events', ->
+        firstDomainEvent = domainEventSpecHelper.createDomainEvent 'SampleAggregateDeleted'
+        secondDomainEvent = domainEventSpecHelper.createDomainEvent 'SampleAggregateDeleted'
+        domainEventStoreStub.findDomainEventsByAggregateId.yields null, [secondDomainEvent, firstDomainEvent]
+        aggregateRepository.load 'aggregate-1'
+        .catch (error) ->
+          expect(error.message).to.contain 'aggregate-1'
+          expect(error.message).to.contain 'SampleAggregate'
+          expect(error.message).to.contain 'SampleAggregateDeleted'
+          expect(error.message).to.contain secondDomainEvent.id
+
+
+    it 'should not reject given a domain event uses the word "Deleted" in its name but not combined with the aggregate name', ->
+      domainEvent = domainEventSpecHelper.createDomainEvent 'SomeEntityDeleted'
+      domainEventStoreStub.findDomainEventsByAggregateId.yields null, [domainEvent]
+      loadingPromise = aggregateRepository.load 'aggregate-1'
+      loadingPromise
+      .then ->
+        expect(loadingPromise).to.be.ok
+
 
 
   describe '#create', ->

@@ -45,11 +45,7 @@ class Context
 
 
   _initializeProjections: ->
-    initializeProjectionsPromise = Promise.resolve()
-    for projectionObject in @_projectionObjects
-      initializeProjectionsPromise = initializeProjectionsPromise.then =>
-        @_projectionService.initializeInstance projectionObject, {}
-    return initializeProjectionsPromise
+    Promise.all (@_projectionService.initializeInstance projectionObject, {} for projectionObject in @_projectionObjects)
 
 
   defineDomainEvent: (domainEventName, DomainEventPayloadConstructor) ->

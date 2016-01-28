@@ -44,7 +44,7 @@ describe 'Context Feature', ->
       .catch done
 
 
-  describe 'adding a projection', ->
+  describe 'adding projections', ->
 
     it 'should call the initialize method of the projection', ->
       exampleContext = eventric.context 'exampleContext'
@@ -55,6 +55,20 @@ describe 'Context Feature', ->
       exampleContext.initialize()
       .then ->
         expect(projectionObject.initialize).to.have.been.called
+
+
+  it 'should correctly call the initialize methods of multiple projections', ->
+    exampleContext = eventric.context 'exampleContext'
+
+    firstProjection = initialize: sandbox.stub().yields()
+    secondProjection = initialize: sandbox.stub().yields()
+    exampleContext.addProjection firstProjection
+    exampleContext.addProjection secondProjection
+
+    exampleContext.initialize()
+    .then ->
+      expect(firstProjection.initialize).to.have.been.called
+      expect(secondProjection.initialize).to.have.been.called
 
 
   describe 'destroying a context', ->

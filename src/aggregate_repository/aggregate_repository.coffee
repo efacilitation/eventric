@@ -44,6 +44,7 @@ class AggregateRepository
         resolve aggregate.instance
 
 
+  # TODO: Rename to "new" and remove automagic call of create() function on aggregate
   create: (params) =>
     Promise.resolve().then =>
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass

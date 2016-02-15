@@ -9,6 +9,7 @@ class Context
   constructor: (@name) ->
     @_isInitialized = false
     @_isDestroyed = false
+    # TODO: Consider removing this "DI" since queries can be executed by simply accessing the context
     @_di =
       $query: => @query.apply @, arguments
     @_aggregateClasses = {}

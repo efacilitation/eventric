@@ -38,7 +38,7 @@ describe 'Remote Projection Feature', ->
       exampleProjection = null
 
       beforeEach ->
-        exampleRemote = eventric.remote 'Example'
+        exampleRemote = eventric.remoteContext 'Example'
 
         exampleProjection =
 
@@ -74,7 +74,7 @@ describe 'Remote Projection Feature', ->
       exampleProjection = null
 
       beforeEach ->
-        exampleRemote = eventric.remote 'Example'
+        exampleRemote = eventric.remoteContext 'Example'
         exampleProjection =
           initialize: (params, done) ->
             done()
@@ -100,7 +100,7 @@ describe 'Remote Projection Feature', ->
       exampleProjection = null
 
       beforeEach ->
-        exampleRemote = eventric.remote 'Example'
+        exampleRemote = eventric.remoteContext 'Example'
 
         exampleProjection =
 
@@ -143,7 +143,7 @@ describe 'Remote Projection Feature', ->
     describe 'adding a remote projection for which matching domain events already exist', ->
 
       it 'should apply the already existing domain events immediately to the projection', ->
-        exampleRemote = eventric.remote 'Example'
+        exampleRemote = eventric.remoteContext 'Example'
 
         exampleProjection =
 
@@ -165,7 +165,7 @@ describe 'Remote Projection Feature', ->
       exampleProjection = null
 
       beforeEach ->
-        exampleRemote = eventric.remote 'Example'
+        exampleRemote = eventric.remoteContext 'Example'
 
         exampleProjection =
 
@@ -222,7 +222,7 @@ describe 'Remote Projection Feature', ->
       exampleProjection = null
 
       beforeEach ->
-        exampleRemote = eventric.remote 'Example'
+        exampleRemote = eventric.remoteContext 'Example'
 
         exampleProjection =
 
@@ -289,7 +289,7 @@ describe 'Remote Projection Feature', ->
       secondProjection = null
 
       beforeEach ->
-        exampleRemote = eventric.remote 'Example'
+        exampleRemote = eventric.remoteContext 'Example'
 
         firstProjection =
 

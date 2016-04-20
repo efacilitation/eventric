@@ -51,7 +51,7 @@ describe 'Remote Feature', ->
 
     exampleContext.initialize()
     .then ->
-      exampleRemote = eventric.remote 'Example'
+      exampleRemote = eventric.remoteContext 'Example'
 
 
   describe 'creating a remote for an example context', ->

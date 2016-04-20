@@ -3,9 +3,11 @@ describe 'eventric', ->
   domainEventSpecHelper = require 'eventric/domain_event/domain_event.spec_helper'
 
   Context = null
+  Remote = null
 
   beforeEach ->
     Context = require './context'
+    Remote = require './remote'
 
 
   describe '#context', ->
@@ -37,6 +39,44 @@ describe 'eventric', ->
         expect(inmemoryRemoteEndpoint.publish).to.have.been.calledWith contextName, 'SomeDomainEvent', sinon.match.string,
           domainEvent
         done()
+
+
+  describe '#remoteContext', ->
+
+    it 'should throw an error given no context name', ->
+      expect(-> eventric.remoteContext null ).to.throw Error, /Missing context name/
+
+
+    it 'should return the remote context for a given context name', ->
+      remoteContext = eventric.remoteContext 'ContextName'
+      expect(remoteContext).to.be.an.instanceOf Remote
+
+
+    it 'should cache remote contexts by context name', ->
+      remote1 = eventric.remoteContext 'ContextName'
+      remote2 = eventric.remoteContext 'ContextName'
+      expect(remote1).to.equal remote2
+
+
+    it 'should not set a default remote client on the returned remote context given no default client was set before', ->
+      inmemoryRemote = require 'eventric-remote-inmemory'
+      remoteContext = eventric.remoteContext 'ContextName'
+      expect(remoteContext._client).to.equal inmemoryRemote.client
+
+
+    it 'should set the default remote client on the returned remote context given a default client was set before', ->
+      remoteClient = {}
+      eventric.setDefaultRemoteClient remoteClient
+      remoteContext = eventric.remoteContext 'ContextName'
+      expect(remoteContext._client).to.equal remoteClient
+
+
+  describe '#setDefaultRemoteClient', ->
+
+    it 'should remember the default remote client', ->
+      remoteClient = {}
+      eventric.setDefaultRemoteClient remoteClient
+      expect(eventric._defaultRemoteClient).to.equal remoteClient
 
 
   describe '#getRegisteredContextNames', ->

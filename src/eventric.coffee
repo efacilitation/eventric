@@ -7,6 +7,7 @@ Context = require './context'
 inmemoryStore = require './store/inmemory'
 uuidGenerator = require './uuid_generator'
 logger = require './logger'
+remoteContextHash = {}
 
 class Eventric
 
@@ -66,10 +67,22 @@ class Eventric
     Object.keys @_contexts
 
 
-  remote: (contextName) ->
+  setDefaultRemoteClient: (remoteClient) ->
+    @_defaultRemoteClient = remoteClient
+
+
+  remoteContext: (contextName) ->
     if !contextName
       throw new Error 'Missing context name'
-    new Remote contextName
+
+    return remoteContextHash[contextName] if remoteContextHash[contextName]
+
+    remote = remoteContextHash[contextName] = new Remote contextName
+
+    if @_defaultRemoteClient
+      remote.setClient @_defaultRemoteClient
+
+    return remote
 
 
   addRemoteEndpoint: (remoteEndpoint) ->

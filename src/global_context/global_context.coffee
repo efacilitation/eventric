@@ -28,7 +28,7 @@ class GlobalContext
     eventric = require '../eventric'
     contextNames = eventric.getRegisteredContextNames()
     contextNames.map (contextName) ->
-      eventric.remote contextName
+      eventric.remoteContext contextName
 
 
   _combineDomainEventsByContext: (domainEventsByContext) ->

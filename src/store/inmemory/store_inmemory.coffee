@@ -1,17 +1,20 @@
 class InMemoryStore
   _domainEvents: {}
+  _domainEventIdCounter: 1
   _projections: {}
 
   initialize: (@_context) ->
     new Promise (resolve) =>
       @_domainEventsCollectionName = "#{@_context.name}.DomainEvents"
-      @_projectionCollectionName   = "#{@_context.name}.Projections"
+      @_projectionCollectionName = "#{@_context.name}.Projections"
       @_domainEvents[@_domainEventsCollectionName] = []
       resolve()
 
 
   saveDomainEvent: (domainEvent) ->
     new Promise (resolve) =>
+      # TODO: we should not modify input arguments in order to keep the code side effects free
+      domainEvent.id = @_domainEventIdCounter++
       @_domainEvents[@_domainEventsCollectionName].push domainEvent
       resolve domainEvent
 

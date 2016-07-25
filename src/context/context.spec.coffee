@@ -20,6 +20,8 @@ describe 'context', ->
 
     firstDomainEvent = domainEventSpecHelper.createDomainEvent()
     secondDomainEvent = domainEventSpecHelper.createDomainEvent()
+    firstDomainEvent.id = 1
+    secondDomainEvent.id = 2
 
     Context = require './'
     context = new Context 'SampleContext'

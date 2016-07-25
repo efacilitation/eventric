@@ -43,7 +43,7 @@ describe 'Command Feature', ->
       # Domain Events
       exampleContext.defineDomainEvent 'ExampleCreated', ->
       exampleContext.defineDomainEvent 'SomethingHappened', (params) ->
-        @someId   = params.someId
+        @someId = params.someId
         @someProperty = params.someProperty
 
 
@@ -91,6 +91,7 @@ describe 'Command Feature', ->
           aggregateId: exampleId
           someId: 'some-id'
           someProperty: 'some-property'
+      .catch done
 
 
     it 'should execute all commands as expected given multiple commands are sent to the context', (done) ->
@@ -112,6 +113,7 @@ describe 'Command Feature', ->
           aggregateId: exampleId
           someId: 'some-id'
           someProperty: 'some-property'
+      .catch done
 
 
     it '[bugfix] should return the correct payload given an array at the domain event definition', (done) ->
@@ -127,6 +129,7 @@ describe 'Command Feature', ->
           aggregateId: exampleId
           someId: 'some-id'
           someProperty: ['value-1', 'value-2']
+      .catch done
 
 
     describe 'given a command handler rejects with an error', ->

@@ -78,14 +78,17 @@ class AggregateRepository
 
       # TODO: Think about how to achieve "transactions" to guarantee consistency when saving multiple events
       saveDomainEventQueue = Promise.resolve()
+      savedDomainEvents = []
       domainEvents.forEach (domainEvent) =>
+        # TODO: find out if this can be saved in parallel
         saveDomainEventQueue = saveDomainEventQueue.then =>
           @_store.saveDomainEvent domainEvent
-
+          .then (domainEvent) ->
+            savedDomainEvents.push domainEvent
 
       saveDomainEventQueue
       .then =>
-        domainEvents.forEach (domainEvent) =>
+        savedDomainEvents.forEach (domainEvent) =>
           @_context.getEventBus().publishDomainEvent domainEvent
           .catch (error) ->
             logger.error error.stack || error

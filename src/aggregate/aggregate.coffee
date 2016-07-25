@@ -1,5 +1,4 @@
 DomainEvent = require 'eventric/domain_event'
-domainEventIdGenerator = require './domain_event_id_generator'
 
 class Aggregate
 
@@ -34,7 +33,6 @@ class Aggregate
     DomainEventPayloadConstructor.apply payload, [domainEventConstructorParams]
 
     new DomainEvent
-      id: domainEventIdGenerator.generateId()
       name: domainEventName
       aggregate: aggregate
       context: @_context.name

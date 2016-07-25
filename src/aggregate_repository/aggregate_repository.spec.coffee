@@ -19,6 +19,7 @@ describe 'aggregate repository', ->
     domainEventStoreStub = sandbox.stub new InmemoryRemote
     eventBusStub = sandbox.stub new EventBus
     contextStub = sandbox.stub eventric.context 'fake'
+    domainEventStoreStub.saveDomainEvent.returns Promise.resolve()
     contextStub.getDomainEventsStore.returns domainEventStoreStub
     contextStub.getEventBus.returns eventBusStub
 
@@ -72,6 +73,8 @@ describe 'aggregate repository', ->
         sandbox.spy domainEventService, 'sortDomainEventsById'
         firstDomainEvent = domainEventSpecHelper.createDomainEvent 'FirstDomainEvent'
         secondDomainEvent = domainEventSpecHelper.createDomainEvent 'SecondDomainEvent'
+        firstDomainEvent.id = 1
+        secondDomainEvent.id = 2
 
         aggregateRepository = new AggregateRepository
           aggregateName: 'SampleAggregate'
@@ -263,7 +266,14 @@ describe 'aggregate repository', ->
         secondDomainEvent = domainEventSpecHelper.createDomainEvent 'SecondDomainEvent'
         aggregate = new Aggregate contextStub, 'SampleAggregate', SampleAggregate
         sandbox.stub(aggregate, 'getNewDomainEvents').returns [firstDomainEvent, secondDomainEvent]
-        domainEventStoreStub.saveDomainEvent.returns Promise.resolve()
+
+        domainEventStoreStub.saveDomainEvent
+        .withArgs firstDomainEvent
+        .returns Promise.resolve firstDomainEvent
+
+        domainEventStoreStub.saveDomainEvent
+        .withArgs secondDomainEvent
+        .returns Promise.resolve secondDomainEvent
 
 
       it 'should call saveDomainEvent on the store for each domain event', ->

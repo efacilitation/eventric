@@ -1,7 +1,10 @@
 class InMemoryStore
-  _domainEvents: {}
-  _domainEventIdCounter: 1
-  _projections: {}
+
+  constructor: ->
+    @_domainEvents = {}
+    @_projections = {}
+    @_domainEventIdCounter = 1
+
 
   initialize: (@_context) ->
     new Promise (resolve) =>

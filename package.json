@@ -29,6 +29,7 @@
     "coffee-loader": "0.7.2",
     "coffee-script": "1.9.3",
     "es6-promise": "2.1.1",
+    "eventric-store-specs": "1.0.3",
     "gulp-coffee": "2.3.1",
     "gulp-karma": "0.0.4",
     "gulp-mocha": "2.1.0",

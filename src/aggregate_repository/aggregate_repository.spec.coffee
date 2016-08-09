@@ -257,23 +257,40 @@ describe 'aggregate repository', ->
 
     describe 'given there are new domain events for the aggregate', ->
 
+      copyDomainEvent = (domainEvent) ->
+        return {
+          name: domainEvent.name
+          payload: domainEvent.payload
+          aggregate: domainEvent.aggregate
+          context: domainEvent.context
+          timestamp: domainEvent.timestamp
+        }
+
       firstDomainEvent = null
+      firstDomainEventSaved = null
       secondDomainEvent = null
+      secondDomainEventSaved = null
       aggregate = null
 
       beforeEach ->
         firstDomainEvent = domainEventSpecHelper.createDomainEvent 'FirstDomainEvent'
+        firstDomainEventSaved = copyDomainEvent firstDomainEvent
+        firstDomainEventSaved.id = 1
+
         secondDomainEvent = domainEventSpecHelper.createDomainEvent 'SecondDomainEvent'
+        secondDomainEventSaved = copyDomainEvent firstDomainEvent
+        secondDomainEventSaved.id = 1
+
         aggregate = new Aggregate contextStub, 'SampleAggregate', SampleAggregate
         sandbox.stub(aggregate, 'getNewDomainEvents').returns [firstDomainEvent, secondDomainEvent]
 
         domainEventStoreStub.saveDomainEvent
         .withArgs firstDomainEvent
-        .returns Promise.resolve firstDomainEvent
+        .returns Promise.resolve firstDomainEventSaved
 
         domainEventStoreStub.saveDomainEvent
         .withArgs secondDomainEvent
-        .returns Promise.resolve secondDomainEvent
+        .returns Promise.resolve secondDomainEventSaved
 
 
       it 'should call saveDomainEvent on the store for each domain event', ->
@@ -284,12 +301,13 @@ describe 'aggregate repository', ->
           expect(domainEventStoreStub.saveDomainEvent.getCall(1).args[0]).to.equal secondDomainEvent
 
 
-      it 'should call publishDomainEvent on the event bus for each domain event', ->
+      it 'should call publishDomainEvent on the event bus for each saved domain event', ->
         aggregateRepository.save aggregate
         .then ->
           expect(eventBusStub.publishDomainEvent).to.have.been.calledTwice
-          expect(eventBusStub.publishDomainEvent.getCall(0).args[0]).to.equal firstDomainEvent
-          expect(eventBusStub.publishDomainEvent.getCall(1).args[0]).to.equal secondDomainEvent
+          console.log eventBusStub.publishDomainEvent.getCall(0).args[0]
+          expect(eventBusStub.publishDomainEvent.getCall(0).args[0]).to.equal firstDomainEventSaved
+          expect(eventBusStub.publishDomainEvent.getCall(1).args[0]).to.equal secondDomainEventSaved
 
 
       it 'should resolve with the aggregate id', ->

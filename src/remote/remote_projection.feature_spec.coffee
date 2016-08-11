@@ -108,9 +108,9 @@ describe 'Remote Projection Feature', ->
             @$subscribeHandlersWithAggregateId params.aggregateId
             done()
 
+
           handleExampleUpdated: (domainEvent) ->
             @updated = true
-
 
 
       it 'should update the projection state as expected', ->
@@ -127,6 +127,8 @@ describe 'Remote Projection Feature', ->
           expect(exampleProjection.updated).not.to.be.true
           exampleRemote.command 'UpdateExample',
             id: testExampleId
+          new Promise (resolve) ->
+            setTimeout resolve
         .then ->
           expect(exampleProjection.updated).to.be.true
 

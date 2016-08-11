@@ -42,6 +42,7 @@ describe 'Context Feature', ->
         exampleContext.command 'ModifyExample',
           exampleId: exampleId
       .catch done
+      return
 
 
   describe 'adding projections', ->

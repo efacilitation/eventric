@@ -49,6 +49,7 @@ describe 'Projection Feature', ->
         exampleContext.initialize()
         .then ->
           exampleContext.command 'CreateExample'
+        return
 
 
       it 'should reject with an error given subscribeHandlersWithAggregateId is called without an aggregate id', ->

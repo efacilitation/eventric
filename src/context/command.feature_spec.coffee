@@ -92,6 +92,7 @@ describe 'Command Feature', ->
           someId: 'some-id'
           someProperty: 'some-property'
       .catch done
+      return
 
 
     it 'should execute all commands as expected given multiple commands are sent to the context', (done) ->
@@ -114,6 +115,7 @@ describe 'Command Feature', ->
           someId: 'some-id'
           someProperty: 'some-property'
       .catch done
+      return
 
 
     it '[bugfix] should return the correct payload given an array at the domain event definition', (done) ->
@@ -130,6 +132,7 @@ describe 'Command Feature', ->
           someId: 'some-id'
           someProperty: ['value-1', 'value-2']
       .catch done
+      return
 
 
     describe 'given a command handler rejects with an error', ->
@@ -193,34 +196,35 @@ describe 'Command Feature', ->
           expect(error.message).to.contain '{"foo":"bar"}'
 
 
-describe 'creating an aggregate', ->
+  describe 'creating an aggregate', ->
 
-  it 'should emit the create domain event after creating an aggregate', (done) ->
-    exampleContext = eventric.context 'Examplecontext'
+    it 'should emit the create domain event after creating an aggregate', (done) ->
+      exampleContext = eventric.context 'Examplecontext'
 
-    exampleContext.defineDomainEvent 'ExampleCreated', (params) ->
-      @name = params.name
-      @email = params.email
+      exampleContext.defineDomainEvent 'ExampleCreated', (params) ->
+        @name = params.name
+        @email = params.email
 
-    class Example
-      create: (params) ->
-        @$emitDomainEvent 'ExampleCreated', params
-    exampleContext.addAggregate 'Example', Example
+      class Example
+        create: (params) ->
+          @$emitDomainEvent 'ExampleCreated', params
+      exampleContext.addAggregate 'Example', Example
 
-    exampleContext.addCommandHandlers
-      CreateExample: (params) ->
-        @$aggregate.create 'Example', params
-        .then (example) ->
-          example.$save()
+      exampleContext.addCommandHandlers
+        CreateExample: (params) ->
+          @$aggregate.create 'Example', params
+          .then (example) ->
+            example.$save()
 
-    exampleContext.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
-      expect(domainEvent.payload.name).to.be.equal 'John'
-      expect(domainEvent.payload.email).to.be.equal 'john@example.com'
-      done()
+      exampleContext.subscribeToDomainEvent 'ExampleCreated', (domainEvent) ->
+        expect(domainEvent.payload.name).to.be.equal 'John'
+        expect(domainEvent.payload.email).to.be.equal 'john@example.com'
+        done()
 
-    exampleContext.initialize()
-    .then ->
-      exampleContext.command 'CreateExample',
-        name: 'John'
-        email: 'john@example.com'
-    .catch done
+      exampleContext.initialize()
+      .then ->
+        exampleContext.command 'CreateExample',
+          name: 'John'
+          email: 'john@example.com'
+      .catch done
+      return

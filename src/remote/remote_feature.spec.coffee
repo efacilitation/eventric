@@ -92,6 +92,7 @@ describe 'Remote Feature', ->
 
       exampleRemote.command 'CreateExample', {}
       exampleRemote.command 'CreateExample', {}
+      return
 
 
   describe 'subscribing for an event for a specific aggregate id on a remote', ->
@@ -103,6 +104,7 @@ describe 'Remote Feature', ->
           done()
         exampleRemote.command 'ModifyExample',
           id: exampleId
+      return
 
 
   describe 'unsubscribing form an event on a remote', ->
@@ -118,6 +120,7 @@ describe 'Remote Feature', ->
           done()
       .then ->
         exampleRemote.command 'CreateExample', {}
+      return
 
 
   describe 'finding domain events by on a remote', ->

@@ -4,7 +4,7 @@ GlobalContext = require './global_context'
 Remote = require './remote'
 Projection = require './projection'
 Context = require './context'
-inmemoryStore = require './store/inmemory'
+InmemoryStore = require 'eventric-store-inmemory'
 uuidGenerator = require './uuid_generator'
 logger = require './logger'
 remoteContextHash = {}
@@ -23,7 +23,7 @@ class Eventric
     @_globalContext = new GlobalContext
     @_projectionService = new Projection @_globalContext
     @addRemoteEndpoint inmemoryRemote.endpoint
-    @setStore inmemoryStore, {}
+    @setStore InmemoryStore, {}
 
 
   # TODO: Test

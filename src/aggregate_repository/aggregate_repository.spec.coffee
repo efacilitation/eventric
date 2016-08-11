@@ -1,6 +1,6 @@
 describe 'aggregate repository', ->
 
-  InmemoryRemote = require 'eventric/store/inmemory'
+  InmemoryRemote = require 'eventric-store-inmemory'
   EventBus = require 'eventric/event_bus'
   Aggregate = require 'eventric/aggregate'
   domainEventService = require 'eventric/domain_event/domain_event_service'
@@ -305,7 +305,6 @@ describe 'aggregate repository', ->
         aggregateRepository.save aggregate
         .then ->
           expect(eventBusStub.publishDomainEvent).to.have.been.calledTwice
-          console.log eventBusStub.publishDomainEvent.getCall(0).args[0]
           expect(eventBusStub.publishDomainEvent.getCall(0).args[0]).to.equal firstDomainEventSaved
           expect(eventBusStub.publishDomainEvent.getCall(1).args[0]).to.equal secondDomainEventSaved
 

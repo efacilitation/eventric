@@ -5,12 +5,12 @@ karmaServer = require('karma').Server
 
 module.exports = (gulp) ->
 
-  gulp.task 'specs', (next) ->
-    runSequence 'specs:server', 'specs:client', next
+  gulp.task 'specs', (done) ->
+    runSequence 'specs:server', 'specs:client', done
 
 
-  gulp.task 'specs:client', (next) ->
-    runSequence 'specs:client:build', 'specs:client:run', next
+  gulp.task 'specs:client', (done) ->
+    runSequence 'specs:client:build', 'specs:client:run', done
 
 
   gulp.task 'specs:server', ->

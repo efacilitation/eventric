@@ -3,8 +3,8 @@ webpack = require 'webpack-stream'
 
 module.exports = (gulp) ->
 
-  gulp.task 'build', (next) ->
-    runSequence 'build:release', next
+  gulp.task 'build', (done) ->
+    runSequence 'build:release', done
 
 
   gulp.task 'build:release', ->

@@ -481,4 +481,4 @@ todoContext.initializeProjection todoProjection, {}
 
 MIT
 
-Copyright (c) 2013-2015 SixSteps Team, efa GmbH
+Copyright (c) 2013-2016 SixSteps Team, efa GmbH

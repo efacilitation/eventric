@@ -3,8 +3,13 @@ uuidGenerator = require 'eventric/uuid_generator'
 
 class DomainEventSpecHelper
 
+  constructor: ->
+    @_currentDomainEventId = 1
+
+
   createDomainEvent: (domainEventName = 'DomainEventName', payload = {}) ->
     return new DomainEvent
+      id: @_currentDomainEventId++
       name: domainEventName
       aggregate:
         id: uuidGenerator.generateUuid()

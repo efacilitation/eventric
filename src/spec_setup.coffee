@@ -19,7 +19,7 @@ if !root._spec_setup
 
 
 beforeEach ->
-  root.eventric = require 'eventric'
+  root.eventric = require './'
 
 
 afterEach ->

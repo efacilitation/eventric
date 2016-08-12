@@ -19,7 +19,6 @@ describe 'aggregate repository', ->
     domainEventStoreStub = sandbox.stub new InmemoryRemote
     eventBusStub = sandbox.stub new EventBus
     contextStub = sandbox.stub eventric.context 'fake'
-    domainEventStoreStub.saveDomainEvent.returns Promise.resolve()
     contextStub.getDomainEventsStore.returns domainEventStoreStub
     contextStub.getEventBus.returns eventBusStub
 
@@ -73,8 +72,6 @@ describe 'aggregate repository', ->
         sandbox.spy domainEventService, 'sortDomainEventsById'
         firstDomainEvent = domainEventSpecHelper.createDomainEvent 'FirstDomainEvent'
         secondDomainEvent = domainEventSpecHelper.createDomainEvent 'SecondDomainEvent'
-        firstDomainEvent.id = 1
-        secondDomainEvent.id = 2
 
         aggregateRepository = new AggregateRepository
           aggregateName: 'SampleAggregate'
@@ -226,15 +223,6 @@ describe 'aggregate repository', ->
         expect(error).to.be.instanceof Error
 
 
-    it 'should ask the aggregate for new domain events to save', ->
-      aggregate = new Aggregate contextStub, 'SampleAggregate', SampleAggregate
-      domainEvent = {}
-      sandbox.stub(aggregate, 'getNewDomainEvents').returns [domainEvent]
-      aggregateRepository.save aggregate
-      .then ->
-        expect(aggregate.getNewDomainEvents).to.have.been.called
-
-
     it 'should reject given the aggregate has no domain events', ->
       aggregate = new Aggregate contextStub, 'SampleAggregate', SampleAggregate
       aggregateRepository.save aggregate
@@ -257,15 +245,6 @@ describe 'aggregate repository', ->
 
     describe 'given there are new domain events for the aggregate', ->
 
-      copyDomainEvent = (domainEvent) ->
-        return {
-          name: domainEvent.name
-          payload: domainEvent.payload
-          aggregate: domainEvent.aggregate
-          context: domainEvent.context
-          timestamp: domainEvent.timestamp
-        }
-
       firstDomainEvent = null
       firstDomainEventSaved = null
       secondDomainEvent = null
@@ -274,12 +253,10 @@ describe 'aggregate repository', ->
 
       beforeEach ->
         firstDomainEvent = domainEventSpecHelper.createDomainEvent 'FirstDomainEvent'
-        firstDomainEventSaved = copyDomainEvent firstDomainEvent
-        firstDomainEventSaved.id = 1
+        firstDomainEventSaved = domainEventSpecHelper.createDomainEvent 'FirstDomainEvent'
 
         secondDomainEvent = domainEventSpecHelper.createDomainEvent 'SecondDomainEvent'
-        secondDomainEventSaved = copyDomainEvent firstDomainEvent
-        secondDomainEventSaved.id = 1
+        secondDomainEventSaved = domainEventSpecHelper.createDomainEvent 'SecondDomainEvent'
 
         aggregate = new Aggregate contextStub, 'SampleAggregate', SampleAggregate
         sandbox.stub(aggregate, 'getNewDomainEvents').returns [firstDomainEvent, secondDomainEvent]

@@ -24,9 +24,8 @@ describe 'eventric', ->
 
 
     it 'should delegate any event from the context to all remote endpoints', (done) ->
-      contextName = 'context'
       domainEvent = domainEventSpecHelper.createDomainEvent 'SomeDomainEvent'
-      domainEvent.context = contextName
+      contextName = domainEvent.context
       sandbox.stub(Context::, 'subscribeToAllDomainEvents').yields domainEvent
 
       inmemoryRemoteEndpoint = require('eventric-remote-inmemory').endpoint

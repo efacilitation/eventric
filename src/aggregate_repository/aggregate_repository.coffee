@@ -80,7 +80,6 @@ class AggregateRepository
       saveDomainEventQueue = Promise.resolve()
       savedDomainEvents = []
       domainEvents.forEach (domainEvent) =>
-        # TODO: find out if this can be saved in parallel
         saveDomainEventQueue = saveDomainEventQueue.then =>
           @_store.saveDomainEvent domainEvent
           .then (domainEvent) ->

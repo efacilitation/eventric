@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "eventric-remote-inmemory": "0.1.1",
-    "eventric-store-inmemory": "0.2.2"
+    "eventric-store-inmemory": "0.3.0"
   },
   "devDependencies": {
     "chai": "3.5.0",
@@ -33,7 +33,7 @@
     "gulp-mocha": "3.0.0",
     "gulp-symlink": "2.1.4",
     "gulp-util": "3.0.7",
-    "karma": "1.1.2",
+    "karma": "1.2.0",
     "karma-mocha": "1.1.1",
     "karma-phantomjs-launcher": "1.0.1",
     "karma-spec-reporter": "0.0.26",

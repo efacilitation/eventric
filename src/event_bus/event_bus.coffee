@@ -40,8 +40,9 @@ class EventBus
       @_verifyPublishIsPossible domainEvent
 
       publishOperation = =>
-        @_notifySubscribers domainEvent
-        .then(resolve).catch(reject)
+        return @_notifySubscribers domainEvent
+        .then resolve
+        .catch reject
 
       @_enqueueEventPublishing publishOperation
 
@@ -61,7 +62,7 @@ class EventBus
     Promise.resolve()
     .then =>
       subscribers = @_getSubscribersForDomainEvent domainEvent
-      Promise.all subscribers.map (subscriber) -> subscriber.subscriberFunction domainEvent
+      return Promise.all subscribers.map (subscriber) -> subscriber.subscriberFunction domainEvent
 
 
   _getSubscribersForDomainEvent: (domainEvent) ->

@@ -1,11 +1,12 @@
 uuidGenerator = require 'eventric/uuid_generator'
+logger = require 'eventric/logger'
+
 
 class ProjectionService
 
   constructor: (@_context) ->
     @_handlerFunctions    = {}
     @_projectionInstances = {}
-    @_domainEventsApplied = {}
 
 
   initializeInstance: (projectionInstance, params) ->
@@ -27,7 +28,7 @@ class ProjectionService
       @_parseEventNamesFromProjection projectionInstance
     .then (_eventNames) =>
       eventNames = _eventNames
-      @_applyDomainEventsFromStoreToProjection projectionId, projectionInstance, eventNames, aggregateId
+      @_applyDomainEventsFromStoreToProjection projectionInstance, eventNames, aggregateId
     .then =>
       @_subscribeProjectionToDomainEvents projectionId, projectionInstance, eventNames, aggregateId
     .then =>
@@ -39,7 +40,7 @@ class ProjectionService
 
 
   _callInitializeOnProjection: (projection, params) ->
-    new Promise (resolve, reject) ->
+    new Promise (resolve) ->
       if not projection.initialize
         return resolve projection
 
@@ -48,7 +49,7 @@ class ProjectionService
 
 
   _parseEventNamesFromProjection: (projection) ->
-    new Promise (resolve, reject) ->
+    new Promise (resolve) ->
       eventNames = []
       for key, value of projection
         if (key.indexOf 'handle') is 0 and (typeof value is 'function')
@@ -57,13 +58,12 @@ class ProjectionService
       resolve eventNames
 
 
-  _applyDomainEventsFromStoreToProjection: (projectionId, projection, eventNames, aggregateId) ->
-    @_domainEventsApplied[projectionId] = {}
-
+  _applyDomainEventsFromStoreToProjection: (projection, eventNames, aggregateId) ->
     if aggregateId
       findEvents = @_context.findDomainEventsByNameAndAggregateId eventNames, aggregateId
     else
       findEvents = @_context.findDomainEventsByName eventNames
+
     findEvents
     .then (domainEvents) =>
       if not domainEvents or domainEvents.length is 0
@@ -71,29 +71,22 @@ class ProjectionService
 
       applyDomainEventsToProjectionPromise = Promise.resolve()
       domainEvents.forEach (domainEvent) =>
-        applyDomainEventsToProjectionPromise = applyDomainEventsToProjectionPromise.then =>
-          @_applyDomainEventToProjection domainEvent, projection
+        applyDomainEventsToProjectionPromise = applyDomainEventsToProjectionPromise
         .then =>
-          @_domainEventsApplied[projectionId][domainEvent.id] = true
+          @_applyDomainEventToProjection domainEvent, projection
 
       return applyDomainEventsToProjectionPromise
 
 
   _subscribeProjectionToDomainEvents: (projectionId, projection, eventNames, aggregateId) ->
     domainEventHandler = (domainEvent) =>
-      if @_domainEventsApplied[projectionId][domainEvent.id]
-        return
-
       @_applyDomainEventToProjection domainEvent, projection
-      .then =>
-        @_domainEventsApplied[projectionId][domainEvent.id] = true
-        return
-
 
     @_handlerFunctions[projectionId] = []
     subscribeProjectionToDomainEventsPromise = Promise.resolve()
     eventNames.forEach (eventName) =>
-      subscribeProjectionToDomainEventsPromise = subscribeProjectionToDomainEventsPromise.then =>
+      subscribeProjectionToDomainEventsPromise = subscribeProjectionToDomainEventsPromise
+      .then =>
         if aggregateId
           @_context.subscribeToDomainEventWithAggregateId eventName, aggregateId, domainEventHandler
         else
@@ -108,7 +101,7 @@ class ProjectionService
     Promise.resolve()
     .then ->
       if !projection["handle#{domainEvent.name}"]
-        return
+        logger.warn "ProjectionService: handle#{domainEvent.name} not defined"
 
       return projection["handle#{domainEvent.name}"] domainEvent
 

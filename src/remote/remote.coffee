@@ -1,7 +1,3 @@
-inmemoryRemote = require 'eventric-remote-inmemory'
-
-Projection = require 'eventric/projection'
-
 class Remote
 
   @ALLOWED_RPC_OPERATIONS: [
@@ -12,6 +8,9 @@ class Remote
   ]
 
   constructor: (@_contextName) ->
+    Projection = require 'eventric/projection'
+    inmemoryRemote = require 'eventric-remote-inmemory'
+
     @_params = {}
     @_handlerFunctions = {}
     @_projectionService = new Projection @

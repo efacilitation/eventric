@@ -259,4 +259,3 @@ describe 'EventBus', ->
         eventBus.destroy()
       .then ->
         expect(anotherHandlerFunction).to.have.been.called
-

@@ -5,7 +5,7 @@ class GlobalProjectionFeatureSpecHelper
     modifiedEventName = aggregateName + 'Modified'
 
     class Aggregate
-      create: (params) ->
+      create: ->
         @$emitDomainEvent createdEventName
 
 
@@ -20,7 +20,7 @@ class GlobalProjectionFeatureSpecHelper
           aggregate.$save()
 
 
-      ModifyAggregate: ({aggregateId})->
+      ModifyAggregate: ({aggregateId}) ->
         @$aggregate.load aggregateName, aggregateId
         .then (aggregate) ->
           aggregate.modify()

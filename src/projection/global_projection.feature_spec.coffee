@@ -93,4 +93,3 @@ describe 'Global Projection Feature', ->
           secondContext.command 'CreateAggregate'
         .then ->
           expect(receivedDomainEventNames).to.deep.equal ['SecondContextAggregateCreated']
-

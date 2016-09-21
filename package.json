@@ -17,7 +17,7 @@
   },
   "main": "dist/release/eventric.js",
   "scripts": {
-    "test": "gulp specs",
+    "test": "gulp lint && gulp specs",
     "prepublish": "gulp symlink && gulp build"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "coffee-script": "1.10.0",
     "es6-promise": "3.2.1",
     "gulp": "3.9.1",
+    "gulp-coffeelint": "0.6.0",
     "gulp-mocha": "3.0.0",
     "gulp-symlink": "2.1.4",
     "gulp-util": "3.0.7",

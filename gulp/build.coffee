@@ -14,6 +14,6 @@ module.exports = (gulp) ->
       library: 'eventric'
       filename: 'eventric.js'
 
-    gulp.src ['src/index.coffee']
+    gulp.src ['src/eventric.entry.coffee']
     .pipe webpack webpackConfig
     .pipe gulp.dest 'dist/release'

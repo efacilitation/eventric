@@ -10,7 +10,7 @@
     "reactive",
     "eventric"
   ],
-  "version": "0.24.1",
+  "version": "0.25.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/efacilitation/eventric.git"

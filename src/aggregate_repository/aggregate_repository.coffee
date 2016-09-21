@@ -1,11 +1,11 @@
 Aggregate = require 'eventric/aggregate'
-logger = require 'eventric/logger'
 uuidGenerator = require 'eventric/uuid_generator'
 domainEventService = require 'eventric/domain_event/domain_event_service'
 
 class AggregateRepository
 
   constructor: (params) ->
+    @_logger = require('eventric').getLogger()
     @_aggregateName = params.aggregateName
     @_AggregateClass = params.AggregateClass
     @_context = params.context
@@ -50,7 +50,7 @@ class AggregateRepository
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
 
       if typeof aggregate.instance.create isnt 'function'
-        throw new Error "No create function on aggregate"
+        throw new Error 'No create function on aggregate'
 
       aggregate.setId uuidGenerator.generateUuid()
       @_installSaveFunctionOnAggregateInstance aggregate
@@ -66,7 +66,8 @@ class AggregateRepository
 
 
   save: (aggregate) =>
-    Promise.resolve().then =>
+    Promise.resolve()
+    .then =>
       if not aggregate
         throw new Error "Tried to save unknown aggregate #{@_aggregateName}"
 
@@ -74,7 +75,7 @@ class AggregateRepository
       if not domainEvents?.length
         throw new Error "No new domain events to save for aggregate of type #{@_aggregateName} with id #{aggregate.id}"
 
-      logger.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
+      @_logger.debug "Going to Save and Publish #{domainEvents.length} DomainEvents from Aggregate #{@_aggregateName}"
 
       # TODO: Think about how to achieve "transactions" to guarantee consistency when saving multiple events
       saveDomainEventQueue = Promise.resolve()
@@ -89,8 +90,8 @@ class AggregateRepository
       .then =>
         savedDomainEvents.forEach (domainEvent) =>
           @_context.getEventBus().publishDomainEvent domainEvent
-          .catch (error) ->
-            logger.error error.stack || error
+          .catch (error) =>
+            @_logger.error error.stack || error
 
         return aggregate.id
 

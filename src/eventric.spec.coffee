@@ -10,6 +10,38 @@ describe 'eventric', ->
     Remote = require './remote'
 
 
+  describe '#setLogger', ->
+
+    it 'should set a logger', ->
+      logger = eventric.getLogger()
+      CustomLogger = class CustomLogger
+        setLogLevel: ->
+        debug: ->
+        warn: ->
+        info: ->
+        error: ->
+      customLogger = new CustomLogger
+      eventric.setLogger customLogger
+      expect(eventric.getLogger()).to.be.equal customLogger
+
+
+  describe '#getLogger', ->
+
+    it 'should get the logger', ->
+      logger = eventric.getLogger()
+      expect(logger).to.be.equal require './logger'
+
+
+
+  describe '#setLogLevel', ->
+
+    it 'should set the log level for the logger', ->
+      logger = require './logger'
+      sandbox.spy logger, 'setLogLevel'
+      eventric.setLogLevel 2
+      expect(logger.setLogLevel).to.have.been.calledWith 2
+
+
   describe '#context', ->
 
     it 'should generate a new eventric context', ->

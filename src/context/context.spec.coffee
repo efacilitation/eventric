@@ -15,8 +15,7 @@ describe 'context', ->
       Class: StoreFake
 
     eventric = require '../eventric'
-    sandbox.stub eventric
-    eventric.getStoreDefinition.returns storeDefinitionFake
+    sandbox.stub(eventric, 'getStoreDefinition').returns storeDefinitionFake
 
     firstDomainEvent = domainEventSpecHelper.createDomainEvent()
     secondDomainEvent = domainEventSpecHelper.createDomainEvent()

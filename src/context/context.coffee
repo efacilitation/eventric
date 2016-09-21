@@ -1,12 +1,13 @@
-EventBus = require 'eventric/event_bus'
-Projection = require 'eventric/projection'
 AggregateRepository = require 'eventric/aggregate_repository'
-logger = require 'eventric/logger'
 domainEventService = require 'eventric/domain_event/domain_event_service'
 
 class Context
 
   constructor: (@name) ->
+    EventBus = require 'eventric/event_bus'
+    Projection = require 'eventric/projection'
+
+    @_logger = require('eventric').getLogger()
     @_isInitialized = false
     @_isDestroyed = false
     # TODO: Consider removing this "DI" since queries can be executed by simply accessing the context
@@ -26,11 +27,11 @@ class Context
 
 
   initialize: ->
-    logger.debug "[#{@name}] Initializing"
-    logger.debug "[#{@name}] Initializing Store"
+    @_logger.debug "[#{@name}] Initializing"
+    @_logger.debug "[#{@name}] Initializing Store"
     @_initializeStore()
     .then =>
-      logger.debug "[#{@name}] Initializing Projections"
+      @_logger.debug "[#{@name}] Initializing Projections"
       @_initializeProjections()
     .then =>
       @_isInitialized = true
@@ -154,10 +155,11 @@ class Context
 
       commandServicesToInject = @_getCommandServicesToInject()
 
-      Promise.resolve().then =>
+      Promise.resolve()
+      .then =>
         @_commandHandlers[commandName].apply commandServicesToInject, [params]
-      .then (result) ->
-        logger.debug 'Completed Command', commandName
+      .then (result) =>
+        @_logger.debug 'Completed Command', commandName
         resolve result
       .catch (error) =>
         commandErrorMessage = """
@@ -216,7 +218,7 @@ class Context
 
   query: (queryName, params) ->
     new Promise (resolve, reject) =>
-      logger.debug 'Got Query', queryName
+      @_logger.debug 'Got Query', queryName
 
       @_verifyContextIsInitialized queryName
 
@@ -224,10 +226,11 @@ class Context
         reject new Error "Given query #{queryName} not registered on context"
         return
 
-      Promise.resolve().then =>
+      Promise.resolve()
+      .then =>
         @_queryHandlers[queryName].apply @_di, [params]
-      .then (result) ->
-        logger.debug "Completed Query #{queryName} with Result #{result}"
+      .then (result) =>
+        @_logger.debug "Completed Query #{queryName} with Result #{result}"
         resolve result
       .catch (error) =>
         queryErrorMessage = """

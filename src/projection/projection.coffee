@@ -1,10 +1,9 @@
 uuidGenerator = require 'eventric/uuid_generator'
-logger = require 'eventric/logger'
-
 
 class ProjectionService
 
   constructor: (@_context) ->
+    @_logger = require('eventric').getLogger()
     @_handlerFunctions    = {}
     @_projectionInstances = {}
 
@@ -99,9 +98,9 @@ class ProjectionService
 
   _applyDomainEventToProjection: (domainEvent, projection) ->
     Promise.resolve()
-    .then ->
+    .then =>
       if !projection["handle#{domainEvent.name}"]
-        logger.warn "ProjectionService: handle#{domainEvent.name} not defined"
+        @_logger.warn "ProjectionService: handle#{domainEvent.name} not defined"
 
       return projection["handle#{domainEvent.name}"] domainEvent
 

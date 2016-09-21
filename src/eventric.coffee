@@ -1,17 +1,19 @@
-inmemoryRemote = require 'eventric-remote-inmemory'
-
-GlobalContext = require './global_context'
+Context = require './context'
 Remote = require './remote'
 Projection = require './projection'
-Context = require './context'
-InmemoryStore = require 'eventric-store-inmemory'
 uuidGenerator = require './uuid_generator'
-logger = require './logger'
+
 remoteContextHash = {}
 
 class Eventric
 
   constructor: ->
+    @_logger = require './logger'
+
+    GlobalContext = require './global_context'
+    inmemoryRemote = require 'eventric-remote-inmemory'
+    InmemoryStore = require 'eventric-store-inmemory'
+
     @_contexts = {}
     @_params = {}
     @_domainEventHandlers = {}
@@ -21,9 +23,20 @@ class Eventric
     @_globalProjectionObjects = []
 
     @_globalContext = new GlobalContext
-    @_projectionService = new Projection @_globalContext
     @addRemoteEndpoint inmemoryRemote.endpoint
     @setStore InmemoryStore, {}
+
+
+  setLogger: (logger) ->
+    @_logger = logger
+
+
+  getLogger: ->
+    return @_logger
+
+
+  setLogLevel: (logLevel) ->
+    @_logger.setLogLevel logLevel
 
 
   # TODO: Test
@@ -54,6 +67,8 @@ class Eventric
 
   # TODO: Reconsider/Remove when adding EventStore
   initializeGlobalProjections: ->
+    if not @_projectionService
+      @_projectionService = new Projection @_globalContext
     Promise.all @_globalProjectionObjects.map (projectionObject) =>
       @_projectionService.initializeInstance projectionObject, {}
 
@@ -94,27 +109,23 @@ class Eventric
     uuidGenerator.generateUuid()
 
 
-  setLogLevel: (logLevel) ->
-    logger.setLogLevel logLevel
-
-
   _handleRemoteRPCRequest: (request, callback) =>
     context = @_contexts[request.contextName]
     if not context
       error = new Error "Tried to handle Remote RPC with not registered context #{request.contextName}"
-      logger.error error.stack
+      @_logger.error error.stack
       callback error, null
       return
 
     if Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.functionName) is -1
       error = new Error "RPC operation '#{request.functionName}' not allowed"
-      logger.error error.stack
+      @_logger.error error.stack
       callback error, null
       return
 
     if request.functionName not of context
       error = new Error "Remote RPC function #{request.functionName} not found on Context #{request.contextName}"
-      logger.error error.stack
+      @_logger.error error.stack
       callback error, null
       return
 

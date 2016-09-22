@@ -1,25 +1,39 @@
-module.exports =
+class Logger
 
-  _logLevel: 1
+  LOG_LEVELS:
+    error: 0
+    warn: 1
+    info: 2
+    debug: 3
+
+
+  constructor: ->
+    @setLogLevel 'warn'
+
+
   setLogLevel: (logLevel) ->
-    @_logLevel = switch logLevel
-      when 'debug' then 0
-      when 'warn' then 1
-      when 'info' then 2
-      when 'error' then 3
+    if @LOG_LEVELS[logLevel] is undefined
+      throw new Error 'Logger: No valid log level'
+    @_logLevel = @LOG_LEVELS[logLevel]
 
-  debug: ->
-    return if @_logLevel > 0
-    console['log'] arguments...
-
-  warn: ->
-    return if @_logLevel > 1
-    console['log'] arguments...
-
-  info: ->
-    return if @_logLevel > 2
-    console['log'] arguments...
 
   error: ->
-    return if @_logLevel > 3
+    console['error'] arguments...
+
+
+  warn: ->
+    return if @_logLevel < 1
+    console['warn'] arguments...
+
+
+  info: ->
+    return if @_logLevel < 2
+    console['info'] arguments...
+
+
+  debug: ->
+    return if @_logLevel < 3
     console['log'] arguments...
+
+
+module.exports = new Logger

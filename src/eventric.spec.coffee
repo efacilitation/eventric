@@ -32,14 +32,13 @@ describe 'eventric', ->
       expect(logger).to.be.equal require './logger'
 
 
-
   describe '#setLogLevel', ->
 
     it 'should set the log level for the logger', ->
       logger = require './logger'
       sandbox.spy logger, 'setLogLevel'
-      eventric.setLogLevel 2
-      expect(logger.setLogLevel).to.have.been.calledWith 2
+      eventric.setLogLevel 'warn'
+      expect(logger.setLogLevel).to.have.been.calledWith 'warn'
 
 
   describe '#context', ->

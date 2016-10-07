@@ -27,13 +27,15 @@ class Context
 
 
   initialize: ->
-    @_logger.debug "[#{@name}] Initializing"
-    @_logger.debug "[#{@name}] Initializing Store"
+    startOfInitialization = new Date
+    @_logger.debug "eventric context \"#{@name}\" initializing"
     @_initializeStore()
     .then =>
-      @_logger.debug "[#{@name}] Initializing Projections"
       @_initializeProjections()
     .then =>
+      endOfInitialization = new Date
+      durationOfInitialization = endOfInitialization - startOfInitialization
+      @_logger.debug "eventric context \"#{@name}\" initialized after #{durationOfInitialization}ms"
       @_isInitialized = true
 
 

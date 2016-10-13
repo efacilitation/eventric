@@ -8,11 +8,19 @@ class GlobalContext
 
 
   findDomainEventsByName: (findArguments...) ->
-    findDomainEventsByName = @_getAllContexts().map (context) ->
-      context.findDomainEventsByName findArguments...
+    findDomainEventsByNamePromise = Promise.resolve()
 
-    Promise.all findDomainEventsByName
-    .then (domainEventsByContext) =>
+    domainEventsByContext = []
+
+    @_getAllContexts().forEach (context) ->
+      findDomainEventsByNamePromise = findDomainEventsByNamePromise.then ->
+        context.findDomainEventsByName findArguments...
+        .then (domainEvents) ->
+          domainEventsByContext.push domainEvents
+
+
+    return findDomainEventsByNamePromise
+    .then =>
       domainEvents = @_combineDomainEventsByContext domainEventsByContext
       domainEvents = domainEventService.sortDomainEventsById domainEvents
       return domainEvents

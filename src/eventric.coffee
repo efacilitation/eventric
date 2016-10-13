@@ -20,7 +20,7 @@ class Eventric
     @_domainEventHandlersAll = []
     @_storeDefinition = null
     @_remoteEndpoints = []
-    @_globalProjectionObjects = []
+    @_globalProjections = []
 
     @_globalContext = new GlobalContext
     @addRemoteEndpoint inmemoryRemote.endpoint
@@ -69,13 +69,19 @@ class Eventric
   initializeGlobalProjections: ->
     if not @_projectionService
       @_projectionService = new Projection @_globalContext
-    Promise.all @_globalProjectionObjects.map (projectionObject) =>
-      @_projectionService.initializeInstance projectionObject, {}
+
+    initializeGlobalProjectionsPromise = Promise.resolve()
+
+    @_globalProjections.forEach (globalProjection) =>
+      initializeGlobalProjectionsPromise = initializeGlobalProjectionsPromise.then =>
+        @_projectionService.initializeInstance globalProjection, {}
+
+    return initializeGlobalProjectionsPromise
 
 
   # TODO: Reconsider/Remove when adding EventStore
   addGlobalProjection: (projectionObject) ->
-    @_globalProjectionObjects.push projectionObject
+    @_globalProjections.push projectionObject
 
 
   getRegisteredContextNames: ->
@@ -140,6 +146,7 @@ class Eventric
     Promise.all @_remoteEndpoints.map (remoteEndpoint) ->
       publishPromise = Promise.resolve().then ->
         remoteEndpoint.publish domainEvent.context, domainEvent.name, domainEvent
+
       if domainEvent.aggregate
         publishPromise = publishPromise.then ->
           remoteEndpoint.publish domainEvent.context, domainEvent.name, domainEvent.aggregate.id, domainEvent

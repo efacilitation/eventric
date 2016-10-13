@@ -49,7 +49,11 @@ class Context
 
 
   _initializeProjections: ->
-    Promise.all (@_projectionService.initializeInstance projectionObject, {} for projectionObject in @_projectionObjects)
+    initializeProjectionsPromise = Promise.resolve()
+    @_projectionObjects.forEach (projectionObject) =>
+      initializeProjectionsPromise = initializeProjectionsPromise.then =>
+        @_projectionService.initializeInstance projectionObject, {}
+    return initializeProjectionsPromise
 
 
   defineDomainEvent: (domainEventName, DomainEventPayloadConstructor) ->
@@ -253,9 +257,11 @@ class Context
 
 
   destroy: ->
-    Promise.all(@_pendingPromises).then =>
-      @_eventBus.destroy().then =>
-        @_isDestroyed = true
+    Promise.all @_pendingPromises
+    .then =>
+      @_eventBus.destroy()
+    .then =>
+      @_isDestroyed = true
 
 
 module.exports = Context

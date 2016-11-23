@@ -119,19 +119,19 @@ class Eventric
     context = @_contexts[request.contextName]
     if not context
       error = new Error "Tried to handle Remote RPC with not registered context #{request.contextName}"
-      @_logger.error error.stack
+      @_logger.error error, '\n', error.stack
       callback error, null
       return
 
     if Remote.ALLOWED_RPC_OPERATIONS.indexOf(request.functionName) is -1
       error = new Error "RPC operation '#{request.functionName}' not allowed"
-      @_logger.error error.stack
+      @_logger.error error, '\n', error.stack
       callback error, null
       return
 
     if request.functionName not of context
       error = new Error "Remote RPC function #{request.functionName} not found on Context #{request.contextName}"
-      @_logger.error error.stack
+      @_logger.error  error, '\n', error.stack
       callback error, null
       return
 

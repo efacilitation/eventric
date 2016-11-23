@@ -91,7 +91,7 @@ class AggregateRepository
         savedDomainEvents.forEach (domainEvent) =>
           @_context.getEventBus().publishDomainEvent domainEvent
           .catch (error) =>
-            @_logger.error error.stack || error
+            @_logger.error error, '\n', error.stack
 
         return aggregate.id
 

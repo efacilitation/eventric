@@ -71,7 +71,7 @@ class Eventric
       @_projectionService = new Projection @_globalContext
 
     startOfInitialization = new Date
-    @_logger.debug 'eventric global contexts initializing'
+    @_logger.debug 'eventric global projections initializing'
 
     initializeGlobalProjectionsPromise = Promise.resolve()
     @_globalProjections.forEach (globalProjection) =>
@@ -82,7 +82,7 @@ class Eventric
     .then =>
       endOfInitialization = new Date
       durationOfInitialization = endOfInitialization - startOfInitialization
-      @_logger.debug "eventric contexts initialized after #{durationOfInitialization}ms"
+      @_logger.debug "eventric global projections initialized after #{durationOfInitialization}ms"
 
     return initializeGlobalProjectionsPromise
 

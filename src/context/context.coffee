@@ -149,8 +149,10 @@ class Context
 
   command: (commandName, params) ->
     if @_isDestroyed
+      paramsWithHiddenPasswordValue = @_hidePasswordValue params
       return Promise.reject new Error """
-        Context #{@name} was destroyed, cannot execute command #{commandName} with arguments #{JSON.stringify(params)}
+        Context #{@name} was destroyed, cannot execute command #{commandName} with arguments
+        #{JSON.stringify(paramsWithHiddenPasswordValue)}
       """
 
     executingCommand = new Promise (resolve, reject) =>
@@ -168,8 +170,10 @@ class Context
         @_logger.debug 'Completed Command', commandName
         resolve result
       .catch (error) =>
+        paramsWithHiddenPasswordValue = @_hidePasswordValue params
         commandErrorMessage = """
-          Command "#{commandName}" with arguments #{JSON.stringify(params)} of context "#{@name}" rejects with an error
+          Command "#{commandName}" with arguments #{JSON.stringify(paramsWithHiddenPasswordValue)} of context "#{@name}"
+          rejects with an error
         """
 
         if not error
@@ -183,6 +187,12 @@ class Context
     @_addPendingPromise executingCommand
 
     return executingCommand
+
+
+  _hidePasswordValue: (params) ->
+    if params.password
+      params.password = '******'
+    return params
 
 
   _getCommandServicesToInject: ->
@@ -239,8 +249,10 @@ class Context
         @_logger.debug "Completed Query #{queryName} with Result #{result}"
         resolve result
       .catch (error) =>
+        paramsWithHiddenPasswordValue = @_hidePasswordValue params
         queryErrorMessage = """
-          Query "#{queryName}" with arguments #{JSON.stringify(params)} of context "#{@name}" rejects with an error
+          Query "#{queryName}" with arguments #{JSON.stringify(paramsWithHiddenPasswordValue)} of context "#{@name}"
+          rejects with an error
         """
 
         if not error

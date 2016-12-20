@@ -202,6 +202,17 @@ describe 'aggregate repository', ->
           aggregateInstance.$save()
           expect(aggregateRepository.save).to.have.been.called
           expect(aggregateRepository.save.getCall(0).args[0]).to.be.an.instanceOf Aggregate
+      
+      it 'should set the aggregate id to a generated uuid, if no id is specified', ->
+        aggregateRepository.create {}
+        .then (aggregateInstance) ->
+          expect(aggregateInstance.$id).to.be.a.string
+
+      it 'should set the aggregate id to the specified id', ->
+        id = 'someId'
+        aggregateRepository.create {}, id
+        .then (aggregateInstance) ->
+          expect(aggregateInstance.$id).to.equal id
 
 
   describe '#save', ->

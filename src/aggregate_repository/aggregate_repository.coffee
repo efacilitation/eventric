@@ -45,14 +45,18 @@ class AggregateRepository
 
 
   # TODO: Rename to "new" and remove automagic call of create() function on aggregate
-  create: (params) =>
+  create: (params, id = null) =>
     Promise.resolve().then =>
       aggregate = new Aggregate @_context, @_aggregateName, @_AggregateClass
 
       if typeof aggregate.instance.create isnt 'function'
         throw new Error 'No create function on aggregate'
 
-      aggregate.setId uuidGenerator.generateUuid()
+      if id?
+        aggregate.setId id
+      else
+        aggregate.setId uuidGenerator.generateUuid()
+
       @_installSaveFunctionOnAggregateInstance aggregate
 
       Promise.resolve aggregate.instance.create params
